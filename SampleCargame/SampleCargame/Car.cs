@@ -42,10 +42,10 @@ namespace SampleCargame
             this.Position = Vector3.Zero;
 
             // Constants
-            Acceleration = .05f;
-            MaxSpeed = 10;
+            Acceleration = .35f;
+            MaxSpeed = 25;
             MaxWheelTurn = MathHelper.PiOver4 / 1.7f;
-            TurnSpeed = .05f;
+            TurnSpeed = .015f;
 
             this.wheelRadius = wheelRadius;
         }

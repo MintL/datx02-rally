@@ -25,10 +25,16 @@ namespace SampleCargame
         // ... in a city.
         Model city;
 
+        PlaneModel plane;
+
+        List<PlaneModel> trees = new List<PlaneModel>();
+
         // Camera
         Vector3 camPos, camLookAt;
         Vector2 camRot = Vector2.Zero;
         Matrix view, projection;
+
+        Random random = new Random();
 
         public Game1()
         {
@@ -62,7 +68,7 @@ namespace SampleCargame
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            camRot = new Vector2(0, (float)MathHelper.PiOver4/2);
+            camRot = new Vector2(0, (float)MathHelper.PiOver4/2.25f);
             camPos = Vector3.Zero;
             camLookAt = Vector3.Zero;
 
@@ -85,6 +91,23 @@ namespace SampleCargame
             BasicEffect cityeffect = city.Meshes[0].Effects[0] as BasicEffect;
             cityeffect.EnableDefaultLighting();
             cityeffect.Projection = projection;
+
+            plane = new PlaneModel(new Vector2(-100, -10000), new Vector2(100), 1, GraphicsDevice, null, projection, Matrix.Identity);
+
+            Vector2 treePlaneSizeStart = new Vector2(-50, -250), 
+                treePlaneSizeEnd =  new Vector2(50, 0);
+            for (int i = 99; i >= 0; i--)
+            {
+                int side = 2 * random.Next(2) - 1;
+
+                trees.Add(new PlaneModel(treePlaneSizeStart, treePlaneSizeEnd, 1, GraphicsDevice, 
+                    Content.Load<Texture2D>("spruce"), projection,
+                    Matrix.CreateRotationX(MathHelper.PiOver2) *
+                    Matrix.CreateRotationY(-side * (MathHelper.PiOver4 + (float)(random.NextDouble() / 4))) *
+                    Matrix.CreateTranslation(new Vector3(side * (140 + random.Next(30)), 0, i * -100))));
+            }
+
+            GraphicsDevice.BlendState = BlendState.AlphaBlend;
         }
 
         /// <summary>
@@ -113,7 +136,7 @@ namespace SampleCargame
             camRot += new Vector2(0.05f * (
                 (Keyboard.GetState().IsKeyDown(Keys.Right) ? 1 : 0) -
                 (Keyboard.GetState().IsKeyDown(Keys.Left) ? 1 : 0)),
-                0.05f * (
+                0.01f * (
                 (Keyboard.GetState().IsKeyDown(Keys.Up) ? 1 : 0) -
                 (Keyboard.GetState().IsKeyDown(Keys.Down) ? 1 : 0)));
 
@@ -148,8 +171,10 @@ namespace SampleCargame
             car.WheelRotationY += (Keyboard.GetState().IsKeyDown(Keys.A) ? car.TurnSpeed : 0) -
                 (Keyboard.GetState().IsKeyDown(Keys.D) ? car.TurnSpeed : 0);
             car.WheelRotationY = MathHelper.Clamp(car.WheelRotationY, -car.MaxWheelTurn, car.MaxWheelTurn);
-            if (Math.Abs(car.WheelRotationY) > MathHelper.Pi / 360)
+            if (Math.Abs(car.WheelRotationY) > MathHelper.Pi / 720)
                 car.WheelRotationY *= .9f;
+            else
+                car.WheelRotationY = 0;
 
             //Apply changes to car
             car.Update();
@@ -183,9 +208,17 @@ namespace SampleCargame
             GraphicsDevice.Clear(Color.LightBlue);
 
             //Draw city
-            var cityMesh = city.Meshes[0];
-            (cityMesh.Effects[0] as BasicEffect).View = view;
-            cityMesh.Draw();
+            //var cityMesh = city.Meshes[0];
+            //(cityMesh.Effects[0] as BasicEffect).View = view;
+            //cityMesh.Draw();
+
+            plane.Draw(view, Color.LightYellow);
+
+            foreach (var tree in trees)
+            {
+                tree.Draw(view);
+            }
+
             
             // Draw car
             foreach (var mesh in car.Model.Meshes) // 5 meshes
