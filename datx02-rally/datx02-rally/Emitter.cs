@@ -8,7 +8,8 @@ namespace datx02_rally
 {
     public class Emitter
     {
-        private Vector2 relPosition; // Relative position to parent particle system
+        private Vector2 position; // Position
+        private Vector2 lastPosition;
         private Texture2D particleTexture;
         private int budget; // Max number of active particles
         private float nextSpawnIn; // Next particle creation in seconds
@@ -28,13 +29,18 @@ namespace datx02_rally
         private Vector2 endSpeed;
         private Vector2 startLife;
 
+        public Vector2 Position
+        {
+            set { lastPosition = position; position = value; }
+        }
 
-        public Emitter(Vector2 relPosition, Texture2D particleTexture, int budget, float nextSpawnIn, Random random,
+        public Emitter(Vector2 position, Texture2D particleTexture, int budget, float nextSpawnIn, Random random,
                         Vector2 spawnDirection, Vector2 directionNoiseAngle, Vector2 startScale, Vector2 endScale, 
                         Color startColor1, Color startColor2, Color endColor1, Color endColor2,
                         Vector2 startSpeed, Vector2 endSpeed, Vector2 startLife)
         {
-            this.relPosition = relPosition;
+            this.position = position;
+            this.lastPosition = position;
             this.particleTexture = particleTexture;
             this.budget = budget;
             this.nextSpawnIn = nextSpawnIn;
@@ -87,7 +93,10 @@ namespace datx02_rally
                     activeParticles.AddLast(
                         new Particle(
                             particleTexture,
-                            relPosition,
+                            new Vector2(
+                                MathHelper.Lerp(lastPosition.X, position.X, secondsPassed / dt),
+                                MathHelper.Lerp(lastPosition.Y, position.Y, secondsPassed / dt)
+                            ),
                             startDirection,
                             endDirection,
                             MathHelper.Lerp(startScale.X, startScale.Y, (float)random.NextDouble()),
@@ -99,6 +108,7 @@ namespace datx02_rally
                     );
                 }
                 secondsPassed -= nextSpawnIn;
+                activeParticles.Last.Value.Update(secondsPassed);
             }
 
             LinkedListNode<Particle> node = activeParticles.First;

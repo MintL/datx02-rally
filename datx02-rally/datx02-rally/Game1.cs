@@ -23,7 +23,10 @@ namespace datx02_rally
 
         Texture2D particleBase;
         Emitter fire;
-        bool isFireVisible; // fire on/off
+        Emitter bluePulse;
+        Emitter blueSparkle;
+        Emitter redSparkle;
+        int followMouse; // what emitter follows mouse
 
         Random random;
 
@@ -36,7 +39,7 @@ namespace datx02_rally
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
-            IsMouseVisible = true;
+            IsMouseVisible = false;
         }
 
         /// <summary>
@@ -48,7 +51,7 @@ namespace datx02_rally
         protected override void Initialize()
         {
             random = new Random();
-            isFireVisible = true;
+            followMouse = 0;
             base.Initialize();
         }
 
@@ -63,11 +66,32 @@ namespace datx02_rally
 
             particleBase = Content.Load<Texture2D>(@"Textures/ParticleBase1");
             fire = new Emitter(new Vector2(500, 400), particleBase, 1000, 0.01f, random,
-                new Vector2(0, -1), new Vector2(0.1f * MathHelper.Pi, 0.1f * -MathHelper.Pi),
+                new Vector2(0, -1), new Vector2(0.01f * MathHelper.Pi, 0.01f * -MathHelper.Pi),
                 new Vector2(0.3f, 1.3f), new Vector2(0.3f, 0.5f),
-                new Color(250, 250, 0), new Color(250, 140, 140),
+                new Color(250, 200, 0), new Color(250, 140, 140),
                 new Color(255, 165, 0, 0), new Color(220, 20, 60, 0),
                 new Vector2(400, 500), new Vector2(100, 120), new Vector2(0.5f, 0.75f));
+
+            bluePulse = new Emitter(new Vector2(500, 400), particleBase, 1000, 0.01f, random,
+                new Vector2(0, -1), new Vector2(1.0f * MathHelper.Pi, 1.0f * -MathHelper.Pi),
+                new Vector2(0.6f, 1.3f), new Vector2(0.8f, 1.2f),
+                new Color(99, 255, 255), new Color(148, 255, 255),
+                new Color(27, 69, 129, 0), new Color(113, 225, 225, 0),
+                new Vector2(400, 500), new Vector2(100, 120), new Vector2(0.4f, 0.5f));
+
+            blueSparkle = new Emitter(new Vector2(900, 200), particleBase, 1000, 0.01f, random,
+                new Vector2(-1, 1), new Vector2(0.05f * MathHelper.Pi, 0.05f * -MathHelper.Pi),
+                new Vector2(0.1f, 0.15f), new Vector2(0.08f, 0.1f),
+                new Color(99, 255, 255), new Color(148, 255, 255),
+                new Color(99, 255, 255, 100), new Color(148, 255, 255, 100),
+                new Vector2(700, 800), new Vector2(700, 800), new Vector2(0.3f, 0.5f));
+
+            redSparkle = new Emitter(new Vector2(700, 200), particleBase, 1000, 0.01f, random,
+                new Vector2(1, 1), new Vector2(0.05f * MathHelper.Pi, 0.05f * -MathHelper.Pi),
+                new Vector2(0.1f, 0.15f), new Vector2(0.08f, 0.1f),
+                new Color(250, 200, 0), new Color(250, 140, 140),
+                new Color(255, 165, 0, 0), new Color(220, 20, 60, 0),
+                new Vector2(700, 800), new Vector2(700, 800), new Vector2(0.3f, 0.5f));
         }
 
         /// <summary>
@@ -97,15 +121,43 @@ namespace datx02_rally
                 this.Exit();
             }
 
-            if (keyboardState.IsKeyDown(Keys.F) && lastKeyboardState.IsKeyUp(Keys.F))
+            if (keyboardState.IsKeyDown(Keys.Space) && lastKeyboardState.IsKeyUp(Keys.Space))
             {
-                isFireVisible = !isFireVisible;
+                followMouse = -1;
             }
+            if (keyboardState.IsKeyDown(Keys.D1))
+                followMouse = 0;
+            else if (keyboardState.IsKeyDown(Keys.D2))
+                followMouse = 1;
+            else if (keyboardState.IsKeyDown(Keys.D3))
+                followMouse = 2;
+            else if (keyboardState.IsKeyDown(Keys.D4))
+                followMouse = 3;
 
             lastKeyboardState = keyboardState;
 
-            if (isFireVisible)
-                fire.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
+            if (followMouse == 0)
+            {
+                fire.Position = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
+            }
+            else if (followMouse == 1)
+            {
+                bluePulse.Position = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
+            }
+            else if (followMouse == 2)
+            {
+                blueSparkle.Position = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
+            }
+            else if (followMouse == 3)
+            {
+                redSparkle.Position = new Vector2(Mouse.GetState().X, Mouse.GetState().Y);
+            }
+
+            bluePulse.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
+            fire.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
+            blueSparkle.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
+            redSparkle.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
+                   
 
             base.Update(gameTime);
         }
@@ -118,11 +170,15 @@ namespace datx02_rally
         {
             GraphicsDevice.Clear(Color.Black);
 
+            spriteBatch.Begin();
+            
+            spriteBatch.End();
+
             spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Additive);
-            
-            if (isFireVisible)
-                fire.Draw(spriteBatch);
-            
+            bluePulse.Draw(spriteBatch);
+            fire.Draw(spriteBatch);
+            blueSparkle.Draw(spriteBatch);
+            redSparkle.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
