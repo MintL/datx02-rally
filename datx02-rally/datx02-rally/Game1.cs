@@ -19,8 +19,12 @@ namespace datx02_rally
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        KeyboardState lastKeyboardState;
+
         Texture2D particleBase;
-        Emitter emitter;
+        Emitter fire;
+        bool isFireVisible; // fire on/off
+
         Random random;
 
         public Game1()
@@ -31,6 +35,8 @@ namespace datx02_rally
             graphics.PreferredBackBufferWidth = 1024;
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
+
+            IsMouseVisible = true;
         }
 
         /// <summary>
@@ -42,6 +48,7 @@ namespace datx02_rally
         protected override void Initialize()
         {
             random = new Random();
+            isFireVisible = true;
             base.Initialize();
         }
 
@@ -55,9 +62,12 @@ namespace datx02_rally
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             particleBase = Content.Load<Texture2D>(@"Textures/ParticleBase1");
-            emitter = new Emitter(new Vector2(500, 400), particleBase, 1000, 0.01f, random,
+            fire = new Emitter(new Vector2(500, 400), particleBase, 1000, 0.01f, random,
                 new Vector2(0, -1), new Vector2(0.1f * MathHelper.Pi, 0.1f * -MathHelper.Pi),
-                new Vector2(0.1f, 0.5f), Color.Orange, Color.Crimson, new Vector2(400, 500), new Vector2(0.5f, 0.75f));
+                new Vector2(0.3f, 1.3f), new Vector2(0.3f, 0.5f),
+                new Color(250, 250, 0), new Color(250, 140, 140),
+                new Color(255, 165, 0, 0), new Color(220, 20, 60, 0),
+                new Vector2(400, 500), new Vector2(100, 120), new Vector2(0.5f, 0.75f));
         }
 
         /// <summary>
@@ -76,6 +86,9 @@ namespace datx02_rally
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            KeyboardState keyboardState = Keyboard.GetState();
+            
+            
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
@@ -84,7 +97,15 @@ namespace datx02_rally
                 this.Exit();
             }
 
-            emitter.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
+            if (keyboardState.IsKeyDown(Keys.F) && lastKeyboardState.IsKeyUp(Keys.F))
+            {
+                isFireVisible = !isFireVisible;
+            }
+
+            lastKeyboardState = keyboardState;
+
+            if (isFireVisible)
+                fire.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
 
             base.Update(gameTime);
         }
@@ -97,8 +118,11 @@ namespace datx02_rally
         {
             GraphicsDevice.Clear(Color.Black);
 
-            spriteBatch.Begin();
-            emitter.Draw(spriteBatch);
+            spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Additive);
+            
+            if (isFireVisible)
+                fire.Draw(spriteBatch);
+            
             spriteBatch.End();
 
             base.Draw(gameTime);
