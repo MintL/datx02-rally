@@ -19,6 +19,9 @@ namespace datx02_rally
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        Texture2D particleBase;
+        Particle particle;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -50,7 +53,8 @@ namespace datx02_rally
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            particleBase = Content.Load<Texture2D>(@"Textures/ParticleBase1");
+            particle = new Particle(particleBase, new Vector2(500, 700), new Vector2(0, -100f), 0.2f, Color.Red, 10);
         }
 
         /// <summary>
@@ -77,6 +81,8 @@ namespace datx02_rally
                 this.Exit();
             }
 
+            particle.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
+
             base.Update(gameTime);
         }
 
@@ -88,7 +94,9 @@ namespace datx02_rally
         {
             GraphicsDevice.Clear(Color.Honeydew);
 
-            // TODO: Add your drawing code here
+            spriteBatch.Begin();
+            particle.Draw(spriteBatch);
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
