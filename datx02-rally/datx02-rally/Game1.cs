@@ -20,7 +20,8 @@ namespace datx02_rally
         SpriteBatch spriteBatch;
 
         Texture2D particleBase;
-        Particle particle;
+        Emitter emitter;
+        Random random;
 
         public Game1()
         {
@@ -40,7 +41,7 @@ namespace datx02_rally
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            random = new Random();
             base.Initialize();
         }
 
@@ -54,7 +55,9 @@ namespace datx02_rally
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             particleBase = Content.Load<Texture2D>(@"Textures/ParticleBase1");
-            particle = new Particle(particleBase, new Vector2(500, 700), new Vector2(0, -100f), 0.2f, Color.Red, 10);
+            emitter = new Emitter(new Vector2(500, 400), particleBase, 1000, 0.01f, random,
+                new Vector2(0, -1), new Vector2(0.1f * MathHelper.Pi, 0.1f * -MathHelper.Pi),
+                new Vector2(0.1f, 0.5f), Color.Orange, Color.Crimson, new Vector2(400, 500), new Vector2(0.5f, 0.75f));
         }
 
         /// <summary>
@@ -81,7 +84,7 @@ namespace datx02_rally
                 this.Exit();
             }
 
-            particle.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
+            emitter.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
 
             base.Update(gameTime);
         }
@@ -92,10 +95,10 @@ namespace datx02_rally
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Honeydew);
+            GraphicsDevice.Clear(Color.Black);
 
             spriteBatch.Begin();
-            particle.Draw(spriteBatch);
+            emitter.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
