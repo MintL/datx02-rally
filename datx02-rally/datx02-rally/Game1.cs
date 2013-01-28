@@ -100,11 +100,11 @@ namespace datx02_rally
                 new Color(255, 165, 0, 0), new Color(220, 20, 60, 0),
                 new Vector2(700, 800), new Vector2(700, 800), new Vector2(0.3f, 0.5f), Vector2.Zero);
 
-            smoke = new Emitter(new Vector2(100, 600), smokeTexture, 1000, 0.05f, random,
+            smoke = new Emitter(new Vector2(100, 600), smokeTexture, 1000, 0.3f, random,
                 new Vector2(0, -1), new Vector2(0.1f * MathHelper.Pi, 0.1f * -MathHelper.Pi),
                 new Vector2(0.8f, 1.3f), new Vector2(0.3f, 0.5f),
-                new Color(250, 255, 255), new Color(250, 250, 250),
-                new Color(255, 255, 255, 0), new Color(250, 250, 250, 100),
+                new Color(250, 255, 255, 150), new Color(250, 250, 250, 150),
+                new Color(255, 255, 255, 0), new Color(250, 250, 250, 0),
                 new Vector2(50, 100), new Vector2(40, 80), new Vector2(2.0f, 2.5f), new Vector2(-5f, 5f));
         }
 
@@ -199,7 +199,7 @@ namespace datx02_rally
             //}
 
             spriteBatch.Begin();
-            //smoke.Draw(spriteBatch);
+            
             spriteBatch.End();
 
             spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Additive);
@@ -207,6 +207,7 @@ namespace datx02_rally
             fire.Draw(spriteBatch);
             blueSparkle.Draw(spriteBatch);
             redSparkle.Draw(spriteBatch);
+            smoke.Draw(spriteBatch);
             spriteBatch.End();
 
             base.Draw(gameTime);
