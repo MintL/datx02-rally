@@ -22,11 +22,15 @@ namespace datx02_rally
         KeyboardState lastKeyboardState;
 
         Texture2D particleBase;
+        Texture2D smokeTexture;
         Emitter fire;
         Emitter bluePulse;
         Emitter blueSparkle;
         Emitter redSparkle;
+        Emitter smoke;
         int followMouse; // what emitter follows mouse
+
+        float nextLightning;
 
         Random random;
 
@@ -52,6 +56,8 @@ namespace datx02_rally
         {
             random = new Random();
             followMouse = 0;
+            nextLightning = MathHelper.Lerp(3.0f, 10.0f, (float)random.NextDouble());
+
             base.Initialize();
         }
 
@@ -65,33 +71,41 @@ namespace datx02_rally
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             particleBase = Content.Load<Texture2D>(@"Textures/ParticleBase1");
+            smokeTexture = Content.Load<Texture2D>(@"Textures/Smoke");
             fire = new Emitter(new Vector2(500, 400), particleBase, 1000, 0.01f, random,
                 new Vector2(0, -1), new Vector2(0.01f * MathHelper.Pi, 0.01f * -MathHelper.Pi),
                 new Vector2(0.3f, 1.3f), new Vector2(0.3f, 0.5f),
                 new Color(250, 200, 0), new Color(250, 140, 140),
                 new Color(255, 165, 0, 0), new Color(220, 20, 60, 0),
-                new Vector2(400, 500), new Vector2(100, 120), new Vector2(0.5f, 0.75f));
+                new Vector2(400, 500), new Vector2(100, 120), new Vector2(0.5f, 0.75f), Vector2.Zero);
 
             bluePulse = new Emitter(new Vector2(500, 400), particleBase, 1000, 0.01f, random,
                 new Vector2(0, -1), new Vector2(1.0f * MathHelper.Pi, 1.0f * -MathHelper.Pi),
                 new Vector2(0.6f, 1.3f), new Vector2(0.8f, 1.2f),
                 new Color(99, 255, 255), new Color(148, 255, 255),
                 new Color(27, 69, 129, 0), new Color(113, 225, 225, 0),
-                new Vector2(400, 500), new Vector2(100, 120), new Vector2(0.4f, 0.5f));
+                new Vector2(400, 500), new Vector2(100, 120), new Vector2(0.4f, 0.5f), Vector2.Zero);
 
             blueSparkle = new Emitter(new Vector2(900, 200), particleBase, 1000, 0.01f, random,
                 new Vector2(-1, 1), new Vector2(0.05f * MathHelper.Pi, 0.05f * -MathHelper.Pi),
                 new Vector2(0.1f, 0.15f), new Vector2(0.08f, 0.1f),
                 new Color(99, 255, 255), new Color(148, 255, 255),
                 new Color(99, 255, 255, 100), new Color(148, 255, 255, 100),
-                new Vector2(700, 800), new Vector2(700, 800), new Vector2(0.3f, 0.5f));
+                new Vector2(700, 800), new Vector2(700, 800), new Vector2(0.3f, 0.5f), Vector2.Zero);
 
             redSparkle = new Emitter(new Vector2(700, 200), particleBase, 1000, 0.01f, random,
                 new Vector2(1, 1), new Vector2(0.05f * MathHelper.Pi, 0.05f * -MathHelper.Pi),
                 new Vector2(0.1f, 0.15f), new Vector2(0.08f, 0.1f),
                 new Color(250, 200, 0), new Color(250, 140, 140),
                 new Color(255, 165, 0, 0), new Color(220, 20, 60, 0),
-                new Vector2(700, 800), new Vector2(700, 800), new Vector2(0.3f, 0.5f));
+                new Vector2(700, 800), new Vector2(700, 800), new Vector2(0.3f, 0.5f), Vector2.Zero);
+
+            smoke = new Emitter(new Vector2(100, 600), smokeTexture, 1000, 0.05f, random,
+                new Vector2(0, -1), new Vector2(0.1f * MathHelper.Pi, 0.1f * -MathHelper.Pi),
+                new Vector2(0.8f, 1.3f), new Vector2(0.3f, 0.5f),
+                new Color(250, 255, 255), new Color(250, 250, 250),
+                new Color(255, 255, 255, 0), new Color(250, 250, 250, 100),
+                new Vector2(50, 100), new Vector2(40, 80), new Vector2(2.0f, 2.5f), new Vector2(-5f, 5f));
         }
 
         /// <summary>
@@ -157,7 +171,9 @@ namespace datx02_rally
             fire.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
             blueSparkle.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
             redSparkle.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
-                   
+            smoke.Update(gameTime.ElapsedGameTime.Milliseconds / 1000f);
+
+            nextLightning -= gameTime.ElapsedGameTime.Milliseconds / 1000f;
 
             base.Update(gameTime);
         }
@@ -168,10 +184,22 @@ namespace datx02_rally
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            /*if (nextLightning > 0 && nextLightning <= 0.2)
+            {
+                GraphicsDevice.Clear(Color.White);
+                
+            }
+            else if (nextLightning <= 0)
+            {
+                nextLightning = MathHelper.Lerp(3.0f, 10.0f, (float)random.NextDouble());
+            }
+            else
+            {*/
+                GraphicsDevice.Clear(Color.Black);
+            //}
 
             spriteBatch.Begin();
-            
+            //smoke.Draw(spriteBatch);
             spriteBatch.End();
 
             spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.Additive);

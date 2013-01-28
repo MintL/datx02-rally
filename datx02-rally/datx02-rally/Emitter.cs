@@ -28,6 +28,7 @@ namespace datx02_rally
         private Vector2 startSpeed;
         private Vector2 endSpeed;
         private Vector2 startLife;
+        private Vector2 startRotation;
 
         public Vector2 Position
         {
@@ -37,7 +38,7 @@ namespace datx02_rally
         public Emitter(Vector2 position, Texture2D particleTexture, int budget, float nextSpawnIn, Random random,
                         Vector2 spawnDirection, Vector2 directionNoiseAngle, Vector2 startScale, Vector2 endScale, 
                         Color startColor1, Color startColor2, Color endColor1, Color endColor2,
-                        Vector2 startSpeed, Vector2 endSpeed, Vector2 startLife)
+                        Vector2 startSpeed, Vector2 endSpeed, Vector2 startLife, Vector2 startRotation)
         {
             this.position = position;
             this.lastPosition = position;
@@ -59,6 +60,7 @@ namespace datx02_rally
             this.startSpeed = startSpeed;
             this.endSpeed = endSpeed;
             this.startLife = startLife;
+            this.startRotation = startRotation;
         }
 
         public void Update(float dt)
@@ -103,7 +105,8 @@ namespace datx02_rally
                             MathHelper.Lerp(endScale.X, endScale.Y, (float)random.NextDouble()),
                             startColor,
                             endColor,
-                            life
+                            life,
+                            MathHelper.Lerp(startRotation.X, startRotation.Y, (float)random.NextDouble())
                         )
                     );
                 }

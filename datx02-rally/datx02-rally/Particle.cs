@@ -18,10 +18,12 @@ namespace datx02_rally
         private Color endColor;
         private float lifeLeft;
         private float startLife;
+        private float rotation;
+        private float rotationSpeed;
         private float lifePhase; // 0 means newly created, 1 means dead
 
         public Particle(Texture2D particleBase, Vector2 position, Vector2 startDirection, Vector2 endDirection,
-                            float startScale, float endScale, Color startColor, Color endColor, float life)
+                            float startScale, float endScale, Color startColor, Color endColor, float life, float rotationSpeed)
         {
             this.particleBase = particleBase;
             this.position = position;
@@ -33,6 +35,8 @@ namespace datx02_rally
             this.endColor = endColor;
             this.startLife = life;
             this.lifeLeft = life;
+            this.rotation = 0;
+            this.rotationSpeed = rotationSpeed;
         }
 
         public bool Update(float dt)
@@ -46,6 +50,7 @@ namespace datx02_rally
 
             position += new Vector2(MathHelper.Lerp(startDirection.X, endDirection.X, lifePhase),
                                     MathHelper.Lerp(startDirection.Y, endDirection.Y, lifePhase)) * dt;
+            rotation += rotationSpeed * dt;
             return true;
         }
 
@@ -58,7 +63,7 @@ namespace datx02_rally
                 (int)MathHelper.Lerp(startColor.B, endColor.B, lifePhase),
                 (int)MathHelper.Lerp(startColor.A, endColor.A, lifePhase)
             );
-            spriteBatch.Draw(particleBase, position, null, currColor, 0, new Vector2(64,64), currScale, SpriteEffects.None, 0);
+            spriteBatch.Draw(particleBase, position, null, currColor, rotation, new Vector2(64,64), currScale, SpriteEffects.None, 0);
         }
     }
 }
