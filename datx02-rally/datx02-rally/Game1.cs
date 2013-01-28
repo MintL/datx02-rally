@@ -19,6 +19,18 @@ namespace datx02_rally
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        Model model;
+        Vector3 modelPosition = Vector3.Zero;
+        float modelRotation = 0.0f;
+        float lightRotation;
+        Vector3 cameraPosition = new Vector3(0.0f, 100.0f, 300.0f);
+        Vector3 cameraTarget = new Vector3(0.0f, 50.0f, 0.0f);
+        float aspectRatio;
+
+        Vector3 lightPosition;
+
+        Effect effect;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -27,6 +39,8 @@ namespace datx02_rally
             graphics.PreferredBackBufferWidth = 1024;
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
+
+            IsMouseVisible = true;
         }
 
         /// <summary>
@@ -50,7 +64,32 @@ namespace datx02_rally
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            
+            aspectRatio = graphics.GraphicsDevice.Viewport.AspectRatio;
+
+            effect = Content.Load<Effect>(@"Effects/BasicShading");
+            model = Content.Load<Model>(@"Models/porsche");
+            
+            // Light specific parameters
+            lightPosition = new Vector3(-200.0f, 200.0f, 0.0f);
+            effect.Parameters["LightAmbient"].SetValue(Color.Black.ToVector3() * 0.2f);
+            effect.Parameters["LightDiffuse"].SetValue(Color.White.ToVector3() * 1.0f);
+            effect.CurrentTechnique = effect.Techniques["BasicShading"];
+
+            // Initialize the material settings
+            foreach (ModelMesh mesh in model.Meshes)
+            {
+                foreach (ModelMeshPart part in mesh.MeshParts)
+                {
+                    BasicEffect basicEffect = (BasicEffect)part.Effect;
+                    part.Effect = effect.Clone();
+                    part.Effect.Parameters["MaterialAmbient"].SetValue(basicEffect.AmbientLightColor);
+                    part.Effect.Parameters["MaterialDiffuse"].SetValue(basicEffect.DiffuseColor);
+                    part.Effect.Parameters["MaterialSpecular"].SetValue(basicEffect.SpecularColor);
+                    
+                }
+            }
+
         }
 
         /// <summary>
@@ -76,6 +115,19 @@ namespace datx02_rally
             {
                 this.Exit();
             }
+            if (Keyboard.GetState().IsKeyDown(Keys.Left))
+            {
+                modelRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
+            }
+            else if (Keyboard.GetState().IsKeyDown(Keys.Right))
+            {
+                modelRotation -= (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
+            }
+
+            lightRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
+            lightPosition = Vector3.Transform(new Vector3(0.0f, 0.0f, 0.0f),
+                Matrix.CreateTranslation(new Vector3(0.0f, 0.0f, 300.0f)) * Matrix.CreateRotationY(lightRotation));
+            Console.WriteLine(lightPosition);
 
             base.Update(gameTime);
         }
@@ -88,7 +140,56 @@ namespace datx02_rally
         {
             GraphicsDevice.Clear(Color.Honeydew);
 
-            // TODO: Add your drawing code here
+            Matrix[] transforms = new Matrix[model.Bones.Count];
+            model.CopyAbsoluteBoneTransformsTo(transforms);
+
+            
+
+            // Model specific parameters
+            //effect.Parameters["MaterialAmbient"].SetValue(Color.White.ToVector3() * 0.5f);
+            //effect.Parameters["MaterialDiffuse"].SetValue(Color.DarkGreen.ToVector3() * 0.9f);
+            //effect.Parameters["MaterialSpecular"].SetValue(Color.White.ToVector3() * 0.2f);
+
+            foreach (ModelMesh mesh in model.Meshes)
+            {
+                foreach (Effect currentEffect in mesh.Effects)
+                {
+                    currentEffect.Parameters["MaterialShininess"].SetValue(10.0f);
+
+                    Matrix worldMatrix = transforms[mesh.ParentBone.Index] *
+                                Matrix.CreateRotationX(modelRotation) *
+                                Matrix.CreateTranslation(modelPosition);
+                    Matrix viewMatrix = Matrix.CreateLookAt(cameraPosition,
+                        cameraTarget, Vector3.Up);
+                    Matrix projectionMatrix = Matrix.CreatePerspectiveFieldOfView(
+                        MathHelper.ToRadians(45.0f), aspectRatio, 1.0f, 10000.0f);
+                    Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(viewMatrix * worldMatrix));
+                    
+                    currentEffect.Parameters["World"].SetValue(worldMatrix);
+                    currentEffect.Parameters["View"].SetValue(viewMatrix);
+                    currentEffect.Parameters["Projection"].SetValue(projectionMatrix);
+                    currentEffect.Parameters["NormalMatrix"].SetValue(normalMatrix);
+                    currentEffect.Parameters["LightPosition"].SetValue(lightPosition);
+                }
+                mesh.Draw();
+            }
+            foreach (ModelMesh mesh in model.Meshes)
+            {
+                foreach (Effect currentEffect in mesh.Effects)
+                {
+                    currentEffect.Parameters["MaterialShininess"].SetValue(10.0f);
+
+                    currentEffect.Parameters["World"].SetValue(transforms[mesh.ParentBone.Index] *
+                                Matrix.CreateRotationY(modelRotation) *
+                                Matrix.CreateTranslation(lightPosition));
+                    currentEffect.Parameters["View"].SetValue(Matrix.CreateLookAt(cameraPosition,
+                        cameraTarget, Vector3.Up));
+                    currentEffect.Parameters["Projection"].SetValue(Matrix.CreatePerspectiveFieldOfView(
+                        MathHelper.ToRadians(45.0f), aspectRatio, 1.0f, 10000.0f));
+                    currentEffect.Parameters["LightPosition"].SetValue(lightPosition);
+                }
+                mesh.Draw();
+            }
 
             base.Draw(gameTime);
         }

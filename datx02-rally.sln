@@ -2,6 +2,9 @@
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C# Express 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "datx02-rally", "datx02-rally\datx02-rally\datx02-rally.csproj", "{4E994360-DF8F-4459-A4CF-0DA97B35B390}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B77B7730-EEE4-46D2-AC5C-3943C1B1E57C} = {B77B7730-EEE4-46D2-AC5C-3943C1B1E57C}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "datx02-rallyContent", "datx02-rally\datx02-rallyContent\datx02-rallyContent.contentproj", "{E3618D78-69E9-4178-98DA-0B28EE92D4FC}"
 EndProject
