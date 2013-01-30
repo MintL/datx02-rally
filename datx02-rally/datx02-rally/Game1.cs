@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using BulletSharp;
+using Test;
 
 namespace datx02_rally
 {
@@ -24,13 +25,22 @@ namespace datx02_rally
         Vector3 modelPosition = Vector3.Zero;
         float modelRotation = 0.0f;
         float lightRotation;
-        Vector3 cameraPosition = new Vector3(0.0f, 100.0f, 300.0f);
-        Vector3 cameraTarget = new Vector3(0.0f, 50.0f, 0.0f);
-        float aspectRatio;
+
+        ThirdPersonCamera camera;
+        Vector2 screenCenter;
+
+        Matrix projection;
 
         Vector3 lightPosition;
 
         Effect effect;
+
+        #region SkySphere
+
+        Model skySphereModel;
+        Effect skySphereEffect;
+
+        #endregion
 
         public Game1()
         {
@@ -65,8 +75,11 @@ namespace datx02_rally
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            camera = new ThirdPersonCamera();
+            screenCenter = new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height) / 2f;
+            projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
+                GraphicsDevice.Viewport.AspectRatio, .1f, 10000f);
             
-            aspectRatio = graphics.GraphicsDevice.Viewport.AspectRatio;
 
             effect = Content.Load<Effect>(@"Effects/BasicShading");
             model = Content.Load<Model>(@"Models/porsche");
@@ -87,10 +100,53 @@ namespace datx02_rally
                     part.Effect.Parameters["MaterialAmbient"].SetValue(basicEffect.AmbientLightColor);
                     part.Effect.Parameters["MaterialDiffuse"].SetValue(basicEffect.DiffuseColor);
                     part.Effect.Parameters["MaterialSpecular"].SetValue(basicEffect.SpecularColor);
+                }
+            }
+
+            #region SkySphere
+
+            skySphereModel = Content.Load<Model>(@"Models/skysphere");
+            skySphereEffect = Content.Load<Effect>(@"Effects/SkySphere");
+            
+            TextureCube cubeMap = new TextureCube(GraphicsDevice, 2048, false, SurfaceFormat.Color);
+
+            string[] cubemapfaces = { @"SkyBoxes/PurpleSky/skybox_right1", 
+@"SkyBoxes/PurpleSky/skybox_left2", 
+@"SkyBoxes/PurpleSky/skybox_top3", 
+@"SkyBoxes/PurpleSky/skybox_bottom4", 
+@"SkyBoxes/PurpleSky/skybox_front5", 
+@"SkyBoxes/PurpleSky/skybox_back6" 
+                                    };
+
+            for (int i = 0; i < cubemapfaces.Length; i++)
+                LoadCubemapFace(cubeMap, cubemapfaces[i], (CubeMapFace)i);
+
+            skySphereEffect.Parameters["SkyboxTexture"].SetValue(cubeMap);
+
+            foreach (var mesh in skySphereModel.Meshes)
+            {
+                foreach (var part in mesh.MeshParts)
+                {
+                    part.Effect = skySphereEffect;
                     
                 }
             }
 
+            #endregion
+        }
+
+        /// <summary>
+        /// Loads a texture from Content and asign it to the cubemaps face.
+        /// </summary>
+        /// <param name="cubeMap"></param>
+        /// <param name="filepath"></param>
+        /// <param name="face"></param>
+        private void LoadCubemapFace(TextureCube cubeMap, string filepath, CubeMapFace face)
+        {
+            Texture2D texture = Content.Load<Texture2D>(filepath);
+            byte[] data = new byte[texture.Width * texture.Height * 4];
+            texture.GetData<byte>(data);
+            cubeMap.SetData<byte>(face, data);
         }
 
         /// <summary>
@@ -110,12 +166,11 @@ namespace datx02_rally
         protected override void Update(GameTime gameTime)
         {
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
+            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+                Keyboard.GetState().IsKeyDown(Keys.Escape))
                 this.Exit();
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
-            {
-                this.Exit();
-            }
+
+
             if (Keyboard.GetState().IsKeyDown(Keys.Left))
             {
                 modelRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
@@ -129,6 +184,8 @@ namespace datx02_rally
             lightPosition = Vector3.Transform(new Vector3(0.0f, 0.0f, 0.0f),
                 Matrix.CreateTranslation(new Vector3(0.0f, 0.0f, 300.0f)) * Matrix.CreateRotationY(lightRotation));
             Console.WriteLine(lightPosition);
+
+            camera.Update(Keyboard.GetState(), Mouse.GetState(), screenCenter);
 
             base.Update(gameTime);
         }
@@ -144,7 +201,7 @@ namespace datx02_rally
             Matrix[] transforms = new Matrix[model.Bones.Count];
             model.CopyAbsoluteBoneTransformsTo(transforms);
 
-            
+            Matrix view = camera.View;
 
             // Model specific parameters
             //effect.Parameters["MaterialAmbient"].SetValue(Color.White.ToVector3() * 0.5f);
@@ -158,17 +215,14 @@ namespace datx02_rally
                     currentEffect.Parameters["MaterialShininess"].SetValue(10.0f);
 
                     Matrix worldMatrix = transforms[mesh.ParentBone.Index] *
-                                Matrix.CreateRotationX(modelRotation) *
+                                Matrix.CreateRotationY(modelRotation) *
                                 Matrix.CreateTranslation(modelPosition);
-                    Matrix viewMatrix = Matrix.CreateLookAt(cameraPosition,
-                        cameraTarget, Vector3.Up);
-                    Matrix projectionMatrix = Matrix.CreatePerspectiveFieldOfView(
-                        MathHelper.ToRadians(45.0f), aspectRatio, 1.0f, 10000.0f);
-                    Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(viewMatrix * worldMatrix));
+
+                    Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(view * worldMatrix));
                     
                     currentEffect.Parameters["World"].SetValue(worldMatrix);
-                    currentEffect.Parameters["View"].SetValue(viewMatrix);
-                    currentEffect.Parameters["Projection"].SetValue(projectionMatrix);
+                    currentEffect.Parameters["View"].SetValue(view);
+                    currentEffect.Parameters["Projection"].SetValue(projection);
                     currentEffect.Parameters["NormalMatrix"].SetValue(normalMatrix);
                     currentEffect.Parameters["LightPosition"].SetValue(lightPosition);
                 }
@@ -183,14 +237,24 @@ namespace datx02_rally
                     currentEffect.Parameters["World"].SetValue(transforms[mesh.ParentBone.Index] *
                                 Matrix.CreateRotationY(modelRotation) *
                                 Matrix.CreateTranslation(lightPosition));
-                    currentEffect.Parameters["View"].SetValue(Matrix.CreateLookAt(cameraPosition,
-                        cameraTarget, Vector3.Up));
-                    currentEffect.Parameters["Projection"].SetValue(Matrix.CreatePerspectiveFieldOfView(
-                        MathHelper.ToRadians(45.0f), aspectRatio, 1.0f, 10000.0f));
+                    currentEffect.Parameters["View"].SetValue(view);
+                    currentEffect.Parameters["Projection"].SetValue(projection);
                     currentEffect.Parameters["LightPosition"].SetValue(lightPosition);
                 }
                 mesh.Draw();
             }
+
+            #region SkySphere
+
+            skySphereEffect.Parameters["View"].SetValue(view);
+            skySphereEffect.Parameters["Projection"].SetValue(projection);
+            foreach (var mesh in skySphereModel.Meshes)
+            {
+                mesh.Draw();
+            }
+
+            #endregion
+
 
             base.Draw(gameTime);
         }
