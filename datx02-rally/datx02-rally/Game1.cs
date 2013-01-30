@@ -35,6 +35,14 @@ namespace datx02_rally
 
         Effect effect;
 
+        Car car;
+
+        PlaneModel plane;
+        PlaneModel tree;
+        List<Matrix> treeTransforms = new List<Matrix>();
+
+        Random random = new Random();
+
         #region SkySphere
 
         Model skySphereModel;
@@ -47,9 +55,11 @@ namespace datx02_rally
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            graphics.PreferredBackBufferWidth = 1024;
-            graphics.PreferredBackBufferHeight = 768;
+            graphics.PreferredBackBufferWidth = 800;// 1920;
+            graphics.PreferredBackBufferHeight = 600; // 1080;
             graphics.ApplyChanges();
+
+            //graphics.ToggleFullScreen();
 
             IsMouseVisible = true;
         }
@@ -63,6 +73,7 @@ namespace datx02_rally
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+
             base.Initialize();
         }
 
@@ -80,7 +91,6 @@ namespace datx02_rally
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
                 GraphicsDevice.Viewport.AspectRatio, .1f, 10000f);
             
-
             effect = Content.Load<Effect>(@"Effects/BasicShading");
             model = Content.Load<Model>(@"Models/porsche");
             
@@ -103,6 +113,23 @@ namespace datx02_rally
                 }
             }
 
+            car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
+            plane = new PlaneModel(new Vector2(-10000), new Vector2(10000), 1, GraphicsDevice, null, projection, Matrix.Identity);
+
+            Vector2 treePlaneSizeStart = new Vector2(-50, -250),
+                treePlaneSizeEnd = new Vector2(50, 0);
+
+            tree = new PlaneModel(treePlaneSizeStart, treePlaneSizeEnd, 1, GraphicsDevice,
+                    Content.Load<Texture2D>("spruce"), projection, Matrix.Identity);
+
+            for (int i = 99; i >= 0; i--)
+            {
+                int side = 2 * random.Next(2) - 1;
+                treeTransforms.Add(Matrix.CreateRotationX(MathHelper.PiOver2) *
+                    Matrix.CreateRotationY(-side * (MathHelper.PiOver4 + (float)(random.NextDouble() / 4))) *
+                    Matrix.CreateTranslation(new Vector3(side * (140 + random.Next(30)), 0, i * -100)));
+            }
+
             #region SkySphere
 
             skySphereModel = Content.Load<Model>(@"Models/skysphere");
@@ -115,7 +142,7 @@ namespace datx02_rally
 @"SkyBoxes/PurpleSky/skybox_top3", 
 @"SkyBoxes/PurpleSky/skybox_bottom4", 
 @"SkyBoxes/PurpleSky/skybox_front5", 
-@"SkyBoxes/PurpleSky/skybox_back6" 
+@"SkyBoxes/PurpleSky/skybox_back6_2" 
                                     };
 
             for (int i = 0; i < cubemapfaces.Length; i++)
@@ -185,7 +212,37 @@ namespace datx02_rally
                 Matrix.CreateTranslation(new Vector3(0.0f, 0.0f, 300.0f)) * Matrix.CreateRotationY(lightRotation));
             Console.WriteLine(lightPosition);
 
+            #region Car control
+
+            //Accelerate
+            car.Speed = Math.Min(car.Speed + car.Acceleration *
+                ((Keyboard.GetState().IsKeyDown(Keys.W) ? 1 : 0) +
+                GamePad.GetState(PlayerIndex.One).Triggers.Right -
+                (Keyboard.GetState().IsKeyDown(Keys.S) ? 1 : 0) -
+                GamePad.GetState(PlayerIndex.One).Triggers.Left), car.MaxSpeed);
+            // Turn Wheel
+            car.WheelRotationY += (Keyboard.GetState().IsKeyDown(Keys.A) ? car.TurnSpeed : 0) -
+                (Keyboard.GetState().IsKeyDown(Keys.D) ? car.TurnSpeed : 0);
+            car.WheelRotationY = MathHelper.Clamp(car.WheelRotationY, -car.MaxWheelTurn, car.MaxWheelTurn);
+            if (Math.Abs(car.WheelRotationY) > MathHelper.Pi / 720)
+                car.WheelRotationY *= .9f;
+            else
+                car.WheelRotationY = 0;
+
+            //Apply changes to car
+            car.Update();
+
+            //Friktion if is not driving
+            float friction = .97f; // 0.995f;
+            if (!Keyboard.GetState().IsKeyDown(Keys.W) ||
+                !GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.RightTrigger) && GamePad.GetState(PlayerIndex.One).IsConnected)
+                car.Speed *= friction;
+
+            #endregion
+
             camera.Update(Keyboard.GetState(), Mouse.GetState(), screenCenter);
+
+            camera.Position = car.Position;
 
             base.Update(gameTime);
         }
@@ -208,41 +265,80 @@ namespace datx02_rally
             //effect.Parameters["MaterialDiffuse"].SetValue(Color.DarkGreen.ToVector3() * 0.9f);
             //effect.Parameters["MaterialSpecular"].SetValue(Color.White.ToVector3() * 0.2f);
 
-            foreach (ModelMesh mesh in model.Meshes)
-            {
-                foreach (Effect currentEffect in mesh.Effects)
-                {
-                    currentEffect.Parameters["MaterialShininess"].SetValue(10.0f);
+            //foreach (ModelMesh mesh in model.Meshes)
+            //{
+            //    foreach (Effect currentEffect in mesh.Effects)
+            //    {
+            //        currentEffect.Parameters["MaterialShininess"].SetValue(10.0f);
 
-                    Matrix worldMatrix = transforms[mesh.ParentBone.Index] *
-                                Matrix.CreateRotationY(modelRotation) *
-                                Matrix.CreateTranslation(modelPosition);
+            //        Matrix worldMatrix = transforms[mesh.ParentBone.Index] *
+            //                    Matrix.CreateRotationY(modelRotation) *
+            //                    Matrix.CreateTranslation(modelPosition);
 
-                    Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(view * worldMatrix));
+            //        Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(view * worldMatrix));
                     
-                    currentEffect.Parameters["World"].SetValue(worldMatrix);
-                    currentEffect.Parameters["View"].SetValue(view);
-                    currentEffect.Parameters["Projection"].SetValue(projection);
-                    currentEffect.Parameters["NormalMatrix"].SetValue(normalMatrix);
-                    currentEffect.Parameters["LightPosition"].SetValue(lightPosition);
-                }
-                mesh.Draw();
-            }
-            foreach (ModelMesh mesh in model.Meshes)
-            {
-                foreach (Effect currentEffect in mesh.Effects)
-                {
-                    currentEffect.Parameters["MaterialShininess"].SetValue(10.0f);
+            //        currentEffect.Parameters["World"].SetValue(worldMatrix);
+            //        currentEffect.Parameters["View"].SetValue(view);
+            //        currentEffect.Parameters["Projection"].SetValue(projection);
+            //        currentEffect.Parameters["NormalMatrix"].SetValue(normalMatrix);
+            //        currentEffect.Parameters["LightPosition"].SetValue(lightPosition);
+            //    }
+            //    mesh.Draw();
+            //}
+            //foreach (ModelMesh mesh in model.Meshes)
+            //{
+            //    foreach (Effect currentEffect in mesh.Effects)
+            //    {
+            //        currentEffect.Parameters["MaterialShininess"].SetValue(10.0f);
 
-                    currentEffect.Parameters["World"].SetValue(transforms[mesh.ParentBone.Index] *
-                                Matrix.CreateRotationY(modelRotation) *
-                                Matrix.CreateTranslation(lightPosition));
-                    currentEffect.Parameters["View"].SetValue(view);
-                    currentEffect.Parameters["Projection"].SetValue(projection);
-                    currentEffect.Parameters["LightPosition"].SetValue(lightPosition);
+            //        currentEffect.Parameters["World"].SetValue(transforms[mesh.ParentBone.Index] *
+            //                    Matrix.CreateRotationY(modelRotation) *
+            //                    Matrix.CreateTranslation(lightPosition));
+            //        currentEffect.Parameters["View"].SetValue(view);
+            //        currentEffect.Parameters["Projection"].SetValue(projection);
+            //        currentEffect.Parameters["LightPosition"].SetValue(lightPosition);
+            //    }
+            //    mesh.Draw();
+            //}
+
+
+            plane.Draw(view, Color.Gray);
+
+
+            // Draw car
+            foreach (var mesh in car.Model.Meshes) // 5 meshes
+            {
+                foreach (Effect effect in mesh.Effects) // 5 effects for main, 1 for each wheel
+                {
+                    effect.Parameters["MaterialShininess"].SetValue(10.0f);
+
+                    Matrix world = Matrix.Identity;
+                    // If this mesh is a wheel, apply rotation
+                    if (mesh.Name.StartsWith("wheel"))
+                    {
+                        world *= Matrix.CreateRotationX(car.WheelRotationX);
+
+                        if (mesh.Name.EndsWith("001") || mesh.Name.EndsWith("002"))
+                            world *= Matrix.CreateRotationY(car.WheelRotationY);
+                    }
+                    // Local morldspace, due to bad .X-file/exporter
+                    world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
+                    world *= Matrix.CreateRotationY(car.Rotation) *
+                        Matrix.CreateTranslation(car.Position);
+
+                    effect.Parameters["World"].SetValue(world);
+
+                    Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(view * world));
+                    effect.Parameters["NormalMatrix"].SetValue(normalMatrix);
+
+                    effect.Parameters["View"].SetValue(view);
+                    effect.Parameters["Projection"].SetValue(projection);
+
+                    effect.Parameters["LightPosition"].SetValue(lightPosition);
                 }
                 mesh.Draw();
             }
+
 
             #region SkySphere
 
@@ -255,6 +351,13 @@ namespace datx02_rally
 
             #endregion
 
+
+            GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            foreach (var world in treeTransforms)
+            {
+                tree.World = world;
+                tree.Draw(view);
+            }
 
             base.Draw(gameTime);
         }

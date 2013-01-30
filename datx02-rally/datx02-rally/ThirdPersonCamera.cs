@@ -23,6 +23,8 @@ namespace Test
             }
         }
 
+        public Vector3 Position { get { return position; } set { position = value; } }
+
         public float Zoom { get; set; }
 
         public float OrbitZOffset { get; set; }
