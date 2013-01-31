@@ -26,7 +26,7 @@ namespace datx02_rally
         Vector3 modelPosition = Vector3.Zero;
         float modelRotation = 0.0f;
         float lightRotation;
-        float lightDistance = 300.0f;
+        float lightDistance = 700.0f;
 
         ThirdPersonCamera camera;
         Vector2 screenCenter;
@@ -222,7 +222,7 @@ namespace datx02_rally
             lightRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
 
             PointLight pointLight = pointLights.First<PointLight>();
-            pointLight.Position = Vector3.Transform(new Vector3(0.0f, 0.0f, 0.0f),
+            pointLight.Position = Vector3.Transform(new Vector3(0.0f, 100.0f, 0.0f),
                 Matrix.CreateTranslation(new Vector3(0.0f, 0.0f, lightDistance)) * Matrix.CreateRotationY(lightRotation));
 
             #region Car control
@@ -307,11 +307,12 @@ namespace datx02_rally
                 {
                     PointLight pointLight = pointLights.First<PointLight>();
                     currentEffect.World = transforms[mesh.ParentBone.Index] *
-                                Matrix.CreateRotationY(modelRotation) *
+                                Matrix.CreateRotationY(lightRotation) *
                                 Matrix.CreateTranslation(pointLight.Position);
                     currentEffect.View = view;
                     currentEffect.Projection = projection;
                 }
+                mesh.Draw();
             }
 
             plane.Draw(view, Color.Gray);
