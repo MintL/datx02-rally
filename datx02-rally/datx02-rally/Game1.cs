@@ -97,7 +97,7 @@ namespace datx02_rally
             light = Content.Load<Model>(@"Models/light");
 
             // Light specific parameters
-            pointLights.Add(new PointLight(Vector3.Zero, Color.Black.ToVector3() * 0.2f, Color.White.ToVector3() * 1.0f, 1000.0f));
+            pointLights.Add(new PointLight(Vector3.Zero, Color.Black.ToVector3() * 0.2f, Color.White.ToVector3() * 1.0f, 400.0f));
             effect.CurrentTechnique = effect.Techniques["BasicShading"];
 
             // Initialize the material settings
@@ -109,7 +109,7 @@ namespace datx02_rally
                     part.Effect = effect.Clone();
                     part.Effect.Parameters["MaterialAmbient"].SetValue(basicEffect.AmbientLightColor);
                     part.Effect.Parameters["MaterialDiffuse"].SetValue(basicEffect.DiffuseColor);
-                    part.Effect.Parameters["MaterialSpecular"].SetValue(basicEffect.SpecularColor);
+                    part.Effect.Parameters["MaterialSpecular"].SetValue(Color.White.ToVector3());//basicEffect.SpecularColor
                 }
             }
 
