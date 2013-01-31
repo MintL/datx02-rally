@@ -116,6 +116,8 @@
     <Compile Include="Camera.cs" />
     <Compile Include="Car.cs" />
     <Compile Include="FirstPersonCamera.cs" />
+    <Compile Include="MapGeneration\HeightMap.cs" />
+    <Compile Include="MapGeneration\PerlinGenerator.cs" />
     <Compile Include="PointLight.cs" />
     <Compile Include="PlaneModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
