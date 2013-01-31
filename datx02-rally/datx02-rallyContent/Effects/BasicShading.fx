@@ -11,6 +11,7 @@ float MaterialShininess;
 float3 LightPosition;
 float3 LightAmbient;
 float3 LightDiffuse;
+float LightRange;
 
 struct VertexShaderInput
 {
@@ -48,7 +49,8 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input, float3 Normal :
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
 	float3 normal = normalize(input.Normal);
-	float3 directionToLight = normalize(input.ViewLightPosition - input.ViewPosition);
+	float3 distance = input.ViewLightPosition - input.ViewPosition;
+	float3 directionToLight = normalize(distance);
 	float3 directionFromEye = -normalize(input.ViewPosition);
 
 	float3 diffuse = saturate(dot(normal, directionToLight));
@@ -57,14 +59,17 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float3 specular = pow(saturate(dot(reflect, directionFromEye)), MaterialShininess);
 	float normalizationFactor = ((MaterialShininess + 2.0) / 8.0);
 
+	// point light
+	float attenuation = saturate(1 - dot(distance / LightRange, distance / LightRange)); 
+
 	// Fresnel
 	float3 fresnel = MaterialSpecular + (float3(1.0, 1.0, 1.0) - MaterialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
 		0.0, 1.0), 5.0);
 
 	//TODO: Multiple lights
     float3 shading = LightAmbient * MaterialAmbient + 
-		LightDiffuse * MaterialDiffuse * diffuse +
-		LightDiffuse * fresnel * specular * normalizationFactor;
+		LightDiffuse * MaterialDiffuse * diffuse * attenuation +
+		LightDiffuse * fresnel * specular * normalizationFactor * attenuation;
 
 	return float4(shading, 1.0);
 }
