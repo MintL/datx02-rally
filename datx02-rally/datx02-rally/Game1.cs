@@ -342,11 +342,12 @@ namespace datx02_rally
 
                     parameters["World"].SetValue(world);
 
-                    Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(view * world));
+                    Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(world));
                     parameters["NormalMatrix"].SetValue(normalMatrix);
 
                     parameters["View"].SetValue(view);
                     parameters["Projection"].SetValue(projection);
+                    parameters["EyePosition"].SetValue(camera.Position);
 
                     PointLight pointLight = pointLights.First<PointLight>();
                     parameters["LightPosition"].SetValue(pointLight.Position);

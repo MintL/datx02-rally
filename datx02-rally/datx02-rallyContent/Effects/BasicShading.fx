@@ -3,6 +3,8 @@ float4x4 View;
 float4x4 Projection;
 float4x4 NormalMatrix;
 
+float3 EyePosition;
+
 float3 MaterialAmbient;
 float3 MaterialDiffuse;
 float3 MaterialSpecular;
@@ -25,8 +27,8 @@ struct VertexShaderOutput
 {
     float4 Position : POSITION0;
 	float3 Normal : TEXCOORD0;
-	float3 ViewPosition : TEXCOORD1;
-	float3 ViewLightPosition : TEXCOORD2;
+	float3 View : TEXCOORD1;
+	float3 WorldPosition : TEXCOORD2;
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input, float3 Normal : NORMAL)
@@ -36,12 +38,10 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input, float3 Normal :
     float4 worldPosition = mul(input.Position, World);
     float4 viewPosition = mul(worldPosition, View);
     output.Position = mul(viewPosition, Projection);
-	output.ViewPosition = viewPosition.xyz;
+	output.View = EyePosition - worldPosition.xyz;
+	output.WorldPosition = worldPosition.xyz;
 
-	//float4 worldNormal = mul(Normal, World);
-	//float4 viewNormal = mul(worldNormal, View);
-	output.Normal = mul(Normal, NormalMatrix);//viewNormal.xyz;//normalize(mul(mul(Normal, World), View));//mul(Normal, inverse(transpose(viewPosition));
-	output.ViewLightPosition = mul(LightPosition, View);
+	output.Normal = mul(Normal, NormalMatrix);
 
     return output;
 }
@@ -49,9 +49,9 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input, float3 Normal :
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
 	float3 normal = normalize(input.Normal);
-	float3 distance = input.ViewLightPosition - input.ViewPosition;
-	float3 directionToLight = normalize(distance);
-	float3 directionFromEye = -normalize(input.ViewPosition);
+	float3 L = LightPosition - input.WorldPosition;
+	float3 directionToLight = normalize(L);
+	float3 directionFromEye = -normalize(input.View);
 
 	float3 diffuse = saturate(dot(normal, directionToLight));
 	
@@ -60,7 +60,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float normalizationFactor = ((MaterialShininess + 2.0) / 8.0);
 
 	// point light
-	float attenuation = saturate(1 - dot(distance / LightRange, distance / LightRange)); 
+	float attenuation = saturate(1 - dot(L / LightRange, L / LightRange)); 
 
 	// Fresnel
 	float3 fresnel = MaterialSpecular + (float3(1.0, 1.0, 1.0) - MaterialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
