@@ -115,6 +115,7 @@
   <ItemGroup>
     <Compile Include="Camera.cs" />
     <Compile Include="Car.cs" />
+    <Compile Include="DirectionalLight.cs" />
     <Compile Include="FirstPersonCamera.cs" />
     <Compile Include="PointLight.cs" />
     <Compile Include="PlaneModel.cs" />

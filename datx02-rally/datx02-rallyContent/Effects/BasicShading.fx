@@ -18,6 +18,9 @@ float3 LightDiffuse[MaxLights];
 float LightRange[MaxLights];
 int NumLights;
 
+float3 DirectionalDirection;
+float3 DirectionalDiffuse;
+
 struct VertexShaderInput
 {
     float4 Position : POSITION0;
@@ -87,6 +90,14 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 			(LightDiffuse[i] * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) + 
 			LightDiffuse[i] * fresnel * CalculateSpecular(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor);
 	}
+
+	// Directional light
+	float3 directionToLight = -normalize(DirectionalDirection);
+	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
+	float3 fresnel = MaterialSpecular + (float3(1.0, 1.0, 1.0) - MaterialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
+			0.0, 1.0), 5.0);
+	totalLight += selfShadow * (DirectionalDiffuse * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) +
+					DirectionalDiffuse * fresnel * CalculateSpecular(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor);
 
 	return float4(totalLight, 1.0);
 }

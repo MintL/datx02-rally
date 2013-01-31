@@ -34,6 +34,7 @@ namespace datx02_rally
         Matrix projection;
 
         List<PointLight> pointLights;
+        DirectionalLight directionalLight;
 
         Effect effect;
 
@@ -108,6 +109,7 @@ namespace datx02_rally
                 Console.WriteLine(color);
                 pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 600.0f));
             }
+            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), Color.Purple.ToVector3() * 0.8f);
 
             effect.CurrentTechnique = effect.Techniques["BasicShading"];
 
@@ -118,9 +120,9 @@ namespace datx02_rally
                 {
                     BasicEffect basicEffect = (BasicEffect)part.Effect;
                     part.Effect = effect.Clone();
-                    part.Effect.Parameters["MaterialAmbient"].SetValue(basicEffect.DiffuseColor * 0.5f);
+                    part.Effect.Parameters["MaterialAmbient"].SetValue(Color.White.ToVector3() * 0.1f);
                     part.Effect.Parameters["MaterialDiffuse"].SetValue(basicEffect.DiffuseColor);
-                    part.Effect.Parameters["MaterialSpecular"].SetValue(Color.White.ToVector3());//basicEffect.SpecularColor
+                    part.Effect.Parameters["MaterialSpecular"].SetValue(basicEffect.SpecularColor);//basicEffect.SpecularColor
                 }
             }
 
@@ -336,6 +338,9 @@ namespace datx02_rally
                     parameters["LightDiffuse"].SetValue(diffuses);
                     parameters["LightRange"].SetValue(ranges);
                     parameters["NumLights"].SetValue(pointLights.Count);
+
+                    parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
+                    parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
 
                 }
                 mesh.Draw();
