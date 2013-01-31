@@ -61,6 +61,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	// point light
 	float attenuation = saturate(1 - dot(L / LightRange, L / LightRange)); 
+	// Frazier threshold selfshadowing
+	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 
 	// Fresnel
 	float3 fresnel = MaterialSpecular + (float3(1.0, 1.0, 1.0) - MaterialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
@@ -68,8 +70,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	//TODO: Multiple lights
     float3 shading = LightAmbient * MaterialAmbient + 
-		LightDiffuse * MaterialDiffuse * diffuse * attenuation +
-		LightDiffuse * fresnel * specular * normalizationFactor * attenuation;
+		attenuation * selfShadow *
+		(LightDiffuse * MaterialDiffuse * diffuse + LightDiffuse * fresnel * specular * normalizationFactor);
 
 	return float4(shading, 1.0);
 }
