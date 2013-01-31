@@ -1,3 +1,5 @@
+#define MaxLights 10
+
 float4x4 World;
 float4x4 View;
 float4x4 Projection;
@@ -10,10 +12,11 @@ float3 MaterialDiffuse;
 float3 MaterialSpecular;
 float MaterialShininess;
 
-float3 LightPosition;
-float3 LightAmbient;
-float3 LightDiffuse;
-float LightRange;
+float3 LightPosition[MaxLights];
+//float3 LightAmbient[MaxLights];
+float3 LightDiffuse[MaxLights];
+float LightRange[MaxLights];
+int NumLights;
 
 struct VertexShaderInput
 {
@@ -46,41 +49,53 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input, float3 Normal :
     return output;
 }
 
+float3 CalculateDiffuse(float3 normal, float3 directionToLight)
+{
+	return saturate(dot(normal, directionToLight));
+}
+
+float3 CalculateSpecular(float3 normal, float3 directionToLight, float3 directionFromEye, float shininess)
+{
+	float3 reflect = -directionToLight + normal * (2 * dot(normal, directionToLight));
+	return pow(saturate(dot(reflect, directionFromEye)), shininess);
+}
+
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
 	float3 normal = normalize(input.Normal);
-	float3 L = LightPosition - input.WorldPosition;
-	float3 directionToLight = normalize(L);
 	float3 directionFromEye = -normalize(input.View);
-
-	float3 diffuse = saturate(dot(normal, directionToLight));
-	
-	float3 reflect = -directionToLight + normal * (2 * dot(normal, directionToLight));
-	float3 specular = pow(saturate(dot(reflect, directionFromEye)), MaterialShininess);
 	float normalizationFactor = ((MaterialShininess + 2.0) / 8.0);
+	float3 totalLight = MaterialAmbient;
 
-	// point light
-	float attenuation = saturate(1 - dot(L / LightRange, L / LightRange)); 
-	// Frazier threshold selfshadowing
-	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
+	for (int i = 0; i < NumLights; i++)
+	{
+		float3 L = LightPosition[i] - input.WorldPosition;
+		float3 directionToLight = normalize(L);
 
-	// Fresnel
-	float3 fresnel = MaterialSpecular + (float3(1.0, 1.0, 1.0) - MaterialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
-		0.0, 1.0), 5.0);
+		// point light
+		float attenuation = saturate(1 - dot(L / LightRange[i], L / LightRange[i])); 
 
-	//TODO: Multiple lights
-    float3 shading = LightAmbient * MaterialAmbient + 
-		attenuation * selfShadow *
-		(LightDiffuse * MaterialDiffuse * diffuse + LightDiffuse * fresnel * specular * normalizationFactor);
+		// Frazier threshold self shadowing
+		float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 
-	return float4(shading, 1.0);
+		// Fresnel
+		float3 fresnel = MaterialSpecular + (float3(1.0, 1.0, 1.0) - MaterialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
+			0.0, 1.0), 5.0);
+
+		totalLight +=
+			attenuation * selfShadow *
+			(LightDiffuse[i] * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) + 
+			LightDiffuse[i] * fresnel * CalculateSpecular(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor);
+	}
+
+	return float4(totalLight, 1.0);
 }
 
 technique BasicShading
 {
     pass Pass1
     {
-        VertexShader = compile vs_2_0 VertexShaderFunction();
-        PixelShader = compile ps_2_0 PixelShaderFunction();
+        VertexShader = compile vs_3_0 VertexShaderFunction();
+        PixelShader = compile ps_3_0 PixelShaderFunction();
     }
 }

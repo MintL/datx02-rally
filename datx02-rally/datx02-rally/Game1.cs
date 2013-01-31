@@ -22,7 +22,7 @@ namespace datx02_rally
         SpriteBatch spriteBatch;
 
         Model model;
-        Model light;
+        Model lightModel;
         Vector3 modelPosition = Vector3.Zero;
         float modelRotation = 0.0f;
         float lightRotation;
@@ -94,10 +94,21 @@ namespace datx02_rally
             
             effect = Content.Load<Effect>(@"Effects/BasicShading");
             model = Content.Load<Model>(@"Models/porsche");
-            light = Content.Load<Model>(@"Models/light");
+            lightModel = Content.Load<Model>(@"Models/light");
 
             // Light specific parameters
-            pointLights.Add(new PointLight(Vector3.Zero, Color.Black.ToVector3() * 0.2f, Color.White.ToVector3() * 1.0f, 400.0f));
+            for (int i = 0; i < 10; i++)
+            {
+                //float x = MathHelper.Lerp(-500.0f, 500.0f, (float)random.NextDouble());
+                float z = MathHelper.Lerp(-5000.0f, 0.0f, (float)random.NextDouble());
+                Vector3 color = new Vector3(
+                    MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
+                    MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
+                    MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()));
+                Console.WriteLine(color);
+                pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 600.0f));
+            }
+
             effect.CurrentTechnique = effect.Techniques["BasicShading"];
 
             // Initialize the material settings
@@ -107,7 +118,7 @@ namespace datx02_rally
                 {
                     BasicEffect basicEffect = (BasicEffect)part.Effect;
                     part.Effect = effect.Clone();
-                    part.Effect.Parameters["MaterialAmbient"].SetValue(basicEffect.AmbientLightColor);
+                    part.Effect.Parameters["MaterialAmbient"].SetValue(basicEffect.DiffuseColor * 0.5f);
                     part.Effect.Parameters["MaterialDiffuse"].SetValue(basicEffect.DiffuseColor);
                     part.Effect.Parameters["MaterialSpecular"].SetValue(Color.White.ToVector3());//basicEffect.SpecularColor
                 }
@@ -217,13 +228,13 @@ namespace datx02_rally
                 lightDistance += millis * 1.0f;
             }
 
-            Console.WriteLine(1 - Math.Pow(lightDistance / 500.0f, 2));
 
-            lightRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
+            /*lightRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
 
             PointLight pointLight = pointLights.First<PointLight>();
             pointLight.Position = Vector3.Transform(new Vector3(0.0f, 100.0f, 0.0f),
                 Matrix.CreateTranslation(new Vector3(0.0f, 0.0f, lightDistance)) * Matrix.CreateRotationY(lightRotation));
+            */
 
             #region Car control
 
@@ -273,47 +284,11 @@ namespace datx02_rally
 
             Matrix view = camera.View;
 
-            /*foreach (ModelMesh mesh in model.Meshes)
+            foreach (PointLight light in pointLights)
             {
-                foreach (Effect currentEffect in mesh.Effects)
-                {
-                    EffectParameterCollection parameters = currentEffect.Parameters;
-                    parameters["MaterialShininess"].SetValue(10.0f);
-
-            //        Matrix worldMatrix = transforms[mesh.ParentBone.Index] *
-            //                    Matrix.CreateRotationY(modelRotation) *
-            //                    Matrix.CreateTranslation(modelPosition);
-
-            //        Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(view * worldMatrix));
-                    
-                    parameters["World"].SetValue(worldMatrix);
-                    parameters["View"].SetValue(view);
-                    parameters["Projection"].SetValue(projection);
-                    parameters["NormalMatrix"].SetValue(normalMatrix);
-
-                    // light parameters
-                    PointLight pointLight = pointLights.First<PointLight>();
-                    parameters["LightPosition"].SetValue(pointLight.Position);
-                    parameters["LightAmbient"].SetValue(pointLight.Ambient);
-                    parameters["LightDiffuse"].SetValue(pointLight.Diffuse);
-                    parameters["LightRange"].SetValue(pointLight.Range);
-                }
-                mesh.Draw();
-            }*/
-
-            foreach (ModelMesh mesh in light.Meshes)
-            {
-                foreach (BasicEffect currentEffect in mesh.Effects)
-                {
-                    PointLight pointLight = pointLights.First<PointLight>();
-                    currentEffect.World = transforms[mesh.ParentBone.Index] *
-                                Matrix.CreateRotationY(lightRotation) *
-                                Matrix.CreateTranslation(pointLight.Position);
-                    currentEffect.View = view;
-                    currentEffect.Projection = projection;
-                }
-                mesh.Draw();
+                light.Draw(lightModel, view, projection);
             }
+
 
             plane.Draw(view, Color.Gray);
 
@@ -335,7 +310,7 @@ namespace datx02_rally
                         if (mesh.Name.EndsWith("001") || mesh.Name.EndsWith("002"))
                             world *= Matrix.CreateRotationY(car.WheelRotationY);
                     }
-                    // Local morldspace, due to bad .X-file/exporter
+                    // Local worldspace, due to bad .X-file/exporter
                     world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
                     world *= Matrix.CreateRotationY(car.Rotation) *
                         Matrix.CreateTranslation(car.Position);
@@ -349,11 +324,18 @@ namespace datx02_rally
                     parameters["Projection"].SetValue(projection);
                     parameters["EyePosition"].SetValue(camera.Position);
 
-                    PointLight pointLight = pointLights.First<PointLight>();
-                    parameters["LightPosition"].SetValue(pointLight.Position);
-                    parameters["LightAmbient"].SetValue(pointLight.Ambient);
-                    parameters["LightDiffuse"].SetValue(pointLight.Diffuse);
-                    parameters["LightRange"].SetValue(pointLight.Range);
+                    Vector3[] positions = new Vector3[pointLights.Count];
+                    Vector3[] diffuses = new Vector3[pointLights.Count];
+                    float[] ranges = new float[pointLights.Count];
+                    for (int i=0; i<pointLights.Count; i++) {
+                        positions[i] = pointLights[i].Position;
+                        diffuses[i] = pointLights[i].Diffuse;
+                        ranges[i] = pointLights[i].Range;
+                    }
+                    parameters["LightPosition"].SetValue(positions);
+                    parameters["LightDiffuse"].SetValue(diffuses);
+                    parameters["LightRange"].SetValue(ranges);
+                    parameters["NumLights"].SetValue(pointLights.Count);
 
                 }
                 mesh.Draw();
