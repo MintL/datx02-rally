@@ -74,6 +74,10 @@ namespace datx02_rally
         {
             // TODO: Add your initialization logic here
 
+            var debugCamera = new DebugCameraComponent(this);
+            Components.Add(debugCamera);
+            Services.AddService(typeof(DebugCameraComponent), debugCamera);
+
             base.Initialize();
         }
 
@@ -240,7 +244,7 @@ namespace datx02_rally
 
             #endregion
 
-            camera.Update(Keyboard.GetState(), Mouse.GetState(), screenCenter);
+            //camera.Update(Keyboard.GetState(), Mouse.GetState(), screenCenter);
 
             camera.Position = car.Position;
 
@@ -258,7 +262,7 @@ namespace datx02_rally
             Matrix[] transforms = new Matrix[model.Bones.Count];
             model.CopyAbsoluteBoneTransformsTo(transforms);
 
-            Matrix view = camera.View;
+            Matrix view = this.GetService<DebugCameraComponent>().View;
 
             // Model specific parameters
             //effect.Parameters["MaterialAmbient"].SetValue(Color.White.ToVector3() * 0.5f);
