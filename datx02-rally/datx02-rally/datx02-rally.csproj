@@ -112,14 +112,14 @@
   <ItemGroup>
     <Compile Include="Cameras\Camera.cs" />
     <Compile Include="Cameras\DebugCamera.cs" />
-    <Compile Include="Cameras\ICameraTargetNode.cs" />
-    <Compile Include="Car.cs" />
     <Compile Include="Components\CameraComponent.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Components\PreviousKeyboardState.cs" />
+    <Compile Include="Entities\Car.cs" />
+    <Compile Include="Entities\ITargetNode.cs" />
+    <Compile Include="Entities\PlaneModel.cs" />
     <Compile Include="GameExtensions.cs" />
-    <Compile Include="PlaneModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Game1.cs" />
