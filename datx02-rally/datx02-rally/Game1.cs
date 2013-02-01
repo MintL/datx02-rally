@@ -28,6 +28,9 @@ namespace datx02_rally
         float lightRotation;
         float lightDistance = 300.0f;
 
+        float[,] heightMap;
+        int mapSize;
+
         ThirdPersonCamera camera;
         Vector2 screenCenter;
 
@@ -130,6 +133,22 @@ namespace datx02_rally
                     Matrix.CreateTranslation(new Vector3(side * (140 + random.Next(30)), 0, i * -100)));
             }
 
+            #region MapGeneration
+
+            mapSize = 48;
+            MapGeneration.HeightMap hmGenerator = new MapGeneration.HeightMap(mapSize);
+
+            heightMap = hmGenerator.Generate();
+
+            for (int i = 0; i < mapSize; i++)
+            {
+                for (int j = 0; j < mapSize; j++)
+                {
+                    Console.Write(heightMap[i,j]+" ");
+                }
+                Console.WriteLine();
+            }
+            #endregion
             #region SkySphere
 
             skySphereModel = Content.Load<Model>(@"Models/skysphere");
@@ -217,7 +236,7 @@ namespace datx02_rally
                 lightDistance += millis * 1.0f;
             }
 
-            Console.WriteLine(1 - Math.Pow(lightDistance / 500.0f, 2));
+            //Console.WriteLine(1 - Math.Pow(lightDistance / 500.0f, 2));
 
             lightRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
 

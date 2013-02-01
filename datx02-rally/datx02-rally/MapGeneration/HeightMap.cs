@@ -107,5 +107,19 @@ namespace datx02_rally.MapGeneration
                 }
             }
         }
+
+        public float[,] Generate()
+        {   
+            AddPerlinNoise(6.0f); 
+            
+            Perturb(32.0f, 32.0f); 
+            
+            for (int i = 0; i < 10; i++) 
+                Erode(16.0f); 
+            
+            Smoothen();
+
+            return Heights;
+        }
     }
 }
