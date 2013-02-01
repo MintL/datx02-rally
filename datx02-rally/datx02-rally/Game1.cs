@@ -75,10 +75,10 @@ namespace datx02_rally
         protected override void Initialize()
         {
             pointLights = new List<PointLight>();
-            // TODO: Add your initialization logic here
+
+            GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
             // Components
-
             var debugCamera = new CameraComponent(this);
             Components.Add(debugCamera);
             Services.AddService(typeof(CameraComponent), debugCamera);
@@ -373,7 +373,7 @@ namespace datx02_rally
             #endregion
 
 
-            GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            
             foreach (var world in treeTransforms)
             {
                 tree.World = world;
