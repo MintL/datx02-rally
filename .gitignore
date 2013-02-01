@@ -108,3 +108,4 @@ Backup*/
 UpgradeLog*.XML
 
 Thumbs.db
+*.cachefile
