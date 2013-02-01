@@ -24,7 +24,6 @@ namespace datx02_rally
         Model lightModel;
         Vector3 modelPosition = Vector3.Zero;
         float modelRotation = 0.0f;
-        float lightRotation;
         float lightDistance = 700.0f;
 
         ThirdPersonCamera camera;
@@ -49,6 +48,7 @@ namespace datx02_rally
 
         Model skySphereModel;
         Effect skySphereEffect;
+        TextureCube cubeMap;
 
         #endregion
 
@@ -117,9 +117,9 @@ namespace datx02_rally
                     MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
                     MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()));
                 Console.WriteLine(color);
-                pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 600.0f));
+                pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
             }
-            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), Color.Purple.ToVector3() * 0.8f);
+            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.6f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.3f);
 
             effect.CurrentTechnique = effect.Techniques["BasicShading"];
 
@@ -130,9 +130,9 @@ namespace datx02_rally
                 {
                     BasicEffect basicEffect = (BasicEffect)part.Effect;
                     part.Effect = effect.Clone();
-                    part.Effect.Parameters["MaterialAmbient"].SetValue(Color.White.ToVector3() * 0.1f);
+                    part.Effect.Parameters["MaterialAmbient"].SetValue(basicEffect.DiffuseColor * 0.5f);
                     part.Effect.Parameters["MaterialDiffuse"].SetValue(basicEffect.DiffuseColor);
-                    part.Effect.Parameters["MaterialSpecular"].SetValue(basicEffect.SpecularColor);//basicEffect.SpecularColor
+                    part.Effect.Parameters["MaterialSpecular"].SetValue(basicEffect.DiffuseColor);//basicEffect.SpecularColor
                 }
             }
 
@@ -158,15 +158,15 @@ namespace datx02_rally
             skySphereModel = Content.Load<Model>(@"Models/skysphere");
             skySphereEffect = Content.Load<Effect>(@"Effects/SkySphere");
             
-            TextureCube cubeMap = new TextureCube(GraphicsDevice, 2048, false, SurfaceFormat.Color);
+            cubeMap = new TextureCube(GraphicsDevice, 2048, false, SurfaceFormat.Color);
 
             string[] cubemapfaces = { @"SkyBoxes/PurpleSky/skybox_right1", 
-@"SkyBoxes/PurpleSky/skybox_left2", 
-@"SkyBoxes/PurpleSky/skybox_top3", 
-@"SkyBoxes/PurpleSky/skybox_bottom4", 
-@"SkyBoxes/PurpleSky/skybox_front5", 
-@"SkyBoxes/PurpleSky/skybox_back6_2" 
-                                    };
+                @"SkyBoxes/PurpleSky/skybox_left2", 
+                @"SkyBoxes/PurpleSky/skybox_top3", 
+                @"SkyBoxes/PurpleSky/skybox_bottom4", 
+                @"SkyBoxes/PurpleSky/skybox_front5", 
+                @"SkyBoxes/PurpleSky/skybox_back6_2" 
+            };
 
             for (int i = 0; i < cubemapfaces.Length; i++)
                 LoadCubemapFace(cubeMap, cubemapfaces[i], (CubeMapFace)i);
@@ -314,7 +314,9 @@ namespace datx02_rally
                 foreach (Effect effect in mesh.Effects) // 5 effects for main, 1 for each wheel
                 {
                     EffectParameterCollection parameters = effect.Parameters;
-                    parameters["MaterialShininess"].SetValue(10.0f);
+                    parameters["MaterialShininess"].SetValue(25.0f);
+                    parameters["MaterialReflection"].SetValue(0.4f);
+                    parameters["EnvironmentMap"].SetValue(cubeMap);
 
                     Matrix world = Matrix.Identity;
                     // Wheel transformation
@@ -355,6 +357,7 @@ namespace datx02_rally
 
                     parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
                     parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
+                    parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
 
                 }
                 mesh.Draw();

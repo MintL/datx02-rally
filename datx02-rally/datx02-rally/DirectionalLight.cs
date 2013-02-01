@@ -14,11 +14,13 @@ namespace datx02_rally
     class DirectionalLight
     {
         public Vector3 Direction { get; set; }
+        public Vector3 Ambient { get; set; }
         public Vector3 Diffuse { get; set; }
 
-        public DirectionalLight(Vector3 direction, Vector3 diffuse)
+        public DirectionalLight(Vector3 direction, Vector3 ambient, Vector3 diffuse)
         {
             Direction = direction;
+            Ambient = ambient;
             Diffuse = diffuse;
         }
 

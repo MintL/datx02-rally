@@ -19,7 +19,20 @@ float LightRange[MaxLights];
 int NumLights;
 
 float3 DirectionalDirection;
+float3 DirectionalAmbient;
 float3 DirectionalDiffuse;
+
+float MaterialReflection;
+Texture EnvironmentMap;
+samplerCUBE EnvironmentSampler = sampler_state
+{
+	texture = <EnvironmentMap>;
+	magfilter = LINEAR;
+	minfilter = LINEAR;
+	mipfilter = LINEAR;
+	AddressU = Mirror;
+	AddressV = Mirror;
+};
 
 struct VertexShaderInput
 {
@@ -63,12 +76,17 @@ float3 CalculateSpecular(float3 normal, float3 directionToLight, float3 directio
 	return pow(saturate(dot(reflect, directionFromEye)), shininess);
 }
 
+float3 CalculateEnvironmentReflection(float3 normal, float3 directionFromEye) 
+{
+	return reflect(directionFromEye, normal);
+}
+
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
 	float3 normal = normalize(input.Normal);
 	float3 directionFromEye = -normalize(input.View);
 	float normalizationFactor = ((MaterialShininess + 2.0) / 8.0);
-	float3 totalLight = MaterialAmbient;
+	float3 totalLight = MaterialAmbient * DirectionalAmbient;
 
 	for (int i = 0; i < NumLights; i++)
 	{
@@ -96,10 +114,13 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 	float3 fresnel = MaterialSpecular + (float3(1.0, 1.0, 1.0) - MaterialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
 			0.0, 1.0), 5.0);
-	totalLight += selfShadow * (DirectionalDiffuse * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) +
-					DirectionalDiffuse * fresnel * CalculateSpecular(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor);
 
-	return float4(totalLight, 1.0);
+	float3 reflection = normalize(reflect(directionFromEye, normal));
+	totalLight += selfShadow * (DirectionalDiffuse * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) +
+					DirectionalDiffuse * fresnel * CalculateSpecular(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor +
+					texCUBE(EnvironmentSampler, reflection) * MaterialReflection * fresnel);
+
+	return float4(saturate(totalLight), 1.0);
 }
 
 technique BasicShading
