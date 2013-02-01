@@ -6,13 +6,16 @@ using Microsoft.Xna.Framework;
 
 namespace datx02_rally
 {
-    class Car
+    class Car : ITargetNode
     {
         public Model Model { get; private set; }
         public float Rotation { get; private set; }
         public Vector3 Position { get; private set; }
         private float wheelRadius;
         public float WheelRotationX { get; private set; }
+
+        public Matrix TranslationMatrix { get { return Matrix.CreateTranslation(Position); } }
+        public Matrix RotationMatrix { get { return Matrix.CreateRotationY(Rotation); } }
 
         /// <summary>
         /// This is set from outside to make the car go forward or backward.

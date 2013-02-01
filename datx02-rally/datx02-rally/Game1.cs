@@ -9,7 +9,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using BulletSharp;
-using Test;
 
 namespace datx02_rally
 {
@@ -74,9 +73,15 @@ namespace datx02_rally
         {
             // TODO: Add your initialization logic here
 
-            var debugCamera = new DebugCameraComponent(this);
+            // Components
+
+            var debugCamera = new CameraComponent(this);
             Components.Add(debugCamera);
-            Services.AddService(typeof(DebugCameraComponent), debugCamera);
+            Services.AddService(typeof(CameraComponent), debugCamera);
+
+            var previousKeyboardStateComponent = new PreviousKeyboardState(this);
+            Components.Add(previousKeyboardStateComponent);
+            Services.AddService(typeof(PreviousKeyboardState), previousKeyboardStateComponent);
 
             base.Initialize();
         }
@@ -90,7 +95,6 @@ namespace datx02_rally
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            camera = new ThirdPersonCamera();
             screenCenter = new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height) / 2f;
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
                 GraphicsDevice.Viewport.AspectRatio, .1f, 10000f);
@@ -164,6 +168,10 @@ namespace datx02_rally
             }
 
             #endregion
+
+            camera = new ThirdPersonCamera(car);
+            this.GetService<CameraComponent>().AddCamera(camera);
+            this.GetService<CameraComponent>().AddCamera(new DebugCamera());
         }
 
         /// <summary>
@@ -218,20 +226,23 @@ namespace datx02_rally
 
             #region Car control
 
-            //Accelerate
-            car.Speed = Math.Min(car.Speed + car.Acceleration *
-                ((Keyboard.GetState().IsKeyDown(Keys.W) ? 1 : 0) +
-                GamePad.GetState(PlayerIndex.One).Triggers.Right -
-                (Keyboard.GetState().IsKeyDown(Keys.S) ? 1 : 0) -
-                GamePad.GetState(PlayerIndex.One).Triggers.Left), car.MaxSpeed);
-            // Turn Wheel
-            car.WheelRotationY += (Keyboard.GetState().IsKeyDown(Keys.A) ? car.TurnSpeed : 0) -
-                (Keyboard.GetState().IsKeyDown(Keys.D) ? car.TurnSpeed : 0);
-            car.WheelRotationY = MathHelper.Clamp(car.WheelRotationY, -car.MaxWheelTurn, car.MaxWheelTurn);
-            if (Math.Abs(car.WheelRotationY) > MathHelper.Pi / 720)
-                car.WheelRotationY *= .9f;
-            else
-                car.WheelRotationY = 0;
+            if (this.GetService<CameraComponent>().CurrentCamera is ThirdPersonCamera)
+            {
+                //Accelerate
+                car.Speed = Math.Min(car.Speed + car.Acceleration *
+                    ((Keyboard.GetState().IsKeyDown(Keys.W) ? 1 : 0) +
+                    GamePad.GetState(PlayerIndex.One).Triggers.Right -
+                    (Keyboard.GetState().IsKeyDown(Keys.S) ? 1 : 0) -
+                    GamePad.GetState(PlayerIndex.One).Triggers.Left), car.MaxSpeed);
+                // Turn Wheel
+                car.WheelRotationY += (Keyboard.GetState().IsKeyDown(Keys.A) ? car.TurnSpeed : 0) -
+                    (Keyboard.GetState().IsKeyDown(Keys.D) ? car.TurnSpeed : 0);
+                car.WheelRotationY = MathHelper.Clamp(car.WheelRotationY, -car.MaxWheelTurn, car.MaxWheelTurn);
+                if (Math.Abs(car.WheelRotationY) > MathHelper.Pi / 720)
+                    car.WheelRotationY *= .9f;
+                else
+                    car.WheelRotationY = 0;
+            }
 
             //Apply changes to car
             car.Update();
@@ -243,11 +254,7 @@ namespace datx02_rally
                 car.Speed *= friction;
 
             #endregion
-
-            //camera.Update(Keyboard.GetState(), Mouse.GetState(), screenCenter);
-
-            camera.Position = car.Position;
-
+            
             base.Update(gameTime);
         }
 
@@ -262,7 +269,7 @@ namespace datx02_rally
             Matrix[] transforms = new Matrix[model.Bones.Count];
             model.CopyAbsoluteBoneTransformsTo(transforms);
 
-            Matrix view = this.GetService<DebugCameraComponent>().View;
+            Matrix view = this.GetService<CameraComponent>().View;
 
             // Model specific parameters
             //effect.Parameters["MaterialAmbient"].SetValue(Color.White.ToVector3() * 0.5f);
@@ -317,7 +324,7 @@ namespace datx02_rally
                     effect.Parameters["MaterialShininess"].SetValue(10.0f);
 
                     Matrix world = Matrix.Identity;
-                    // If this mesh is a wheel, apply rotation
+                    // Wheel transformation
                     if (mesh.Name.StartsWith("wheel"))
                     {
                         world *= Matrix.CreateRotationX(car.WheelRotationX);
@@ -325,10 +332,10 @@ namespace datx02_rally
                         if (mesh.Name.EndsWith("001") || mesh.Name.EndsWith("002"))
                             world *= Matrix.CreateRotationY(car.WheelRotationY);
                     }
-                    // Local morldspace, due to bad .X-file/exporter
+                    // Local modelspace, due to bad .X-file/exporter
                     world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
-                    world *= Matrix.CreateRotationY(car.Rotation) *
-                        Matrix.CreateTranslation(car.Position);
+
+                    world *= car.RotationMatrix * car.TranslationMatrix;
 
                     effect.Parameters["World"].SetValue(world);
 
