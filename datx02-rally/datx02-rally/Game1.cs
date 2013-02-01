@@ -132,7 +132,7 @@ namespace datx02_rally
                     part.Effect = effect.Clone();
                     part.Effect.Parameters["MaterialAmbient"].SetValue(basicEffect.DiffuseColor * 0.5f);
                     part.Effect.Parameters["MaterialDiffuse"].SetValue(basicEffect.DiffuseColor);
-                    part.Effect.Parameters["MaterialSpecular"].SetValue(basicEffect.DiffuseColor);//basicEffect.SpecularColor
+                    part.Effect.Parameters["MaterialSpecular"].SetValue(basicEffect.DiffuseColor * 0.3f);//basicEffect.SpecularColor
                 }
             }
 
@@ -314,8 +314,8 @@ namespace datx02_rally
                 foreach (Effect effect in mesh.Effects) // 5 effects for main, 1 for each wheel
                 {
                     EffectParameterCollection parameters = effect.Parameters;
-                    parameters["MaterialShininess"].SetValue(25.0f);
-                    parameters["MaterialReflection"].SetValue(0.4f);
+                    parameters["MaterialShininess"].SetValue(10.0f);
+                    parameters["MaterialReflection"].SetValue(0.3f);
                     parameters["EnvironmentMap"].SetValue(cubeMap);
 
                     Matrix world = Matrix.Identity;
