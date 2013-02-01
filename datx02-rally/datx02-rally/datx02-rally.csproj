@@ -113,12 +113,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Camera.cs" />
-    <Compile Include="Car.cs" />
     <Compile Include="DirectionalLight.cs" />
-    <Compile Include="FirstPersonCamera.cs" />
     <Compile Include="PointLight.cs" />
-    <Compile Include="PlaneModel.cs" />
     <Compile Include="Cameras\Camera.cs" />
     <Compile Include="Cameras\DebugCamera.cs" />
     <Compile Include="Components\CameraComponent.cs">

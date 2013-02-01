@@ -325,11 +325,8 @@ namespace datx02_rally
                         if (mesh.Name.EndsWith("001") || mesh.Name.EndsWith("002"))
                             world *= Matrix.CreateRotationY(car.WheelRotationY);
                     }
-<<<<<<< HEAD
-                    // Local worldspace, due to bad .X-file/exporter
-=======
+
                     // Local modelspace, due to bad .X-file/exporter
->>>>>>> origin/camera-component
                     world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
 
                     world *= car.RotationMatrix * car.TranslationMatrix;
@@ -341,7 +338,7 @@ namespace datx02_rally
 
                     parameters["View"].SetValue(view);
                     parameters["Projection"].SetValue(projection);
-                    parameters["EyePosition"].SetValue(camera.Position);
+                    parameters["EyePosition"].SetValue(view.Translation);
 
                     Vector3[] positions = new Vector3[pointLights.Count];
                     Vector3[] diffuses = new Vector3[pointLights.Count];
