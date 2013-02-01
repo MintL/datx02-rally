@@ -76,6 +76,11 @@ namespace datx02_rally
         protected override void Initialize()
         {
             pointLights = new List<PointLight>();
+
+            var debugCamera = new DebugCameraComponent(this);
+            Components.Add(debugCamera);
+            Services.AddService(typeof(DebugCameraComponent), debugCamera);
+
             base.Initialize();
         }
 
@@ -266,7 +271,7 @@ namespace datx02_rally
 
             #endregion
 
-            camera.Update(Keyboard.GetState(), Mouse.GetState(), screenCenter);
+            //camera.Update(Keyboard.GetState(), Mouse.GetState(), screenCenter);
 
             camera.Position = car.Position;
 
@@ -284,7 +289,7 @@ namespace datx02_rally
             Matrix[] transforms = new Matrix[model.Bones.Count];
             model.CopyAbsoluteBoneTransformsTo(transforms);
 
-            Matrix view = camera.View;
+            Matrix view = this.GetService<DebugCameraComponent>().View;
 
             foreach (PointLight light in pointLights)
             {
