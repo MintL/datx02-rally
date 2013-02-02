@@ -35,7 +35,7 @@ namespace datx02_rally
                 //cameraTranslation = Matrix.Lerp(cameraTranslation, TargetNode.TranslationMatrix, 1);
                 cameraTranslation = TargetNode.TranslationMatrix;
                 return Matrix.CreateLookAt(Vector3.Transform(Zoom * offset, extraOffset * cameraRotation * cameraTranslation),
-                    Vector3.Transform(Vector3.Zero, cameraRotation * cameraTranslation), Vector3.Up);
+                    Vector3.Transform(Vector3.Zero, cameraRotation * cameraTranslation + Matrix.CreateTranslation(new Vector3(0.0f, 70.0f, 0.0f))), Vector3.Up);
             }
         }
 
@@ -44,7 +44,7 @@ namespace datx02_rally
         public ThirdPersonCamera(ITargetNode targetNode, InputComponent input)
         {
             this.TargetNode = targetNode;
-            Zoom = 250;
+            Zoom = 300;
             RotationSpeed = .05f;
             this.input = input;
         }
@@ -54,7 +54,6 @@ namespace datx02_rally
             // Get X relative to lookAt.
             Vector3 localX = Vector3.Cross(offset, Vector3.Up);
 
-            //Vector2 movement = RotationSpeed * new Vector2(K(Keys.Right) - K(Keys.Left), K(Keys.Up) - K(Keys.Down));
             Vector2 movement = RotationSpeed * new Vector2(input.GetState(Input.CameraX), input.GetState(Input.CameraY));
 
             extraOffset *= Matrix.CreateFromAxisAngle(localX, movement.Y) * Matrix.CreateRotationY(movement.X);
