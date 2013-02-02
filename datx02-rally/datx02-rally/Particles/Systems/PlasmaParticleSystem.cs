@@ -33,14 +33,15 @@ namespace datx02_rally
             settings.MinRotateSpeed = -1;
             settings.MaxRotateSpeed = 1;
 
-            settings.MinStartSize = 4;
-            settings.MaxStartSize = 7;
+            settings.MinStartSize = 20;
+            settings.MaxStartSize = 20;
 
-            settings.MinEndSize = 35;
-            settings.MaxEndSize = 140;
 
-            settings.MaxColor = Color.White;
-            settings.MinColor = Color.LightBlue;
+            settings.MinEndSize = 20;
+            settings.MaxEndSize = 20;
+
+            settings.MinColor = settings.MaxColor = Color.White;
+            //settings.MinColor = Color.LightBlue;
         }
     }
 }

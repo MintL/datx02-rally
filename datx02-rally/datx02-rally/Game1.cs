@@ -96,9 +96,9 @@ namespace datx02_rally
 
             // Particlesystems
 
-            smoke = new SmokePlumeParticleSystem(this, Content);
-            smoke.DrawOrder = 500;
-            Components.Add(smoke);
+            //smoke = new SmokePlumeParticleSystem(this, Content);
+            //smoke.DrawOrder = 500;
+            //Components.Add(smoke);
 
             plasmaSystem = new PlasmaParticleSystem(this, Content);
             Components.Add(plasmaSystem);
@@ -153,7 +153,7 @@ namespace datx02_rally
             }
 
             car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
-            particleEmitter = new ParticleEmitter(smoke, 200, car.Position);
+            //particleEmitter = new ParticleEmitter(smoke, 200, car.Position);
 
             plane = new PlaneModel(new Vector2(-10000), new Vector2(10000), 1, GraphicsDevice, null, projection, Matrix.Identity);
 
@@ -203,8 +203,8 @@ namespace datx02_rally
             #endregion
 
             camera = new ThirdPersonCamera(car);
+            this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100)));
             this.GetService<CameraComponent>().AddCamera(camera);
-            this.GetService<CameraComponent>().AddCamera(new DebugCamera());
         }
 
         /// <summary>
@@ -262,7 +262,12 @@ namespace datx02_rally
                 lightDistance += millis * 1.0f;
             }
 
-            plasmaSystem.AddParticle(200 * Vector3.Up, Vector3.Zero);
+            if (ts < TimeSpan.Zero)
+            {
+                ts = TimeSpan.FromSeconds(.2f);
+                plasmaSystem.AddParticle(200 * Vector3.Up, Vector3.Zero);
+            }
+            ts -= gameTime.ElapsedGameTime;
 
 
             /*lightRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
@@ -303,10 +308,12 @@ namespace datx02_rally
 
             #endregion
 
-            particleEmitter.Update(gameTime, car.Position + new Vector3(18,8,65));
+            //particleEmitter.Update(gameTime, car.Position + new Vector3(18,8,65));
 
             base.Update(gameTime);
         }
+
+        TimeSpan ts;
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -321,7 +328,7 @@ namespace datx02_rally
 
             Matrix view = this.GetService<CameraComponent>().View;
 
-            smoke.SetCamera(view, projection);
+            //smoke.SetCamera(view, projection);
             plasmaSystem.SetCamera(view, projection);
 
             foreach (PointLight light in pointLights)
