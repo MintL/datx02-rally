@@ -42,6 +42,8 @@ namespace datx02_rally
         ParticleSystem smoke;
         ParticleEmitter particleEmitter;
 
+        ParticleSystem plasmaSystem;
+
         PlaneModel plane;
         PlaneModel tree;
         List<Matrix> treeTransforms = new List<Matrix>();
@@ -97,6 +99,9 @@ namespace datx02_rally
             smoke = new SmokePlumeParticleSystem(this, Content);
             smoke.DrawOrder = 500;
             Components.Add(smoke);
+
+            plasmaSystem = new PlasmaParticleSystem(this, Content);
+            Components.Add(plasmaSystem);
 
             base.Initialize();
         }
@@ -257,6 +262,8 @@ namespace datx02_rally
                 lightDistance += millis * 1.0f;
             }
 
+            plasmaSystem.AddParticle(200 * Vector3.Up, Vector3.Zero);
+
 
             /*lightRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
 
@@ -315,6 +322,7 @@ namespace datx02_rally
             Matrix view = this.GetService<CameraComponent>().View;
 
             smoke.SetCamera(view, projection);
+            plasmaSystem.SetCamera(view, projection);
 
             foreach (PointLight light in pointLights)
             {

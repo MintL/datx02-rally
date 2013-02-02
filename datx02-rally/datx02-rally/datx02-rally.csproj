@@ -121,6 +121,7 @@
     <Compile Include="Particles\Systems\ExplosionParticleSystem.cs" />
     <Compile Include="Particles\Systems\ExplosionSmokeParticleSystem.cs" />
     <Compile Include="Particles\Systems\FireParticleSystem.cs" />
+    <Compile Include="Particles\Systems\PlasmaParticleSystem.cs" />
     <Compile Include="Particles\Systems\ProjectileTrailParticleSystem.cs" />
     <Compile Include="Particles\Systems\SmokePlumeParticleSystem.cs" />
     <Compile Include="PointLight.cs" />
