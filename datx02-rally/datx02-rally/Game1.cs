@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using BulletSharp;
+using Particle3DSample;
 
 namespace datx02_rally
 {
@@ -38,6 +39,8 @@ namespace datx02_rally
         Effect effect;
 
         Car car;
+        ParticleSystem smoke;
+        ParticleEmitter particleEmitter;
 
         PlaneModel plane;
         PlaneModel tree;
@@ -77,6 +80,8 @@ namespace datx02_rally
             pointLights = new List<PointLight>();
             // TODO: Add your initialization logic here
 
+            GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
             // Components
 
             var debugCamera = new CameraComponent(this);
@@ -86,6 +91,12 @@ namespace datx02_rally
             var previousKeyboardStateComponent = new PreviousKeyboardState(this);
             Components.Add(previousKeyboardStateComponent);
             Services.AddService(typeof(PreviousKeyboardState), previousKeyboardStateComponent);
+
+            // Particlesystems
+
+            smoke = new SmokePlumeParticleSystem(this, Content);
+            smoke.DrawOrder = 500;
+            Components.Add(smoke);
 
             base.Initialize();
         }
@@ -137,6 +148,8 @@ namespace datx02_rally
             }
 
             car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
+            particleEmitter = new ParticleEmitter(smoke, 200, car.Position);
+
             plane = new PlaneModel(new Vector2(-10000), new Vector2(10000), 1, GraphicsDevice, null, projection, Matrix.Identity);
 
             Vector2 treePlaneSizeStart = new Vector2(-50, -250),
@@ -282,7 +295,9 @@ namespace datx02_rally
                 car.Speed *= friction;
 
             #endregion
-            
+
+            particleEmitter.Update(gameTime, car.Position + new Vector3(18,8,65));
+
             base.Update(gameTime);
         }
 
@@ -298,6 +313,8 @@ namespace datx02_rally
             model.CopyAbsoluteBoneTransformsTo(transforms);
 
             Matrix view = this.GetService<CameraComponent>().View;
+
+            smoke.SetCamera(view, projection);
 
             foreach (PointLight light in pointLights)
             {
@@ -373,12 +390,11 @@ namespace datx02_rally
             #endregion
 
 
-            GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            foreach (var world in treeTransforms)
-            {
-                tree.World = world;
-                tree.Draw(view);
-            }
+            //foreach (var world in treeTransforms)
+            //{
+            //    tree.World = world;
+            //    tree.Draw(view);
+            //}
 
             base.Draw(gameTime);
         }
