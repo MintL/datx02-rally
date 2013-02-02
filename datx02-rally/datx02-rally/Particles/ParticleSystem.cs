@@ -437,6 +437,8 @@ namespace Particle3DSample
             }
 
             drawCounter++;
+
+            device.BlendState = BlendState.Opaque;
         }
 
 

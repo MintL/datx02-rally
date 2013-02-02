@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Particle3DSample;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace datx02_rally
 {
@@ -18,15 +19,15 @@ namespace datx02_rally
         {
             settings.TextureName = @"Particles/plasma";
 
-            settings.MaxParticles = 6000;
+            settings.MaxParticles = 600;
 
-            settings.Duration = TimeSpan.FromSeconds(2);
+            settings.Duration = TimeSpan.FromSeconds(5);
 
-            settings.MinHorizontalVelocity = 0;
-            settings.MaxHorizontalVelocity = 15;
+            settings.MinHorizontalVelocity = 5;
+            settings.MaxHorizontalVelocity = 10;
 
-            settings.MinVerticalVelocity = 10;
-            settings.MaxVerticalVelocity = 20;
+            settings.MinVerticalVelocity = 5;
+            settings.MaxVerticalVelocity = 15;
 
             settings.EndVelocity = 0.75f;
 
@@ -34,14 +35,14 @@ namespace datx02_rally
             settings.MaxRotateSpeed = 1;
 
             settings.MinStartSize = 20;
-            settings.MaxStartSize = 20;
-
+            settings.MaxStartSize = 30;
 
             settings.MinEndSize = 20;
-            settings.MaxEndSize = 20;
+            settings.MaxEndSize = 30;
 
-            settings.MinColor = settings.MaxColor = Color.White;
-            //settings.MinColor = Color.LightBlue;
+            settings.MaxColor = settings.MinColor = Color.Turquoise;
+
+            settings.BlendState = BlendState.Additive;
         }
     }
 }

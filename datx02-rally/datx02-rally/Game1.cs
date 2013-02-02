@@ -62,8 +62,8 @@ namespace datx02_rally
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            graphics.PreferredBackBufferWidth = 800;// 1920;
-            graphics.PreferredBackBufferHeight = 600; // 1080;
+            graphics.PreferredBackBufferWidth = 1366;
+            graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
             //graphics.ToggleFullScreen();
@@ -262,12 +262,7 @@ namespace datx02_rally
                 lightDistance += millis * 1.0f;
             }
 
-            if (ts < TimeSpan.Zero)
-            {
-                ts = TimeSpan.FromSeconds(.2f);
-                plasmaSystem.AddParticle(200 * Vector3.Up, Vector3.Zero);
-            }
-            ts -= gameTime.ElapsedGameTime;
+            plasmaSystem.AddParticle(new Vector3(200,50,-500), Vector3.Zero);
 
 
             /*lightRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
@@ -313,7 +308,6 @@ namespace datx02_rally
             base.Update(gameTime);
         }
 
-        TimeSpan ts;
 
         /// <summary>
         /// This is called when the game should draw itself.
