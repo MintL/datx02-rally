@@ -79,7 +79,12 @@ namespace datx02_rally
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
             // Components
-            var debugCamera = new CameraComponent(this);
+            var inputComponent = new InputComponent(this);
+            //inputComponent.CurrentController = Controller.GamePad;
+            Components.Add(inputComponent);
+            Services.AddService(typeof(InputComponent), inputComponent);
+            
+            var debugCamera = new CameraComponent(this, inputComponent);
             Components.Add(debugCamera);
             Services.AddService(typeof(CameraComponent), debugCamera);
 
@@ -87,10 +92,7 @@ namespace datx02_rally
             Components.Add(previousKeyboardStateComponent);
             Services.AddService(typeof(PreviousKeyboardState), previousKeyboardStateComponent);
 
-            var inputComponent = new InputComponent(this);
-            //inputComponent.CurrentController = Controller.GamePad;
-            Components.Add(inputComponent);
-            Services.AddService(typeof(InputComponent), inputComponent);
+            
 
             Console.WriteLine("isConnected " + GamePad.GetState(PlayerIndex.One).IsConnected);
 
@@ -190,9 +192,9 @@ namespace datx02_rally
 
             #endregion
 
-            camera = new ThirdPersonCamera(car);
+            camera = new ThirdPersonCamera(car, this.GetService<InputComponent>());
             this.GetService<CameraComponent>().AddCamera(camera);
-            this.GetService<CameraComponent>().AddCamera(new DebugCamera());
+            this.GetService<CameraComponent>().AddCamera(new DebugCamera(this.GetService<InputComponent>()));
         }
 
         /// <summary>

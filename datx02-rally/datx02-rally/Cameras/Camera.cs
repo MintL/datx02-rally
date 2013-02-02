@@ -13,6 +13,8 @@ namespace datx02_rally
 
         public abstract void Update(GameTime gameTime);
 
+        protected InputComponent input;
+
         protected int K(Keys k)
         {
             return Keyboard.GetState().IsKeyDown(k) ? 1 : 0;

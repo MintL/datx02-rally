@@ -41,11 +41,12 @@ namespace datx02_rally
 
         public ITargetNode TargetNode { get; set; }
 
-        public ThirdPersonCamera(ITargetNode targetNode)
+        public ThirdPersonCamera(ITargetNode targetNode, InputComponent input)
         {
             this.TargetNode = targetNode;
             Zoom = 250;
             RotationSpeed = .05f;
+            this.input = input;
         }
 
         public override void Update(GameTime gameTime)
@@ -53,9 +54,10 @@ namespace datx02_rally
             // Get X relative to lookAt.
             Vector3 localX = Vector3.Cross(offset, Vector3.Up);
 
-            Vector2 input = RotationSpeed * new Vector2(K(Keys.Right) - K(Keys.Left), K(Keys.Up) - K(Keys.Down));
+            //Vector2 movement = RotationSpeed * new Vector2(K(Keys.Right) - K(Keys.Left), K(Keys.Up) - K(Keys.Down));
+            Vector2 movement = RotationSpeed * new Vector2(input.GetState(Input.CameraX), input.GetState(Input.CameraY));
 
-            extraOffset *= Matrix.CreateFromAxisAngle(localX, input.Y) * Matrix.CreateRotationY(input.X);
+            extraOffset *= Matrix.CreateFromAxisAngle(localX, movement.Y) * Matrix.CreateRotationY(movement.X);
             extraOffset = Matrix.Lerp(extraOffset, Matrix.Identity, .1f);
         }
 

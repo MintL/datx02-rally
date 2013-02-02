@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace datx02_rally
 {
-    public enum Input { Thrust, Brake, Steer, ChangeController, Exit };
+    public enum Input { Thrust, Brake, Steer, ChangeController, ChangeCamera, CameraX, CameraY, Exit };
     public enum Controller { Keyboard, GamePad };
 
     class InputComponent : GameComponent
@@ -37,6 +37,12 @@ namespace datx02_rally
                     case Input.Steer:
                         return (keyboard.IsKeyDown(Keys.A) ? 1.0f : 0.0f) -
                             (keyboard.IsKeyDown(Keys.D) ? 1.0f : 0.0f);
+                    case Input.CameraX:
+                        return (keyboard.IsKeyDown(Keys.Right) ? 1.0f : 0.0f) -
+                            (keyboard.IsKeyDown(Keys.Left) ? 1.0f : 0.0f);
+                    case Input.CameraY:
+                        return (keyboard.IsKeyDown(Keys.Up) ? 1.0f : 0.0f) -
+                            (keyboard.IsKeyDown(Keys.Down) ? 1.0f : 0.0f);
                 }
             }
             else if (CurrentController == Controller.GamePad)
@@ -49,6 +55,10 @@ namespace datx02_rally
                         return gamePad.Triggers.Left;
                     case Input.Steer:
                         return -gamePad.ThumbSticks.Left.X;
+                    case Input.CameraX:
+                        return -gamePad.ThumbSticks.Right.X;
+                    case Input.CameraY:
+                        return -gamePad.ThumbSticks.Right.Y;
                 }
             }
             return 0.0f;
@@ -62,6 +72,8 @@ namespace datx02_rally
                 {
                     case Input.ChangeController:
                         return previousKeyboard.IsKeyUp(Keys.F1) && keyboard.IsKeyDown(Keys.F1);
+                    case Input.ChangeCamera:
+                        return previousKeyboard.IsKeyUp(Keys.C) && keyboard.IsKeyDown(Keys.C);
                     case Input.Exit:
                         return keyboard.IsKeyDown(Keys.Escape);
                 }
@@ -71,9 +83,11 @@ namespace datx02_rally
                 switch (input)
                 {
                     case Input.ChangeController:
-                        return previousGamePad.IsButtonUp(Buttons.Y) && gamePad.IsButtonDown(Buttons.Y);
+                        return previousGamePad.IsButtonUp(Buttons.Start) && gamePad.IsButtonDown(Buttons.Start);
+                    case Input.ChangeCamera:
+                        return previousGamePad.IsButtonUp(Buttons.RightStick) && gamePad.IsButtonDown(Buttons.RightStick);
                     case Input.Exit:
-                        return gamePad.IsButtonDown(Buttons.Start);
+                        return gamePad.IsButtonDown(Buttons.Back);
                 }
             }
             return false;

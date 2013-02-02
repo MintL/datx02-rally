@@ -11,13 +11,15 @@ namespace datx02_rally
     {
         private List<Camera> cameras = new List<Camera>();
         private int currentCamera;
+        private InputComponent input;
 
         public Camera CurrentCamera { get { return cameras[currentCamera]; } }
 
         public Matrix View { get { return cameras[currentCamera].View; } }
 
-        public CameraComponent(Game1 game) : base(game)
+        public CameraComponent(Game1 game, InputComponent input) : base(game)
         {
+            this.input = input;
         }
 
         public void AddCamera(Camera camera)
@@ -27,7 +29,7 @@ namespace datx02_rally
 
         public override void Update(GameTime gameTime)
         {
-            if (Keyboard.GetState().IsKeyDown(Keys.C) && Game.GetService<PreviousKeyboardState>().State.IsKeyUp(Keys.C))
+            if (input.GetPressed(Input.ChangeCamera))
                 currentCamera++;
             if (currentCamera == cameras.Count)
                 currentCamera = 0;
