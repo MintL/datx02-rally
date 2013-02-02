@@ -87,6 +87,13 @@ namespace datx02_rally
             Components.Add(previousKeyboardStateComponent);
             Services.AddService(typeof(PreviousKeyboardState), previousKeyboardStateComponent);
 
+            var inputComponent = new InputComponent(this);
+            //inputComponent.CurrentController = Controller.GamePad;
+            Components.Add(inputComponent);
+            Services.AddService(typeof(InputComponent), inputComponent);
+
+            Console.WriteLine("isConnected " + GamePad.GetState(PlayerIndex.One).IsConnected);
+
             base.Initialize();
         }
 
@@ -116,7 +123,6 @@ namespace datx02_rally
                     MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
                     MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
                     MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()));
-                Console.WriteLine(color);
                 pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
             }
             directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.6f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.3f);
@@ -219,9 +225,25 @@ namespace datx02_rally
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+            
+            InputComponent input = this.GetService<InputComponent>();
+
+            if (input.GetPressed(Input.ChangeController))
+            {
+                if (input.CurrentController == Controller.Keyboard)
+                {
+                    input.CurrentController = Controller.GamePad;
+                    Console.WriteLine("CurrentController equals GamePad");
+                }
+                else
+                {
+                    input.CurrentController = Controller.Keyboard;
+                    Console.WriteLine("CurrentController equals Keyboard");
+                }
+            }
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-                Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (input.GetPressed(Input.Exit))
                 this.Exit();
 
             KeyboardState keyboard = Keyboard.GetState();
@@ -252,38 +274,13 @@ namespace datx02_rally
                 Matrix.CreateTranslation(new Vector3(0.0f, 0.0f, lightDistance)) * Matrix.CreateRotationY(lightRotation));
             */
 
-            #region Car control
-
-            if (this.GetService<CameraComponent>().CurrentCamera is ThirdPersonCamera)
-            {
-                //Accelerate
-                car.Speed = Math.Min(car.Speed + car.Acceleration *
-                    ((Keyboard.GetState().IsKeyDown(Keys.W) ? 1 : 0) +
-                    GamePad.GetState(PlayerIndex.One).Triggers.Right -
-                    (Keyboard.GetState().IsKeyDown(Keys.S) ? 1 : 0) -
-                    GamePad.GetState(PlayerIndex.One).Triggers.Left), car.MaxSpeed);
-                // Turn Wheel
-                car.WheelRotationY += (Keyboard.GetState().IsKeyDown(Keys.A) ? car.TurnSpeed : 0) -
-                    (Keyboard.GetState().IsKeyDown(Keys.D) ? car.TurnSpeed : 0);
-                car.WheelRotationY = MathHelper.Clamp(car.WheelRotationY, -car.MaxWheelTurn, car.MaxWheelTurn);
-                if (Math.Abs(car.WheelRotationY) > MathHelper.Pi / 720)
-                    car.WheelRotationY *= .9f;
-                else
-                    car.WheelRotationY = 0;
-            }
-
             //Apply changes to car
-            car.Update();
+            car.Update(input, this.GetService<CameraComponent>().CurrentCamera);
 
-            //Friktion if is not driving
-            float friction = .97f; // 0.995f;
-            if (!Keyboard.GetState().IsKeyDown(Keys.W) ||
-                !GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.RightTrigger) && GamePad.GetState(PlayerIndex.One).IsConnected)
-                car.Speed *= friction;
 
-            #endregion
+            input.UpdatePreviousState();
             
-            base.Update(gameTime);
+            
         }
 
         /// <summary>
