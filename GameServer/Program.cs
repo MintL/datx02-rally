@@ -9,8 +9,8 @@ namespace GameServer
     {
         static void Main(string[] args)
         {
-            //Basic command line argument parsing
-            
+            // TODO: parse args from command line
+            new Server();
         }
 
     }
