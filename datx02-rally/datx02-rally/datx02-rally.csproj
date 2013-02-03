@@ -63,11 +63,12 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="BulletSharp">
-      <HintPath>..\..\BulletSharp.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Xna.Framework.Content.Pipeline, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Program Files (x86)\Microsoft XNA\XNA Game Studio\v4.0\References\Windows\x86\Microsoft.Xna.Framework.Content.Pipeline.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86">
       <Private>False</Private>
@@ -117,6 +118,7 @@
     <Compile Include="Car.cs" />
     <Compile Include="FirstPersonCamera.cs" />
     <Compile Include="MapGeneration\HeightMap.cs" />
+    <Compile Include="MapGeneration\HeightMapInfo.cs" />
     <Compile Include="MapGeneration\PerlinGenerator.cs" />
     <Compile Include="PointLight.cs" />
     <Compile Include="PlaneModel.cs" />
@@ -133,6 +135,10 @@
     <ProjectReference Include="..\datx02-rallyContent\datx02-rallyContent.contentproj">
       <Name>datx02_rallyContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
+    </ProjectReference>
+    <ProjectReference Include="..\HeightmapProcessor\HeightmapProcessor.csproj">
+      <Project>{C77F18AB-7EC8-4F87-A88F-3506CABE701A}</Project>
+      <Name>HeightmapProcessor</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

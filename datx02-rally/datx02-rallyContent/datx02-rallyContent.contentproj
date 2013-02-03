@@ -121,12 +121,38 @@
       <Name>light</Name>
       <Importer>XImporter</Importer>
       <Processor>ModelProcessor</Processor>
-	</Compile>
+    </Compile>
     <Compile Include="SkyBoxes\PurpleSky\skybox_back6_2.png">
       <Name>skybox_back6_2</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Compile Include="checker.bmp">
+      <Name>checker</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="heightmap.bmp">
+      <Name>heightmap</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TerrainProcessor</Processor>
+    </Compile>
+    <Compile Include="lunkmap.bmp">
+      <Name>lunkmap</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TerrainProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\HeightmapProcessor\HeightmapProcessor.csproj">
+      <Project>{C77F18AB-7EC8-4F87-A88F-3506CABE701A}</Project>
+      <Name>HeightmapProcessor</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--  To modify your build process, add your task inside one of the targets below and uncomment it. 
