@@ -35,7 +35,7 @@ namespace Particle3DSample
 
         // Custom effect for drawing particles. This computes the particle
         // animation entirely in the vertex shader: no per-particle CPU work required!
-        Effect particleEffect;
+        public Effect particleEffect;
 
 
         // Shortcuts for accessing frequently changed effect parameters.

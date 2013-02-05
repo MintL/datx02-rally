@@ -19,9 +19,9 @@ namespace datx02_rally
         {
             settings.TextureName = @"Particles/plasma";
 
-            settings.MaxParticles = 600;
+            settings.MaxParticles = 15000;
 
-            settings.Duration = TimeSpan.FromSeconds(5);
+            settings.Duration = TimeSpan.FromSeconds(1);
 
             settings.MinHorizontalVelocity = 5;
             settings.MaxHorizontalVelocity = 10;
@@ -40,9 +40,19 @@ namespace datx02_rally
             settings.MinEndSize = 20;
             settings.MaxEndSize = 30;
 
-            settings.MaxColor = settings.MinColor = Color.Turquoise;
+            settings.MinColor = settings.MaxColor = Color.Cyan;
 
             settings.BlendState = BlendState.Additive;
+
+            this.VisibleChanged += delegate
+            {
+                Console.WriteLine("Vis: " + this.Visible);
+            };
+
+            this.EnabledChanged += delegate
+            {
+                Console.WriteLine("Enabled: " + this.Enabled);
+            };
         }
     }
 }
