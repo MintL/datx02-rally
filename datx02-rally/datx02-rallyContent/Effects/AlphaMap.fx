@@ -1,6 +1,11 @@
 float4x4 World;
 float4x4 View;
 float4x4 Projection;
+float4x4 NormalMatrix;
+
+float3 DirectionalDirection;
+float3 DirectionalAmbient;
+float3 DirectionalDiffuse;
 
 texture ColorMap;
 sampler ColorMapSampler = sampler_state
@@ -28,6 +33,7 @@ struct VertexShaderInput
 {
     float4 Position : POSITION0;
 	float2 Texture : TEXCOORD;
+	float3 Normal : NORMAL;
 
 };
 
@@ -35,6 +41,7 @@ struct VertexShaderOutput
 {
     float4 Position : POSITION0;
 	float2 Texture : TEXCOORD0;
+	float3 Normal : TEXCOORD1;
 
 };
 
@@ -47,19 +54,25 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     output.Position = mul(viewPosition, Projection);
 
     output.Texture = input.Texture;
+	output.Normal = mul(input.Normal, NormalMatrix);
 
     return output;
 }
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-	float4 Color = tex2D(ColorMapSampler, input.Texture);	
+	float4 totalLight = float4(DirectionalAmbient, 1.0);
+	totalLight.a = 1 - tex2D(AlphaMapSampler, input.Texture).r;
+	if (totalLight.a < 0.01) discard;
 
-	Color.a = 1 - tex2D(AlphaMapSampler, input.Texture).r;
-	Color.rgb = Color.rgb * Color.a;
-	if (Color.a < 0.01) discard;
+	float3 normal = normalize(input.Normal);
+	float4 color = tex2D(ColorMapSampler, input.Texture);	
+	float3 directionToLight = -normalize(DirectionalDirection);
+	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
+
+	totalLight.rgb = selfShadow * (DirectionalDiffuse * color * saturate(dot(normal, directionToLight)));
 	
-	return Color;
+	return totalLight;
 }
 
 technique Technique1

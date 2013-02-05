@@ -373,11 +373,19 @@ namespace datx02_rally
             {
                 foreach (Effect effect in mesh.Effects)
                 {
-                    effect.Parameters["World"].SetValue(transforms[mesh.ParentBone.Index] * 
+                    Matrix world = transforms[mesh.ParentBone.Index] * 
                         Matrix.CreateTranslation(position) *
-                        Matrix.CreateRotationY(rotation));
+                        Matrix.CreateRotationY(rotation);
+                    Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(world));
+
+                    effect.Parameters["NormalMatrix"].SetValue(normalMatrix);
+                    effect.Parameters["World"].SetValue(world);
                     effect.Parameters["View"].SetValue(view);
                     effect.Parameters["Projection"].SetValue(projection);
+
+                    effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
+                    effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
+                    effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
                 }
                 mesh.Draw();
             }
