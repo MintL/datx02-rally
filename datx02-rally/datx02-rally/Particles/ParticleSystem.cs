@@ -369,6 +369,7 @@ namespace Particle3DSample
         public override void Draw(GameTime gameTime)
         {
             GraphicsDevice device = GraphicsDevice;
+            BlendState currentBlendState = device.BlendState;
 
             // Restore the vertex buffer contents if the graphics device was lost.
             if (vertexBuffer.IsContentLost)
@@ -438,7 +439,8 @@ namespace Particle3DSample
 
             drawCounter++;
 
-            device.BlendState = BlendState.Opaque;
+            // Reset to draw with current bglendstate
+            device.BlendState = currentBlendState;
         }
 
 
