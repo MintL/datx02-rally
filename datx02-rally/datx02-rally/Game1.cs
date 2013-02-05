@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using BulletSharp;
+using Particle3DSample;
 
 namespace datx02_rally
 {
@@ -37,6 +38,10 @@ namespace datx02_rally
         Effect effect;
 
         Car car;
+        ParticleSystem smoke;
+        ParticleEmitter particleEmitter;
+
+        ParticleSystem plasmaSystem;
 
         PlaneModel plane;
         PlaneModel tree;
@@ -57,8 +62,8 @@ namespace datx02_rally
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            graphics.PreferredBackBufferWidth = 800;// 1920;
-            graphics.PreferredBackBufferHeight = 600; // 1080;
+            graphics.PreferredBackBufferWidth = 1366;
+            graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
             //graphics.ToggleFullScreen();
@@ -86,6 +91,15 @@ namespace datx02_rally
             var previousKeyboardStateComponent = new PreviousKeyboardState(this);
             Components.Add(previousKeyboardStateComponent);
             Services.AddService(typeof(PreviousKeyboardState), previousKeyboardStateComponent);
+
+            // Particlesystems
+
+            //smoke = new SmokePlumeParticleSystem(this, Content);
+            //smoke.DrawOrder = 500;
+            //Components.Add(smoke);
+
+            plasmaSystem = new PlasmaParticleSystem(this, Content);
+            Components.Add(plasmaSystem);
 
             base.Initialize();
         }
@@ -137,6 +151,8 @@ namespace datx02_rally
             }
 
             car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
+            //particleEmitter = new ParticleEmitter(smoke, 200, car.Position);
+
             plane = new PlaneModel(new Vector2(-10000), new Vector2(10000), 1, GraphicsDevice, null, projection, Matrix.Identity);
 
             Vector2 treePlaneSizeStart = new Vector2(-50, -250),
@@ -185,8 +201,8 @@ namespace datx02_rally
             #endregion
 
             camera = new ThirdPersonCamera(car);
+            this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100)));
             this.GetService<CameraComponent>().AddCamera(camera);
-            this.GetService<CameraComponent>().AddCamera(new DebugCamera());
         }
 
         /// <summary>
@@ -244,6 +260,8 @@ namespace datx02_rally
                 lightDistance += millis * 1.0f;
             }
 
+            plasmaSystem.AddParticle(new Vector3(200,50,-500), Vector3.Zero);
+
 
             /*lightRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
 
@@ -282,9 +300,12 @@ namespace datx02_rally
                 car.Speed *= friction;
 
             #endregion
-            
+
+            //particleEmitter.Update(gameTime, car.Position + new Vector3(18,8,65));
+
             base.Update(gameTime);
         }
+
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -298,6 +319,9 @@ namespace datx02_rally
             model.CopyAbsoluteBoneTransformsTo(transforms);
 
             Matrix view = this.GetService<CameraComponent>().View;
+
+            //smoke.SetCamera(view, projection);
+            plasmaSystem.SetCamera(view, projection);
 
             foreach (PointLight light in pointLights)
             {
@@ -375,8 +399,6 @@ namespace datx02_rally
 
             #endregion
 
-
-            
             foreach (var world in treeTransforms)
             {
                 tree.World = world;

@@ -114,6 +114,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DirectionalLight.cs" />
+    <Compile Include="Particles\ParticleEmitter.cs" />
+    <Compile Include="Particles\ParticleSettings.cs" />
+    <Compile Include="Particles\ParticleSystem.cs" />
+    <Compile Include="Particles\ParticleVertex.cs" />
+    <Compile Include="Particles\Systems\ExplosionParticleSystem.cs" />
+    <Compile Include="Particles\Systems\ExplosionSmokeParticleSystem.cs" />
+    <Compile Include="Particles\Systems\FireParticleSystem.cs" />
+    <Compile Include="Particles\Systems\PlasmaParticleSystem.cs" />
+    <Compile Include="Particles\Systems\ProjectileTrailParticleSystem.cs" />
+    <Compile Include="Particles\Systems\SmokePlumeParticleSystem.cs" />
     <Compile Include="PointLight.cs" />
     <Compile Include="Cameras\Camera.cs" />
     <Compile Include="Cameras\DebugCamera.cs" />

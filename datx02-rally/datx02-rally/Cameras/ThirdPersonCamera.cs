@@ -35,7 +35,7 @@ namespace datx02_rally
                 //cameraTranslation = Matrix.Lerp(cameraTranslation, TargetNode.TranslationMatrix, 1);
                 cameraTranslation = TargetNode.TranslationMatrix;
                 return Matrix.CreateLookAt(Vector3.Transform(Zoom * offset, extraOffset * cameraRotation * cameraTranslation),
-                    Vector3.Transform(Vector3.Zero, cameraRotation * cameraTranslation), Vector3.Up);
+                    Vector3.Transform(50 * Vector3.Up, cameraRotation * cameraTranslation), Vector3.Up);
             }
         }
 
