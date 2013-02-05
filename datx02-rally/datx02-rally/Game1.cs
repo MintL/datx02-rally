@@ -100,9 +100,8 @@ namespace datx02_rally
 
             // Particlesystems
 
-            //smoke = new SmokePlumeParticleSystem(this, Content);
-            //smoke.DrawOrder = 500;
-            //Components.Add(smoke);
+            smoke = new SmokePlumeParticleSystem(this, Content);
+            Components.Add(smoke);
 
             plasmaSystem = new PlasmaParticleSystem(this, Content);
             Components.Add(plasmaSystem);
@@ -157,7 +156,7 @@ namespace datx02_rally
             }
 
             car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
-            //particleEmitter = new ParticleEmitter(smoke, 200, car.Position);
+            particleEmitter = new ParticleEmitter(plasmaSystem, 60, car.Position);
 
             plane = new PlaneModel(new Vector2(-10000), new Vector2(10000), 1, GraphicsDevice, null, projection, Matrix.Identity);
 
@@ -289,7 +288,16 @@ namespace datx02_rally
                 lightDistance += millis * 1.0f;
             }
 
-            plasmaSystem.AddParticle(new Vector3(200,50,-500), Vector3.Zero);
+            Vector3 radius = 100 * Vector3.UnitX;
+            for (int z = 0; z < 10000; z += 1000)
+            {
+                float next = (float)random.NextDouble();
+                plasmaSystem.AddParticle(Vector3.Transform(radius + Vector3.UnitZ * next * -10000,
+                    Matrix.CreateRotationZ(MathHelper.TwoPi * 20 * next)), Vector3.Zero);
+            }
+            
+
+            
 
             //Console.WriteLine(1 - Math.Pow(lightDistance / 500.0f, 2));
 
@@ -331,11 +339,12 @@ namespace datx02_rally
 
             #endregion
 
-            //particleEmitter.Update(gameTime, car.Position + new Vector3(18,8,65));
+            particleEmitter.Update(gameTime, car.Position);
 
             base.Update(gameTime);
         }
 
+        Vector3 velo;
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -437,6 +446,8 @@ namespace datx02_rally
 
             #region SkySphere
 
+            skySphereEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
+
             skySphereEffect.Parameters["View"].SetValue(view);
             skySphereEffect.Parameters["Projection"].SetValue(projection);
             foreach (var mesh in skySphereModel.Meshes)
@@ -446,11 +457,11 @@ namespace datx02_rally
 
             #endregion
 
-            foreach (var world in treeTransforms)
-            {
-                tree.World = world;
-                tree.Draw(view);
-            }
+            //foreach (var world in treeTransforms)
+            //{
+            //    tree.World = world;
+            //    tree.Draw(view);
+            //}
 
             base.Draw(gameTime);
         }

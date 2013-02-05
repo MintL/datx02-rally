@@ -10,7 +10,7 @@ namespace datx02_rally
     {
         public Model Model { get; private set; }
         public float Rotation { get; private set; }
-        public Vector3 Position { get; private set; }
+        public Vector3 Position { get; set; }
         private float wheelRadius;
         public float WheelRotationX { get; private set; }
 
