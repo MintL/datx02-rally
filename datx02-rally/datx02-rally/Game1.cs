@@ -8,7 +8,6 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-using BulletSharp;
 using Particle3DSample;
 
 namespace datx02_rally
@@ -25,7 +24,14 @@ namespace datx02_rally
         Model lightModel;
         Vector3 modelPosition = Vector3.Zero;
         float modelRotation = 0.0f;
+
         float lightDistance = 700.0f;
+        float lightRotation;
+        
+        /*
+        float[,] heightMap;
+        int mapSize;*/
+        Model terrain;
 
         ThirdPersonCamera camera;
         Vector2 screenCenter;
@@ -155,6 +161,28 @@ namespace datx02_rally
 
             plane = new PlaneModel(new Vector2(-10000), new Vector2(10000), 1, GraphicsDevice, null, projection, Matrix.Identity);
 
+            #region MapGeneration
+            /*
+
+            MapGeneration.HeightMap hmGenerator = new MapGeneration.HeightMap(mapSize);
+
+            heightMap = hmGenerator.Generate();
+
+            for (int i = 0; i < mapSize; i++)
+            {
+                for (int j = 0; j < mapSize; j++)
+                {
+                    Console.Write(heightMap[i,j]+" ");
+                }
+                Console.WriteLine();
+            }*/
+
+            terrain = Content.Load<Model>("heightmap");
+
+
+
+            #endregion
+
             Vector2 treePlaneSizeStart = new Vector2(-50, -250),
                 treePlaneSizeEnd = new Vector2(50, 0);
 
@@ -169,6 +197,7 @@ namespace datx02_rally
                     Matrix.CreateTranslation(new Vector3(side * (140 + random.Next(30)), 0, i * -100)));
             }
 
+ 
             #region SkySphere
 
             skySphereModel = Content.Load<Model>(@"Models/skysphere");
@@ -262,6 +291,7 @@ namespace datx02_rally
 
             plasmaSystem.AddParticle(new Vector3(200,50,-500), Vector3.Zero);
 
+            //Console.WriteLine(1 - Math.Pow(lightDistance / 500.0f, 2));
 
             /*lightRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
 
@@ -328,9 +358,26 @@ namespace datx02_rally
                 light.Draw(lightModel, view, projection);
             }
 
+            //plane.Draw(view, Color.Gray);
 
-            plane.Draw(view, Color.Gray);
 
+            #region Terrain
+
+            foreach (ModelMesh mesh in terrain.Meshes)
+            {
+                foreach (BasicEffect currentEffect in mesh.Effects)
+                {
+                    currentEffect.World = transforms[mesh.ParentBone.Index] *
+                                Matrix.CreateTranslation(Vector3.Zero);
+                    currentEffect.View = view;
+                    currentEffect.Projection = projection;
+                    currentEffect.EnableDefaultLighting();
+                    currentEffect.PreferPerPixelLighting = true;
+                }
+                mesh.Draw();
+            }
+
+            #endregion
 
             // Draw car
             foreach (var mesh in car.Model.Meshes) // 5 meshes
