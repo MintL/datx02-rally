@@ -93,16 +93,21 @@ namespace datx02_rally
             return false;
         }
 
-        public void UpdatePreviousState()
+        private  void UpdatePreviousState()
         {
             if (CurrentController == Controller.Keyboard)
-                previousKeyboard = Keyboard.GetState();
+                previousKeyboard = keyboard;
             else if (CurrentController == Controller.GamePad)
-                previousGamePad = GamePad.GetState(PlayerIndex.One);
+                previousGamePad = gamePad;
         }
 
+        /// <summary>
+        /// Updates before other components to have up-to-date input.
+        /// </summary>
+        /// <param name="gameTime"></param>
         public override void Update(GameTime gameTime)
         {
+            UpdatePreviousState();
             if (CurrentController == Controller.Keyboard)
                 keyboard = Keyboard.GetState();
             else if (CurrentController == Controller.GamePad)

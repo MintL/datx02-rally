@@ -38,7 +38,7 @@ namespace datx02_rally
 
         Matrix projection;
 
-        List<PointLight> pointLights;
+        List<PointLight> pointLights  = new List<PointLight>();
         DirectionalLight directionalLight;
 
         Effect effect;
@@ -49,16 +49,18 @@ namespace datx02_rally
 
         ParticleSystem plasmaSystem;
 
+        List<ParticleSystem> particleSystems = new List<ParticleSystem>();
+
         PlaneModel plane;
         PlaneModel tree;
         List<Matrix> treeTransforms = new List<Matrix>();
 
         Random random = new Random();
 
-        #region SkySphere
+        #region SkyBox
 
-        Model skySphereModel;
-        Effect skySphereEffect;
+        Model skyBoxModel;
+        Effect skyBoxEffect;
         TextureCube cubeMap;
 
         #endregion
@@ -72,7 +74,7 @@ namespace datx02_rally
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
-            graphics.ToggleFullScreen();
+            //graphics.ToggleFullScreen();
 
             IsMouseVisible = true;
         }
@@ -85,32 +87,34 @@ namespace datx02_rally
         /// </summary>
         protected override void Initialize()
         {
-            pointLights = new List<PointLight>();
-
-            GraphicsDevice.BlendState = BlendState.AlphaBlend;
-
             // Components
+            
             var inputComponent = new InputComponent(this);
             //inputComponent.CurrentController = Controller.GamePad;
             Components.Add(inputComponent);
             Services.AddService(typeof(InputComponent), inputComponent);
+
+            // Components
             
-            var debugCamera = new CameraComponent(this);
-            Components.Add(debugCamera);
-            Services.AddService(typeof(CameraComponent), debugCamera);
+            var cameraComponent = new CameraComponent(this);
+            Components.Add(cameraComponent);
+            Services.AddService(typeof(CameraComponent), cameraComponent);
 
             var previousKeyboardStateComponent = new PreviousKeyboardState(this);
             Components.Add(previousKeyboardStateComponent);
             Services.AddService(typeof(PreviousKeyboardState), previousKeyboardStateComponent);
-
-            plasmaSystem = new PlasmaParticleSystem(this, Content);
-            Components.Add(plasmaSystem);
 
             var carControlComponent = new CarControlComponent(this);
             Components.Add(carControlComponent);
             Services.AddService(typeof(CarControlComponent), carControlComponent);
 
             Console.WriteLine("isConnected " + GamePad.GetState(PlayerIndex.One).IsConnected);
+
+            // Particle systems
+
+            plasmaSystem = new PlasmaParticleSystem(this, Content);
+            Components.Add(plasmaSystem);
+            particleSystems.Add(plasmaSystem);
 
             base.Initialize();
         }
@@ -126,7 +130,7 @@ namespace datx02_rally
 
             screenCenter = new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height) / 2f;
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
-                GraphicsDevice.Viewport.AspectRatio, .1f, 10000f);
+                GraphicsDevice.Viewport.AspectRatio, 1.1f, 50000f);
             
             effect = Content.Load<Effect>(@"Effects/BasicShading");
             model = Content.Load<Model>(@"Models/porsche");
@@ -206,8 +210,8 @@ namespace datx02_rally
  
             #region SkySphere
 
-            skySphereModel = Content.Load<Model>(@"Models/skysphere");
-            skySphereEffect = Content.Load<Effect>(@"Effects/SkySphere");
+            skyBoxModel = Content.Load<Model>(@"Models/skybox");
+            skyBoxEffect = Content.Load<Effect>(@"Effects/SkyBox");
             
             cubeMap = new TextureCube(GraphicsDevice, 2048, false, SurfaceFormat.Color);
 
@@ -222,13 +226,13 @@ namespace datx02_rally
             for (int i = 0; i < cubemapfaces.Length; i++)
                 LoadCubemapFace(cubeMap, cubemapfaces[i], (CubeMapFace)i);
 
-            skySphereEffect.Parameters["SkyboxTexture"].SetValue(cubeMap);
+            skyBoxEffect.Parameters["SkyboxTexture"].SetValue(cubeMap);
 
-            foreach (var mesh in skySphereModel.Meshes)
+            foreach (var mesh in skyBoxModel.Meshes)
             {
                 foreach (var part in mesh.MeshParts)
                 {
-                    part.Effect = skySphereEffect;
+                    part.Effect = skyBoxEffect;
                     
                 }
             }
@@ -324,9 +328,6 @@ namespace datx02_rally
             car.Update();
 
             base.Update(gameTime);
-
-            input.UpdatePreviousState();
-
         }
 
 
@@ -337,14 +338,33 @@ namespace datx02_rally
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Honeydew);
+            
 
             Matrix[] transforms = new Matrix[model.Bones.Count];
             model.CopyAbsoluteBoneTransformsTo(transforms);
 
             Matrix view = this.GetService<CameraComponent>().View;
 
+            GraphicsDevice.BlendState = BlendState.Opaque;
+
+            #region SkyBox
+
+            skyBoxEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
+
+            skyBoxEffect.Parameters["View"].SetValue(view);
+            skyBoxEffect.Parameters["Projection"].SetValue(projection);
+            skyBoxModel.Meshes[0].Draw();
+
+            #endregion
+
+            GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            // Set view to particlesystems
+            foreach (ParticleSystem pSystem in this.Components.Where(c => c is ParticleSystem))
+                pSystem.SetCamera(view, projection);
+
             //smoke.SetCamera(view, projection);
-            plasmaSystem.SetCamera(view, projection);
+            //plasmaSystem.SetCamera(view, projection);
 
             foreach (PointLight light in pointLights)
             {
@@ -428,18 +448,6 @@ namespace datx02_rally
             }
 
 
-            #region SkySphere
-
-            skySphereEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
-
-            skySphereEffect.Parameters["View"].SetValue(view);
-            skySphereEffect.Parameters["Projection"].SetValue(projection);
-            foreach (var mesh in skySphereModel.Meshes)
-            {
-                mesh.Draw();
-            }
-
-            #endregion
 
             //foreach (var world in treeTransforms)
             //{
