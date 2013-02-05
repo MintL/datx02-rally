@@ -28,9 +28,10 @@ namespace datx02_rally
         float lightDistance = 700.0f;
         float lightRotation;
         
-        /*
+        
         float[,] heightMap;
-        int mapSize;*/
+        int mapSize;
+
         Model terrain;
 
         ThirdPersonCamera camera;
@@ -162,22 +163,15 @@ namespace datx02_rally
             plane = new PlaneModel(new Vector2(-10000), new Vector2(10000), 1, GraphicsDevice, null, projection, Matrix.Identity);
 
             #region MapGeneration
-            /*
-
+            
+            mapSize = 512;
             MapGeneration.HeightMap hmGenerator = new MapGeneration.HeightMap(mapSize);
 
             heightMap = hmGenerator.Generate();
 
-            for (int i = 0; i < mapSize; i++)
-            {
-                for (int j = 0; j < mapSize; j++)
-                {
-                    Console.Write(heightMap[i,j]+" ");
-                }
-                Console.WriteLine();
-            }*/
+            hmGenerator.Store(GraphicsDevice);
 
-            terrain = Content.Load<Model>("heightmap");
+            terrain = Content.Load<Model>("ourmap");
 
 
 
@@ -362,6 +356,8 @@ namespace datx02_rally
 
 
             #region Terrain
+
+
 
             foreach (ModelMesh mesh in terrain.Meshes)
             {
