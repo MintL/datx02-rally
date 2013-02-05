@@ -54,7 +54,7 @@ namespace datx02_rally
             this.wheelRadius = wheelRadius;
         }
 
-        public void Update(InputComponent input, Camera currentCamera)
+        public void Update()
         {
             Vector3 forward = Vector3.Transform(Vector3.Forward,
                 Matrix.CreateRotationY(Rotation));
@@ -72,34 +72,7 @@ namespace datx02_rally
             Rotation = (float)Math.Atan2(back.X - front.X, back.Z - front.Z);
             WheelRotationX -= (Position - oldPos).Length() / wheelRadius;
 
-            #region Car control
-
-            if (currentCamera is ThirdPersonCamera)
-            {
-                //Accelerate
-                Speed = Math.Min(Speed + Acceleration *
-                    (input.GetState(Input.Thrust) -
-                    input.GetState(Input.Brake)), MaxSpeed);
-
-                // Turn Wheel
-                WheelRotationY += (input.GetState(Input.Steer) * TurnSpeed);
-                WheelRotationY = MathHelper.Clamp(WheelRotationY, -MaxWheelTurn, MaxWheelTurn);
-                if (Math.Abs(WheelRotationY) > MathHelper.Pi / 720)
-                    WheelRotationY *= .9f;
-                else
-                    WheelRotationY = 0;
-            }
-
             
-
-            //Friction if is not driving
-            float friction = .97f; // 0.995f;
-            if (Math.Abs(input.GetState(Input.Thrust)) < 0.001f)
-            {
-                Speed *= friction;
-            }
-
-            #endregion
         }
     }
 }

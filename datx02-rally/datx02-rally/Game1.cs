@@ -84,7 +84,7 @@ namespace datx02_rally
             Components.Add(inputComponent);
             Services.AddService(typeof(InputComponent), inputComponent);
             
-            var debugCamera = new CameraComponent(this, inputComponent);
+            var debugCamera = new CameraComponent(this);
             Components.Add(debugCamera);
             Services.AddService(typeof(CameraComponent), debugCamera);
 
@@ -92,7 +92,9 @@ namespace datx02_rally
             Components.Add(previousKeyboardStateComponent);
             Services.AddService(typeof(PreviousKeyboardState), previousKeyboardStateComponent);
 
-            
+            var carControlComponent = new CarControlComponent(this);
+            Components.Add(carControlComponent);
+            Services.AddService(typeof(CarControlComponent), carControlComponent);
 
             Console.WriteLine("isConnected " + GamePad.GetState(PlayerIndex.One).IsConnected);
 
@@ -145,6 +147,8 @@ namespace datx02_rally
             }
 
             car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
+            this.GetService<CarControlComponent>().Car = car;
+
             plane = new PlaneModel(new Vector2(-10000), new Vector2(10000), 1, GraphicsDevice, null, projection, Matrix.Identity);
 
             Vector2 treePlaneSizeStart = new Vector2(-50, -250),
@@ -192,9 +196,10 @@ namespace datx02_rally
 
             #endregion
 
-            camera = new ThirdPersonCamera(car, this.GetService<InputComponent>());
+            var input = this.GetService<InputComponent>();
+            camera = new ThirdPersonCamera(car, input);
             this.GetService<CameraComponent>().AddCamera(camera);
-            this.GetService<CameraComponent>().AddCamera(new DebugCamera(this.GetService<InputComponent>()));
+            this.GetService<CameraComponent>().AddCamera(new DebugCamera(input));
         }
 
         /// <summary>
@@ -277,7 +282,7 @@ namespace datx02_rally
             */
 
             //Apply changes to car
-            car.Update(input, this.GetService<CameraComponent>().CurrentCamera);
+            car.Update();
 
 
             input.UpdatePreviousState();
