@@ -192,13 +192,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Foliage\box.fbx">
-      <Name>box</Name>
-      <Importer>FbxImporter</Importer>
-      <Processor>ModelProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Foliage\Textures\BarkMossy-tiled-c.png">
       <Name>BarkMossy-tiled-c</Name>
       <Importer>TextureImporter</Importer>

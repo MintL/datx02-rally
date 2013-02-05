@@ -61,16 +61,15 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-	float4 totalLight = float4(DirectionalAmbient, 1.0);
+	float4 color = tex2D(ColorMapSampler, input.Texture);
+	float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
 	totalLight.a = 1 - tex2D(AlphaMapSampler, input.Texture).r;
-	if (totalLight.a < 0.01) discard;
 
 	float3 normal = normalize(input.Normal);
-	float4 color = tex2D(ColorMapSampler, input.Texture);	
 	float3 directionToLight = -normalize(DirectionalDirection);
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 
-	totalLight.rgb = selfShadow * (DirectionalDiffuse * color * saturate(dot(normal, directionToLight)));
+	totalLight.rgb += selfShadow * (DirectionalDiffuse * color.rgb * saturate(dot(normal, directionToLight)));
 	
 	return totalLight;
 }
@@ -82,7 +81,7 @@ technique Technique1
 		AlphaBlendEnable = True;
 		SrcBlend = SrcAlpha;
 		DestBlend = InvSrcAlpha;
-
+		
         VertexShader = compile vs_3_0 VertexShaderFunction();
         PixelShader = compile ps_3_0 PixelShaderFunction();
     }
