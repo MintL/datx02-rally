@@ -23,6 +23,8 @@ namespace datx02_rally
 
         public float Zoom { get; set; }
 
+        private Vector3 lookUpOffset;
+
         private Matrix cameraRotation = Matrix.Identity, 
             cameraTranslation = Matrix.Identity,
             extraOffset = Matrix.Identity;
@@ -35,17 +37,19 @@ namespace datx02_rally
                 //cameraTranslation = Matrix.Lerp(cameraTranslation, TargetNode.TranslationMatrix, 1);
                 cameraTranslation = TargetNode.TranslationMatrix;
                 return Matrix.CreateLookAt(Vector3.Transform(Zoom * offset, extraOffset * cameraRotation * cameraTranslation),
-                    Vector3.Transform(50 * Vector3.Up, cameraRotation * cameraTranslation), Vector3.Up);
+                    Vector3.Transform(lookUpOffset, cameraRotation * cameraTranslation), Vector3.Up);
             }
         }
 
         public ITargetNode TargetNode { get; set; }
 
-        public ThirdPersonCamera(ITargetNode targetNode)
+        public ThirdPersonCamera(ITargetNode targetNode, Vector3 lookUpOffset, InputComponent input)
         {
             this.TargetNode = targetNode;
-            Zoom = 250;
+            Zoom = 300;
             RotationSpeed = .05f;
+            this.lookUpOffset = lookUpOffset;
+            this.input = input;
         }
 
         public override void Update(GameTime gameTime)
@@ -53,9 +57,9 @@ namespace datx02_rally
             // Get X relative to lookAt.
             Vector3 localX = Vector3.Cross(offset, Vector3.Up);
 
-            Vector2 input = RotationSpeed * new Vector2(K(Keys.Right) - K(Keys.Left), K(Keys.Up) - K(Keys.Down));
+            Vector2 movement = RotationSpeed * new Vector2(input.GetState(Input.CameraX), input.GetState(Input.CameraY));
 
-            extraOffset *= Matrix.CreateFromAxisAngle(localX, input.Y) * Matrix.CreateRotationY(input.X);
+            extraOffset *= Matrix.CreateFromAxisAngle(localX, movement.Y) * Matrix.CreateRotationY(movement.X);
             extraOffset = Matrix.Lerp(extraOffset, Matrix.Identity, .1f);
         }
 

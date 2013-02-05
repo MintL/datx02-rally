@@ -23,15 +23,16 @@ namespace datx02_rally
             get { return Matrix.CreateLookAt(position, position + lookAt, Vector3.Up); }
         }
 
-        public DebugCamera(Vector3 position) : this()
+        public DebugCamera(Vector3 position, InputComponent input) : this(input)
         {
             this.position = position;
         }
 
-        public DebugCamera()
+        public DebugCamera(InputComponent input)
         {
             speed = MinSpeed = 3f;
             MaxSpeed = 50f;
+            this.input = input;
         }
 
         public override void Update(GameTime gameTime)

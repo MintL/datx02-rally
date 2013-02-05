@@ -27,7 +27,8 @@ namespace datx02_rally
 
         public override void Update(GameTime gameTime)
         {
-            if (Keyboard.GetState().IsKeyDown(Keys.C) && Game.GetService<PreviousKeyboardState>().State.IsKeyUp(Keys.C))
+            var input = Game.GetService<InputComponent>();
+            if (input.GetPressed(Input.ChangeCamera))
                 currentCamera++;
             if (currentCamera == cameras.Count)
                 currentCamera = 0;

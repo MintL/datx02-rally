@@ -90,6 +90,11 @@ namespace datx02_rally
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
             // Components
+            var inputComponent = new InputComponent(this);
+            //inputComponent.CurrentController = Controller.GamePad;
+            Components.Add(inputComponent);
+            Services.AddService(typeof(InputComponent), inputComponent);
+            
             var debugCamera = new CameraComponent(this);
             Components.Add(debugCamera);
             Services.AddService(typeof(CameraComponent), debugCamera);
@@ -98,14 +103,14 @@ namespace datx02_rally
             Components.Add(previousKeyboardStateComponent);
             Services.AddService(typeof(PreviousKeyboardState), previousKeyboardStateComponent);
 
-            // Particlesystems
-
-            //smoke = new SmokePlumeParticleSystem(this, Content);
-            //smoke.DrawOrder = 500;
-            //Components.Add(smoke);
-
             plasmaSystem = new PlasmaParticleSystem(this, Content);
             Components.Add(plasmaSystem);
+
+            var carControlComponent = new CarControlComponent(this);
+            Components.Add(carControlComponent);
+            Services.AddService(typeof(CarControlComponent), carControlComponent);
+
+            Console.WriteLine("isConnected " + GamePad.GetState(PlayerIndex.One).IsConnected);
 
             base.Initialize();
         }
@@ -136,7 +141,6 @@ namespace datx02_rally
                     MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
                     MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
                     MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()));
-                Console.WriteLine(color);
                 pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
             }
             directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.6f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.3f);
@@ -157,7 +161,7 @@ namespace datx02_rally
             }
 
             car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
-            //particleEmitter = new ParticleEmitter(smoke, 200, car.Position);
+            this.GetService<CarControlComponent>().Car = car;
 
             plane = new PlaneModel(new Vector2(-10000), new Vector2(10000), 1, GraphicsDevice, null, projection, Matrix.Identity);
 
@@ -229,9 +233,10 @@ namespace datx02_rally
 
             #endregion
 
-            camera = new ThirdPersonCamera(car);
-            this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100)));
+            var input = this.GetService<InputComponent>();
+            camera = new ThirdPersonCamera(car, Vector3.Up * 50, input);
             this.GetService<CameraComponent>().AddCamera(camera);
+            this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100), input));
         }
 
         /// <summary>
@@ -264,9 +269,25 @@ namespace datx02_rally
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+            
+            InputComponent input = this.GetService<InputComponent>();
+
+            if (input.GetPressed(Input.ChangeController))
+            {
+                if (input.CurrentController == Controller.Keyboard)
+                {
+                    input.CurrentController = Controller.GamePad;
+                    Console.WriteLine("CurrentController equals GamePad");
+                }
+                else
+                {
+                    input.CurrentController = Controller.Keyboard;
+                    Console.WriteLine("CurrentController equals Keyboard");
+                }
+            }
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-                Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (input.GetPressed(Input.Exit))
                 this.Exit();
 
             KeyboardState keyboard = Keyboard.GetState();
@@ -291,49 +312,13 @@ namespace datx02_rally
 
             plasmaSystem.AddParticle(new Vector3(200,50,-500), Vector3.Zero);
 
-            //Console.WriteLine(1 - Math.Pow(lightDistance / 500.0f, 2));
-
-            /*lightRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
-
-            PointLight pointLight = pointLights.First<PointLight>();
-            pointLight.Position = Vector3.Transform(new Vector3(0.0f, 100.0f, 0.0f),
-                Matrix.CreateTranslation(new Vector3(0.0f, 0.0f, lightDistance)) * Matrix.CreateRotationY(lightRotation));
-            */
-
-            #region Car control
-
-            if (this.GetService<CameraComponent>().CurrentCamera is ThirdPersonCamera)
-            {
-                //Accelerate
-                car.Speed = Math.Min(car.Speed + car.Acceleration *
-                    ((Keyboard.GetState().IsKeyDown(Keys.W) ? 1 : 0) +
-                    GamePad.GetState(PlayerIndex.One).Triggers.Right -
-                    (Keyboard.GetState().IsKeyDown(Keys.S) ? 1 : 0) -
-                    GamePad.GetState(PlayerIndex.One).Triggers.Left), car.MaxSpeed);
-                // Turn Wheel
-                car.WheelRotationY += (Keyboard.GetState().IsKeyDown(Keys.A) ? car.TurnSpeed : 0) -
-                    (Keyboard.GetState().IsKeyDown(Keys.D) ? car.TurnSpeed : 0);
-                car.WheelRotationY = MathHelper.Clamp(car.WheelRotationY, -car.MaxWheelTurn, car.MaxWheelTurn);
-                if (Math.Abs(car.WheelRotationY) > MathHelper.Pi / 720)
-                    car.WheelRotationY *= .9f;
-                else
-                    car.WheelRotationY = 0;
-            }
-
             //Apply changes to car
             car.Update();
 
-            //Friktion if is not driving
-            float friction = .97f; // 0.995f;
-            if (!Keyboard.GetState().IsKeyDown(Keys.W) ||
-                !GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.RightTrigger) && GamePad.GetState(PlayerIndex.One).IsConnected)
-                car.Speed *= friction;
-
-            #endregion
-
-            //particleEmitter.Update(gameTime, car.Position + new Vector3(18,8,65));
-
             base.Update(gameTime);
+
+            input.UpdatePreviousState();
+
         }
 
 

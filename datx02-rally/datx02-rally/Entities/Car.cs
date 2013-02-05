@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 
 namespace datx02_rally
@@ -70,6 +71,8 @@ namespace datx02_rally
             Position = (front + back) / 2;
             Rotation = (float)Math.Atan2(back.X - front.X, back.Z - front.Z);
             WheelRotationX -= (Position - oldPos).Length() / wheelRadius;
+
+            
         }
     }
 }
