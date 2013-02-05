@@ -20,6 +20,12 @@ namespace datx02_rally
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        #region Foliage
+        Model oakTree;
+        Vector3[] treePositions;
+        float[] treeRotations;
+        #endregion
+
         Model model;
         Model lightModel;
         Vector3 modelPosition = Vector3.Zero;
@@ -72,7 +78,7 @@ namespace datx02_rally
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
-            graphics.ToggleFullScreen();
+            //graphics.ToggleFullScreen();
 
             IsMouseVisible = true;
         }
@@ -203,7 +209,36 @@ namespace datx02_rally
                     Matrix.CreateTranslation(new Vector3(side * (140 + random.Next(30)), 0, i * -100)));
             }
 
- 
+            #region Foliage
+            oakTree = Content.Load<Model>(@"Foliage\Oak_Tree");
+            Effect alphaMapEffect = Content.Load<Effect>(@"Effects\AlphaMap");
+            Texture2D alphaMap = Content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-a");
+
+            // Initialize the material settings
+            foreach (ModelMesh mesh in oakTree.Meshes)
+            {
+                foreach (ModelMeshPart part in mesh.MeshParts)
+                {
+                    BasicEffect basicEffect = (BasicEffect)part.Effect;
+                    part.Effect = alphaMapEffect.Clone();
+                    part.Effect.Parameters["ColorMap"].SetValue(basicEffect.Texture);
+                }
+                mesh.Effects[1].Parameters["AlphaMap"].SetValue(alphaMap);
+            }
+
+            treePositions = new Vector3[10];
+            treeRotations = new float[10];
+            for (int i = 0; i < 10; i++)
+            {
+                treePositions[i] = new Vector3(
+                    MathHelper.Lerp(300, 800, (float)random.NextDouble()),
+                    0,
+                    MathHelper.Lerp(-200, 400, (float)random.NextDouble())
+                );
+                treeRotations[i] = MathHelper.Lerp(0, MathHelper.Pi * 2, (float)random.NextDouble());
+            }
+            #endregion
+
             #region SkySphere
 
             skySphereModel = Content.Load<Model>(@"Models/skysphere");
@@ -323,12 +358,30 @@ namespace datx02_rally
             //Apply changes to car
             car.Update();
 
-            base.Update(gameTime);
-
             input.UpdatePreviousState();
 
         }
 
+        private void DrawModel(Model m, Vector3 position, float rotation)
+        {
+            Matrix[] transforms = new Matrix[m.Bones.Count];
+            m.CopyAbsoluteBoneTransformsTo(transforms);
+
+            Matrix view = this.GetService<CameraComponent>().View;
+
+            foreach (ModelMesh mesh in m.Meshes)
+            {
+                foreach (Effect effect in mesh.Effects)
+                {
+                    effect.Parameters["World"].SetValue(transforms[mesh.ParentBone.Index] * 
+                        Matrix.CreateTranslation(position) *
+                        Matrix.CreateRotationY(rotation));
+                    effect.Parameters["View"].SetValue(view);
+                    effect.Parameters["Projection"].SetValue(projection);
+                }
+                mesh.Draw();
+            }
+        }
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -352,7 +405,7 @@ namespace datx02_rally
             }
 
             //plane.Draw(view, Color.Gray);
-
+            
 
             #region Terrain
 
@@ -371,6 +424,8 @@ namespace datx02_rally
             }
 
             #endregion
+
+            
 
             // Draw car
             foreach (var mesh in car.Model.Meshes) // 5 meshes
@@ -446,6 +501,11 @@ namespace datx02_rally
             //    tree.World = world;
             //    tree.Draw(view);
             //}
+
+            for (int i = 0; i < 10; i++)
+            {
+                DrawModel(oakTree, treePositions[i], treeRotations[i]);
+            }
 
             base.Draw(gameTime);
         }
