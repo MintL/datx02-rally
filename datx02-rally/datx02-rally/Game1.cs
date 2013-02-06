@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Particle3DSample;
 using datx02_rally.ModelPresenters;
+using datx02_rally.GameLogic;
 
 namespace datx02_rally
 {
@@ -42,6 +43,8 @@ namespace datx02_rally
             MaterialReflection = .3f,
             MaterialShininess = 10
         };
+
+        RaceTrack raceTrack = new RaceTrack(25000);
 
         List<ParticleSystem> particleSystems = new List<ParticleSystem>();
         ParticleSystem plasmaSystem;
@@ -152,6 +155,11 @@ namespace datx02_rally
             //carEffect.CurrentTechnique = carEffect.Techniques["CarShading"];
 
             car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
+            Vector3 carPosition = raceTrack.Curve.GetPoint(0);
+            Vector3 carHeading = (raceTrack.Curve.GetPoint(.001f) - carPosition);
+            car.Position = raceTrack.Curve.GetPoint(0);
+            car.Rotation = (float)Math.Atan2(carHeading.X, carHeading.Z) - (float)Math.Atan2(0, -1);
+
             foreach (var mesh in car.Model.Meshes)
             {
                 if (mesh.Name.StartsWith("wheel"))
@@ -198,6 +206,30 @@ namespace datx02_rally
 
             #endregion
 
+            #region MapGeneration v2.
+
+            terrainGenerator = new datx02_rally.MapGeneration.TerrainGenerator();
+            terrainGenerator.LoadContent(GraphicsDevice, Content);
+
+            #endregion
+
+            #region RaceTrackGeneration
+
+            //for (int i = 0; i < 100; i++)
+            //{
+            //    Vector3 trackSample = raceTrack.Curve.GetPoint(i / 100f);
+
+            //    trackSample += Vector3.One * 25000;
+
+            //    trackSample *= 300 / 25000f;
+
+            //    // Set Height!
+            //    //hmGenerator.Heights[(int)trackSample.X, (int)trackSample.Z] = SOMETHING;
+
+            //}
+
+            #endregion
+
             #region SkySphere
 
             skyBoxModel = Content.Load<Model>(@"Models/skybox");
@@ -229,11 +261,10 @@ namespace datx02_rally
             #endregion
 
             var input = this.GetService<InputComponent>();
+            this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 60000, 35000), input));
             this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(car, Vector3.Up * 50, input));
-            this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 60000, 35000), input)); 
-
         }
-
+        datx02_rally.MapGeneration.TerrainGenerator terrainGenerator;
         /// <summary>
         /// Loads a texture from Content and asign it to the cubemaps face.
         /// </summary>
@@ -295,33 +326,27 @@ namespace datx02_rally
             //}
 
             if (input.GetKey(Keys.Y))
-                curve = new GameLogic.Curve(25000);
+                ; // raceTrack.Curve = new GameLogic.Curve(25000);
 
-            for (int j = 0; j < 50; j++)
+            for (int j = 0; j < 20; j++)
             {
-                float i = (float)random.NextDouble() * .99f;
-                Vector3 point1 = curve.GetPoint(i);
-                Vector3 point2 = curve.GetPoint(i + .009f);
+                var i = (float)random.NextDouble();
+                Vector3 point1 = raceTrack.Curve.GetPoint(i);
+                Vector3 point2 = raceTrack.Curve.GetPoint(i + .01f * (i > .5f ? -1 : 1));
                 var heading = (point2 - point1);
 
-                var side = 600 * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
-
-                //plasmaSystem.AddParticle(point1, Vector3.Zero);
-                //plasmaSystem.AddParticle(point2, Vector3.Zero);
-
-                //plasmaSystem.AddParticle(Vector3.Lerp(Vector3.Zero, side, (float)random.NextDouble()), Vector3.Zero);
+                var side = 150 * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
 
                 plasmaSystem.AddParticle(point1 + side, Vector3.Zero);
                 plasmaSystem.AddParticle(point1 - side, Vector3.Zero);
             }
+
 
             //Apply changes to car
             car.Update();
 
             base.Update(gameTime);
         }
-
-        GameLogic.Curve curve = new GameLogic.Curve(25000);
 
 
         /// <summary>
@@ -349,6 +374,8 @@ namespace datx02_rally
 
             #endregion
 
+            terrainGenerator.DrawTerrain(view, projection);
+
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
             // Set view to particlesystems
@@ -369,19 +396,19 @@ namespace datx02_rally
 
             #region Terrain
 
-            foreach (ModelMesh mesh in terrain.Meshes)
-            {
-                foreach (BasicEffect currentEffect in mesh.Effects)
-                {
-                    currentEffect.World = transforms[mesh.ParentBone.Index] *
-                                Matrix.CreateTranslation(Vector3.Zero);
-                    currentEffect.View = view;
-                    currentEffect.Projection = projection;
-                    currentEffect.EnableDefaultLighting();
-                    currentEffect.PreferPerPixelLighting = true;
-                }
-                mesh.Draw();
-            }
+            //foreach (ModelMesh mesh in terrain.Meshes)
+            //{
+            //    foreach (BasicEffect currentEffect in mesh.Effects)
+            //    {
+            //        currentEffect.World = transforms[mesh.ParentBone.Index] *
+            //                    Matrix.CreateTranslation(Vector3.Zero);
+            //        currentEffect.View = view;
+            //        currentEffect.Projection = projection;
+            //        currentEffect.EnableDefaultLighting();
+            //        currentEffect.PreferPerPixelLighting = true;
+            //    }
+            //    mesh.Draw();
+            //}
 
             #endregion
 

@@ -15,9 +15,6 @@ namespace datx02_rally
         private ButtonState oldButtonState = ButtonState.Released;
         private int oldX, oldY;
 
-        public float MinSpeed { get; set; }
-        public float MaxSpeed { get; set; }
-
         public override Matrix View
         {
             get { return Matrix.CreateLookAt(position, position + lookAt, Vector3.Up); }
@@ -26,12 +23,12 @@ namespace datx02_rally
         public DebugCamera(Vector3 position, InputComponent input) : this(input)
         {
             this.position = position;
+            lookAt = Vector3.Down + .5f * Vector3.Forward;
         }
 
         public DebugCamera(InputComponent input)
         {
-            speed = MinSpeed = 3f;
-            MaxSpeed = 50f;
+            speed = 3f;
             this.input = input;
         }
 
@@ -57,13 +54,8 @@ namespace datx02_rally
             oldButtonState = Mouse.GetState().LeftButton;
 
             // Movement
-            Vector3 delta = speed * (lookAt * (K(Keys.W) - K(Keys.S)) +
+            Vector3 delta = (25 * K(Keys.LeftShift) + 1) * speed * (lookAt * (K(Keys.W) - K(Keys.S)) +
                 localX * (K(Keys.D) - K(Keys.A)) + Vector3.Up * (K(Keys.PageUp) - K(Keys.PageDown)));
-
-            if (delta.LengthSquared() > 0)
-                speed = Math.Min(MaxSpeed, speed * 1.02f);
-            else
-                speed = MinSpeed;
 
             position += delta;
         }

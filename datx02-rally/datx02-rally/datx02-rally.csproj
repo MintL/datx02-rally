@@ -118,6 +118,8 @@
     <Compile Include="Components\InputComponent.cs" />
     <Compile Include="DirectionalLight.cs" />
     <Compile Include="GameLogic\Curve.cs" />
+    <Compile Include="GameLogic\RaceTrack.cs" />
+    <Compile Include="MapGeneration\TerrainGenerator.cs" />
     <Compile Include="ModelPresenters\BasicShadingPresenter.cs" />
     <Compile Include="Particles\ParticleEmitter.cs" />
     <Compile Include="Particles\ParticleSettings.cs" />
