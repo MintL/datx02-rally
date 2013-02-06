@@ -76,6 +76,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float4 color = tex2D(ColorMapSampler, input.TexCoord);
 	float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
 	totalLight.a = 1 - tex2D(AlphaMapSampler, input.TexCoord).r;
+	clip(totalLight.a - 0.7843f);
 
 	float3 normal = 2.0 * (tex2D(NormalMapSampler, input.TexCoord)) - 1.0;
 	normal = normalize(mul(normal, input.WorldToTangentSpace));
