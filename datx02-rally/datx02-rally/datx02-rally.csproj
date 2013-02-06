@@ -117,6 +117,7 @@
     <Compile Include="Components\CarControlComponent.cs" />
     <Compile Include="Components\InputComponent.cs" />
     <Compile Include="DirectionalLight.cs" />
+    <Compile Include="GameLogic\Curve.cs" />
     <Compile Include="ModelPresenters\BasicShadingPresenter.cs" />
     <Compile Include="Particles\ParticleEmitter.cs" />
     <Compile Include="Particles\ParticleSettings.cs" />

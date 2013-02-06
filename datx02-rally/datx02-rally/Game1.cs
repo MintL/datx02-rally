@@ -230,7 +230,7 @@ namespace datx02_rally
 
             var input = this.GetService<InputComponent>();
             this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(car, Vector3.Up * 50, input));
-            this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100), input));
+            this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 60000, 35000), input)); 
 
         }
 
@@ -286,12 +286,33 @@ namespace datx02_rally
                 this.Exit();
 
             // Spawn particles
-            Vector3 radius = 100 * Vector3.UnitX;
-            for (int z = 0; z < 10000; z += 1000)
+            //Vector3 radius = 100 * Vector3.UnitX;
+            //for (int z = 0; z < 10000; z += 1000)
+            //{
+            //    float next = (float)random.NextDouble();
+            //    plasmaSystem.AddParticle(Vector3.Transform(radius + Vector3.UnitZ * next * -10000,
+            //        Matrix.CreateRotationZ(MathHelper.TwoPi * 20 * next)), Vector3.Zero);
+            //}
+
+            if (input.GetKey(Keys.Y))
+                curve = new GameLogic.Curve(25000);
+
+            for (int j = 0; j < 50; j++)
             {
-                float next = (float)random.NextDouble();
-                plasmaSystem.AddParticle(Vector3.Transform(radius + Vector3.UnitZ * next * -10000,
-                    Matrix.CreateRotationZ(MathHelper.TwoPi * 20 * next)), Vector3.Zero);
+                float i = (float)random.NextDouble() * .99f;
+                Vector3 point1 = curve.GetPoint(i);
+                Vector3 point2 = curve.GetPoint(i + .009f);
+                var heading = (point2 - point1);
+
+                var side = 600 * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
+
+                //plasmaSystem.AddParticle(point1, Vector3.Zero);
+                //plasmaSystem.AddParticle(point2, Vector3.Zero);
+
+                //plasmaSystem.AddParticle(Vector3.Lerp(Vector3.Zero, side, (float)random.NextDouble()), Vector3.Zero);
+
+                plasmaSystem.AddParticle(point1 + side, Vector3.Zero);
+                plasmaSystem.AddParticle(point1 - side, Vector3.Zero);
             }
 
             //Apply changes to car
@@ -299,6 +320,8 @@ namespace datx02_rally
 
             base.Update(gameTime);
         }
+
+        GameLogic.Curve curve = new GameLogic.Curve(25000);
 
 
         /// <summary>
