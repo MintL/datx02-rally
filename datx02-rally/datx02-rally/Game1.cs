@@ -179,10 +179,11 @@ namespace datx02_rally
                 foreach (ModelMeshPart part in mesh.MeshParts)
                 {
                     BasicEffect oldEffect = part.Effect as BasicEffect;
-                    carSettings.MaterialDiffuse = oldEffect.DiffuseColor;
-                    carSettings.MaterialAmbient = oldEffect.DiffuseColor * .5f;
-                    carSettings.MaterialSpecular = oldEffect.DiffuseColor * .3f;
                     part.Effect = carEffect.Clone();
+                    part.Effect.Parameters["MaterialDiffuse"].SetValue(oldEffect.DiffuseColor);
+                    part.Effect.Parameters["MaterialAmbient"].SetValue(oldEffect.DiffuseColor * .5f);
+                    part.Effect.Parameters["MaterialSpecular"].SetValue(oldEffect.DiffuseColor * .3f);
+                    
                 }
             }
 
@@ -265,6 +266,8 @@ namespace datx02_rally
                 treeRotations[i] = MathHelper.Lerp(0, MathHelper.Pi * 2, (float)random.NextDouble());
             }
             #endregion
+
+            carSettings.EnvironmentMap = cubeMap;
 
             var input = this.GetService<InputComponent>();
             this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(car, Vector3.Up * 50, input));
