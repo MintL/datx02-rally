@@ -23,6 +23,7 @@ namespace datx02_rally
 
         #region Foliage
         Model oakTree;
+        Model mushroomGroup;
         Vector3[] treePositions;
         float[] treeRotations;
         #endregion
@@ -51,6 +52,7 @@ namespace datx02_rally
 
         List<ParticleSystem> particleSystems = new List<ParticleSystem>();
         ParticleSystem plasmaSystem;
+        ParticleSystem greenSystem;
 
         Random random = new Random();
 
@@ -109,6 +111,10 @@ namespace datx02_rally
             Components.Add(plasmaSystem);
             particleSystems.Add(plasmaSystem);
 
+            greenSystem = new GreenParticleSystem(this, Content);
+            Components.Add(greenSystem);
+            particleSystems.Add(greenSystem);
+
             //smoke = new SmokePlumeParticleSystem(this, Content);
             //smoke.DrawOrder = 500;
             //Components.Add(smoke);
@@ -147,7 +153,7 @@ namespace datx02_rally
 
                 pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
             }
-            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.6f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.3f);
+            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.1f, Color.White.ToVector3() * 0.4f);
             
             #endregion
 
@@ -265,6 +271,18 @@ namespace datx02_rally
                 );
                 treeRotations[i] = MathHelper.Lerp(0, MathHelper.Pi * 2, (float)random.NextDouble());
             }
+
+            {
+                mushroomGroup = Content.Load<Model>(@"Foliage\MushroomGroup");
+                ModelMesh mesh = mushroomGroup.Meshes.First<ModelMesh>();
+                foreach (ModelMeshPart part in mesh.MeshParts)
+                {
+                    part.Effect = alphaMapEffect.Clone();
+                    part.Effect.Parameters["ColorMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-c"));
+                    part.Effect.Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-n"));
+                }
+            }
+            
             #endregion
 
             carSettings.EnvironmentMap = cubeMap;
@@ -335,6 +353,10 @@ namespace datx02_rally
                     Matrix.CreateRotationZ(MathHelper.TwoPi * 20 * next)), Vector3.Zero);
             }
 
+            for (int i = 0; i < 3; i++) {
+                greenSystem.AddParticle(new Vector3(105, 10, 100), Vector3.Up);
+            }
+
             //Apply changes to car
             car.Update();
 
@@ -387,6 +409,8 @@ namespace datx02_rally
             {
                 DrawModel(oakTree, treePositions[i], treeRotations[i]);
             }
+
+            DrawModel(mushroomGroup, new Vector3(100, 0, 100), 0.0f);
             #endregion
 
             #region Terrain
