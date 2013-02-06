@@ -74,7 +74,7 @@ namespace datx02_rally
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            graphics.PreferredBackBufferWidth = 1366;
+            graphics.PreferredBackBufferWidth = 1360;
             graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
@@ -149,7 +149,7 @@ namespace datx02_rally
                     MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()));
                 pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
             }
-            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.6f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.3f);
+            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.6f, 1.0f) * 0.2f, Color.White.ToVector3() * 1.0f); //0.3f
 
             effect.CurrentTechnique = effect.Techniques["BasicShading"];
 
@@ -210,10 +210,9 @@ namespace datx02_rally
             }
 
             #region Foliage
-            oakTree = Content.Load<Model>(@"Foliage\Oak_Tree");
+            oakTree = Content.Load<Model>(@"Foliage\Oak_tree");
             Effect alphaMapEffect = Content.Load<Effect>(@"Effects\AlphaMap");
-            Texture2D alphaMap = Content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-a");
-
+            
             // Initialize the material settings
             foreach (ModelMesh mesh in oakTree.Meshes)
             {
@@ -223,7 +222,10 @@ namespace datx02_rally
                     part.Effect = alphaMapEffect.Clone();
                     part.Effect.Parameters["ColorMap"].SetValue(basicEffect.Texture);
                 }
-                mesh.Effects[1].Parameters["AlphaMap"].SetValue(alphaMap);
+                mesh.Effects[0].Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\BarkMossy-tiled-n"));
+
+                mesh.Effects[1].Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-ni"));
+                mesh.Effects[1].Parameters["AlphaMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-a"));
             }
 
             treePositions = new Vector3[10];
@@ -378,7 +380,7 @@ namespace datx02_rally
                         Matrix.CreateRotationY(rotation);
                     Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(world));
 
-                    effect.Parameters["NormalMatrix"].SetValue(normalMatrix);
+                    //effect.Parameters["NormalMatrix"].SetValue(normalMatrix);
                     effect.Parameters["World"].SetValue(world);
                     effect.Parameters["View"].SetValue(view);
                     effect.Parameters["Projection"].SetValue(projection);
