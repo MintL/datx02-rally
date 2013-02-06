@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
+using System.IO;
 
 /*Implementation from the following link: 
  * 
@@ -30,7 +32,8 @@ namespace datx02_rally.MapGeneration
             {
                 for (int j = 0; j < Size; j++)
                 {
-                    Heights[i, j] += Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0);
+                    
+                    Heights[i, j] += (Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0)+1)/2;
                 }
             }
         }
@@ -110,8 +113,8 @@ namespace datx02_rally.MapGeneration
 
         public float[,] Generate()
         {   
-            AddPerlinNoise(6.0f); 
-            
+            AddPerlinNoise(10.0f);
+
             Perturb(32.0f, 32.0f); 
             
             for (int i = 0; i < 10; i++) 
@@ -120,6 +123,47 @@ namespace datx02_rally.MapGeneration
             Smoothen();
 
             return Heights;
+        }
+
+        public void Store(GraphicsDevice graphicsDevice) 
+        { 
+            string imageDestination = "z:/GeneratedMaps/new.bmp";
+            
+            float lowest = 1, highest = 0;
+
+            FileStream stream = new FileStream(imageDestination, FileMode.Create);
+
+
+            Texture2D mapImage = new Texture2D(graphicsDevice, Size, Size, false, SurfaceFormat.Color);
+
+            Color[] heightMapColors = new Color[Heights.Length];
+
+            for (int x = 0; x < Size; x++)
+            {
+                for (int y = 0; y < Size; y++)
+                {
+                    var next = Heights[x, y];
+                    
+                    lowest = Math.Min(lowest, next);
+                    highest = Math.Max(highest, next);
+
+                    byte colorData = (byte)(next * 255);
+
+                    heightMapColors[x + y * Size].R = colorData;
+                    heightMapColors[x + y * Size].G = colorData;
+                    heightMapColors[x + y * Size].B = colorData;
+                    heightMapColors[x + y * Size].A = 255;
+                }
+            }
+
+            mapImage.SetData<Color>(heightMapColors);
+
+            mapImage.SaveAsPng(stream, Size, Size);
+
+            Console.WriteLine("Lowest noise: " + lowest);
+            Console.WriteLine("Highest noise: " + highest);
+
+            stream.Close();
         }
     }
 }

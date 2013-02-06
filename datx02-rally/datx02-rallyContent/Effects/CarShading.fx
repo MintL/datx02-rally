@@ -18,9 +18,9 @@ float3 LightDiffuse[MaxLights];
 float LightRange[MaxLights];
 int NumLights;
 
-float3 DirectionalDirection;
-float3 DirectionalAmbient;
-float3 DirectionalDiffuse;
+float3 DirectionalLightDirection;
+float3 DirectionalLightAmbient;
+float3 DirectionalLightDiffuse;
 
 float MaterialReflection;
 Texture EnvironmentMap;
@@ -92,7 +92,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float3 normal = normalize(input.Normal);
 	float3 directionFromEye = -normalize(input.View);
 	float normalizationFactor = ((MaterialShininess + 2.0) / 8.0);
-	float3 totalLight = MaterialAmbient * DirectionalAmbient;
+	float3 totalLight = MaterialAmbient * DirectionalLightAmbient;
 
 	for (int i = 0; i < NumLights; i++)
 	{
@@ -116,20 +116,20 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	}
 
 	// Directional light
-	float3 directionToLight = -normalize(DirectionalDirection);
+	float3 directionToLight = -normalize(DirectionalLightDirection);
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 	float3 fresnel = MaterialSpecular + (float3(1.0, 1.0, 1.0) - MaterialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
 			0.0, 1.0), 5.0);
 
 	float3 reflection = normalize(reflect(directionFromEye, normal));
-	totalLight += selfShadow * (DirectionalDiffuse * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) +
-					DirectionalDiffuse * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor +
+	totalLight += selfShadow * (DirectionalLightDiffuse * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) +
+					DirectionalLightDiffuse * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor +
 					texCUBE(EnvironmentSampler, reflection) * MaterialReflection * fresnel);
 
 	return float4(saturate(totalLight), 1.0);
 }
 
-technique BasicShading
+technique CarShading
 {
     pass Pass1
     {

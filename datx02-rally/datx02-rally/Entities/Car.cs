@@ -70,7 +70,7 @@ namespace datx02_rally
             Vector3 oldPos = Position;
             Position = (front + back) / 2;
             Rotation = (float)Math.Atan2(back.X - front.X, back.Z - front.Z);
-            WheelRotationX -= (Position - oldPos).Length() / wheelRadius;
+            WheelRotationX += (Speed < 0 ? 1 : -1) * (Position - oldPos).Length() / wheelRadius;
 
             
         }

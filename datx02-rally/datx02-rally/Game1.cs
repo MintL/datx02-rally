@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Particle3DSample;
+using datx02_rally.ModelPresenters;
 
 namespace datx02_rally
 {
@@ -20,40 +21,30 @@ namespace datx02_rally
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        Model model;
+        // 
         Model lightModel;
-        Vector3 modelPosition = Vector3.Zero;
-        float modelRotation = 0.0f;
 
-        float lightDistance = 700.0f;
-        float lightRotation;
-        
-        /*
+        // 
         float[,] heightMap;
-        int mapSize;*/
-        Model terrain;
+        int mapSize;
 
-        ThirdPersonCamera camera;
-        Vector2 screenCenter;
+        Model terrain;
 
         Matrix projection;
 
         List<PointLight> pointLights  = new List<PointLight>();
+
         DirectionalLight directionalLight;
 
-        Effect effect;
-
         Car car;
-        ParticleSystem smoke;
-        ParticleEmitter particleEmitter;
-
-        ParticleSystem plasmaSystem;
+        Effect carEffect;
+        CarShadingSettings carSettings = new CarShadingSettings(){
+            MaterialReflection = .3f,
+            MaterialShininess = 10
+        };
 
         List<ParticleSystem> particleSystems = new List<ParticleSystem>();
-
-        PlaneModel plane;
-        PlaneModel tree;
-        List<Matrix> treeTransforms = new List<Matrix>();
+        ParticleSystem plasmaSystem;
 
         Random random = new Random();
 
@@ -100,10 +91,6 @@ namespace datx02_rally
             Components.Add(cameraComponent);
             Services.AddService(typeof(CameraComponent), cameraComponent);
 
-            var previousKeyboardStateComponent = new PreviousKeyboardState(this);
-            Components.Add(previousKeyboardStateComponent);
-            Services.AddService(typeof(PreviousKeyboardState), previousKeyboardStateComponent);
-
             var carControlComponent = new CarControlComponent(this);
             Components.Add(carControlComponent);
             Services.AddService(typeof(CarControlComponent), carControlComponent);
@@ -115,6 +102,10 @@ namespace datx02_rally
             plasmaSystem = new PlasmaParticleSystem(this, Content);
             Components.Add(plasmaSystem);
             particleSystems.Add(plasmaSystem);
+
+            //smoke = new SmokePlumeParticleSystem(this, Content);
+            //smoke.DrawOrder = 500;
+            //Components.Add(smoke);
 
             base.Initialize();
         }
@@ -128,12 +119,12 @@ namespace datx02_rally
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            screenCenter = new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height) / 2f;
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
-                GraphicsDevice.Viewport.AspectRatio, 1.1f, 50000f);
-            
-            effect = Content.Load<Effect>(@"Effects/BasicShading");
-            model = Content.Load<Model>(@"Models/porsche");
+                GraphicsDevice.Viewport.AspectRatio, .1f, 500000f);
+
+            #region Lights
+
+            // Load model to represent our lightsources
             lightModel = Content.Load<Model>(@"Models/light");
 
             // Light specific parameters
@@ -145,69 +136,68 @@ namespace datx02_rally
                     MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
                     MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
                     MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()));
+
+                Console.WriteLine(color);
+
                 pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
             }
             directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.6f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.3f);
+            
+            #endregion
 
-            effect.CurrentTechnique = effect.Techniques["BasicShading"];
+            // Load car effect (10p-light, env-map)
+            carEffect = Content.Load<Effect>(@"Effects/CarShading");
+            
+            // TODO: Uses first Technique?
+            //carEffect.CurrentTechnique = carEffect.Techniques["CarShading"];
 
-            // Initialize the material settings
-            foreach (ModelMesh mesh in model.Meshes)
+            car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
+            foreach (var mesh in car.Model.Meshes)
+            {
+                if (mesh.Name.StartsWith("wheel"))
+                {
+                    if (mesh.Name.EndsWith("001") || mesh.Name.EndsWith("002"))
+                        mesh.Tag = 2;
+                    else
+                        mesh.Tag = 1;
+                }
+                else
+                    mesh.Tag = 0;
+            }
+            
+            carSettings.Projection = projection;
+
+            // Keep some old settings from imported modeleffect, then replace with carEffect
+            foreach (ModelMesh mesh in car.Model.Meshes)
             {
                 foreach (ModelMeshPart part in mesh.MeshParts)
                 {
-                    BasicEffect basicEffect = (BasicEffect)part.Effect;
-                    part.Effect = effect.Clone();
-                    part.Effect.Parameters["MaterialAmbient"].SetValue(basicEffect.DiffuseColor * 0.5f);
-                    part.Effect.Parameters["MaterialDiffuse"].SetValue(basicEffect.DiffuseColor);
-                    part.Effect.Parameters["MaterialSpecular"].SetValue(basicEffect.DiffuseColor * 0.3f);//basicEffect.SpecularColor
+                    BasicEffect oldEffect = part.Effect as BasicEffect;
+                    carSettings.MaterialDiffuse = oldEffect.DiffuseColor;
+                    carSettings.MaterialAmbient = oldEffect.DiffuseColor * .5f;
+                    carSettings.MaterialSpecular = oldEffect.DiffuseColor * .3f;
+                    part.Effect = carEffect.Clone();
                 }
             }
 
-            car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
             this.GetService<CarControlComponent>().Car = car;
-            particleEmitter = new ParticleEmitter(plasmaSystem, 60, car.Position);
-
-
-            plane = new PlaneModel(new Vector2(-10000), new Vector2(10000), 1, GraphicsDevice, null, projection, Matrix.Identity);
 
             #region MapGeneration
-            /*
+
+            
+            mapSize = 512;
 
             MapGeneration.HeightMap hmGenerator = new MapGeneration.HeightMap(mapSize);
 
             heightMap = hmGenerator.Generate();
 
-            for (int i = 0; i < mapSize; i++)
-            {
-                for (int j = 0; j < mapSize; j++)
-                {
-                    Console.Write(heightMap[i,j]+" ");
-                }
-                Console.WriteLine();
-            }*/
+            hmGenerator.Store(GraphicsDevice);
 
-            terrain = Content.Load<Model>("heightmap");
-
+            terrain = Content.Load<Model>("ourmap");
 
 
             #endregion
 
-            Vector2 treePlaneSizeStart = new Vector2(-50, -250),
-                treePlaneSizeEnd = new Vector2(50, 0);
-
-            tree = new PlaneModel(treePlaneSizeStart, treePlaneSizeEnd, 1, GraphicsDevice,
-                    Content.Load<Texture2D>("spruce"), projection, Matrix.Identity);
-
-            for (int i = 99; i >= 0; i--)
-            {
-                int side = 2 * random.Next(2) - 1;
-                treeTransforms.Add(Matrix.CreateRotationX(MathHelper.PiOver2) *
-                    Matrix.CreateRotationY(-side * (MathHelper.PiOver4 + (float)(random.NextDouble() / 4))) *
-                    Matrix.CreateTranslation(new Vector3(side * (140 + random.Next(30)), 0, i * -100)));
-            }
-
- 
             #region SkySphere
 
             skyBoxModel = Content.Load<Model>(@"Models/skybox");
@@ -233,16 +223,15 @@ namespace datx02_rally
                 foreach (var part in mesh.MeshParts)
                 {
                     part.Effect = skyBoxEffect;
-                    
                 }
             }
 
             #endregion
 
             var input = this.GetService<InputComponent>();
-            camera = new ThirdPersonCamera(car, Vector3.Up * 50, input);
-            this.GetService<CameraComponent>().AddCamera(camera);
+            this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(car, Vector3.Up * 50, input));
             this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100), input));
+
         }
 
         /// <summary>
@@ -296,26 +285,7 @@ namespace datx02_rally
             if (input.GetPressed(Input.Exit))
                 this.Exit();
 
-            KeyboardState keyboard = Keyboard.GetState();
-            float millis = (float)gameTime.ElapsedGameTime.Milliseconds;
-            if (keyboard.IsKeyDown(Keys.Left))
-            {
-                modelRotation += millis * MathHelper.ToRadians(0.05f);
-            }
-            else if (keyboard.IsKeyDown(Keys.Right))
-            {
-                modelRotation -= millis * MathHelper.ToRadians(0.05f);
-            }
-
-            if (keyboard.IsKeyDown(Keys.Subtract))
-            {
-                lightDistance -= millis * 1.0f;
-            }
-            else if (keyboard.IsKeyDown(Keys.Add))
-            {
-                lightDistance += millis * 1.0f;
-            }
-
+            // Spawn particles
             Vector3 radius = 100 * Vector3.UnitX;
             for (int z = 0; z < 10000; z += 1000)
             {
@@ -338,10 +308,9 @@ namespace datx02_rally
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Honeydew);
-            
 
-            Matrix[] transforms = new Matrix[model.Bones.Count];
-            model.CopyAbsoluteBoneTransformsTo(transforms);
+            Matrix[] transforms = new Matrix[car.Model.Bones.Count];
+            car.Model.CopyAbsoluteBoneTransformsTo(transforms);
 
             Matrix view = this.GetService<CameraComponent>().View;
 
@@ -365,6 +334,7 @@ namespace datx02_rally
 
             //smoke.SetCamera(view, projection);
             //plasmaSystem.SetCamera(view, projection);
+
 
             foreach (PointLight light in pointLights)
             {
@@ -392,70 +362,64 @@ namespace datx02_rally
 
             #endregion
 
-            // Draw car
-            foreach (var mesh in car.Model.Meshes) // 5 meshes
-            {
-                foreach (Effect effect in mesh.Effects) // 5 effects for main, 1 for each wheel
-                {
-                    EffectParameterCollection parameters = effect.Parameters;
-                    parameters["MaterialShininess"].SetValue(10.0f);
-                    parameters["MaterialReflection"].SetValue(0.3f);
-                    parameters["EnvironmentMap"].SetValue(cubeMap);
 
-                    Matrix world = Matrix.Identity;
-                    // Wheel transformation
-                    if (mesh.Name.StartsWith("wheel"))
-                    {
-                        world *= Matrix.CreateRotationX(car.WheelRotationX);
-
-                        if (mesh.Name.EndsWith("001") || mesh.Name.EndsWith("002"))
-                            world *= Matrix.CreateRotationY(car.WheelRotationY);
-                    }
-
-                    // Local modelspace, due to bad .X-file/exporter
-                    world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
-
-                    world *= car.RotationMatrix * car.TranslationMatrix;
-
-                    parameters["World"].SetValue(world);
-
-                    Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(world));
-                    parameters["NormalMatrix"].SetValue(normalMatrix);
-
-                    parameters["View"].SetValue(view);
-                    parameters["Projection"].SetValue(projection);
-                    parameters["EyePosition"].SetValue(view.Translation);
-
-                    Vector3[] positions = new Vector3[pointLights.Count];
-                    Vector3[] diffuses = new Vector3[pointLights.Count];
-                    float[] ranges = new float[pointLights.Count];
-                    for (int i=0; i<pointLights.Count; i++) {
-                        positions[i] = pointLights[i].Position;
-                        diffuses[i] = pointLights[i].Diffuse;
-                        ranges[i] = pointLights[i].Range;
-                    }
-                    parameters["LightPosition"].SetValue(positions);
-                    parameters["LightDiffuse"].SetValue(diffuses);
-                    parameters["LightRange"].SetValue(ranges);
-                    parameters["NumLights"].SetValue(pointLights.Count);
-
-                    parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
-                    parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
-                    parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
-
-                }
-                mesh.Draw();
-            }
-
-
-
-            //foreach (var world in treeTransforms)
-            //{
-            //    tree.World = world;
-            //    tree.Draw(view);
-            //}
+            DrawCar(view, projection);
 
             base.Draw(gameTime);
         }
+
+        private void DrawCar(Matrix view, Matrix projection)
+        {
+            carSettings.View = view;
+            carSettings.Projection = projection;
+
+            carSettings.EyePosition = view.Translation;
+
+            Vector3[] positions = new Vector3[pointLights.Count];
+            Vector3[] diffuses = new Vector3[pointLights.Count];
+            float[] ranges = new float[pointLights.Count];
+            for (int i = 0; i < pointLights.Count; i++)
+            {
+                positions[i] = pointLights[i].Position;
+                diffuses[i] = pointLights[i].Diffuse;
+                ranges[i] = pointLights[i].Range;
+            }
+
+            carSettings.LightPosition = positions;
+            carSettings.LightDiffuse = diffuses;
+            carSettings.LightRange = ranges;
+            carSettings.NumLights = pointLights.Count;
+
+            carSettings.DirectionalLightDirection = directionalLight.Direction;
+            carSettings.DirectionalLightDiffuse = directionalLight.Diffuse;
+            carSettings.DirectionalLightAmbient = directionalLight.Ambient;
+
+            foreach (var mesh in car.Model.Meshes) // 5 meshes
+            {
+                Matrix world = Matrix.Identity;
+                // Wheel transformation
+                if ((int)mesh.Tag > 0)
+                {
+                    world *= Matrix.CreateRotationX(car.WheelRotationX);
+                    if ((int)mesh.Tag > 1)
+                        world *= Matrix.CreateRotationY(car.WheelRotationY);
+                }
+
+                // Local modelspace, due to bad .X-file/exporter
+                world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
+                // World
+                world *= car.RotationMatrix * car.TranslationMatrix;
+            
+                carSettings.World = world;
+                carSettings.NormalMatrix = Matrix.Invert(Matrix.Transpose(world));
+
+                foreach (Effect effect in mesh.Effects) // 5 effects for main, 1 for each wheel
+                    effect.SetCarShadingParameters(carSettings);
+
+                mesh.Draw();
+            }
+
+        }
+
     }
 }

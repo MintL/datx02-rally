@@ -117,6 +117,7 @@
     <Compile Include="Components\CarControlComponent.cs" />
     <Compile Include="Components\InputComponent.cs" />
     <Compile Include="DirectionalLight.cs" />
+    <Compile Include="ModelPresenters\BasicShadingPresenter.cs" />
     <Compile Include="Particles\ParticleEmitter.cs" />
     <Compile Include="Particles\ParticleSettings.cs" />
     <Compile Include="Particles\ParticleSystem.cs" />
@@ -132,7 +133,6 @@
     <Compile Include="Components\CameraComponent.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Components\PreviousKeyboardState.cs" />
     <Compile Include="Entities\Car.cs" />
     <Compile Include="Entities\ITargetNode.cs" />
     <Compile Include="Entities\PlaneModel.cs" />
