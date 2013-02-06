@@ -14,6 +14,7 @@ namespace GameServer
         ServerPlayer[] Players;
         readonly int Port;
         NetServer serverThread;
+        Boolean running;
 
         public Server()
         {
@@ -28,9 +29,12 @@ namespace GameServer
         private void Run()
         {
             NetIncomingMessage msg;
-            while ((msg = serverThread.ReadMessage()) != null)
+            while (running)
             {
-                HandleIncomingPacket(msg);
+                while ((msg = serverThread.ReadMessage()) != null)
+                {
+                    HandleIncomingPacket(msg);
+                }
             }
         }
 
@@ -79,6 +83,7 @@ namespace GameServer
 
             serverThread = new NetServer(config);
             serverThread.Start();
+            running = true;
 
             Run();
         }
