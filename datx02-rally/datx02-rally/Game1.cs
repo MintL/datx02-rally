@@ -21,6 +21,12 @@ namespace datx02_rally
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        #region Foliage
+        Model oakTree;
+        Vector3[] treePositions;
+        float[] treeRotations;
+        #endregion
+
         // 
         Model lightModel;
 
@@ -228,6 +234,38 @@ namespace datx02_rally
 
             #endregion
 
+            #region Foliage
+            oakTree = Content.Load<Model>(@"Foliage\Oak_tree");
+            Effect alphaMapEffect = Content.Load<Effect>(@"Effects\AlphaMap");
+
+            // Initialize the material settings
+            foreach (ModelMesh mesh in oakTree.Meshes)
+            {
+                foreach (ModelMeshPart part in mesh.MeshParts)
+                {
+                    BasicEffect basicEffect = (BasicEffect)part.Effect;
+                    part.Effect = alphaMapEffect.Clone();
+                    part.Effect.Parameters["ColorMap"].SetValue(basicEffect.Texture);
+                }
+                mesh.Effects[0].Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\BarkMossy-tiled-n"));
+
+                mesh.Effects[1].Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-ni"));
+                mesh.Effects[1].Parameters["AlphaMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-a"));
+            }
+
+            treePositions = new Vector3[10];
+            treeRotations = new float[10];
+            for (int i = 0; i < 10; i++)
+            {
+                treePositions[i] = new Vector3(
+                    MathHelper.Lerp(300, 800, (float)random.NextDouble()),
+                    0,
+                    MathHelper.Lerp(-200, 400, (float)random.NextDouble())
+                );
+                treeRotations[i] = MathHelper.Lerp(0, MathHelper.Pi * 2, (float)random.NextDouble());
+            }
+            #endregion
+
             var input = this.GetService<InputComponent>();
             this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(car, Vector3.Up * 50, input));
             this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100), input));
@@ -341,8 +379,12 @@ namespace datx02_rally
                 light.Draw(lightModel, view, projection);
             }
 
-            //plane.Draw(view, Color.Gray);
-
+            #region Foliage
+            for (int i = 0; i < 10; i++)
+            {
+                DrawModel(oakTree, treePositions[i], treeRotations[i]);
+            }
+            #endregion
 
             #region Terrain
 
@@ -366,6 +408,35 @@ namespace datx02_rally
             DrawCar(view, projection);
 
             base.Draw(gameTime);
+        }
+
+        private void DrawModel(Model m, Vector3 position, float rotation)
+        {
+            Matrix[] transforms = new Matrix[m.Bones.Count];
+            m.CopyAbsoluteBoneTransformsTo(transforms);
+
+            Matrix view = this.GetService<CameraComponent>().View;
+
+            foreach (ModelMesh mesh in m.Meshes)
+            {
+                foreach (Effect effect in mesh.Effects)
+                {
+                    Matrix world = transforms[mesh.ParentBone.Index] *
+                        Matrix.CreateTranslation(position) *
+                        Matrix.CreateRotationY(rotation);
+                    Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(world));
+
+                    //effect.Parameters["NormalMatrix"].SetValue(normalMatrix);
+                    effect.Parameters["World"].SetValue(world);
+                    effect.Parameters["View"].SetValue(view);
+                    effect.Parameters["Projection"].SetValue(projection);
+
+                    effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
+                    effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
+                    effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
+                }
+                mesh.Draw();
+            }
         }
 
         private void DrawCar(Matrix view, Matrix projection)
