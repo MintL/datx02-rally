@@ -23,7 +23,7 @@ namespace datx02_rally
 
         #region Foliage
         Model oakTree;
-        Model mushroomGroup;
+        //Model mushroomGroup;
         Vector3[] treePositions;
         float[] treeRotations;
         #endregion
@@ -243,7 +243,7 @@ namespace datx02_rally
 
             #endregion
 
-            testTerrain = new TerrainModel(GraphicsDevice, 2, 2, 1000);
+            testTerrain = new TerrainModel(GraphicsDevice, 4, 4, 1000);
             testTerrain.Projection = projection;
 
             #region Foliage
@@ -277,16 +277,16 @@ namespace datx02_rally
                 treeRotations[i] = MathHelper.Lerp(0, MathHelper.Pi * 2, (float)random.NextDouble());
             }
 
-            {
-                mushroomGroup = Content.Load<Model>(@"Foliage\MushroomGroup");
-                ModelMesh mesh = mushroomGroup.Meshes.First<ModelMesh>();
-                foreach (ModelMeshPart part in mesh.MeshParts)
-                {
-                    part.Effect = alphaMapEffect.Clone();
-                    part.Effect.Parameters["ColorMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-c"));
-                    part.Effect.Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-n"));
-                }
-            }
+         // {
+         //     mushroomGroup = Content.Load<Model>(@"Foliage\MushroomGroup");
+         //     ModelMesh mesh = mushroomGroup.Meshes.First<ModelMesh>();
+         //     foreach (ModelMeshPart part in mesh.MeshParts)
+         //     {
+         //         part.Effect = alphaMapEffect.Clone();
+         //         part.Effect.Parameters["ColorMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-c"));
+         //         part.Effect.Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-n"));
+         //     }
+         // }
             
             #endregion
 
@@ -417,7 +417,7 @@ namespace datx02_rally
                 DrawModel(oakTree, treePositions[i], treeRotations[i]);
             }
 
-            DrawModel(mushroomGroup, new Vector3(100, 0, 100), 0.0f);
+            //DrawModel(mushroomGroup, new Vector3(100, 0, 100), 0.0f);
             #endregion
 
             #region Terrain

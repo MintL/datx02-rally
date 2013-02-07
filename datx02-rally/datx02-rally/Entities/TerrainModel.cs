@@ -48,6 +48,7 @@ namespace datx02_rally
             
 
             int flexIndice = 1;
+            int rowIndex = 2;
             int[] indices = new int[(width-1) * (height-1) * 6];
             indices[0] = 0;
             indices[1] = width;
@@ -68,10 +69,16 @@ namespace datx02_rally
                     flexIndice += width;
                     indices[i] = flexIndice;
                 }
-
-                if (indices[i] == 2 * width - 1)
+                if (i + 3 >= indices.Length)
+                    break;
+                else if (rowIndex * width -1 == indices[i])
                 {
-                    flexIndice -= 2;
+                    indices[i + 1] = flexIndice - width + 1;
+                    indices[i + 2] = flexIndice + 1;
+                    indices[i + 3] = flexIndice - width + 2;
+                    flexIndice = indices[i + 3];
+                    rowIndex++;
+                    i += 3;
                 }
             }
 
@@ -123,7 +130,7 @@ namespace datx02_rally
                 pass.Apply();
                 device.Indices = indexBuffer;
                 device.SetVertexBuffer(vertexbuffer);
-                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexbuffer.VertexCount, 0, vertexbuffer.VertexCount/2);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexbuffer.VertexCount, 0, vertexbuffer.VertexCount*2);
             }
         }
     }
