@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using BulletSharp;
 using Test;
+using System.Net;
 
 namespace datx02_rally
 {
@@ -18,6 +19,7 @@ namespace datx02_rally
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        Boolean connected = false;
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
@@ -215,6 +217,18 @@ namespace datx02_rally
             else if (keyboard.IsKeyDown(Keys.Add))
             {
                 lightDistance += millis * 1.0f;
+            }
+
+            if (keyboard.IsKeyDown(Keys.Z) && !connected)
+            {
+                System.Threading.ThreadPool.QueueUserWorkItem(delegate
+                {
+                    ServerClient client = new ServerClient();
+                    client.Connect(IPAddress.Loopback);
+                    client.SendTestData();
+                    Console.WriteLine("Sent test data!");
+                }, null);
+                connected = true;
             }
 
             Console.WriteLine(1 - Math.Pow(lightDistance / 500.0f, 2));

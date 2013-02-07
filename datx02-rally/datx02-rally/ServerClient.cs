@@ -25,5 +25,11 @@ namespace datx02_rally
         public void Connect(IPAddress IP) {
             client.Connect(new IPEndPoint(IP, PORT));
         }
+
+        public void SendTestData()
+        {
+            NetOutgoingMessage msg = client.CreateMessage("Hello world!");
+            client.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
+        }
     }
 }
