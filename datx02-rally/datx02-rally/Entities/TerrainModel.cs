@@ -16,9 +16,9 @@ namespace datx02_rally
 
         private IndexBuffer indexBuffer;
 
-        private BasicEffect effect;
+        public Effect Effect { get; set; }
 
-        public Matrix Projection { get { return effect.Projection; } set { effect.Projection = value; } }
+        public Matrix Projection { get; set; }
         
         public TerrainModel(Vector2 start, Vector2 end, float uvScale, GraphicsDevice device, Texture2D texture, Matrix projection, Matrix world)
         {
@@ -28,9 +28,11 @@ namespace datx02_rally
         {
             this.device = device;
 
-            effect = new BasicEffect(device);
-            effect.EnableDefaultLighting();
-            effect.World = Matrix.Identity;
+            //Effect = new BasicEffect(device);
+            //var effect = Effect as BasicEffect;
+
+            //effect.EnableDefaultLighting();
+            //effect.World = Matrix.Identity;
 
             vertices = new VertexPositionNormalTexture[width * height];
 
@@ -39,8 +41,8 @@ namespace datx02_rally
                 for (int z = 0; z < height; z++)
                 {
                     vertices[x * width + z] = new VertexPositionNormalTexture(
-                        new Vector3(x * triangleSize, 0, z * triangleSize), 
-                        Vector3.Up, 
+                        new Vector3((x - width / 2) * triangleSize, ((x == 0 || x == width - 1) || (z == 0 || z == height - 1) ? -1200 : 0), (z - height / 2) * triangleSize),
+                        Vector3.Up,
                         new Vector2(x % 2, z % 2));
                 }
             }
@@ -103,10 +105,10 @@ namespace datx02_rally
             //    }
             //}
 
-            for (int i = 0; i < indices.Length; i++)
-            {
-                System.Console.WriteLine(indices[i]);
-            }
+            //for (int i = 0; i < indices.Length; i++)
+            //{
+            //    System.Console.WriteLine(indices[i]);
+            //}
 
 
 
@@ -122,10 +124,14 @@ namespace datx02_rally
         
         public void Draw(Matrix view)
         {
-            effect.View = view;
-            effect.DiffuseColor = Color.LightBlue.ToVector3();
+            //var effect = Effect as BasicEffect;
+            //effect.View = view;
+            //effect.DiffuseColor = Color.LightBlue.ToVector3();
 
-            foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+            Effect.Parameters["EyePosition"].SetValue(view.Translation);
+            Effect.Parameters["WorldViewProj"].SetValue(view * Projection);
+
+            foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
             {
                 pass.Apply();
                 device.Indices = indexBuffer;

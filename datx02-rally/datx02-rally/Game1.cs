@@ -243,8 +243,11 @@ namespace datx02_rally
 
             #endregion
 
-            testTerrain = new TerrainModel(GraphicsDevice, 4, 4, 1000);
+            testTerrain = new TerrainModel(GraphicsDevice, 512, 512, 100);
+            //testTerrain.Projection = projection;
+            var ef = terrain.Meshes[0].Effects[0].Clone();
             testTerrain.Projection = projection;
+            testTerrain.Effect = terrain.Meshes[0].Effects[0];
 
             #region Foliage
             oakTree = Content.Load<Model>(@"Foliage\Oak_tree");
@@ -437,7 +440,6 @@ namespace datx02_rally
             }
 
             #endregion
-
 
             DrawCar(view, projection);
 
