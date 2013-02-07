@@ -64,6 +64,8 @@ namespace datx02_rally
 
         #endregion
 
+        TerrainModel testTerrain;
+
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -241,6 +243,9 @@ namespace datx02_rally
 
             #endregion
 
+            testTerrain = new TerrainModel(GraphicsDevice, 4, 4, 1000);
+            testTerrain.Projection = projection;
+
             #region Foliage
             oakTree = Content.Load<Model>(@"Foliage\Oak_tree");
             Effect alphaMapEffect = Content.Load<Effect>(@"Effects\AlphaMap");
@@ -353,7 +358,7 @@ namespace datx02_rally
                     Matrix.CreateRotationZ(MathHelper.TwoPi * 20 * next)), Vector3.Zero);
             }
 
-            for (int i = 0; i < 3; i++) {
+            for (int i = 0; i < 1; i++) {
                 greenSystem.AddParticle(new Vector3(105, 10, 100), Vector3.Up);
             }
 
@@ -388,6 +393,8 @@ namespace datx02_rally
             skyBoxModel.Meshes[0].Draw();
 
             #endregion
+
+            testTerrain.Draw(view);
 
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
 

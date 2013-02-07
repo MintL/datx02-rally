@@ -136,7 +136,7 @@
     </Compile>
     <Compile Include="Entities\Car.cs" />
     <Compile Include="Entities\ITargetNode.cs" />
-    <Compile Include="Entities\PlaneModel.cs" />
+    <Compile Include="Entities\TerrainModel.cs" />
     <Compile Include="GameExtensions.cs" />
     <Compile Include="MapGeneration\HeightMap.cs" />
     <Compile Include="MapGeneration\HeightMapInfo.cs" />

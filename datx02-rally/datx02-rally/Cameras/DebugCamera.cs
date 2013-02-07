@@ -18,10 +18,7 @@ namespace datx02_rally
         public float MinSpeed { get; set; }
         public float MaxSpeed { get; set; }
 
-        public override Matrix View
-        {
-            get { return Matrix.CreateLookAt(position, position + lookAt, Vector3.Up); }
-        }
+        public override Matrix View { get; protected set; }
 
         public DebugCamera(Vector3 position, InputComponent input) : this(input)
         {
@@ -66,7 +63,8 @@ namespace datx02_rally
                 speed = MinSpeed;
 
             position += delta;
-        }
 
+            View = Matrix.CreateLookAt(position, position + lookAt, Vector3.Up);
+        }
     }
 }
