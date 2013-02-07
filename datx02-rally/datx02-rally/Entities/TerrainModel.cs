@@ -45,27 +45,65 @@ namespace datx02_rally
                 }
             }
 
-            int[] indices = new int[width * height];
+            
+
+            int flexIndice = 1;
+            int[] indices = new int[(width-1) * (height-1) * 6];
             indices[0] = 0;
             indices[1] = width;
+            indices[2] = flexIndice;
 
-            int offset = 0;
-
-            for (int i = 2; i < indices.Length + offset; i++)
+            for (int i = 5; i <= indices.Length; i += 3)
             {
-                if (i % 3 < 2)
-                    indices[i - offset] = indices[i - 2 - offset];
-                else
-                    indices[i - offset] = 1 + i / 2 + (i % 2 == 0 ? 0 : width);
+                indices[i - 2] = indices[i - 4];
+                indices[i - 1] = indices[i - 3];
 
-                if (indices[i - offset] == 2 * width - 1)
+                if (i % 2 == 0)
                 {
-                    i += 6;
-                    offset += 6;
+                    flexIndice -= (width-1);
+                    indices[i] = flexIndice;
+                }
+                else
+                {
+                    flexIndice += width;
+                    indices[i] = flexIndice;
+                }
+
+                if (indices[i] == 2 * width - 1)
+                {
+                    flexIndice -= 2;
                 }
             }
 
-            indexBuffer = new IndexBuffer(device, typeof(int), width * height, BufferUsage.None);
+
+            //int[] indices = new int[(width-1) * (height-1) * 6];
+            //indices[0] = 0;
+            //indices[1] = width;
+
+            //int offset = 0;
+
+            //for (int i = 2; i < indices.Length + offset; i++)
+            //{
+            //    if (i % 3 < 2)
+            //        indices[i - offset] = indices[i - 2 - offset];
+            //    else
+            //        indices[i - offset] = 1 + i / 2 + (i % 2 == 0 ? 0 : width);
+
+            //    if (indices[i - offset] == 2 * width - 1)
+            //    {
+            //        i += 6;
+            //        offset += 6;
+            //    }
+            //}
+
+            for (int i = 0; i < indices.Length; i++)
+            {
+                System.Console.WriteLine(indices[i]);
+            }
+
+
+
+            indexBuffer = new IndexBuffer(device, typeof(int), (width-1) * (height-1) * 6, BufferUsage.None);
             indexBuffer.SetData(indices);
 
             vertexbuffer = new VertexBuffer(device,
@@ -85,7 +123,7 @@ namespace datx02_rally
                 pass.Apply();
                 device.Indices = indexBuffer;
                 device.SetVertexBuffer(vertexbuffer);
-                device.DrawPrimitives(PrimitiveType.TriangleList, 0, vertexbuffer.VertexCount);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexbuffer.VertexCount, 0, vertexbuffer.VertexCount/2);
             }
         }
     }

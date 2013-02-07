@@ -243,7 +243,7 @@ namespace datx02_rally
 
             #endregion
 
-            testTerrain = new TerrainModel(GraphicsDevice, 4, 4, 1000);
+            testTerrain = new TerrainModel(GraphicsDevice, 2, 2, 1000);
             testTerrain.Projection = projection;
 
             #region Foliage
