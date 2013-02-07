@@ -228,7 +228,7 @@ namespace datx02_rally
                     client.SendTestData();
                     Console.WriteLine("Sent test data!");
                 }, null);
-                connected = true;
+                connected = true; 
             }
 
             Console.WriteLine(1 - Math.Pow(lightDistance / 500.0f, 2));
