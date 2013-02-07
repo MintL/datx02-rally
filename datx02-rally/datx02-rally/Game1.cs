@@ -225,6 +225,7 @@ namespace datx02_rally
                 {
                     ServerClient client = new ServerClient();
                     client.Connect(IPAddress.Loopback);
+                    System.Threading.Thread.Sleep(5000);
                     client.SendTestData();
                     Console.WriteLine("Sent test data!");
                 }, null);

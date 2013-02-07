@@ -21,7 +21,7 @@ namespace GameServer
             ServerName = "Test server";
             MaxPlayers = 4;
             Players = new ServerPlayer[4];
-            Port = 14242; 
+            Port = 19283; 
 
             Start();
         }
@@ -71,7 +71,7 @@ namespace GameServer
 
         private void ProcessDataMessage(NetIncomingMessage msg)
         {
-            Console.WriteLine("Received data from player " + msg.SenderEndPoint.Address + ": " + msg.Data);
+            Console.Write("Received data from player " + msg.SenderEndPoint.Address + ": " + msg.ReadString());
         }
 
         public void Start()
@@ -96,8 +96,10 @@ namespace GameServer
         public void PlayerConnected(IPEndPoint playerIP)
         {
             serverThread.SendDiscoveryResponse(null, playerIP);
-
-
+            Console.WriteLine("Player " + playerIP.Address + " connected!");
+            Console.WriteLine("Current players: " + serverThread.ConnectionsCount);
+            foreach (NetConnection connection in serverThread.Connections)
+                Console.WriteLine(connection.RemoteEndPoint.Address);
         }
 
         public void PlayerDisconnected(IPEndPoint playerIP)

@@ -11,7 +11,7 @@ namespace datx02_rally
     class ServerClient
     {
         NetClient client;
-        readonly int PORT = 14242;
+        readonly int PORT = 19283;
 
         public ServerClient()
         {
@@ -28,7 +28,8 @@ namespace datx02_rally
 
         public void SendTestData()
         {
-            NetOutgoingMessage msg = client.CreateMessage("Hello world!");
+            NetOutgoingMessage msg = client.CreateMessage();
+            msg.Write("Hello world! I'm connected.");
             client.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
         }
     }
