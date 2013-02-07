@@ -17,9 +17,9 @@ namespace datx02_rally
         {
             NetPeerConfiguration config = new NetPeerConfiguration("DATX02");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
-
+            
             client = new NetClient(config);
-            client.Start();
+            client.Start(); 
         }
 
         public void Connect(IPAddress IP) {
@@ -32,5 +32,6 @@ namespace datx02_rally
             msg.Write("Hello world! I'm connected.");
             client.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
         }
+
     }
 }

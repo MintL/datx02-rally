@@ -119,6 +119,7 @@
     <Compile Include="Camera.cs" />
     <Compile Include="Car.cs" />
     <Compile Include="FirstPersonCamera.cs" />
+    <Compile Include="Player.cs" />
     <Compile Include="PointLight.cs" />
     <Compile Include="PlaneModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
