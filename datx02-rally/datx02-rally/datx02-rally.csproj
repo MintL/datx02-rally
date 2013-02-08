@@ -119,12 +119,12 @@
     <Compile Include="DirectionalLight.cs" />
     <Compile Include="GameLogic\Curve.cs" />
     <Compile Include="GameLogic\RaceTrack.cs" />
-    <Compile Include="MapGeneration\TerrainGenerator.cs" />
     <Compile Include="ModelPresenters\BasicShadingPresenter.cs" />
     <Compile Include="Particles\ParticleEmitter.cs" />
     <Compile Include="Particles\ParticleSettings.cs" />
     <Compile Include="Particles\ParticleSystem.cs" />
     <Compile Include="Particles\ParticleVertex.cs" />
+    <Compile Include="Particles\Systems\GreenParticleSystem.cs" />
     <Compile Include="Particles\Systems\ExplosionParticleSystem.cs" />
     <Compile Include="Particles\Systems\ExplosionSmokeParticleSystem.cs" />
     <Compile Include="Particles\Systems\FireParticleSystem.cs" />
@@ -138,7 +138,7 @@
     </Compile>
     <Compile Include="Entities\Car.cs" />
     <Compile Include="Entities\ITargetNode.cs" />
-    <Compile Include="Entities\PlaneModel.cs" />
+    <Compile Include="Entities\TerrainModel.cs" />
     <Compile Include="GameExtensions.cs" />
     <Compile Include="MapGeneration\HeightMap.cs" />
     <Compile Include="MapGeneration\HeightMapInfo.cs" />

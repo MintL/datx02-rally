@@ -13,10 +13,10 @@ namespace datx02_rally.ModelPresenters
         {
             EffectParameterCollection param = effect.Parameters;
 
-            param["MaterialDiffuse"].SetValue(settings.MaterialDiffuse);
+            /*param["MaterialDiffuse"].SetValue(settings.MaterialDiffuse);
             param["MaterialAmbient"].SetValue(settings.MaterialAmbient);
             param["MaterialSpecular"].SetValue(settings.MaterialSpecular);
-
+            */
             param["MaterialReflection"].SetValue(settings.MaterialReflection);
             param["MaterialShininess"].SetValue(settings.MaterialShininess);
 

@@ -22,12 +22,23 @@ namespace datx02_rally
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        #region Foliage
+        Model oakTree;
+        //Model mushroomGroup;
+        Vector3[] treePositions;
+        float[] treeRotations;
+        #endregion
+
         // 
         Model lightModel;
 
         // 
+
+        static int mapSize = 1024;
+        static int triangleSize = 50;
+        RaceTrack raceTrack = new RaceTrack(((mapSize / 2) * triangleSize));
         float[,] heightMap;
-        int mapSize;
+        
 
         Model terrain;
 
@@ -44,10 +55,11 @@ namespace datx02_rally
             MaterialShininess = 10
         };
 
-        RaceTrack raceTrack = new RaceTrack(25000);
+
 
         List<ParticleSystem> particleSystems = new List<ParticleSystem>();
         ParticleSystem plasmaSystem;
+        ParticleSystem greenSystem;
 
         Random random = new Random();
 
@@ -58,6 +70,11 @@ namespace datx02_rally
         TextureCube cubeMap;
 
         #endregion
+
+        TerrainModel testTerrain1;
+        TerrainModel testTerrain2;
+        TerrainModel testTerrain3;
+        TerrainModel testTerrain4;
 
         public Game1()
         {
@@ -106,6 +123,10 @@ namespace datx02_rally
             Components.Add(plasmaSystem);
             particleSystems.Add(plasmaSystem);
 
+            greenSystem = new GreenParticleSystem(this, Content);
+            Components.Add(greenSystem);
+            particleSystems.Add(greenSystem);
+
             //smoke = new SmokePlumeParticleSystem(this, Content);
             //smoke.DrawOrder = 500;
             //Components.Add(smoke);
@@ -144,7 +165,7 @@ namespace datx02_rally
 
                 pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
             }
-            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.6f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.3f);
+            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.1f, Color.White.ToVector3() * 0.4f);
             
             #endregion
 
@@ -181,19 +202,17 @@ namespace datx02_rally
                 foreach (ModelMeshPart part in mesh.MeshParts)
                 {
                     BasicEffect oldEffect = part.Effect as BasicEffect;
-                    carSettings.MaterialDiffuse = oldEffect.DiffuseColor;
-                    carSettings.MaterialAmbient = oldEffect.DiffuseColor * .5f;
-                    carSettings.MaterialSpecular = oldEffect.DiffuseColor * .3f;
                     part.Effect = carEffect.Clone();
+                    part.Effect.Parameters["MaterialDiffuse"].SetValue(oldEffect.DiffuseColor);
+                    part.Effect.Parameters["MaterialAmbient"].SetValue(oldEffect.DiffuseColor * .5f);
+                    part.Effect.Parameters["MaterialSpecular"].SetValue(oldEffect.DiffuseColor * .3f);
+                    
                 }
             }
 
             this.GetService<CarControlComponent>().Car = car;
 
             #region MapGeneration
-
-            
-            mapSize = 512;
 
             MapGeneration.HeightMap hmGenerator = new MapGeneration.HeightMap(mapSize);
 
@@ -203,15 +222,10 @@ namespace datx02_rally
 
             terrain = Content.Load<Model>("ourmap");
 
+            hmGenerator.loadMap(raceTrack, triangleSize);
 
             #endregion
 
-            #region MapGeneration v2.
-
-            terrainGenerator = new datx02_rally.MapGeneration.TerrainGenerator();
-            terrainGenerator.LoadContent(GraphicsDevice, Content);
-
-            #endregion
 
             #region RaceTrackGeneration
 
@@ -259,12 +273,126 @@ namespace datx02_rally
             }
 
             #endregion
+            #region fuckedupterraingeneration
+
+            #region generatesubmap
+            float[,] subMap1 = new float[mapSize/2, mapSize/2];
+            int submapOffset = mapSize / 2;
+
+            for (int x = 0; x < (mapSize / 2); x++)
+            {
+                for (int z = 0; z < (mapSize / 2); z++)
+                {
+                    subMap1[x, z] = heightMap[x, z];
+                }
+            }
+            #region duplicates
+            float[,] subMap2 = new float[mapSize / 2, mapSize / 2];
+            
+            for (int x = 0; x < (mapSize / 2); x++)
+            {
+                for (int z = 0; z < (mapSize / 2); z++)
+                {
+                    subMap2[x, z] = heightMap[x + submapOffset, z];
+                }
+            }
+
+            float[,] subMap3 = new float[mapSize / 2, mapSize / 2];
+            
+            for (int x = 0; x < (mapSize / 2); x++)
+            {
+                for (int z = 0; z < (mapSize / 2); z++)
+                {
+                    subMap3[x, z] = heightMap[x, z + submapOffset];
+                }
+            }
+
+            float[,] subMap4 = new float[mapSize / 2, mapSize / 2];
+            
+            for (int x = 0; x < (mapSize / 2); x++)
+            {
+                for (int z = 0; z < (mapSize / 2); z++)
+                {
+                    subMap4[x, z] = heightMap[x + submapOffset, z + submapOffset];
+                }
+            }
+            #endregion
+            #endregion
+
+            testTerrain1 = new TerrainModel(GraphicsDevice, mapSize / 2, mapSize / 2, triangleSize, subMap1, mapSize / 2, mapSize / 2);
+            //testTerrain.Projection = projection;
+            var ef = terrain.Meshes[0].Effects[0].Clone();
+            testTerrain1.Projection = projection;
+            testTerrain1.Effect = terrain.Meshes[0].Effects[0];
+
+            #region evenmoreduplicates
+            testTerrain2 = new TerrainModel(GraphicsDevice, mapSize / 2, mapSize / 2, triangleSize, subMap2, mapSize / 2, 0);
+            testTerrain2.Projection = projection;
+            testTerrain2.Effect = terrain.Meshes[0].Effects[0];
+
+            testTerrain3 = new TerrainModel(GraphicsDevice, mapSize / 2, mapSize / 2, triangleSize, subMap3, 0, mapSize / 2);
+            testTerrain3.Projection = projection;
+            testTerrain3.Effect = terrain.Meshes[0].Effects[0];
+
+            testTerrain4 = new TerrainModel(GraphicsDevice, mapSize / 2, mapSize / 2, triangleSize, subMap4, 0, 0);
+            testTerrain4.Projection = projection;
+            testTerrain4.Effect = terrain.Meshes[0].Effects[0];
+            #endregion
+
+            #endregion
+
+
+            #region Foliage
+            oakTree = Content.Load<Model>(@"Foliage\Oak_tree");
+            Effect alphaMapEffect = Content.Load<Effect>(@"Effects\AlphaMap");
+
+            // Initialize the material settings
+            foreach (ModelMesh mesh in oakTree.Meshes)
+            {
+                foreach (ModelMeshPart part in mesh.MeshParts)
+                {
+                    BasicEffect basicEffect = (BasicEffect)part.Effect;
+                    part.Effect = alphaMapEffect.Clone();
+                    part.Effect.Parameters["ColorMap"].SetValue(basicEffect.Texture);
+                }
+                mesh.Effects[0].Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\BarkMossy-tiled-n"));
+
+                mesh.Effects[1].Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-ni"));
+                mesh.Effects[1].Parameters["AlphaMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-a"));
+            }
+
+            treePositions = new Vector3[10];
+            treeRotations = new float[10];
+            for (int i = 0; i < 10; i++)
+            {
+                treePositions[i] = new Vector3(
+                    MathHelper.Lerp(300, 800, (float)random.NextDouble()),
+                    0,
+                    MathHelper.Lerp(-200, 400, (float)random.NextDouble())
+                );
+                treeRotations[i] = MathHelper.Lerp(0, MathHelper.Pi * 2, (float)random.NextDouble());
+            }
+
+         // {
+         //     mushroomGroup = Content.Load<Model>(@"Foliage\MushroomGroup");
+         //     ModelMesh mesh = mushroomGroup.Meshes.First<ModelMesh>();
+         //     foreach (ModelMeshPart part in mesh.MeshParts)
+         //     {
+         //         part.Effect = alphaMapEffect.Clone();
+         //         part.Effect.Parameters["ColorMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-c"));
+         //         part.Effect.Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-n"));
+         //     }
+         // }
+            
+            #endregion
+
+            carSettings.EnvironmentMap = cubeMap;
 
             var input = this.GetService<InputComponent>();
             this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 60000, 35000), input));
             this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(car, Vector3.Up * 50, input));
         }
-        datx02_rally.MapGeneration.TerrainGenerator terrainGenerator;
+        
         /// <summary>
         /// Loads a texture from Content and asign it to the cubemaps face.
         /// </summary>
@@ -342,6 +470,10 @@ namespace datx02_rally
             }
 
 
+            for (int i = 0; i < 1; i++) {
+                greenSystem.AddParticle(new Vector3(105, 10, 100), Vector3.Up);
+            }
+
             //Apply changes to car
             car.Update();
 
@@ -374,7 +506,12 @@ namespace datx02_rally
 
             #endregion
 
-            terrainGenerator.DrawTerrain(view, projection);
+
+            testTerrain1.Draw(view);
+            testTerrain2.Draw(view);
+            testTerrain3.Draw(view);
+            testTerrain4.Draw(view);
+
 
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
@@ -391,8 +528,14 @@ namespace datx02_rally
                 light.Draw(lightModel, view, projection);
             }
 
-            //plane.Draw(view, Color.Gray);
+            #region Foliage
+            for (int i = 0; i < 10; i++)
+            {
+                DrawModel(oakTree, treePositions[i], treeRotations[i]);
+            }
 
+            //DrawModel(mushroomGroup, new Vector3(100, 0, 100), 0.0f);
+            #endregion
 
             #region Terrain
 
@@ -412,10 +555,38 @@ namespace datx02_rally
 
             #endregion
 
-
             DrawCar(view, projection);
 
             base.Draw(gameTime);
+        }
+
+        private void DrawModel(Model m, Vector3 position, float rotation)
+        {
+            Matrix[] transforms = new Matrix[m.Bones.Count];
+            m.CopyAbsoluteBoneTransformsTo(transforms);
+
+            Matrix view = this.GetService<CameraComponent>().View;
+
+            foreach (ModelMesh mesh in m.Meshes)
+            {
+                foreach (Effect effect in mesh.Effects)
+                {
+                    Matrix world = transforms[mesh.ParentBone.Index] *
+                        Matrix.CreateTranslation(position) *
+                        Matrix.CreateRotationY(rotation);
+                    Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(world));
+
+                    //effect.Parameters["NormalMatrix"].SetValue(normalMatrix);
+                    effect.Parameters["World"].SetValue(world);
+                    effect.Parameters["View"].SetValue(view);
+                    effect.Parameters["Projection"].SetValue(projection);
+
+                    effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
+                    effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
+                    effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
+                }
+                mesh.Draw();
+            }
         }
 
         private void DrawCar(Matrix view, Matrix projection)

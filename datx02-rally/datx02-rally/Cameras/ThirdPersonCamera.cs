@@ -29,17 +29,7 @@ namespace datx02_rally
             cameraTranslation = Matrix.Identity,
             extraOffset = Matrix.Identity;
 
-        public override Matrix View
-        {
-            get
-            {
-                cameraRotation = Matrix.Lerp(cameraRotation, TargetNode.RotationMatrix, .075f);
-                //cameraTranslation = Matrix.Lerp(cameraTranslation, TargetNode.TranslationMatrix, 1);
-                cameraTranslation = TargetNode.TranslationMatrix;
-                return Matrix.CreateLookAt(Vector3.Transform(Zoom * offset, extraOffset * cameraRotation * cameraTranslation),
-                    Vector3.Transform(lookUpOffset, cameraRotation * cameraTranslation), Vector3.Up);
-            }
-        }
+        public override Matrix View { get; protected set; }
 
         public ITargetNode TargetNode { get; set; }
 
@@ -61,6 +51,12 @@ namespace datx02_rally
 
             extraOffset *= Matrix.CreateFromAxisAngle(localX, movement.Y) * Matrix.CreateRotationY(movement.X);
             extraOffset = Matrix.Lerp(extraOffset, Matrix.Identity, .1f);
+
+            cameraRotation = Matrix.Lerp(cameraRotation, TargetNode.RotationMatrix, .075f);
+            cameraTranslation = Matrix.Lerp(cameraTranslation, TargetNode.TranslationMatrix, .98f);
+            //cameraTranslation = TargetNode.TranslationMatrix;
+            View = Matrix.CreateLookAt(Vector3.Transform(Zoom * offset, extraOffset * cameraRotation * cameraTranslation),
+                Vector3.Transform(lookUpOffset, cameraRotation * cameraTranslation), Vector3.Up);
         }
 
     }

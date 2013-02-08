@@ -9,7 +9,7 @@ namespace datx02_rally
 {
     abstract class Camera : IUpdateable
     {
-        public abstract Matrix View { get; }
+        public abstract Matrix View { get; protected set; }
 
         public abstract void Update(GameTime gameTime);
 

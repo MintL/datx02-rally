@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System.IO;
+using datx02_rally.GameLogic;
 
 /*Implementation from the following link: 
  * 
@@ -33,7 +34,19 @@ namespace datx02_rally.MapGeneration
                 for (int j = 0; j < Size; j++)
                 {
                     
-                    Heights[i, j] += (Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0)+1)/2;
+                    Heights[i, j] += (Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0)) + 0.5f;
+                    if (Heights[i, j] > 1 || Heights[i, j] < 0) 
+                    {
+                        if (Heights[i, j] > 1)
+                        {
+                            Heights[i, j] -= (Heights[i, j] - 1) / 2;
+                        }
+                        else 
+                        {
+                            Heights[i, j] += Math.Abs(Heights[i, j]) / 2;
+                        }
+
+                    }
                 }
             }
         }
@@ -113,7 +126,7 @@ namespace datx02_rally.MapGeneration
 
         public float[,] Generate()
         {   
-            AddPerlinNoise(10.0f);
+            AddPerlinNoise(6.2f);
 
             Perturb(32.0f, 32.0f); 
             
@@ -164,6 +177,30 @@ namespace datx02_rally.MapGeneration
             Console.WriteLine("Highest noise: " + highest);
 
             stream.Close();
+        }
+
+        public void loadMap(RaceTrack track, int triangleSize)
+        {
+            Vector3 trackCoordinate = Vector3.Zero;
+            Vector3 offsetVector = new Vector3(Size/2, 0, Size/2);
+
+            for (float f = 0; f <= 1; f += 0.001f)
+            {
+                trackCoordinate = track.Curve.GetPoint(f);
+
+                trackCoordinate = trackCoordinate / triangleSize;
+                trackCoordinate += offsetVector;
+
+
+
+                for (int x = -4; x < 4; x++)
+                {
+                    for (int z = -4; z < 4; z++)
+                    {
+                        Heights[(int)trackCoordinate.X + x, (int)trackCoordinate.Z + z] = 0.5f;
+                    }
+                }
+            }
         }
     }
 }
