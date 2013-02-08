@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -8,9 +9,8 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-using BulletSharp;
-using Test;
-using System.Net;
+using Particle3DSample;
+using datx02_rally.ModelPresenters;
 
 namespace datx02_rally
 {
@@ -19,48 +19,62 @@ namespace datx02_rally
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
-        Boolean connected = false;
+	    Boolean connected = false;
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        Model model;
-        Model light;
-        Vector3 modelPosition = Vector3.Zero;
-        float modelRotation = 0.0f;
-        float lightRotation;
-        float lightDistance = 300.0f;
+        #region Foliage
+        Model oakTree;
+        Model mushroomGroup;
+        Vector3[] treePositions;
+        float[] treeRotations;
+        #endregion
 
-        ThirdPersonCamera camera;
-        Vector2 screenCenter;
+        // 
+        Model lightModel;
+
+        // 
+        float[,] heightMap;
+        int mapSize;
+
+        Model terrain;
 
         Matrix projection;
 
-        List<PointLight> pointLights;
+        List<PointLight> pointLights  = new List<PointLight>();
 
-        Effect effect;
+        DirectionalLight directionalLight;
 
         Car car;
+        Effect carEffect;
+        CarShadingSettings carSettings = new CarShadingSettings(){
+            MaterialReflection = .3f,
+            MaterialShininess = 10
+        };
 
-        PlaneModel plane;
-        PlaneModel tree;
-        List<Matrix> treeTransforms = new List<Matrix>();
+        List<ParticleSystem> particleSystems = new List<ParticleSystem>();
+        ParticleSystem plasmaSystem;
+        ParticleSystem greenSystem;
 
         Random random = new Random();
 
-        #region SkySphere
+        #region SkyBox
 
-        Model skySphereModel;
-        Effect skySphereEffect;
+        Model skyBoxModel;
+        Effect skyBoxEffect;
+        TextureCube cubeMap;
 
         #endregion
+
+        TerrainModel testTerrain;
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
-            graphics.PreferredBackBufferWidth = 800;// 1920;
-            graphics.PreferredBackBufferHeight = 600; // 1080;
+            graphics.PreferredBackBufferWidth = 1366;
+            graphics.PreferredBackBufferHeight = 768;
             graphics.ApplyChanges();
 
             //graphics.ToggleFullScreen();
@@ -76,7 +90,39 @@ namespace datx02_rally
         /// </summary>
         protected override void Initialize()
         {
-            pointLights = new List<PointLight>();
+            // Components
+            
+            var inputComponent = new InputComponent(this);
+            //inputComponent.CurrentController = Controller.GamePad;
+            Components.Add(inputComponent);
+            Services.AddService(typeof(InputComponent), inputComponent);
+
+            // Components
+            
+            var cameraComponent = new CameraComponent(this);
+            Components.Add(cameraComponent);
+            Services.AddService(typeof(CameraComponent), cameraComponent);
+
+            var carControlComponent = new CarControlComponent(this);
+            Components.Add(carControlComponent);
+            Services.AddService(typeof(CarControlComponent), carControlComponent);
+
+            Console.WriteLine("isConnected " + GamePad.GetState(PlayerIndex.One).IsConnected);
+
+            // Particle systems
+
+            plasmaSystem = new PlasmaParticleSystem(this, Content);
+            Components.Add(plasmaSystem);
+            particleSystems.Add(plasmaSystem);
+
+            greenSystem = new GreenParticleSystem(this, Content);
+            Components.Add(greenSystem);
+            particleSystems.Add(greenSystem);
+
+            //smoke = new SmokePlumeParticleSystem(this, Content);
+            //smoke.DrawOrder = 500;
+            //Components.Add(smoke);
+
             base.Initialize();
         }
 
@@ -89,79 +135,169 @@ namespace datx02_rally
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            camera = new ThirdPersonCamera();
-            screenCenter = new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height) / 2f;
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
-                GraphicsDevice.Viewport.AspectRatio, .1f, 10000f);
-            
-            effect = Content.Load<Effect>(@"Effects/BasicShading");
-            model = Content.Load<Model>(@"Models/porsche");
-            light = Content.Load<Model>(@"Models/light");
+                GraphicsDevice.Viewport.AspectRatio, .1f, 500000f);
+
+            #region Lights
+
+            // Load model to represent our lightsources
+            lightModel = Content.Load<Model>(@"Models/light");
 
             // Light specific parameters
-            pointLights.Add(new PointLight(Vector3.Zero, Color.Black.ToVector3() * 0.2f, Color.White.ToVector3() * 1.0f, 1000.0f));
-            effect.CurrentTechnique = effect.Techniques["BasicShading"];
+            for (int i = 0; i < 10; i++)
+            {
+                //float x = MathHelper.Lerp(-500.0f, 500.0f, (float)random.NextDouble());
+                float z = MathHelper.Lerp(-5000.0f, 0.0f, (float)random.NextDouble());
+                Vector3 color = new Vector3(
+                    MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
+                    MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
+                    MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()));
 
-            // Initialize the material settings
-            foreach (ModelMesh mesh in model.Meshes)
+                Console.WriteLine(color);
+
+                pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
+            }
+            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.1f, Color.White.ToVector3() * 0.4f);
+            
+            #endregion
+
+            // Load car effect (10p-light, env-map)
+            carEffect = Content.Load<Effect>(@"Effects/CarShading");
+            
+            // TODO: Uses first Technique?
+            //carEffect.CurrentTechnique = carEffect.Techniques["CarShading"];
+
+            car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
+            foreach (var mesh in car.Model.Meshes)
+            {
+                if (mesh.Name.StartsWith("wheel"))
+                {
+                    if (mesh.Name.EndsWith("001") || mesh.Name.EndsWith("002"))
+                        mesh.Tag = 2;
+                    else
+                        mesh.Tag = 1;
+                }
+                else
+                    mesh.Tag = 0;
+            }
+            
+            carSettings.Projection = projection;
+
+            // Keep some old settings from imported modeleffect, then replace with carEffect
+            foreach (ModelMesh mesh in car.Model.Meshes)
             {
                 foreach (ModelMeshPart part in mesh.MeshParts)
                 {
-                    BasicEffect basicEffect = (BasicEffect)part.Effect;
-                    part.Effect = effect.Clone();
-                    part.Effect.Parameters["MaterialAmbient"].SetValue(basicEffect.AmbientLightColor);
-                    part.Effect.Parameters["MaterialDiffuse"].SetValue(basicEffect.DiffuseColor);
-                    part.Effect.Parameters["MaterialSpecular"].SetValue(basicEffect.SpecularColor);
-                }
-            }
-
-            car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
-            plane = new PlaneModel(new Vector2(-10000), new Vector2(10000), 1, GraphicsDevice, null, projection, Matrix.Identity);
-
-            Vector2 treePlaneSizeStart = new Vector2(-50, -250),
-                treePlaneSizeEnd = new Vector2(50, 0);
-
-            tree = new PlaneModel(treePlaneSizeStart, treePlaneSizeEnd, 1, GraphicsDevice,
-                    Content.Load<Texture2D>("spruce"), projection, Matrix.Identity);
-
-            for (int i = 99; i >= 0; i--)
-            {
-                int side = 2 * random.Next(2) - 1;
-                treeTransforms.Add(Matrix.CreateRotationX(MathHelper.PiOver2) *
-                    Matrix.CreateRotationY(-side * (MathHelper.PiOver4 + (float)(random.NextDouble() / 4))) *
-                    Matrix.CreateTranslation(new Vector3(side * (140 + random.Next(30)), 0, i * -100)));
-            }
-
-            #region SkySphere
-
-            skySphereModel = Content.Load<Model>(@"Models/skysphere");
-            skySphereEffect = Content.Load<Effect>(@"Effects/SkySphere");
-            
-            TextureCube cubeMap = new TextureCube(GraphicsDevice, 2048, false, SurfaceFormat.Color);
-
-            string[] cubemapfaces = { @"SkyBoxes/PurpleSky/skybox_right1", 
-@"SkyBoxes/PurpleSky/skybox_left2", 
-@"SkyBoxes/PurpleSky/skybox_top3", 
-@"SkyBoxes/PurpleSky/skybox_bottom4", 
-@"SkyBoxes/PurpleSky/skybox_front5", 
-@"SkyBoxes/PurpleSky/skybox_back6_2" 
-                                    };
-
-            for (int i = 0; i < cubemapfaces.Length; i++)
-                LoadCubemapFace(cubeMap, cubemapfaces[i], (CubeMapFace)i);
-
-            skySphereEffect.Parameters["SkyboxTexture"].SetValue(cubeMap);
-
-            foreach (var mesh in skySphereModel.Meshes)
-            {
-                foreach (var part in mesh.MeshParts)
-                {
-                    part.Effect = skySphereEffect;
+                    BasicEffect oldEffect = part.Effect as BasicEffect;
+                    part.Effect = carEffect.Clone();
+                    part.Effect.Parameters["MaterialDiffuse"].SetValue(oldEffect.DiffuseColor);
+                    part.Effect.Parameters["MaterialAmbient"].SetValue(oldEffect.DiffuseColor * .5f);
+                    part.Effect.Parameters["MaterialSpecular"].SetValue(oldEffect.DiffuseColor * .3f);
                     
                 }
             }
 
+            this.GetService<CarControlComponent>().Car = car;
+
+            #region MapGeneration
+
+            
+            mapSize = 512;
+
+            MapGeneration.HeightMap hmGenerator = new MapGeneration.HeightMap(mapSize);
+
+            heightMap = hmGenerator.Generate();
+
+            //hmGenerator.Store(GraphicsDevice);
+
+            terrain = Content.Load<Model>("ourmap");
+
+
             #endregion
+
+            #region SkySphere
+
+            skyBoxModel = Content.Load<Model>(@"Models/skybox");
+            skyBoxEffect = Content.Load<Effect>(@"Effects/SkyBox");
+            
+            cubeMap = new TextureCube(GraphicsDevice, 2048, false, SurfaceFormat.Color);
+
+            string[] cubemapfaces = { @"SkyBoxes/PurpleSky/skybox_right1", 
+                @"SkyBoxes/PurpleSky/skybox_left2", 
+                @"SkyBoxes/PurpleSky/skybox_top3", 
+                @"SkyBoxes/PurpleSky/skybox_bottom4", 
+                @"SkyBoxes/PurpleSky/skybox_front5", 
+                @"SkyBoxes/PurpleSky/skybox_back6_2" 
+            };
+
+            for (int i = 0; i < cubemapfaces.Length; i++)
+                LoadCubemapFace(cubeMap, cubemapfaces[i], (CubeMapFace)i);
+
+            skyBoxEffect.Parameters["SkyboxTexture"].SetValue(cubeMap);
+
+            foreach (var mesh in skyBoxModel.Meshes)
+            {
+                foreach (var part in mesh.MeshParts)
+                {
+                    part.Effect = skyBoxEffect;
+                }
+            }
+
+            #endregion
+
+            testTerrain = new TerrainModel(GraphicsDevice, 2, 2, 1000);
+            testTerrain.Projection = projection;
+
+            #region Foliage
+            oakTree = Content.Load<Model>(@"Foliage\Oak_tree");
+            Effect alphaMapEffect = Content.Load<Effect>(@"Effects\AlphaMap");
+
+            // Initialize the material settings
+            foreach (ModelMesh mesh in oakTree.Meshes)
+            {
+                foreach (ModelMeshPart part in mesh.MeshParts)
+                {
+                    BasicEffect basicEffect = (BasicEffect)part.Effect;
+                    part.Effect = alphaMapEffect.Clone();
+                    part.Effect.Parameters["ColorMap"].SetValue(basicEffect.Texture);
+                }
+                mesh.Effects[0].Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\BarkMossy-tiled-n"));
+
+                mesh.Effects[1].Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-ni"));
+                mesh.Effects[1].Parameters["AlphaMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-a"));
+            }
+
+            treePositions = new Vector3[10];
+            treeRotations = new float[10];
+            for (int i = 0; i < 10; i++)
+            {
+                treePositions[i] = new Vector3(
+                    MathHelper.Lerp(300, 800, (float)random.NextDouble()),
+                    0,
+                    MathHelper.Lerp(-200, 400, (float)random.NextDouble())
+                );
+                treeRotations[i] = MathHelper.Lerp(0, MathHelper.Pi * 2, (float)random.NextDouble());
+            }
+
+            {
+                /**mushroomGroup = Content.Load<Model>(@"Foliage\MushroomGroup");
+                ModelMesh mesh = mushroomGroup.Meshes.First<ModelMesh>();
+                foreach (ModelMeshPart part in mesh.MeshParts)
+                {
+                    part.Effect = alphaMapEffect.Clone();
+                    part.Effect.Parameters["ColorMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-c"));
+                    part.Effect.Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-n"));
+                }*/
+            }
+            
+            #endregion
+
+            carSettings.EnvironmentMap = cubeMap;
+
+            var input = this.GetService<InputComponent>();
+            this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(car, Vector3.Up * 50, input));
+            this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100), input));
+
         }
 
         /// <summary>
@@ -194,32 +330,28 @@ namespace datx02_rally
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+            
+            InputComponent input = this.GetService<InputComponent>();
+
+            if (input.GetPressed(Input.ChangeController))
+            {
+                if (input.CurrentController == Controller.Keyboard)
+                {
+                    input.CurrentController = Controller.GamePad;
+                    Console.WriteLine("CurrentController equals GamePad");
+                }
+                else
+                {
+                    input.CurrentController = Controller.Keyboard;
+                    Console.WriteLine("CurrentController equals Keyboard");
+                }
+            }
             // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-                Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (input.GetPressed(Input.Exit))
                 this.Exit();
 
-            KeyboardState keyboard = Keyboard.GetState();
-            float millis = (float)gameTime.ElapsedGameTime.Milliseconds;
-            if (keyboard.IsKeyDown(Keys.Left))
-            {
-                modelRotation += millis * MathHelper.ToRadians(0.05f);
-            }
-            else if (keyboard.IsKeyDown(Keys.Right))
-            {
-                modelRotation -= millis * MathHelper.ToRadians(0.05f);
-            }
-
-            if (keyboard.IsKeyDown(Keys.Subtract))
-            {
-                lightDistance -= millis * 1.0f;
-            }
-            else if (keyboard.IsKeyDown(Keys.Add))
-            {
-                lightDistance += millis * 1.0f;
-            }
-
-            if (keyboard.IsKeyDown(Keys.Z) && !connected)
+			if (Keyboard.GetState().IsKeyDown(Keys.Z) && !connected)
             {
                 System.Threading.ThreadPool.QueueUserWorkItem(delegate
                 {
@@ -230,50 +362,26 @@ namespace datx02_rally
                     Console.WriteLine("Sent test data!");
                 }, null);
                 connected = true; 
+            }	
+            // Spawn particles
+            Vector3 radius = 100 * Vector3.UnitX;
+            for (int z = 0; z < 10000; z += 1000)
+            {
+                float next = (float)random.NextDouble();
+                plasmaSystem.AddParticle(Vector3.Transform(radius + Vector3.UnitZ * next * -10000,
+                    Matrix.CreateRotationZ(MathHelper.TwoPi * 20 * next)), Vector3.Zero);
             }
 
-            Console.WriteLine(1 - Math.Pow(lightDistance / 500.0f, 2));
-
-            lightRotation += (float)gameTime.ElapsedGameTime.Milliseconds * MathHelper.ToRadians(0.05f);
-
-            PointLight pointLight = pointLights.First<PointLight>();
-            pointLight.Position = Vector3.Transform(new Vector3(0.0f, 0.0f, 0.0f),
-                Matrix.CreateTranslation(new Vector3(0.0f, 0.0f, lightDistance)) * Matrix.CreateRotationY(lightRotation));
-
-            #region Car control
-
-            //Accelerate
-            car.Speed = Math.Min(car.Speed + car.Acceleration *
-                ((Keyboard.GetState().IsKeyDown(Keys.W) ? 1 : 0) +
-                GamePad.GetState(PlayerIndex.One).Triggers.Right -
-                (Keyboard.GetState().IsKeyDown(Keys.S) ? 1 : 0) -
-                GamePad.GetState(PlayerIndex.One).Triggers.Left), car.MaxSpeed);
-            // Turn Wheel
-            car.WheelRotationY += (Keyboard.GetState().IsKeyDown(Keys.A) ? car.TurnSpeed : 0) -
-                (Keyboard.GetState().IsKeyDown(Keys.D) ? car.TurnSpeed : 0);
-            car.WheelRotationY = MathHelper.Clamp(car.WheelRotationY, -car.MaxWheelTurn, car.MaxWheelTurn);
-            if (Math.Abs(car.WheelRotationY) > MathHelper.Pi / 720)
-                car.WheelRotationY *= .9f;
-            else
-                car.WheelRotationY = 0;
+            for (int i = 0; i < 1; i++) {
+                greenSystem.AddParticle(new Vector3(105, 10, 100), Vector3.Up);
+            }
 
             //Apply changes to car
             car.Update();
 
-            //Friktion if is not driving
-            float friction = .97f; // 0.995f;
-            if (!Keyboard.GetState().IsKeyDown(Keys.W) ||
-                !GamePad.GetState(PlayerIndex.One).IsButtonDown(Buttons.RightTrigger) && GamePad.GetState(PlayerIndex.One).IsConnected)
-                car.Speed *= friction;
-
-            #endregion
-
-            camera.Update(Keyboard.GetState(), Mouse.GetState(), screenCenter);
-
-            camera.Position = car.Position;
-
             base.Update(gameTime);
         }
+
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -283,116 +391,154 @@ namespace datx02_rally
         {
             GraphicsDevice.Clear(Color.Honeydew);
 
-            Matrix[] transforms = new Matrix[model.Bones.Count];
-            model.CopyAbsoluteBoneTransformsTo(transforms);
+            Matrix[] transforms = new Matrix[car.Model.Bones.Count];
+            car.Model.CopyAbsoluteBoneTransformsTo(transforms);
 
-            Matrix view = camera.View;
+            Matrix view = this.GetService<CameraComponent>().View;
 
-            /*foreach (ModelMesh mesh in model.Meshes)
+            GraphicsDevice.BlendState = BlendState.Opaque;
+
+            #region SkyBox
+
+            skyBoxEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
+
+            skyBoxEffect.Parameters["View"].SetValue(view);
+            skyBoxEffect.Parameters["Projection"].SetValue(projection);
+            skyBoxModel.Meshes[0].Draw();
+
+            #endregion
+
+            testTerrain.Draw(view);
+
+            GraphicsDevice.BlendState = BlendState.AlphaBlend;
+
+            // Set view to particlesystems
+            foreach (ParticleSystem pSystem in this.Components.Where(c => c is ParticleSystem))
+                pSystem.SetCamera(view, projection);
+
+            //smoke.SetCamera(view, projection);
+            //plasmaSystem.SetCamera(view, projection);
+
+
+            foreach (PointLight light in pointLights)
             {
-                foreach (Effect currentEffect in mesh.Effects)
-                {
-                    EffectParameterCollection parameters = currentEffect.Parameters;
-                    parameters["MaterialShininess"].SetValue(10.0f);
+                light.Draw(lightModel, view, projection);
+            }
 
-            //        Matrix worldMatrix = transforms[mesh.ParentBone.Index] *
-            //                    Matrix.CreateRotationY(modelRotation) *
-            //                    Matrix.CreateTranslation(modelPosition);
+            #region Foliage
+            for (int i = 0; i < 10; i++)
+            {
+                DrawModel(oakTree, treePositions[i], treeRotations[i]);
+            }
 
-            //        Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(view * worldMatrix));
-                    
-                    parameters["World"].SetValue(worldMatrix);
-                    parameters["View"].SetValue(view);
-                    parameters["Projection"].SetValue(projection);
-                    parameters["NormalMatrix"].SetValue(normalMatrix);
+            //DrawModel(mushroomGroup, new Vector3(100, 0, 100), 0.0f);
+            #endregion
 
-                    // light parameters
-                    PointLight pointLight = pointLights.First<PointLight>();
-                    parameters["LightPosition"].SetValue(pointLight.Position);
-                    parameters["LightAmbient"].SetValue(pointLight.Ambient);
-                    parameters["LightDiffuse"].SetValue(pointLight.Diffuse);
-                    parameters["LightRange"].SetValue(pointLight.Range);
-                }
-                mesh.Draw();
-            }*/
+            #region Terrain
 
-            foreach (ModelMesh mesh in light.Meshes)
+            foreach (ModelMesh mesh in terrain.Meshes)
             {
                 foreach (BasicEffect currentEffect in mesh.Effects)
                 {
-                    PointLight pointLight = pointLights.First<PointLight>();
                     currentEffect.World = transforms[mesh.ParentBone.Index] *
-                                Matrix.CreateRotationY(modelRotation) *
-                                Matrix.CreateTranslation(pointLight.Position);
+                                Matrix.CreateTranslation(Vector3.Zero);
                     currentEffect.View = view;
                     currentEffect.Projection = projection;
+                    currentEffect.EnableDefaultLighting();
+                    currentEffect.PreferPerPixelLighting = true;
                 }
-            }
-
-            plane.Draw(view, Color.Gray);
-
-
-            // Draw car
-            foreach (var mesh in car.Model.Meshes) // 5 meshes
-            {
-                foreach (Effect effect in mesh.Effects) // 5 effects for main, 1 for each wheel
-                {
-                    EffectParameterCollection parameters = effect.Parameters;
-                    parameters["MaterialShininess"].SetValue(10.0f);
-
-                    Matrix world = Matrix.Identity;
-                    // If this mesh is a wheel, apply rotation
-                    if (mesh.Name.StartsWith("wheel"))
-                    {
-                        world *= Matrix.CreateRotationX(car.WheelRotationX);
-
-                        if (mesh.Name.EndsWith("001") || mesh.Name.EndsWith("002"))
-                            world *= Matrix.CreateRotationY(car.WheelRotationY);
-                    }
-                    // Local morldspace, due to bad .X-file/exporter
-                    world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
-                    world *= Matrix.CreateRotationY(car.Rotation) *
-                        Matrix.CreateTranslation(car.Position);
-
-                    parameters["World"].SetValue(world);
-
-                    Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(view * world));
-                    parameters["NormalMatrix"].SetValue(normalMatrix);
-
-                    parameters["View"].SetValue(view);
-                    parameters["Projection"].SetValue(projection);
-
-                    PointLight pointLight = pointLights.First<PointLight>();
-                    parameters["LightPosition"].SetValue(pointLight.Position);
-                    parameters["LightAmbient"].SetValue(pointLight.Ambient);
-                    parameters["LightDiffuse"].SetValue(pointLight.Diffuse);
-                    parameters["LightRange"].SetValue(pointLight.Range);
-
-                }
-                mesh.Draw();
-            }
-
-
-            #region SkySphere
-
-            skySphereEffect.Parameters["View"].SetValue(view);
-            skySphereEffect.Parameters["Projection"].SetValue(projection);
-            foreach (var mesh in skySphereModel.Meshes)
-            {
                 mesh.Draw();
             }
 
             #endregion
 
 
-            GraphicsDevice.BlendState = BlendState.AlphaBlend;
-            foreach (var world in treeTransforms)
-            {
-                tree.World = world;
-                tree.Draw(view);
-            }
+            DrawCar(view, projection);
 
             base.Draw(gameTime);
         }
+
+        private void DrawModel(Model m, Vector3 position, float rotation)
+        {
+            Matrix[] transforms = new Matrix[m.Bones.Count];
+            m.CopyAbsoluteBoneTransformsTo(transforms);
+
+            Matrix view = this.GetService<CameraComponent>().View;
+
+            foreach (ModelMesh mesh in m.Meshes)
+            {
+                foreach (Effect effect in mesh.Effects)
+                {
+                    Matrix world = transforms[mesh.ParentBone.Index] *
+                        Matrix.CreateTranslation(position) *
+                        Matrix.CreateRotationY(rotation);
+                    Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(world));
+
+                    //effect.Parameters["NormalMatrix"].SetValue(normalMatrix);
+                    effect.Parameters["World"].SetValue(world);
+                    effect.Parameters["View"].SetValue(view);
+                    effect.Parameters["Projection"].SetValue(projection);
+
+                    effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
+                    effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
+                    effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
+                }
+                mesh.Draw();
+            }
+        }
+
+        private void DrawCar(Matrix view, Matrix projection)
+        {
+            carSettings.View = view;
+            carSettings.Projection = projection;
+
+            carSettings.EyePosition = view.Translation;
+
+            Vector3[] positions = new Vector3[pointLights.Count];
+            Vector3[] diffuses = new Vector3[pointLights.Count];
+            float[] ranges = new float[pointLights.Count];
+            for (int i = 0; i < pointLights.Count; i++)
+            {
+                positions[i] = pointLights[i].Position;
+                diffuses[i] = pointLights[i].Diffuse;
+                ranges[i] = pointLights[i].Range;
+            }
+
+            carSettings.LightPosition = positions;
+            carSettings.LightDiffuse = diffuses;
+            carSettings.LightRange = ranges;
+            carSettings.NumLights = pointLights.Count;
+
+            carSettings.DirectionalLightDirection = directionalLight.Direction;
+            carSettings.DirectionalLightDiffuse = directionalLight.Diffuse;
+            carSettings.DirectionalLightAmbient = directionalLight.Ambient;
+
+            foreach (var mesh in car.Model.Meshes) // 5 meshes
+            {
+                Matrix world = Matrix.Identity;
+                // Wheel transformation
+                if ((int)mesh.Tag > 0)
+                {
+                    world *= Matrix.CreateRotationX(car.WheelRotationX);
+                    if ((int)mesh.Tag > 1)
+                        world *= Matrix.CreateRotationY(car.WheelRotationY);
+                }
+
+                // Local modelspace, due to bad .X-file/exporter
+                world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
+                // World
+                world *= car.RotationMatrix * car.TranslationMatrix;
+            
+                carSettings.World = world;
+                carSettings.NormalMatrix = Matrix.Invert(Matrix.Transpose(world));
+
+                foreach (Effect effect in mesh.Effects) // 5 effects for main, 1 for each wheel
+                    effect.SetCarShadingParameters(carSettings);
+
+                mesh.Draw();
+            }
+
+        }
+
     }
 }
