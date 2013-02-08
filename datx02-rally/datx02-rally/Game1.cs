@@ -39,13 +39,14 @@ namespace datx02_rally
 
         Matrix projection;
 
-        List<PointLight> pointLights  = new List<PointLight>();
+        List<PointLight> pointLights = new List<PointLight>();
 
         DirectionalLight directionalLight;
 
         Car car;
         Effect carEffect;
-        CarShadingSettings carSettings = new CarShadingSettings(){
+        CarShadingSettings carSettings = new CarShadingSettings()
+        {
             MaterialReflection = .3f,
             MaterialShininess = 10
         };
@@ -65,6 +66,10 @@ namespace datx02_rally
         #endregion
 
         TerrainModel testTerrain;
+
+        #region DynamicEnvironment
+        RenderTargetCube refCubeMap;
+        #endregion
 
         public Game1()
         {
@@ -89,14 +94,14 @@ namespace datx02_rally
         protected override void Initialize()
         {
             // Components
-            
+
             var inputComponent = new InputComponent(this);
             //inputComponent.CurrentController = Controller.GamePad;
             Components.Add(inputComponent);
             Services.AddService(typeof(InputComponent), inputComponent);
 
             // Components
-            
+
             var cameraComponent = new CameraComponent(this);
             Components.Add(cameraComponent);
             Services.AddService(typeof(CameraComponent), cameraComponent);
@@ -156,12 +161,12 @@ namespace datx02_rally
                 pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
             }
             directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.1f, Color.White.ToVector3() * 0.4f);
-            
+
             #endregion
 
             // Load car effect (10p-light, env-map)
             carEffect = Content.Load<Effect>(@"Effects/CarShading");
-            
+
             // TODO: Uses first Technique?
             //carEffect.CurrentTechnique = carEffect.Techniques["CarShading"];
 
@@ -178,7 +183,7 @@ namespace datx02_rally
                 else
                     mesh.Tag = 0;
             }
-            
+
             carSettings.Projection = projection;
 
             // Keep some old settings from imported modeleffect, then replace with carEffect
@@ -191,7 +196,7 @@ namespace datx02_rally
                     part.Effect.Parameters["MaterialDiffuse"].SetValue(oldEffect.DiffuseColor);
                     part.Effect.Parameters["MaterialAmbient"].SetValue(oldEffect.DiffuseColor * .5f);
                     part.Effect.Parameters["MaterialSpecular"].SetValue(oldEffect.DiffuseColor * .3f);
-                    
+
                 }
             }
 
@@ -199,7 +204,7 @@ namespace datx02_rally
 
             #region MapGeneration
 
-            
+
             mapSize = 512;
 
             MapGeneration.HeightMap hmGenerator = new MapGeneration.HeightMap(mapSize);
@@ -217,7 +222,7 @@ namespace datx02_rally
 
             skyBoxModel = Content.Load<Model>(@"Models/skybox");
             skyBoxEffect = Content.Load<Effect>(@"Effects/SkyBox");
-            
+
             cubeMap = new TextureCube(GraphicsDevice, 2048, false, SurfaceFormat.Color);
 
             string[] cubemapfaces = { @"SkyBoxes/PurpleSky/skybox_right1", 
@@ -287,15 +292,20 @@ namespace datx02_rally
                     part.Effect.Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-n"));
                 }
             }
-            
+
             #endregion
 
-            carSettings.EnvironmentMap = cubeMap;
-
+            #region Cameras
             var input = this.GetService<InputComponent>();
             this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(car, Vector3.Up * 50, input));
             this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100), input));
+            #endregion
 
+            #region DynamicEnvironment
+            refCubeMap = new RenderTargetCube(this.GraphicsDevice, 256, true, SurfaceFormat.Color, DepthFormat.Depth16);
+            carSettings.EnvironmentMap = refCubeMap;
+            //skyBoxEffect.Parameters["SkyboxTexture"].SetValue(refCubeMap);
+            #endregion
         }
 
         /// <summary>
@@ -329,7 +339,7 @@ namespace datx02_rally
         protected override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
-            
+
             InputComponent input = this.GetService<InputComponent>();
 
             if (input.GetPressed(Input.ChangeController))
@@ -358,7 +368,8 @@ namespace datx02_rally
                     Matrix.CreateRotationZ(MathHelper.TwoPi * 20 * next)), Vector3.Zero);
             }
 
-            for (int i = 0; i < 1; i++) {
+            for (int i = 0; i < 1; i++)
+            {
                 greenSystem.AddParticle(new Vector3(105, 10, 100), Vector3.Up);
             }
 
@@ -368,25 +379,43 @@ namespace datx02_rally
             base.Update(gameTime);
         }
 
-
-        /// <summary>
-        /// This is called when the game should draw itself.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Draw(GameTime gameTime)
+        private void RenderEnvironmentMap()
         {
-            GraphicsDevice.Clear(Color.Honeydew);
+            Matrix viewMatrix;
+            for (int i = 0; i < 6; i++)
+            {
+                CubeMapFace cubeMapFace = (CubeMapFace)i;
+                if (cubeMapFace == CubeMapFace.NegativeX)
+                    viewMatrix = Matrix.CreateLookAt(car.Position, car.Position + Vector3.Left, Vector3.Up);
+                else if (cubeMapFace == CubeMapFace.NegativeY)
+                    viewMatrix = Matrix.CreateLookAt(car.Position, car.Position + Vector3.Down, Vector3.Forward);
+                else if (cubeMapFace == CubeMapFace.PositiveZ)
+                    viewMatrix = Matrix.CreateLookAt(car.Position, car.Position + Vector3.Backward, Vector3.Up);
+                else if (cubeMapFace == CubeMapFace.PositiveX)
+                    viewMatrix = Matrix.CreateLookAt(car.Position, car.Position + Vector3.Right, Vector3.Up);
+                else if (cubeMapFace == CubeMapFace.PositiveY)
+                    viewMatrix = Matrix.CreateLookAt(car.Position, car.Position + Vector3.Up, Vector3.Backward);
+                else if (cubeMapFace == CubeMapFace.NegativeZ)
+                    viewMatrix = Matrix.CreateLookAt(car.Position, car.Position + Vector3.Forward, Vector3.Up);
+                else
+                    viewMatrix = Matrix.Identity;
 
+                GraphicsDevice.SetRenderTarget(refCubeMap, cubeMapFace);
+                GraphicsDevice.Clear(Color.White);
+                RenderScene(viewMatrix, true);
+            }
+
+            GraphicsDevice.SetRenderTarget(null);
+        }
+
+        private void RenderScene(Matrix view, bool environment)
+        {
             Matrix[] transforms = new Matrix[car.Model.Bones.Count];
             car.Model.CopyAbsoluteBoneTransformsTo(transforms);
-
-            Matrix view = this.GetService<CameraComponent>().View;
 
             GraphicsDevice.BlendState = BlendState.Opaque;
 
             #region SkyBox
-
-            skyBoxEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
 
             skyBoxEffect.Parameters["View"].SetValue(view);
             skyBoxEffect.Parameters["Projection"].SetValue(projection);
@@ -414,10 +443,10 @@ namespace datx02_rally
             #region Foliage
             for (int i = 0; i < 10; i++)
             {
-                DrawModel(oakTree, treePositions[i], treeRotations[i]);
+                DrawModel(oakTree, view, treePositions[i], treeRotations[i]);
             }
 
-            DrawModel(mushroomGroup, new Vector3(100, 0, 100), 0.0f);
+            DrawModel(mushroomGroup, view, new Vector3(100, 0, 100), 0.0f);
             #endregion
 
             #region Terrain
@@ -438,18 +467,33 @@ namespace datx02_rally
 
             #endregion
 
+            if (!environment)
+            {
+                DrawCar(view, projection);
+            }
+        }
 
-            DrawCar(view, projection);
+        /// <summary>
+        /// This is called when the game should draw itself.
+        /// </summary>
+        /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        protected override void Draw(GameTime gameTime)
+        {
+            GraphicsDevice.Clear(Color.Honeydew);
+            skyBoxEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
+
+            RenderEnvironmentMap();
+
+            Matrix view = this.GetService<CameraComponent>().View;
+            RenderScene(view, false);
 
             base.Draw(gameTime);
         }
 
-        private void DrawModel(Model m, Vector3 position, float rotation)
+        private void DrawModel(Model m, Matrix view, Vector3 position, float rotation)
         {
             Matrix[] transforms = new Matrix[m.Bones.Count];
             m.CopyAbsoluteBoneTransformsTo(transforms);
-
-            Matrix view = this.GetService<CameraComponent>().View;
 
             foreach (ModelMesh mesh in m.Meshes)
             {
@@ -514,7 +558,7 @@ namespace datx02_rally
                 world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
                 // World
                 world *= car.RotationMatrix * car.TranslationMatrix;
-            
+
                 carSettings.World = world;
                 carSettings.NormalMatrix = Matrix.Invert(Matrix.Transpose(world));
 
