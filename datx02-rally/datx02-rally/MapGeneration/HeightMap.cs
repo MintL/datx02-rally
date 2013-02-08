@@ -33,7 +33,19 @@ namespace datx02_rally.MapGeneration
                 for (int j = 0; j < Size; j++)
                 {
                     
-                    Heights[i, j] += (Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0)+1)/2;
+                    Heights[i, j] += (Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0)) + 0.5f;
+                    if (Heights[i, j] > 1 || Heights[i, j] < 0) 
+                    {
+                        if (Heights[i, j] > 1)
+                        {
+                            Heights[i, j] -= (Heights[i, j] - 1) / 2;
+                        }
+                        else 
+                        {
+                            Heights[i, j] += Math.Abs(Heights[i, j]) / 2;
+                        }
+
+                    }
                 }
             }
         }
@@ -113,7 +125,7 @@ namespace datx02_rally.MapGeneration
 
         public float[,] Generate()
         {   
-            AddPerlinNoise(10.0f);
+            AddPerlinNoise(6.2f);
 
             Perturb(32.0f, 32.0f); 
             

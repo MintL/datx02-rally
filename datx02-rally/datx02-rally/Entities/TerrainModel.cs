@@ -16,21 +16,23 @@ namespace datx02_rally
 
         private IndexBuffer indexBuffer;
 
-        private BasicEffect effect;
+        public Effect Effect { get; set; }
 
-        public Matrix Projection { get { return effect.Projection; } set { effect.Projection = value; } }
+        public Matrix Projection { get; set; }
         
         public TerrainModel(Vector2 start, Vector2 end, float uvScale, GraphicsDevice device, Texture2D texture, Matrix projection, Matrix world)
         {
         }
 
-        public TerrainModel (GraphicsDevice device, int width, int height, float triangleSize)
+        public TerrainModel (GraphicsDevice device, int width, int height, float triangleSize, float[,] heights)
         {
             this.device = device;
+            
+            //Effect = new BasicEffect(device);
+            //var effect = Effect as BasicEffect;
 
-            effect = new BasicEffect(device);
-            effect.EnableDefaultLighting();
-            effect.World = Matrix.Identity;
+            //effect.EnableDefaultLighting();
+            //effect.World = Matrix.Identity;
 
             vertices = new VertexPositionNormalTexture[width * height];
 
@@ -39,8 +41,8 @@ namespace datx02_rally
                 for (int z = 0; z < height; z++)
                 {
                     vertices[x * width + z] = new VertexPositionNormalTexture(
-                        new Vector3(x * triangleSize, 0, z * triangleSize), 
-                        Vector3.Up, 
+                        new Vector3(x * triangleSize, heights[x,z] * triangleSize * 30, z * triangleSize),
+                        Vector3.Zero,
                         new Vector2(x % 2, z % 2));
                 }
             }
@@ -48,6 +50,7 @@ namespace datx02_rally
             
 
             int flexIndice = 1;
+            int rowIndex = 2;
             int[] indices = new int[(width-1) * (height-1) * 6];
             indices[0] = 0;
             indices[1] = width;
@@ -68,11 +71,47 @@ namespace datx02_rally
                     flexIndice += width;
                     indices[i] = flexIndice;
                 }
-
-                if (indices[i] == 2 * width - 1)
+                if (i + 3 >= indices.Length)
+                    break;
+                else if (rowIndex * width -1 == indices[i])
                 {
-                    flexIndice -= 2;
+                    indices[i + 1] = flexIndice - width + 1;
+                    indices[i + 2] = flexIndice + 1;
+                    indices[i + 3] = flexIndice - width + 2;
+                    flexIndice = indices[i + 3];
+                    rowIndex++;
+                    i += 3;
                 }
+            }
+
+
+            for (int i = 0; i < indices.Length / 3; i++)
+            {
+                Vector3 firstvec = vertices[indices[i * 3]].Position;
+                Vector3 secondvec = vertices[indices[i * 3 + 1]].Position;
+                Vector3 thirdvec = vertices[indices[i * 3 + 2]].Position;
+                Vector3 firstsub = secondvec - firstvec;
+                Vector3 secondsub = thirdvec - firstvec;
+
+
+                Vector3 normal;
+                if(i % 2 == 1)
+                {
+                    normal = Vector3.Cross(firstsub, secondsub);
+                }else{
+                    normal = Vector3.Cross(secondsub, firstsub);
+                }
+                
+                normal.Normalize();
+             // normal = new Vector3(Math.Abs(normal.X), Math.Abs(normal.Y), Math.Abs(normal.Z));
+                vertices[indices[i * 3]].Normal += normal;
+                vertices[indices[i * 3 + 1]].Normal += normal;
+                vertices[indices[i * 3 + 2]].Normal += normal;
+            }
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i].Normal.Normalize();
             }
 
 
@@ -96,10 +135,10 @@ namespace datx02_rally
             //    }
             //}
 
-            for (int i = 0; i < indices.Length; i++)
-            {
-                System.Console.WriteLine(indices[i]);
-            }
+            //for (int i = 0; i < indices.Length; i++)
+            //{
+            //    System.Console.WriteLine(indices[i]);
+            //}
 
 
 
@@ -115,15 +154,19 @@ namespace datx02_rally
         
         public void Draw(Matrix view)
         {
-            effect.View = view;
-            effect.DiffuseColor = Color.LightBlue.ToVector3();
+            //var effect = Effect as BasicEffect;
+            //effect.View = view;
+            //effect.DiffuseColor = Color.LightBlue.ToVector3();
 
-            foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+            Effect.Parameters["EyePosition"].SetValue(view.Translation);
+            Effect.Parameters["WorldViewProj"].SetValue(view * Projection);
+
+            foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
             {
                 pass.Apply();
                 device.Indices = indexBuffer;
                 device.SetVertexBuffer(vertexbuffer);
-                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexbuffer.VertexCount, 0, vertexbuffer.VertexCount/2);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexbuffer.VertexCount, 0, vertexbuffer.VertexCount*2);
             }
         }
     }

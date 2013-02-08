@@ -239,18 +239,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Foliage\MushroomGroup.fbx">
-      <Name>MushroomGroup</Name>
-      <Importer>FbxImporter</Importer>
-      <Processor>ModelProcessor</Processor>
-      <ProcessorParameters_GenerateTangentFrames>True</ProcessorParameters_GenerateTangentFrames>
-      <ProcessorParameters_GenerateMipmaps>False</ProcessorParameters_GenerateMipmaps>
-      <ProcessorParameters_PremultiplyTextureAlpha>False</ProcessorParameters_PremultiplyTextureAlpha>
-      <ProcessorParameters_PremultiplyVertexColors>False</ProcessorParameters_PremultiplyVertexColors>
-      <ProcessorParameters_TextureFormat>NoChange</ProcessorParameters_TextureFormat>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Foliage\Textures\mushrooms-c.png">
       <Name>mushrooms-c</Name>
       <Importer>TextureImporter</Importer>
