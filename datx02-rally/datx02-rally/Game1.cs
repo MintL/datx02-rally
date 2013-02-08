@@ -211,7 +211,7 @@ namespace datx02_rally
 
             heightMap = hmGenerator.Generate();
 
-            hmGenerator.Store(GraphicsDevice);
+            //hmGenerator.Store(GraphicsDevice);
 
             terrain = Content.Load<Model>("ourmap");
 
