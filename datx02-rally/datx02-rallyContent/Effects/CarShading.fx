@@ -110,10 +110,10 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		float3 fresnel = MaterialSpecular + (float3(1.0, 1.0, 1.0) - MaterialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
 			0.0, 1.0), 5.0);
 
-		//totalLight +=
-		//	attenuation * selfShadow *
-		//	(LightDiffuse[i] * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) + 
-		//	LightDiffuse[i] * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor);
+		totalLight +=
+			attenuation * selfShadow *
+			(LightDiffuse[i] * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) + 
+			LightDiffuse[i] * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor);
 	}
 
 	// Directional light
@@ -124,9 +124,9 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 			
 	
 	//float3 reflection = normalize(2 * saturate(dot(directionFromEye, normal)) * normal - directionFromEye);
-	totalLight += //selfShadow * (DirectionalLightDiffuse * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) +
-					//DirectionalLightDiffuse * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor +
-					texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye));// * MaterialReflection * fresnel);
+	totalLight += selfShadow * (DirectionalLightDiffuse * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) +
+					DirectionalLightDiffuse * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor +
+					texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye)) * fresnel * MaterialReflection);
 
 	return float4(saturate(totalLight), 1.0);
 }

@@ -10,7 +10,7 @@ namespace datx02_rally
     class DebugCamera : Camera
     {
         private float speed;
-        private Vector3 position, lookAt = Vector3.Forward;
+        private Vector3 lookAt = Vector3.Forward;
 
         private ButtonState oldButtonState = ButtonState.Released;
         private int oldX, oldY;
@@ -20,9 +20,11 @@ namespace datx02_rally
 
         public override Matrix View { get; protected set; }
 
+        public override Vector3 Position { get; protected set; }
+
         public DebugCamera(Vector3 position, InputComponent input) : this(input)
         {
-            this.position = position;
+            this.Position = position;
         }
 
         public DebugCamera(InputComponent input)
@@ -35,7 +37,7 @@ namespace datx02_rally
         public override void Update(GameTime gameTime)
         {
             if (Keyboard.GetState().IsKeyDown(Keys.R))
-                position = Vector3.Zero;
+                Position = Vector3.Zero;
 
             // Get X relative to lookAt.
             Vector3 localX = Vector3.Cross(lookAt, Vector3.Up);
@@ -62,9 +64,9 @@ namespace datx02_rally
             else
                 speed = MinSpeed;
 
-            position += delta;
+            Position += delta;
 
-            View = Matrix.CreateLookAt(position, position + lookAt, Vector3.Up);
+            View = Matrix.CreateLookAt(Position, Position + lookAt, Vector3.Up);
         }
     }
 }

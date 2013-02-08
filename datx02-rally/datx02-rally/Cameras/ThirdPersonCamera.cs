@@ -31,6 +31,8 @@ namespace datx02_rally
 
         public override Matrix View { get; protected set; }
 
+        public override Vector3 Position { get; protected set;  }
+
         public ITargetNode TargetNode { get; set; }
 
         public ThirdPersonCamera(ITargetNode targetNode, Vector3 lookUpOffset, InputComponent input)
@@ -55,7 +57,8 @@ namespace datx02_rally
             cameraRotation = Matrix.Lerp(cameraRotation, TargetNode.RotationMatrix, .075f);
             cameraTranslation = Matrix.Lerp(cameraTranslation, TargetNode.TranslationMatrix, .98f);
             //cameraTranslation = TargetNode.TranslationMatrix;
-            View = Matrix.CreateLookAt(Vector3.Transform(Zoom * offset, extraOffset * cameraRotation * cameraTranslation),
+            Position = Vector3.Transform(Zoom * offset, extraOffset * cameraRotation * cameraTranslation);
+            View = Matrix.CreateLookAt(Position,
                 Vector3.Transform(lookUpOffset, cameraRotation * cameraTranslation), Vector3.Up);
         }
 

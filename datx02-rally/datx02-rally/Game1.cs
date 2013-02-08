@@ -526,7 +526,8 @@ namespace datx02_rally
             carSettings.View = view;
             carSettings.Projection = projection;
 
-            carSettings.EyePosition = view.Translation;
+            //carSettings.EyePosition = view.Translation;
+            carSettings.EyePosition = this.GetService<CameraComponent>().Position;
 
             Vector3[] positions = new Vector3[pointLights.Count];
             Vector3[] diffuses = new Vector3[pointLights.Count];

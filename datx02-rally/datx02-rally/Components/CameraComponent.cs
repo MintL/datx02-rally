@@ -16,6 +16,8 @@ namespace datx02_rally
 
         public Matrix View { get { return cameras[currentCamera].View; } }
 
+        public Vector3 Position { get { return cameras[currentCamera].Position; } }
+
         public CameraComponent(Game1 game) : base(game)
         {
         }

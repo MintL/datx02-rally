@@ -11,6 +11,8 @@ namespace datx02_rally
     {
         public abstract Matrix View { get; protected set; }
 
+        public abstract Vector3 Position { get; protected set; }
+
         public abstract void Update(GameTime gameTime);
 
         protected InputComponent input;
