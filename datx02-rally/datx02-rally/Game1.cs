@@ -206,7 +206,7 @@ namespace datx02_rally
 
             heightMap = hmGenerator.Generate();
 
-            //hmGenerator.Store(GraphicsDevice);
+            hmGenerator.Store(GraphicsDevice);
 
             terrain = Content.Load<Model>("ourmap");
 
@@ -243,7 +243,7 @@ namespace datx02_rally
 
             #endregion
 
-            testTerrain = new TerrainModel(GraphicsDevice, 512, 512, 100);
+            testTerrain = new TerrainModel(GraphicsDevice, 512, 512, 100, heightMap);
             //testTerrain.Projection = projection;
             var ef = terrain.Meshes[0].Effects[0].Clone();
             testTerrain.Projection = projection;

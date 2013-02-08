@@ -24,10 +24,10 @@ namespace datx02_rally
         {
         }
 
-        public TerrainModel (GraphicsDevice device, int width, int height, float triangleSize)
+        public TerrainModel (GraphicsDevice device, int width, int height, float triangleSize, float[,] heights)
         {
             this.device = device;
-
+            
             //Effect = new BasicEffect(device);
             //var effect = Effect as BasicEffect;
 
@@ -41,8 +41,8 @@ namespace datx02_rally
                 for (int z = 0; z < height; z++)
                 {
                     vertices[x * width + z] = new VertexPositionNormalTexture(
-                        new Vector3((x - width / 2) * triangleSize, ((x == 0 || x == width - 1) || (z == 0 || z == height - 1) ? -1200 : 0), (z - height / 2) * triangleSize),
-                        Vector3.Up,
+                        new Vector3(x * triangleSize, heights[x,z] * triangleSize * 30, z * triangleSize),
+                        Vector3.Zero,
                         new Vector2(x % 2, z % 2));
                 }
             }
@@ -82,6 +82,36 @@ namespace datx02_rally
                     rowIndex++;
                     i += 3;
                 }
+            }
+
+
+            for (int i = 0; i < indices.Length / 3; i++)
+            {
+                Vector3 firstvec = vertices[indices[i * 3]].Position;
+                Vector3 secondvec = vertices[indices[i * 3 + 1]].Position;
+                Vector3 thirdvec = vertices[indices[i * 3 + 2]].Position;
+                Vector3 firstsub = secondvec - firstvec;
+                Vector3 secondsub = thirdvec - firstvec;
+
+
+                Vector3 normal;
+                if(i % 2 == 1)
+                {
+                    normal = Vector3.Cross(firstsub, secondsub);
+                }else{
+                    normal = Vector3.Cross(secondsub, firstsub);
+                }
+                
+                normal.Normalize();
+             // normal = new Vector3(Math.Abs(normal.X), Math.Abs(normal.Y), Math.Abs(normal.Z));
+                vertices[indices[i * 3]].Normal += normal;
+                vertices[indices[i * 3 + 1]].Normal += normal;
+                vertices[indices[i * 3 + 2]].Normal += normal;
+            }
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                vertices[i].Normal.Normalize();
             }
 
 
