@@ -19,9 +19,8 @@ namespace datx02_rally
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
-	    Boolean connected = false;
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        public SpriteBatch spriteBatch;
 
         #region Foliage
         Model oakTree;
@@ -106,6 +105,10 @@ namespace datx02_rally
             var carControlComponent = new CarControlComponent(this);
             Components.Add(carControlComponent);
             Services.AddService(typeof(CarControlComponent), carControlComponent);
+
+            var consoleComponent = new HUDConsole(this);
+            Components.Add(consoleComponent);
+            Services.AddService(typeof(HUDConsole), consoleComponent);
 
             Console.WriteLine("isConnected " + GamePad.GetState(PlayerIndex.One).IsConnected);
 
@@ -351,18 +354,9 @@ namespace datx02_rally
             if (input.GetPressed(Input.Exit))
                 this.Exit();
 
-			if (Keyboard.GetState().IsKeyDown(Keys.Z) && !connected)
-            {
-                System.Threading.ThreadPool.QueueUserWorkItem(delegate
-                {
-                    ServerClient client = new ServerClient();
-                    client.Connect(IPAddress.Loopback);
-                    System.Threading.Thread.Sleep(5000);
-                    client.SendTestData();
-                    Console.WriteLine("Sent test data!");
-                }, null);
-                connected = true; 
-            }	
+            if (input.GetPressed(Input.Console))
+                this.GetService<HUDConsole>().Toggle();
+	
             // Spawn particles
             Vector3 radius = 100 * Vector3.UnitX;
             for (int z = 0; z < 10000; z += 1000)
