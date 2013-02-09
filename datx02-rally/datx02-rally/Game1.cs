@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Particle3DSample;
 using datx02_rally.ModelPresenters;
+using datx02_rally.MapGeneration;
 
 namespace datx02_rally
 {
@@ -200,13 +201,13 @@ namespace datx02_rally
             #region MapGeneration
 
             
-            mapSize = 512;
+            //mapSize = 512;
 
-            MapGeneration.HeightMap hmGenerator = new MapGeneration.HeightMap(mapSize);
+            //MapGeneration.HeightMap hmGenerator = new MapGeneration.HeightMap(mapSize);
 
-            heightMap = hmGenerator.Generate();
+            //heightMap = hmGenerator.Generate();
 
-            hmGenerator.Store(GraphicsDevice);
+            //hmGenerator.Store(GraphicsDevice);
 
             terrain = Content.Load<Model>("ourmap");
 
@@ -243,7 +244,11 @@ namespace datx02_rally
 
             #endregion
 
-            testTerrain = new TerrainModel(GraphicsDevice, 512, 512, 100, heightMap);
+            HeightMap heightmapGenerator = new HeightMap(512);
+            var heightmap = heightmapGenerator.Generate();
+
+            testTerrain = new TerrainModel(GraphicsDevice, 512, 512, 100, heightmap);
+
             //testTerrain.Projection = projection;
             var ef = terrain.Meshes[0].Effects[0].Clone();
             testTerrain.Projection = projection;

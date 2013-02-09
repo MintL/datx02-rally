@@ -125,14 +125,17 @@ namespace datx02_rally.MapGeneration
 
         public float[,] Generate()
         {   
-            AddPerlinNoise(6.2f);
+            AddPerlinNoise(55.0f);
 
-            Perturb(32.0f, 32.0f); 
+            //Perturb(32.0f, 32.0f);
             
-            for (int i = 0; i < 10; i++) 
-                Erode(16.0f); 
+
+            //for (int i = 0; i < 10; i++)
+                Erode(1.0f); 
             
             Smoothen();
+
+            Perturb(14, 14);
 
             return Heights;
         }

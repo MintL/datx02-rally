@@ -24,28 +24,76 @@ namespace datx02_rally
         {
         }
 
-        public TerrainModel (GraphicsDevice device, int width, int height, float triangleSize, float[,] heights)
+        public TerrainModel(GraphicsDevice device, int width, int height, int triangleSize) : this(device, width, height, triangleSize, null) {
+        }
+
+
+        public TerrainModel (GraphicsDevice device, int width, int height, float triangleSize, float[,] heightMap)
         {
             this.device = device;
-            
-            //Effect = new BasicEffect(device);
-            //var effect = Effect as BasicEffect;
 
-            //effect.EnableDefaultLighting();
-            //effect.World = Matrix.Identity;
+            int vertexCount = width * height,
+                lastWidthIndex = width - 1,
+                lastHeightIndex = height - 1;
 
-            vertices = new VertexPositionNormalTexture[width * height];
+            float halfWidth = width / 2f,
+                halfHeight = height / 2f;
 
-            for (int x = 0; x < width; x++)
+            vertices = new VertexPositionNormalTexture[vertexCount];
+
+            for (int z = 0; z < height; z++)
             {
-                for (int z = 0; z < height; z++)
+                for (int x = 0; x < width; x++)
                 {
-                    vertices[x * width + z] = new VertexPositionNormalTexture(
-                        new Vector3(x * triangleSize, heights[x,z] * triangleSize * 30, z * triangleSize),
+                    vertices[z * width + x] = new VertexPositionNormalTexture(
+                        new Vector3(
+                            (x - halfWidth) * triangleSize,
+                            (heightMap != null ? 13 * triangleSize * heightMap[x, z] : 0),
+                            (z - halfHeight) * triangleSize),
                         Vector3.Zero,
                         new Vector2(x % 2, z % 2));
+
                 }
             }
+
+            for (int z = 0; z < height; z++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    var current = vertices[z * width + x];
+                    Vector3? prevX = null, nextX = null, prevZ = null, nextZ = null;
+
+                    if (x > 0)
+                        prevX = vertices[z * width + x - 1].Position - current.Position;
+
+                    if (x < lastWidthIndex)
+                        nextX = vertices[z * width + x + 1].Position - current.Position;
+
+                    if (z > 0)
+                        prevZ = vertices[(z - 1) * width + x].Position - current.Position;
+
+                    if (z < lastHeightIndex)
+                        nextZ = vertices[(z + 1) * width + x].Position - current.Position;
+
+                    Vector3 newNormal = Vector3.Zero;
+
+                    if (prevX.HasValue)
+                        newNormal += Vector3.Cross(Vector3.UnitZ, prevX.Value);
+                                                                     
+                    if (nextX.HasValue)                              
+                        newNormal += Vector3.Cross(Vector3.UnitZ, nextX.Value);
+                                                                     
+                    if (prevZ.HasValue)                              
+                        newNormal += Vector3.Cross(-Vector3.UnitX, prevZ.Value);
+                                                                     
+                    if (nextZ.HasValue)                              
+                        newNormal += Vector3.Cross(Vector3.UnitX, nextZ.Value);
+
+                    vertices[z * width + x].Normal = newNormal;
+                }
+            }
+
+
 
             
 
