@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework.Media;
 using Particle3DSample;
 using datx02_rally.ModelPresenters;
 using datx02_rally.GameLogic;
+using datx02_rally.MapGeneration;
 
 namespace datx02_rally
 {
@@ -29,7 +30,7 @@ namespace datx02_rally
         float[] treeRotations;
         #endregion
 
-        // 
+        // Model to represent a location of a pointlight
         Model lightModel;
 
         // 
@@ -39,14 +40,14 @@ namespace datx02_rally
         RaceTrack raceTrack = new RaceTrack(((mapSize / 2) * triangleSize));
         float[,] heightMap;
         
-
-        Model terrain;
+        Model oldTerrain;
 
         Matrix projection;
 
         List<PointLight> pointLights  = new List<PointLight>();
-
         DirectionalLight directionalLight;
+
+        // Car
 
         Car car;
         Effect carEffect;
@@ -56,6 +57,7 @@ namespace datx02_rally
         };
 
 
+        // P-systems
 
         List<ParticleSystem> particleSystems = new List<ParticleSystem>();
         ParticleSystem plasmaSystem;
@@ -70,6 +72,8 @@ namespace datx02_rally
         TextureCube cubeMap;
 
         #endregion
+
+        // Test terrains, to split up one big in 4 smaller...
 
         TerrainModel testTerrain1;
         TerrainModel testTerrain2;
@@ -214,24 +218,18 @@ namespace datx02_rally
 
             #region MapGeneration
 
-            MapGeneration.HeightMap hmGenerator = new MapGeneration.HeightMap(mapSize);
+            //HeightMap hmGenerator = new HeightMap(mapSize);
 
-            heightMap = hmGenerator.Generate();
+            //heightMap = hmGenerator.Generate();
 
-            hmGenerator.Store(GraphicsDevice);
+            //hmGenerator.Store(GraphicsDevice);
 
-            terrain = Content.Load<Model>("ourmap");
+            oldTerrain = Content.Load<Model>("ourmap");
 
-            hmGenerator.loadMap(raceTrack, triangleSize);
-
-            #endregion
-
-            #region MapGeneration v2.
-
-            //terrainGenerator = new datx02_rally.MapGeneration.TerrainGenerator();
-            //terrainGenerator.LoadContent(GraphicsDevice, Content);
+            //hmGenerator.loadMap(raceTrack, triangleSize);
 
             #endregion
+
 
             #region RaceTrackGeneration
 
@@ -279,7 +277,11 @@ namespace datx02_rally
             }
 
             #endregion
-            #region fuckedupterraingeneration
+
+
+            #region fuckedupterraingeneration <- Not very nice name?
+
+            /*
 
             #region generatesubmap
             float[,] subMap1 = new float[mapSize/2, mapSize/2];
@@ -327,23 +329,25 @@ namespace datx02_rally
 
             testTerrain1 = new TerrainModel(GraphicsDevice, mapSize / 2, mapSize / 2, triangleSize, subMap1, mapSize / 2, mapSize / 2);
             //testTerrain.Projection = projection;
-            var ef = terrain.Meshes[0].Effects[0].Clone();
+            var ef = oldTerrain.Meshes[0].Effects[0].Clone();
             testTerrain1.Projection = projection;
-            testTerrain1.Effect = terrain.Meshes[0].Effects[0];
+            testTerrain1.Effect = oldTerrain.Meshes[0].Effects[0];
 
             #region evenmoreduplicates
             testTerrain2 = new TerrainModel(GraphicsDevice, mapSize / 2, mapSize / 2, triangleSize, subMap2, mapSize / 2, 0);
             testTerrain2.Projection = projection;
-            testTerrain2.Effect = terrain.Meshes[0].Effects[0];
+            testTerrain2.Effect = oldTerrain.Meshes[0].Effects[0];
 
             testTerrain3 = new TerrainModel(GraphicsDevice, mapSize / 2, mapSize / 2, triangleSize, subMap3, 0, mapSize / 2);
             testTerrain3.Projection = projection;
-            testTerrain3.Effect = terrain.Meshes[0].Effects[0];
+            testTerrain3.Effect = oldTerrain.Meshes[0].Effects[0];
 
             testTerrain4 = new TerrainModel(GraphicsDevice, mapSize / 2, mapSize / 2, triangleSize, subMap4, 0, 0);
             testTerrain4.Projection = projection;
-            testTerrain4.Effect = terrain.Meshes[0].Effects[0];
+            testTerrain4.Effect = oldTerrain.Meshes[0].Effects[0];
             #endregion
+
+            */
 
             #endregion
 
@@ -512,10 +516,10 @@ namespace datx02_rally
 
             #endregion
 
-            testTerrain1.Draw(view);
-            testTerrain2.Draw(view);
-            testTerrain3.Draw(view);
-            testTerrain4.Draw(view);
+            //testTerrain1.Draw(view);
+            //testTerrain2.Draw(view);
+            //testTerrain3.Draw(view);
+            //testTerrain4.Draw(view);
 
             //terrainGenerator.DrawTerrain(view, projection);
 
@@ -545,19 +549,19 @@ namespace datx02_rally
 
             #region Terrain
 
-            //foreach (ModelMesh mesh in terrain.Meshes)
-            //{
-            //    foreach (BasicEffect currentEffect in mesh.Effects)
-            //    {
-            //        currentEffect.World = transforms[mesh.ParentBone.Index] *
-            //                    Matrix.CreateTranslation(Vector3.Zero);
-            //        currentEffect.View = view;
-            //        currentEffect.Projection = projection;
-            //        currentEffect.EnableDefaultLighting();
-            //        currentEffect.PreferPerPixelLighting = true;
-            //    }
-            //    mesh.Draw();
-            //}
+            foreach (ModelMesh mesh in oldTerrain.Meshes)
+            {
+                foreach (BasicEffect currentEffect in mesh.Effects)
+                {
+                    currentEffect.World = transforms[mesh.ParentBone.Index] *
+                                Matrix.CreateTranslation(Vector3.Zero);
+                    currentEffect.View = view;
+                    currentEffect.Projection = projection;
+                    currentEffect.EnableDefaultLighting();
+                    currentEffect.PreferPerPixelLighting = true;
+                }
+                mesh.Draw();
+            }
 
             #endregion
 
