@@ -226,6 +226,12 @@ namespace datx02_rally
 
             #endregion
 
+            #region MapGeneration v2.
+
+            //terrainGenerator = new datx02_rally.MapGeneration.TerrainGenerator();
+            //terrainGenerator.LoadContent(GraphicsDevice, Content);
+
+            #endregion
 
             #region RaceTrackGeneration
 
@@ -506,12 +512,12 @@ namespace datx02_rally
 
             #endregion
 
-
             testTerrain1.Draw(view);
             testTerrain2.Draw(view);
             testTerrain3.Draw(view);
             testTerrain4.Draw(view);
 
+            //terrainGenerator.DrawTerrain(view, projection);
 
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
