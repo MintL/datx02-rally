@@ -281,20 +281,35 @@ namespace datx02_rally
 
             raceTrack = new RaceTrack(((mapSize / 2) * triangleSize));
 
-            for (float i = 0; i < 1; i += .001f)
+            float roadWidth = 2;
+            float lerpDist = 5;
+
+            Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f);
+            lastPosition /= triangleSize;
+            lastPosition += new Vector3(.5f, 0, .5f) * mapSize;
+            for (float i = 0; i < 1; i += .0003f)
             {
                 var e = raceTrack.Curve.GetPoint(i);
                 e /= triangleSize;
                 e += new Vector3(.5f, 0, .5f) * mapSize;
-                
-                // Indices
-                int x = (int)e.X, z = (int)e.Z;
 
-                for (int xoff = -2; xoff <= 2; xoff++)
-                    for (int zoff = -2; zoff <= 2; zoff++)
-                        heightmap[x + xoff, z + zoff] = .77f;
+                for (float j = -lerpDist; j <= lerpDist; j++)
+                {
+                    var pos = e + j * Vector3.Normalize(Vector3.Cross(lastPosition - e, Vector3.Up));
+                    
+                    // Indices
+                    int x = (int)pos.X, z = (int)pos.Z;
+
+                    if (Math.Abs(j) <= roadWidth)
+                        heightmap[x, z] = .769f;
+                    else
+                        heightmap[x, z] = MathHelper.Lerp(.77f, heightmap[x, z], (Math.Abs(j) - roadWidth) / (lerpDist - roadWidth));
+                }
+                lastPosition = e;
             }
 
+            //heightmapGenerator.Heights = heightmap;
+            heightmapGenerator.Smoothen();
 
             // Creates a terrainmodel around Vector3.Zero
             testTerrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightmap);
