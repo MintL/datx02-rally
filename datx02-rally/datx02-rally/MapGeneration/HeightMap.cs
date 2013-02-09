@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using System.IO;
+using datx02_rally.GameLogic;
 
 /*Implementation from the following link: 
  * 
@@ -142,43 +143,67 @@ namespace datx02_rally.MapGeneration
 
         public void Store(GraphicsDevice graphicsDevice) 
         { 
-            string imageDestination = "z:/GeneratedMaps/new.bmp";
+            //string imageDestination = "z:/GeneratedMaps/new.bmp";
             
-            float lowest = 1, highest = 0;
+            //float lowest = 1, highest = 0;
 
-            FileStream stream = new FileStream(imageDestination, FileMode.Create);
+            //FileStream stream = new FileStream(imageDestination, FileMode.Create);
 
 
-            Texture2D mapImage = new Texture2D(graphicsDevice, Size, Size, false, SurfaceFormat.Color);
+            //Texture2D mapImage = new Texture2D(graphicsDevice, Size, Size, false, SurfaceFormat.Color);
 
-            Color[] heightMapColors = new Color[Heights.Length];
+            //Color[] heightMapColors = new Color[Heights.Length];
 
-            for (int x = 0; x < Size; x++)
-            {
-                for (int y = 0; y < Size; y++)
-                {
-                    var next = Heights[x, y];
+            //for (int x = 0; x < Size; x++)
+            //{
+            //    for (int y = 0; y < Size; y++)
+            //    {
+            //        var next = Heights[x, y];
                     
-                    lowest = Math.Min(lowest, next);
-                    highest = Math.Max(highest, next);
+            //        lowest = Math.Min(lowest, next);
+            //        highest = Math.Max(highest, next);
 
-                    byte colorData = (byte)(next * 255);
+            //        byte colorData = (byte)(next * 255);
 
-                    heightMapColors[x + y * Size].R = colorData;
-                    heightMapColors[x + y * Size].G = colorData;
-                    heightMapColors[x + y * Size].B = colorData;
-                    heightMapColors[x + y * Size].A = 255;
+            //        heightMapColors[x + y * Size].R = colorData;
+            //        heightMapColors[x + y * Size].G = colorData;
+            //        heightMapColors[x + y * Size].B = colorData;
+            //        heightMapColors[x + y * Size].A = 255;
+            //    }
+            //}
+
+            //mapImage.SetData<Color>(heightMapColors);
+
+            //mapImage.SaveAsPng(stream, Size, Size);
+
+            //Console.WriteLine("Lowest noise: " + lowest);
+            //Console.WriteLine("Highest noise: " + highest);
+
+            //stream.Close();
+        }
+
+        public void loadMap(RaceTrack track, int triangleSize)
+        {
+            Vector3 trackCoordinate = Vector3.Zero;
+            Vector3 offsetVector = new Vector3(Size/2, 0, Size/2);
+
+            for (float f = 0; f <= 1; f += 0.001f)
+            {
+                trackCoordinate = track.Curve.GetPoint(f);
+
+                trackCoordinate = trackCoordinate / triangleSize;
+                trackCoordinate += offsetVector;
+
+
+
+                for (int x = -4; x < 4; x++)
+                {
+                    for (int z = -4; z < 4; z++)
+                    {
+                        Heights[(int)trackCoordinate.X + x, (int)trackCoordinate.Z + z] = 0.5f;
+                    }
                 }
             }
-
-            mapImage.SetData<Color>(heightMapColors);
-
-            mapImage.SaveAsPng(stream, Size, Size);
-
-            Console.WriteLine("Lowest noise: " + lowest);
-            Console.WriteLine("Highest noise: " + highest);
-
-            stream.Close();
         }
     }
 }
