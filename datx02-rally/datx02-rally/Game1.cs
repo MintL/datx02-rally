@@ -54,6 +54,8 @@ namespace datx02_rally
         List<ParticleSystem> particleSystems = new List<ParticleSystem>();
         ParticleSystem plasmaSystem;
         ParticleSystem greenSystem;
+        ParticleSystem airParticles;
+        int nextSpawn;
 
         Random random = new Random();
 
@@ -121,6 +123,10 @@ namespace datx02_rally
             greenSystem = new GreenParticleSystem(this, Content);
             Components.Add(greenSystem);
             particleSystems.Add(greenSystem);
+
+            airParticles = new AirParticleSystem(this, Content);
+            Components.Add(airParticles);
+            particleSystems.Add(airParticles);
 
             //smoke = new SmokePlumeParticleSystem(this, Content);
             //smoke.DrawOrder = 500;
@@ -285,17 +291,17 @@ namespace datx02_rally
                 treeRotations[i] = MathHelper.Lerp(0, MathHelper.Pi * 2, (float)random.NextDouble());
             }
 
-         // {
-         //     mushroomGroup = Content.Load<Model>(@"Foliage\MushroomGroup");
-         //     ModelMesh mesh = mushroomGroup.Meshes.First<ModelMesh>();
-         //     foreach (ModelMeshPart part in mesh.MeshParts)
-         //     {
-         //         part.Effect = alphaMapEffect.Clone();
-         //         part.Effect.Parameters["ColorMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-c"));
-         //         part.Effect.Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-n"));
-         //     }
-         // }
-            
+            // {
+            //     mushroomGroup = Content.Load<Model>(@"Foliage\MushroomGroup");
+            //     ModelMesh mesh = mushroomGroup.Meshes.First<ModelMesh>();
+            //     foreach (ModelMeshPart part in mesh.MeshParts)
+            //     {
+            //         part.Effect = alphaMapEffect.Clone();
+            //         part.Effect.Parameters["ColorMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-c"));
+            //         part.Effect.Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-n"));
+            //     }
+            // }
+
 
             #endregion
 
@@ -375,6 +381,27 @@ namespace datx02_rally
             for (int i = 0; i < 1; i++)
             {
                 greenSystem.AddParticle(new Vector3(105, 10, 100), Vector3.Up);
+            }
+
+            for (int i = 0; i < 1; i++)
+            {
+                nextSpawn -= gameTime.ElapsedGameTime.Milliseconds;
+                Camera camera = this.GetService<CameraComponent>().CurrentCamera;
+                if (camera is ThirdPersonCamera && nextSpawn <= 0)
+                {
+                    Vector3 direction = car.Position - camera.Position;
+                    direction.Y = 0;
+                    direction = Vector3.Normalize(direction);
+                    Vector3 crossDirection = Vector3.Normalize(Vector3.Cross(direction, Vector3.Up));
+
+                    Vector3 position = camera.Position;
+                    position += direction * MathHelper.Lerp(400.0f, 1000.0f, (float)random.NextDouble());
+                    position += crossDirection * MathHelper.Lerp(-400.0f, 400.0f, (float)random.NextDouble());
+                    position += Vector3.Up * MathHelper.Lerp(-400.0f, 400.0f, (float)random.NextDouble());
+                    airParticles.AddParticle(position, Vector3.Up);
+
+                    nextSpawn += 100;
+                }
             }
 
             //Apply changes to car
@@ -486,7 +513,7 @@ namespace datx02_rally
             GraphicsDevice.Clear(Color.Honeydew);
             skyBoxEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
 
-            RenderEnvironmentMap();
+            //RenderEnvironmentMap();
 
             Matrix view = this.GetService<CameraComponent>().View;
             RenderScene(view, false);
