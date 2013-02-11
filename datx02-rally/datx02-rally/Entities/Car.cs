@@ -9,9 +9,18 @@ namespace datx02_rally
 {
     class Car : ITargetNode
     {
-        public Model Model { get; private set; }
-        public float Rotation { get; private set; }
-        public Vector3 Position { get; private set; }
+        public Model Model { get; set; }
+
+        /// <summary>
+        /// Set only for repositioning, not driving
+        /// </summary>
+        public float Rotation { get; set; }
+        
+        /// <summary>
+        /// Set only for repositioning, not driving
+        /// </summary>
+        public Vector3 Position { get; set; }
+
         private float wheelRadius;
         public float WheelRotationX { get; private set; }
 

@@ -71,9 +71,9 @@ namespace datx02_rally
                 switch (input)
                 {
                     case Input.ChangeController:
-                        return previousKeyboard.IsKeyUp(Keys.F1) && keyboard.IsKeyDown(Keys.F1);
+                        return GetKey(Keys.F1);
                     case Input.ChangeCamera:
-                        return previousKeyboard.IsKeyUp(Keys.C) && keyboard.IsKeyDown(Keys.C);
+                        return GetKey(Keys.C);
                     case Input.Exit:
                         return keyboard.IsKeyDown(Keys.Escape);
                 }
@@ -91,6 +91,11 @@ namespace datx02_rally
                 }
             }
             return false;
+        }
+
+        public bool GetKey(Keys key)
+        {
+            return previousKeyboard.IsKeyUp(key) && keyboard.IsKeyDown(key);
         }
 
         private  void UpdatePreviousState()
