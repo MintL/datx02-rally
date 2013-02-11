@@ -9,7 +9,7 @@ using System.Net;
 
 namespace datx02_rally
 {
-    class HUDConsole : DrawableGameComponent
+    class HUDConsoleComponent : DrawableGameComponent
     {
         private StringBuilder EnteredCommand = new StringBuilder();
         SpriteFont Font;
@@ -17,7 +17,7 @@ namespace datx02_rally
         Boolean connected = false;
         Boolean enabled = false;
 
-        public HUDConsole(Game1 game) : base(game)
+        public HUDConsoleComponent(Game1 game) : base(game)
         {
         }
 

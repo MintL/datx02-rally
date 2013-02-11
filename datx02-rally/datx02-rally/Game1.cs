@@ -106,9 +106,9 @@ namespace datx02_rally
             Components.Add(carControlComponent);
             Services.AddService(typeof(CarControlComponent), carControlComponent);
 
-            var consoleComponent = new HUDConsole(this);
+            var consoleComponent = new HUDConsoleComponent(this);
             Components.Add(consoleComponent);
-            Services.AddService(typeof(HUDConsole), consoleComponent);
+            Services.AddService(typeof(HUDConsoleComponent), consoleComponent);
 
             Console.WriteLine("isConnected " + GamePad.GetState(PlayerIndex.One).IsConnected);
 
@@ -355,7 +355,7 @@ namespace datx02_rally
                 this.Exit();
 
             if (input.GetPressed(Input.Console))
-                this.GetService<HUDConsole>().Toggle();
+                this.GetService<HUDConsoleComponent>().Toggle();
 	
             // Spawn particles
             Vector3 radius = 100 * Vector3.UnitX;
