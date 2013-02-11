@@ -2,10 +2,9 @@ float4x4 World;
 float4x4 View;
 float4x4 Projection;
 
-texture SkyboxTexture;
-
 float ElapsedTime;
 
+texture SkyboxTexture;
 sampler SkyboxSampler = sampler_state
 {
 	Texture = <SkyboxTexture>;
@@ -15,6 +14,9 @@ sampler SkyboxSampler = sampler_state
     AddressU = CLAMP;
     AddressV = CLAMP;
 };
+
+int FogEnabled = 1;
+float3 FogColor = float3(0.1, 0.1, 0.1);
 
 struct VertexShaderInput
 {
@@ -55,7 +57,10 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	float size = 2;
 	float amount = 1 + (sin(2 * ElapsedTime) + 1) * 0.5 * size; // amount will be in range [1..1+size]
-	return skyBoxColor * amount;
+	skyBoxColor = skyBoxColor * amount;
+
+	skyBoxColor.rgb = lerp(skyBoxColor.rgb, FogColor, 0.9);
+	return skyBoxColor;
 }
 
 technique Technique1

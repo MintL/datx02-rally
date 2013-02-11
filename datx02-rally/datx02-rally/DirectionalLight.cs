@@ -11,7 +11,7 @@ using Microsoft.Xna.Framework.Media;
 
 namespace datx02_rally
 {
-    class DirectionalLight
+    public class DirectionalLight
     {
         public Vector3 Direction { get; set; }
         public Vector3 Ambient { get; set; }

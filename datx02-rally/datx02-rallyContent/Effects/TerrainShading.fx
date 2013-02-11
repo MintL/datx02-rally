@@ -7,32 +7,15 @@ float3 DirectionalDirection;
 float3 DirectionalAmbient;
 float3 DirectionalDiffuse;
 
+int FogEnabled = 1;
+float3 FogColor = float3(0.1, 0.1, 0.1);
+float FogStart = 200;
+float FogEnd = 8000;
+
 texture ColorMap;
 sampler ColorMapSampler = sampler_state
 {
 	Texture = <ColorMap>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU = Mirror;
-	AddressV = Mirror;
-};
-
-texture AlphaMap;
-sampler AlphaMapSampler = sampler_state
-{
-	Texture = <AlphaMap>;
-	MinFilter = Linear;
-	MagFilter = Linear;
-	MipFilter = Linear;
-	AddressU = Mirror;
-	AddressV = Mirror;
-};
-
-texture NormalMap;
-sampler NormalMapSampler = sampler_state
-{
-	Texture = <NormalMap>;
 	MinFilter = Linear;
 	MagFilter = Linear;
 	MipFilter = Linear;
@@ -45,15 +28,14 @@ struct VertexShaderInput
     float4 Position : POSITION0;
 	float2 TexCoord : TEXCOORD;
 	float3 Normal : NORMAL;
-	float3 Binormal : BINORMAL;
-	float3 Tangent : TANGENT;
 };
 
 struct VertexShaderOutput
 {
     float4 Position : POSITION0;
 	float2 TexCoord : TEXCOORD0;
-	float3x3 WorldToTangentSpace : TEXCOORD2;
+	float3 Normal : TEXCOORD1;
+	float3 ViewDirection : TEXCOORD2;
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
@@ -63,29 +45,32 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     float4 worldPosition = mul(input.Position, World);
     float4 viewPosition = mul(worldPosition, View);
     output.Position = mul(viewPosition, Projection);
+	output.ViewDirection = EyePosition - worldPosition.xyz;
 
-    output.TexCoord = input.TexCoord;
-	output.WorldToTangentSpace[0] = mul(normalize(input.Tangent), World);
-	output.WorldToTangentSpace[1] = mul(normalize(input.Binormal), World);
-	output.WorldToTangentSpace[2] = mul(normalize(input.Normal), World);
+	output.TexCoord = input.TexCoord;
+    output.Normal = input.Normal;
 
     return output;
 }
 
+float ComputeFogFactor(float d)
+{
+	return clamp((d - FogStart) / (FogEnd - FogStart), 0, 1) * FogEnabled;
+}
+
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-	float4 color = tex2D(ColorMapSampler, input.TexCoord);
+    float4 color = tex2D(ColorMapSampler, input.TexCoord);
 	float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
-	totalLight.a = 1 - tex2D(AlphaMapSampler, input.TexCoord).r;
-	clip(totalLight.a - 0.7843f);
 
-	float3 normal = 2.0 * (tex2D(NormalMapSampler, input.TexCoord)) - 1.0;
-	normal = normalize(mul(normal, input.WorldToTangentSpace));
+	float3 normal = normalize(input.Normal);
 	float3 directionToLight = -normalize(DirectionalDirection);
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 
 	totalLight.rgb += selfShadow * (DirectionalDiffuse * color.rgb * saturate(dot(normal, directionToLight)));
 	
+	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
+
 	return totalLight;
 }
 
@@ -93,11 +78,7 @@ technique Technique1
 {
     pass Pass1
     {
-		AlphaBlendEnable = True;
-		SrcBlend = SrcAlpha;
-		DestBlend = InvSrcAlpha;
-		
-        VertexShader = compile vs_3_0 VertexShaderFunction();
-        PixelShader = compile ps_3_0 PixelShaderFunction();
+        VertexShader = compile vs_2_0 VertexShaderFunction();
+        PixelShader = compile ps_2_0 PixelShaderFunction();
     }
 }

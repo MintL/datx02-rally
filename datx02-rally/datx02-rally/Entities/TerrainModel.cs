@@ -197,14 +197,20 @@ namespace datx02_rally
         }
 
         
-        public void Draw(Matrix view)
+        public void Draw(Matrix view, Vector3 cameraPosition, DirectionalLight directionalLight)
         {
             //var effect = Effect as BasicEffect;
             //effect.View = view;
             //effect.DiffuseColor = Color.LightBlue.ToVector3();
 
-            Effect.Parameters["EyePosition"].SetValue(view.Translation);
-            Effect.Parameters["WorldViewProj"].SetValue(view * Projection);
+            Effect.Parameters["EyePosition"].SetValue(cameraPosition);
+            Effect.Parameters["View"].SetValue(view);
+            Effect.Parameters["World"].SetValue(Matrix.Identity);
+            Effect.Parameters["Projection"].SetValue(Projection);
+
+            Effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
+            Effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
+            Effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
 
             foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
             {

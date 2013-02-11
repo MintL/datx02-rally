@@ -179,9 +179,9 @@ namespace datx02_rally
 
                 Console.WriteLine(color);
 
-                pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
+                //pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
             }
-            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.1f, Color.White.ToVector3() * 0.4f);
+            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.1f, Color.White.ToVector3() * 0.2f);
 
             #endregion
 
@@ -370,9 +370,13 @@ namespace datx02_rally
 
             // Creates a terrainmodel around Vector3.Zero
             testTerrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightmap);
-            testTerrain.Effect = oldTerrain.Meshes[0].Effects[0].Clone();
-            //testTerrain.Effect = alphaMapEffect
+            //testTerrain.Effect = oldTerrain.Meshes[0].Effects[0].Clone();
+            
+            Effect terrainEffect = Content.Load<Effect>(@"Effects\TerrainShading");
+            terrainEffect.Parameters["ColorMap"].SetValue(Content.Load<Texture2D>("checker"));
+            testTerrain.Effect = terrainEffect.Clone();
             testTerrain.Projection = projection;
+            
 
 
             // Place car at start.
@@ -383,8 +387,18 @@ namespace datx02_rally
             car.Rotation = (float)Math.Atan2(carHeading.X, carHeading.Z) - (float)Math.Atan2(0, -1);
 
 
+            for (int j = 0; j < 200; j++)
+            {
+                float i = j / 200.0f;
+                Vector3 point1 = raceTrack.Curve.GetPoint(i);
+                Vector3 point2 = raceTrack.Curve.GetPoint(i + .01f * (i > .5f ? -1 : 1));
+                var heading = (point2 - point1);
 
+                var side = 150 * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
 
+                pointLights.Add(new PointLight(point1 + side, Color.Cyan.ToVector3() * 0.3f, 800.0f));
+                pointLights.Add(new PointLight(point1 - side, Color.Cyan.ToVector3() * 0.3f, 800.0f));
+            }
 
 
 
@@ -630,7 +644,7 @@ namespace datx02_rally
 
             #endregion
 
-            testTerrain.Draw(view);
+            testTerrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight);
 
             //testTerrain1.Draw(view);
             //testTerrain2.Draw(view);
@@ -648,11 +662,15 @@ namespace datx02_rally
             //smoke.SetCamera(view, projection);
             //plasmaSystem.SetCamera(view, projection);
 
-
-            foreach (PointLight light in pointLights)
+            for (int i = 0; i < 10; i++)
             {
-                light.Draw(lightModel, view, projection);
+                pointLights[i].Draw(lightModel, view, projection);
             }
+
+            //foreach (PointLight light in pointLights)
+            //{
+            //    light.Draw(lightModel, view, projection);
+            //}
 
             #region Foliage
             for (int i = 0; i < 10; i++)
@@ -739,10 +757,24 @@ namespace datx02_rally
             //carSettings.EyePosition = view.Translation;
             carSettings.EyePosition = this.GetService<CameraComponent>().Position;
 
+            Vector3 carPosition = car.Position;
+            pointLights.Sort(
+                delegate(PointLight x, PointLight y)
+                {
+                    if (Vector3.DistanceSquared(x.Position, carPosition) < Vector3.DistanceSquared(y.Position, carPosition))
+                    {
+                        return -1;
+                    }
+                    else {
+                        return 1;
+                    }
+                }
+            );
+
             Vector3[] positions = new Vector3[pointLights.Count];
             Vector3[] diffuses = new Vector3[pointLights.Count];
             float[] ranges = new float[pointLights.Count];
-            for (int i = 0; i < pointLights.Count; i++)
+            for (int i = 0; i < 10; i++)
             {
                 positions[i] = pointLights[i].Position;
                 diffuses[i] = pointLights[i].Diffuse;
@@ -752,7 +784,7 @@ namespace datx02_rally
             carSettings.LightPosition = positions;
             carSettings.LightDiffuse = diffuses;
             carSettings.LightRange = ranges;
-            carSettings.NumLights = pointLights.Count;
+            carSettings.NumLights = 10;
 
             carSettings.DirectionalLightDirection = directionalLight.Direction;
             carSettings.DirectionalLightDiffuse = directionalLight.Diffuse;
