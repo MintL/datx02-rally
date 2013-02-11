@@ -22,6 +22,11 @@ float3 DirectionalLightDirection;
 float3 DirectionalLightAmbient;
 float3 DirectionalLightDiffuse;
 
+int FogEnabled = 1;
+float3 FogColor = float3(0.5, 0.5, 0.5);
+float FogStart = 200;
+float FogEnd = 300;
+
 float MaterialReflection;
 Texture EnvironmentMap;
 samplerCUBE EnvironmentSampler = sampler_state
@@ -61,7 +66,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 	output.WorldPosition = worldPosition.xyz;
 
 	output.Normal = mul(input.Normal, NormalMatrix);
-
+	
     return output;
 }
 
@@ -86,6 +91,11 @@ float3 CalculateEnvironmentReflection(float3 normal, float3 directionFromEye)
 {
 	//return reflect(directionFromEye, normal);
 	return normalize(reflect(directionFromEye, normal));
+}
+
+float ComputeFogFactor(float d)
+{
+	return clamp((d - FogStart) / (FogEnd - FogStart), 0, 1) * FogEnabled;
 }
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
@@ -128,6 +138,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 					DirectionalLightDiffuse * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor +
 					texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye)) * fresnel * MaterialReflection);
 
+	totalLight = lerp(totalLight, FogColor, ComputeFogFactor(length(input.ViewDirection)));
+	
 	return float4(saturate(totalLight), 1.0);
 }
 
