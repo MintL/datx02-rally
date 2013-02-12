@@ -44,7 +44,7 @@ namespace datx02_rally
 
         DirectionalLight directionalLight;
 
-        Car car;
+        public Car car { get; private set; }
         Effect carEffect;
         CarShadingSettings carSettings = new CarShadingSettings(){
             MaterialReflection = .3f,

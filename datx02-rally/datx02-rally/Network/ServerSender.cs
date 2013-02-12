@@ -23,5 +23,15 @@ namespace datx02_rally
             msg.Write("Hello world! I'm connected.");
             Client.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
         }
+
+        public void SendPlayerPosition(Vector3 position)
+        {
+            NetOutgoingMessage msg = Client.CreateMessage();
+            msg.Write((byte)MessageType.PlayerPos);
+            msg.Write(position.X);
+            msg.Write(position.Y);
+            msg.Write(position.Z);
+            Client.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
+        }
     }
 }

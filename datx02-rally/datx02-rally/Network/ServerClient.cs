@@ -14,6 +14,7 @@ namespace datx02_rally
         NetClient Client;
         ServerSender Sender;
         ServerReceiver Receiver;
+        Game1 Game;
         readonly int PORT = 19283;
         
         public ServerClient(Game1 game) : base(game)
@@ -26,18 +27,17 @@ namespace datx02_rally
 
             Sender = new ServerSender(Client);
             Receiver = new ServerReceiver(Client);
+            Game = game;
         }
 
         public void Connect(IPAddress IP) {
             Client.Connect(new IPEndPoint(IP, PORT));
         }
 
-        public void SendTestData()
+        public override void Update(GameTime gameTime)
         {
-            NetOutgoingMessage msg = Client.CreateMessage();
-            msg.Write((byte)MessageType.Debug);
-            msg.Write("Hello world! I'm connected.");
-            Client.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
+            Sender.SendPlayerPosition(Game.car.Position);
+            base.Update(gameTime);
         }
 
     }
