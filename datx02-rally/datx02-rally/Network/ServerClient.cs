@@ -36,7 +36,7 @@ namespace datx02_rally
 
         public override void Update(GameTime gameTime)
         {
-            Sender.SendPlayerPosition(Game.car.Position);
+            Sender.SendPlayerPosition(Game.car.Position, gameTime.TotalGameTime.TotalMilliseconds);
             base.Update(gameTime);
         }
 

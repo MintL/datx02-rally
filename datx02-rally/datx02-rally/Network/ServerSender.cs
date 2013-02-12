@@ -24,10 +24,11 @@ namespace datx02_rally
             Client.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
         }
 
-        public void SendPlayerPosition(Vector3 position)
+        public void SendPlayerPosition(Vector3 position, double ms)
         {
             NetOutgoingMessage msg = Client.CreateMessage();
             msg.Write((byte)MessageType.PlayerPos);
+            msg.Write(ms);
             msg.Write(position.X);
             msg.Write(position.Y);
             msg.Write(position.Z);

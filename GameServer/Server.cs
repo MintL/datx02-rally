@@ -86,6 +86,7 @@ namespace GameServer
             switch (type)
             {
                 case MessageType.PlayerPos:
+                    double msGameTime = msg.ReadFloat();
                     float x = msg.ReadFloat(); float y = msg.ReadFloat(); float z = msg.ReadFloat();
                     Console.WriteLine(" of type PlayerPos: {0},{1},{2}",x,y,z);
                     player.UpdatePosition(x, y, z);
