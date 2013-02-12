@@ -110,6 +110,10 @@ namespace datx02_rally
             Components.Add(consoleComponent);
             Services.AddService(typeof(HUDConsoleComponent), consoleComponent);
 
+            var serverComponent = new ServerClient(this);
+            Components.Add(serverComponent);
+            Services.AddService(typeof(ServerClient), serverComponent);
+
             Console.WriteLine("isConnected " + GamePad.GetState(PlayerIndex.One).IsConnected);
 
             // Particle systems

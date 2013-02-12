@@ -121,6 +121,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\HUDConsoleComponent.cs" />
+    <Compile Include="Network\ServerReceiver.cs" />
+    <Compile Include="Network\ServerSender.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PointLight.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

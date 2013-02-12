@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace datx02_rally
 {
-    class Car : ITargetNode
+    public class Car : ITargetNode
     {
         public Model Model { get; private set; }
         public float Rotation { get; private set; }

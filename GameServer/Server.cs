@@ -16,7 +16,7 @@ namespace GameServer
         NetServer serverThread;
         Boolean running;
 
-        public enum MessageType { PlayerPos, Chat, Debug }
+        public enum MessageType { PlayerPos, Chat, Debug, LobbyUpdate }
 
         public Server()
         {
@@ -86,9 +86,9 @@ namespace GameServer
             switch (type)
             {
                 case MessageType.PlayerPos:
-                    double msGameTime = msg.ReadFloat();
+                    double msGameTime = msg.ReadDouble();
                     float x = msg.ReadFloat(); float y = msg.ReadFloat(); float z = msg.ReadFloat();
-                    Console.WriteLine(" of type PlayerPos: {0},{1},{2}",x,y,z);
+                    Console.WriteLine(" of type PlayerPos: X:{0}, Y:{1}, Z:{2}",x,y,z);
                     player.UpdatePosition(x, y, z);
                     DistributePlayerPosition(player);
                     break;

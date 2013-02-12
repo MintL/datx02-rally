@@ -8,7 +8,7 @@ using System.Net;
 
 namespace datx02_rally
 {
-    public enum MessageType { PlayerPos, Chat, Debug }
+    public enum MessageType { PlayerPos, Chat, Debug, LobbyUpdate }
     class ServerClient : GameComponent
     {
         NetClient Client;

@@ -16,9 +16,11 @@ namespace datx02_rally
         KeyboardState PrevKeyState;
         Boolean connected = false;
         Boolean enabled = false;
+        Game1 Game;
 
         public HUDConsoleComponent(Game1 game) : base(game)
         {
+            Game = game;
         }
 
         protected override void LoadContent()
@@ -100,14 +102,8 @@ namespace datx02_rally
                     if (!connected && IPAddress.TryParse(command[1], out ip))
                     {
                         Console.WriteLine("Connecting to server: " + command[1]);
-                        System.Threading.ThreadPool.QueueUserWorkItem(delegate
-                        {
-                            ServerClient client = new ServerClient();
-                            client.Connect(ip);
-                            System.Threading.Thread.Sleep(5000);
-                            client.SendTestData();
-                            Console.WriteLine("Sent test data!");
-                        }, null);
+                        Game.GetService<ServerClient>().Connect(ip);
+
                         connected = true;
                     }
                     else
