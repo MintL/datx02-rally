@@ -12,6 +12,7 @@ namespace datx02_rally
     {
         NetClient client;
         readonly int PORT = 19283;
+        public enum MessageType { PlayerPos, Chat, Debug }
 
         public ServerClient()
         {
@@ -29,6 +30,7 @@ namespace datx02_rally
         public void SendTestData()
         {
             NetOutgoingMessage msg = client.CreateMessage();
+            msg.Write((byte)MessageType.Debug);
             msg.Write("Hello world! I'm connected.");
             client.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
         }

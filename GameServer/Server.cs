@@ -118,7 +118,12 @@ namespace GameServer
 
         private void DistributePlayerPosition(ServerPlayer player)
         {
-            throw new NotImplementedException();
+            NetOutgoingMessage msg = serverThread.CreateMessage();
+            msg.Write((byte)MessageType.PlayerPos);
+            msg.Write(player.PlayerPos.x);
+            msg.Write(player.PlayerPos.y);
+            msg.Write(player.PlayerPos.z);
+            serverThread.SendToAll(msg, NetDeliveryMethod.Unreliable);
         }
 
         public void Start()
@@ -147,6 +152,8 @@ namespace GameServer
             Console.WriteLine("Current players: " + serverThread.ConnectionsCount);
             foreach (NetConnection connection in serverThread.Connections)
                 Console.WriteLine(connection.RemoteEndPoint.Address);
+
+            Players[playerIP.Address] = new ServerPlayer(serverThread.ConnectionsCount);
         }
 
         public void PlayerDisconnected(IPEndPoint playerIP)

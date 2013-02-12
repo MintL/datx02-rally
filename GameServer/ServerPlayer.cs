@@ -5,17 +5,17 @@ using System.Text;
 
 namespace GameServer
 {
+    struct Position
+    {
+        public float x { get; set; }
+        public float y { get; set; }
+        public float z { get; set; }
+    }
     class ServerPlayer
     {
-        struct Position
-        {
-            public float x { get; set; }
-            public float y { get; set; }
-            public float z { get; set; }
-        }
         public string PlayerName { get; set; }
         readonly int PlayerID;
-        Position PlayerPos;
+        public Position PlayerPos;
 
         public ServerPlayer(int id)
         {
