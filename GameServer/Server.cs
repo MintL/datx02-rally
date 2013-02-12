@@ -11,17 +11,19 @@ namespace GameServer
     {
         string ServerName;
         readonly int MaxPlayers;
-        ServerPlayer[] Players;
+        Dictionary<IPAddress, ServerPlayer> Players;
         readonly int Port;
         NetServer serverThread;
         Boolean running;
+
+        public enum MessageType { PlayerPos, Chat, Debug }
 
         public Server()
         {
             ServerName = "Test server";
             MaxPlayers = 4;
-            Players = new ServerPlayer[4];
-            Port = 19283; 
+            Players = new Dictionary<IPAddress, ServerPlayer>();
+            Port = 19283;
 
             Start();
         }
@@ -71,12 +73,57 @@ namespace GameServer
 
         private void ProcessDataMessage(NetIncomingMessage msg)
         {
-            Console.Write("Received data from player " + msg.SenderEndPoint.Address + ": " + msg.ReadString());
+            Console.Write("Received data from player " + msg.SenderEndPoint.Address);
+            
+            ServerPlayer player;
+            if (!Players.TryGetValue(msg.SenderEndPoint.Address, out player)) 
+            {
+                Console.WriteLine("Player not found!");
+                return;
+            }
+
+            MessageType type = (MessageType)msg.ReadByte();
+            switch (type)
+            {
+                case MessageType.PlayerPos:
+                    float x = msg.ReadFloat(); float y = msg.ReadFloat(); float z = msg.ReadFloat();
+                    Console.WriteLine(" of type PlayerPos: {0},{1},{2}",x,y,z);
+                    player.UpdatePosition(x, y, z);
+                    DistributePlayerPosition(player);
+                    break;
+                case MessageType.Chat:
+                    string chatMsg = msg.ReadString();
+                    string chatSender = player.PlayerName;
+                    Console.WriteLine(" of type chat message: '{0}: {1}", chatSender, chatMsg);
+                    DistributeChatMessage(chatSender, chatMsg);
+                    break;
+                case MessageType.Debug:
+                    string debugMsg = msg.ReadString();
+                    Console.WriteLine(" DEBUG: " + debugMsg);
+                    break;
+                default:
+                    Console.WriteLine(" of unknown type!");
+                    break;
+            }
+        }
+
+        private void DistributeChatMessage(string chatSender, string chatMsg)
+        {
+            NetOutgoingMessage msg = serverThread.CreateMessage();
+            msg.Write((byte)MessageType.Chat);
+            msg.Write(chatSender);
+            msg.Write(chatMsg);
+            serverThread.SendToAll(msg, NetDeliveryMethod.Unreliable);
+        }
+
+        private void DistributePlayerPosition(ServerPlayer player)
+        {
+            throw new NotImplementedException();
         }
 
         public void Start()
         {
-            Console.WriteLine("Started server: "+ServerName+".");
+            Console.WriteLine("Started server: " + ServerName + ".");
 
             NetPeerConfiguration config = new NetPeerConfiguration("DATX02");
             config.Port = Port;
