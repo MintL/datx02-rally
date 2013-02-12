@@ -8,31 +8,36 @@ using System.Net;
 
 namespace datx02_rally
 {
-    class ServerClient
+    public enum MessageType { PlayerPos, Chat, Debug }
+    class ServerClient : GameComponent
     {
-        NetClient client;
+        NetClient Client;
+        ServerSender Sender;
+        ServerReceiver Receiver;
         readonly int PORT = 19283;
-        public enum MessageType { PlayerPos, Chat, Debug }
-
-        public ServerClient()
+        
+        public ServerClient(Game1 game) : base(game)
         {
             NetPeerConfiguration config = new NetPeerConfiguration("DATX02");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
             
-            client = new NetClient(config);
-            client.Start(); 
+            Client = new NetClient(config);
+            Client.Start();
+
+            Sender = new ServerSender(Client);
+            Receiver = new ServerReceiver(Client);
         }
 
         public void Connect(IPAddress IP) {
-            client.Connect(new IPEndPoint(IP, PORT));
+            Client.Connect(new IPEndPoint(IP, PORT));
         }
 
         public void SendTestData()
         {
-            NetOutgoingMessage msg = client.CreateMessage();
+            NetOutgoingMessage msg = Client.CreateMessage();
             msg.Write((byte)MessageType.Debug);
             msg.Write("Hello world! I'm connected.");
-            client.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
+            Client.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
         }
 
     }
