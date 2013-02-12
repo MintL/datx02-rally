@@ -12,6 +12,7 @@ using Particle3DSample;
 using datx02_rally.ModelPresenters;
 using datx02_rally.GameLogic;
 using datx02_rally.MapGeneration;
+using datx02_rally.Entities;
 
 namespace datx02_rally
 {
@@ -38,6 +39,8 @@ namespace datx02_rally
         static int mapSize = 512;
         static int triangleSize = 100;
         RaceTrack raceTrack;
+
+        NavMeshVisualizer navMesh;
         
         Model oldTerrain;
 
@@ -337,7 +340,9 @@ namespace datx02_rally
             var heightmap = heightmapGenerator.Generate();
 
             raceTrack = new RaceTrack(((mapSize / 2) * triangleSize));
+            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 200, 500);
 
+            // Forge map...
             float roadWidth = 2;
             float lerpDist = 5;
 
@@ -542,37 +547,33 @@ namespace datx02_rally
             if (input.GetPressed(Input.Exit))
                 this.Exit();
 
-            // Spawn particles
-            //Vector3 radius = 100 * Vector3.UnitX;
-            //for (int z = 0; z < 10000; z += 1000)
+
+            // New track
+            //if (input.GetKey(Keys.Y))
+            //    raceTrack.Curve = new GameLogic.Curve(25000);
+
+            // Spawn particles st both side of raceTrack.Curve
+            //for (int j = 0; j < 20; j++)
             //{
-            //    float next = (float)random.NextDouble();
-            //    plasmaSystem.AddParticle(Vector3.Transform(radius + Vector3.UnitZ * next * -10000,
-            //        Matrix.CreateRotationZ(MathHelper.TwoPi * 20 * next)), Vector3.Zero);
+            //    var i = (float)random.NextDouble();
+            //    Vector3 point1 = raceTrack.Curve.GetPoint(i);
+            //    Vector3 point2 = raceTrack.Curve.GetPoint(i + .01f * (i > .5f ? -1 : 1));
+            //    var heading = (point2 - point1);
+
+            //    var side = 150 * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
+
+            //    plasmaSystem.AddParticle(point1 + side, Vector3.Zero);
+            //    plasmaSystem.AddParticle(point1 - side, Vector3.Zero);
             //}
 
-            if (input.GetKey(Keys.Y))
-                ; // raceTrack.Curve = new GameLogic.Curve(25000);
 
-            for (int j = 0; j < 20; j++)
-            {
-                var i = (float)random.NextDouble();
-                Vector3 point1 = raceTrack.Curve.GetPoint(i);
-                Vector3 point2 = raceTrack.Curve.GetPoint(i + .01f * (i > .5f ? -1 : 1));
-                var heading = (point2 - point1);
+            // Mushroom
+            //for (int i = 0; i < 1; i++)
+            //{
+            //    greenSystem.AddParticle(new Vector3(105, 10, 100), Vector3.Up);
+            //}
 
-                var side = 150 * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
-
-                plasmaSystem.AddParticle(point1 + side, Vector3.Zero);
-                plasmaSystem.AddParticle(point1 - side, Vector3.Zero);
-            }
-
-
-            for (int i = 0; i < 1; i++)
-            {
-                greenSystem.AddParticle(new Vector3(105, 10, 100), Vector3.Up);
-            }
-
+            // Air particles.. In my opinion, more of those... /Marcus
             for (int i = 0; i < 1; i++)
             {
                 nextSpawn -= gameTime.ElapsedGameTime.Milliseconds;
@@ -593,6 +594,23 @@ namespace datx02_rally
                     nextSpawn += 100;
                 }
             }
+
+
+            // Spawn particles at each vertex of navmesh
+
+
+            plasmaSystem.AddParticle(
+            navMesh.vertices[(int)((gameTime.TotalGameTime.TotalSeconds * 7) % 200)].Position
+            , Vector3.Zero);
+
+            for (int i = 0; i < navMesh.boxes.Length; i++)
+            {
+                if (navMesh.boxes[i].box.Intersects(car.Model.Meshes[0].BoundingSphere))
+                {
+                    Console.WriteLine(i);
+                }
+            }
+
 
             //Apply changes to car
             car.Update();
@@ -645,6 +663,8 @@ namespace datx02_rally
             #endregion
 
             testTerrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight);
+
+            navMesh.Draw(view, projection);
 
             //testTerrain1.Draw(view);
             //testTerrain2.Draw(view);
