@@ -24,80 +24,41 @@ namespace datx02_rally
         {
         }
 
-        public TerrainModel(GraphicsDevice device, int width, int height, int triangleSize) : this(device, 0, width,0, height, triangleSize, null) {
+        public TerrainModel(GraphicsDevice device, int width, int height, int triangleSize) : this(device, 0, width,0, height, triangleSize, 0, null) {
         }
 
-        public TerrainModel (GraphicsDevice device, int offsetX, int width, int offsetY, int height, float triangleSize, float[,] heightMap)
+        public TerrainModel (GraphicsDevice device, int offsetX, int width, int offsetZ, int depth, float triangleSize, int heightScale, float[,] heightMap)
         {
             this.device = device;
 
-            int vertexCount = width * height,
+            int vertexCount = width * depth,
                 lastWidthIndex = width - 1,
-                lastHeightIndex = height - 1;
+                lastHeightIndex = depth - 1;
 
             float halfWidth = width / 2f,
-                halfHeight = height / 2f;
+                halfDepth = depth / 2f;
 
             vertices = new VertexPositionNormalTexture[vertexCount];
 
-            for (int z = 0; z < height; z++)
+            for (int z = 0; z < depth; z++)
             {
                 for (int x = 0; x < width; x++)
                 {
                     vertices[z * width + x] = new VertexPositionNormalTexture(
                         new Vector3(
                             ((x - offsetX) - halfWidth) * triangleSize, // X
-                            (heightMap != null ? 13 * triangleSize * heightMap[x, z] : 0) - 1000, // Y
-                            ((z - offsetY) - halfHeight) * triangleSize), // Z
+                            (heightMap != null ? heightScale * triangleSize * heightMap[x, z] : 0) - 1425, // Y
+                            ((z - offsetZ) - halfDepth) * triangleSize), // Z
                         Vector3.Zero, // Normal
                         new Vector2(x % 2, z % 2));
 
                 }
             }
 
-            // normals v1.
-
-            //for (int z = 0; z < height; z++)
-            //{
-            //    for (int x = 0; x < width; x++)
-            //    {
-            //        var current = vertices[z * width + x];
-            //        Vector3? prevX = null, nextX = null, prevZ = null, nextZ = null;
-
-            //        if (x > 0)
-            //            prevX = vertices[z * width + x - 1].Position - current.Position;
-
-            //        if (x < lastWidthIndex)
-            //            nextX = vertices[z * width + x + 1].Position - current.Position;
-
-            //        if (z > 0)
-            //            prevZ = vertices[(z - 1) * width + x].Position - current.Position;
-
-            //        if (z < lastHeightIndex)
-            //            nextZ = vertices[(z + 1) * width + x].Position - current.Position;
-
-            //        Vector3 newNormal = Vector3.Zero;
-
-            //        if (prevX.HasValue)
-            //            newNormal += Vector3.Cross(Vector3.UnitZ, prevX.Value);
-                                                                     
-            //        if (nextX.HasValue)                              
-            //            newNormal += Vector3.Cross(Vector3.UnitZ, nextX.Value);
-                                                                     
-            //        if (prevZ.HasValue)                              
-            //            newNormal += Vector3.Cross(-Vector3.UnitX, prevZ.Value);
-                                                                     
-            //        if (nextZ.HasValue)                              
-            //            newNormal += Vector3.Cross(Vector3.UnitX, nextZ.Value);
-
-            //        vertices[z * width + x].Normal = newNormal;
-            //    }
-            //}
-
 
             int flexIndice = 1;
             int rowIndex = 2;
-            int[] indices = new int[(width-1) * (height-1) * 6];
+            int[] indices = new int[(width-1) * (depth-1) * 6];
             indices[0] = 0;
             indices[1] = width;
             indices[2] = flexIndice;
@@ -160,34 +121,9 @@ namespace datx02_rally
             }
 
 
-            //int[] indices = new int[(width-1) * (height-1) * 6];
-            //indices[0] = 0;
-            //indices[1] = width;
-
-            //int offset = 0;
-
-            //for (int i = 2; i < indices.Length + offset; i++)
-            //{
-            //    if (i % 3 < 2)
-            //        indices[i - offset] = indices[i - 2 - offset];
-            //    else
-            //        indices[i - offset] = 1 + i / 2 + (i % 2 == 0 ? 0 : width);
-
-            //    if (indices[i - offset] == 2 * width - 1)
-            //    {
-            //        i += 6;
-            //        offset += 6;
-            //    }
-            //}
-
-            //for (int i = 0; i < indices.Length; i++)
-            //{
-            //    System.Console.WriteLine(indices[i]);
-            //}
 
 
-
-            indexBuffer = new IndexBuffer(device, typeof(int), (width-1) * (height-1) * 6, BufferUsage.None);
+            indexBuffer = new IndexBuffer(device, typeof(int), (width-1) * (depth-1) * 6, BufferUsage.None);
             indexBuffer.SetData(indices);
 
             vertexbuffer = new VertexBuffer(device,
@@ -199,9 +135,6 @@ namespace datx02_rally
         
         public void Draw(Matrix view, Vector3 cameraPosition, DirectionalLight directionalLight)
         {
-            //var effect = Effect as BasicEffect;
-            //effect.View = view;
-            //effect.DiffuseColor = Color.LightBlue.ToVector3();
 
             Effect.Parameters["EyePosition"].SetValue(cameraPosition);
             Effect.Parameters["View"].SetValue(view);
