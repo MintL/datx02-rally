@@ -36,8 +36,8 @@ namespace datx02_rally
         // 
 
         static int mapSize = 512;
-        static int triangleSize = 100;
-        static int heightScale = 33;
+        static float triangleSize = 100;
+        static float heightScale = 33;
 
         RaceTrack raceTrack;
 
@@ -175,7 +175,7 @@ namespace datx02_rally
 
                 //pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
             }
-            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.1f, Color.White.ToVector3() * 0.2f);
+            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.2f);
 
             #endregion
 
@@ -255,10 +255,13 @@ namespace datx02_rally
 
 
             // Creates a terrainmodel around Vector3.Zero
-            terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightScale,heightmap);
+            terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightScale, heightmap);
 
             Effect terrainEffect = Content.Load<Effect>(@"Effects\TerrainShading");
-            terrainEffect.Parameters["ColorMap"].SetValue(Content.Load<Texture2D>("checker"));
+            terrainEffect.Parameters["TextureMap0"].SetValue(Content.Load<Texture2D> (@"Terrain\sand"));
+            terrainEffect.Parameters["TextureMap1"].SetValue(Content.Load<Texture2D> (@"Terrain\grass"));
+            terrainEffect.Parameters["TextureMap2"].SetValue(Content.Load<Texture2D> (@"Terrain\rock"));
+            terrainEffect.Parameters["TextureMap3"].SetValue(Content.Load<Texture2D> (@"Terrain\snow"));
             terrain.Effect = terrainEffect.Clone();
             terrain.Projection = projection;
 
@@ -358,8 +361,8 @@ namespace datx02_rally
 
                 var side = 150 * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
 
-                pointLights.Add(new PointLight(point1 + side, Color.Cyan.ToVector3() * 0.3f, 800.0f));
-                pointLights.Add(new PointLight(point1 - side, Color.Cyan.ToVector3() * 0.3f, 800.0f));
+                pointLights.Add(new PointLight(point1 + side + Vector3.Up * 50, Color.Cyan.ToVector3() * 0.3f, 800.0f));
+                pointLights.Add(new PointLight(point1 - side + Vector3.Up * 50, Color.Cyan.ToVector3() * 0.3f, 800.0f));
             }
 
 
@@ -438,8 +441,8 @@ namespace datx02_rally
             //        Matrix.CreateRotationZ(MathHelper.TwoPi * 20 * next)), Vector3.Zero);
             //}
 
-            if (input.GetKey(Keys.Y))
-                ; // raceTrack.Curve = new GameLogic.Curve(25000);
+            //if (input.GetKey(Keys.Y))
+                 // raceTrack.Curve = new GameLogic.Curve(25000);
 
             for (int j = 0; j < 20; j++)
             {
@@ -531,7 +534,7 @@ namespace datx02_rally
 
             #endregion
 
-            terrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight);
+            terrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight, pointLights);
 
             //testTerrain1.Draw(view);
             //testTerrain2.Draw(view);
@@ -627,6 +630,9 @@ namespace datx02_rally
             //carSettings.EyePosition = view.Translation;
             carSettings.EyePosition = this.GetService<CameraComponent>().Position;
 
+            Vector3 direction = car.Position - carSettings.EyePosition;
+            direction.Y = 0;
+            direction = Vector3.Normalize(direction);
             Vector3 carPosition = car.Position;
             pointLights.Sort(
                 delegate(PointLight x, PointLight y)
