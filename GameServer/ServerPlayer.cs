@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Lidgren.Network;
 
 namespace GameServer
 {
@@ -16,11 +17,13 @@ namespace GameServer
         public string PlayerName { get; set; }
         readonly int PlayerID;
         public Position PlayerPos;
+        public NetConnection Connection { get; set; }
 
-        public ServerPlayer(int id)
+        public ServerPlayer(int id, NetConnection connection)
         {
             PlayerID = id;
             PlayerName = "Player "+id;
+            Connection = connection;
             PlayerPos = new Position();
         }
 

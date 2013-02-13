@@ -52,10 +52,10 @@ namespace GameServer
                     switch (status)
                     {
                         case NetConnectionStatus.Connected:
-                            PlayerConnected(msg.SenderEndPoint);
+                            PlayerConnected(msg.SenderConnection);
                             break;
                         case NetConnectionStatus.Disconnected:
-                            PlayerDisconnected(msg.SenderEndPoint);
+                            PlayerDisconnected(msg.SenderConnection);
                             break;
                         default:
                             Console.WriteLine("Received unhandled status message " + status + " from player " + msg.SenderEndPoint.Address);
@@ -96,7 +96,7 @@ namespace GameServer
                     string chatMsg = msg.ReadString();
                     string chatSender = player.PlayerName;
                     Console.WriteLine(" of type chat message: '{0}: {1}", chatSender, chatMsg);
-                    DistributeChatMessage(chatSender, chatMsg);
+                    DistributeChatMessage(player, chatMsg);
                     break;
                 case MessageType.Debug:
                     string debugMsg = msg.ReadString();
@@ -108,13 +108,13 @@ namespace GameServer
             }
         }
 
-        private void DistributeChatMessage(string chatSender, string chatMsg)
+        private void DistributeChatMessage(ServerPlayer player, string chatMsg)
         {
             NetOutgoingMessage msg = serverThread.CreateMessage();
             msg.Write((byte)MessageType.Chat);
-            msg.Write(chatSender);
+            msg.Write(player.PlayerName);
             msg.Write(chatMsg);
-            serverThread.SendToAll(msg, NetDeliveryMethod.Unreliable);
+            SendToAllOtherPlayers(msg, player.Connection);            
         }
 
         private void DistributePlayerPosition(ServerPlayer player)
@@ -124,7 +124,16 @@ namespace GameServer
             msg.Write(player.PlayerPos.x);
             msg.Write(player.PlayerPos.y);
             msg.Write(player.PlayerPos.z);
-            serverThread.SendToAll(msg, NetDeliveryMethod.Unreliable);
+            SendToAllOtherPlayers(msg, player.Connection);
+        }
+
+        private void SendToAllOtherPlayers(NetOutgoingMessage msg, NetConnection exceptPlayer)
+        {
+            foreach (var playerConnection in serverThread.Connections)
+            {
+                if (playerConnection != exceptPlayer)
+                    serverThread.SendMessage(msg, playerConnection, NetDeliveryMethod.Unreliable);
+            }
         }
 
         public void Start()
@@ -146,18 +155,18 @@ namespace GameServer
             Console.WriteLine("Shutting down server...");
         }
 
-        public void PlayerConnected(IPEndPoint playerIP)
+        public void PlayerConnected(NetConnection connection)
         {
-            serverThread.SendDiscoveryResponse(null, playerIP);
-            Console.WriteLine("Player " + playerIP.Address + " connected!");
+            serverThread.SendDiscoveryResponse(null, connection.RemoteEndPoint);
+            Console.WriteLine("Player " + connection.RemoteEndPoint.Address + " connected!");
             Console.WriteLine("Current players: " + serverThread.ConnectionsCount);
-            foreach (NetConnection connection in serverThread.Connections)
-                Console.WriteLine(connection.RemoteEndPoint.Address);
+            foreach (NetConnection conn in serverThread.Connections)
+                Console.WriteLine(conn.RemoteEndPoint.Address);
 
-            Players[playerIP.Address] = new ServerPlayer(serverThread.ConnectionsCount);
+            Players[connection.RemoteEndPoint.Address] = new ServerPlayer(serverThread.ConnectionsCount, connection);
         }
 
-        public void PlayerDisconnected(IPEndPoint playerIP)
+        public void PlayerDisconnected(NetConnection connection)
         {
             // TODO
         }
