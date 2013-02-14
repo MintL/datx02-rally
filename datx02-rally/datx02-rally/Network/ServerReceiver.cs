@@ -29,6 +29,7 @@ namespace datx02_rally
                         break;
                     default:
                         Console.WriteLine("Received unknown network message: " + message.MessageType);
+                        Console.WriteLine(message.ReadString());
                         break;
                 }
             }

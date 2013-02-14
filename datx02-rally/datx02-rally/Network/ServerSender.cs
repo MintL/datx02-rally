@@ -32,7 +32,14 @@ namespace datx02_rally
             msg.Write(position.X);
             msg.Write(position.Y);
             msg.Write(position.Z);
-            Client.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
+            Client.SendMessage(msg, NetDeliveryMethod.Unreliable);
+        }
+
+        public void SendChatMessage(string textMsg)
+        {
+            NetOutgoingMessage msg = Client.CreateMessage();
+            msg.Write(textMsg);
+            Client.SendMessage(msg, NetDeliveryMethod.Unreliable);
         }
     }
 }

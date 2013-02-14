@@ -111,6 +111,12 @@ namespace datx02_rally
                         Console.WriteLine("Retard! Cannot connect to server " + command[1]);
                     }
                     break;
+                case "CHAT":
+                    if (connected)
+                    {
+                        Game.GetService<ServerClient>().Chat(String.Join(" ",command,1,command.Length-1));
+                    }
+                    break;
                 default:
                     break;
             }

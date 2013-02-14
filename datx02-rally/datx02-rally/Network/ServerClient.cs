@@ -42,5 +42,9 @@ namespace datx02_rally
             base.Update(gameTime);
         }
 
+        public void Chat(string msg)
+        {
+            Sender.SendChatMessage(msg);
+        }
     }
 }
