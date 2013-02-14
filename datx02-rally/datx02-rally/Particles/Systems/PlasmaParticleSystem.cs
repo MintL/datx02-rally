@@ -21,7 +21,7 @@ namespace datx02_rally
 
             settings.MaxParticles = 10000;
 
-            settings.Duration = TimeSpan.FromSeconds(.3f);
+            settings.Duration = TimeSpan.FromSeconds(1.5f);
 
             settings.MinHorizontalVelocity = 5;
             settings.MaxHorizontalVelocity = 10;
@@ -34,11 +34,11 @@ namespace datx02_rally
             settings.MinRotateSpeed = -1;
             settings.MaxRotateSpeed = 1;
 
-            settings.MinStartSize = 50;
-            settings.MaxStartSize = 50;
+            settings.MinStartSize = 25;
+            settings.MaxStartSize = 25;
 
-            settings.MinEndSize = 50;
-            settings.MaxEndSize = 50;
+            settings.MinEndSize = 25;
+            settings.MaxEndSize = 25;
 
             settings.MinColor = settings.MaxColor = Color.Cyan;
 

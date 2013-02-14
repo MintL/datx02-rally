@@ -19,12 +19,29 @@ namespace datx02_rally.Entities
 
         public BasicEffect Effect { get; set; }
 
-        public BBoxZone[] boxes;
+        public Triangles[] triangles;
 
-        public struct BBoxZone
+        public struct Triangles
         {
-            public int start, end;
-            public BoundingBox box;
+            public Vector3[] vertices;
+            public Vector3 baryCenter;
+            public Vector3 normal;
+            
+            public Vector3 ab, ac;
+            
+
+            public BoundingSphere boundingSphere;
+
+            public Triangles(params Vector3[] verts)
+            {
+                if (verts.Length != 3)
+                    throw new ArgumentException("Not 3 vertices!");
+
+                vertices = verts;
+                normal = Vector3.Cross(ab = (vertices[1] - vertices[0]), ac = (vertices[2] - vertices[0]));
+                baryCenter = vertices[0] + 1 / 3f * ab + 1 / 3f * ac;
+                boundingSphere = BoundingSphere.CreateFromPoints(vertices);
+            }
         }
 
         public NavMeshVisualizer(GraphicsDevice device, datx02_rally.GameLogic.Curve curve, int resolution, float width)
@@ -76,19 +93,15 @@ namespace datx02_rally.Entities
 
             #region 10-triangle spatial structure
 
-            boxes = new BBoxZone[resolution / 10];
 
-            for (int j = 0; j < resolution / 10; j++) // 20
+
+            triangles = new Triangles[2 * resolution]; // 200
+
+            for (int i = 0; i < indices.Length; i += 3) // 600 // 0..3..6..9...
             {
-                int indexOffset = j * 60;
-                Vector3 min = new Vector3(float.MaxValue), max = new Vector3(float.MinValue);
-                for (int i = 0; i < (3 * resolution / 10); i++)
-                {
-                    var position = vertices[indices[indexOffset + i]].Position;
-                    min = Vector3.Min(min, position);
-                    max = Vector3.Max(max, position);
-                }
-                boxes[j] = new BBoxZone() { box = new BoundingBox(min, max), start = indexOffset, end = indexOffset + 60 };
+                triangles[i / 3] = new Triangles(vertices[indices[i]].Position,
+                    vertices[indices[i + 1]].Position,
+                    vertices[indices[i + 2]].Position); // vert
             }
 
             #endregion
@@ -114,6 +127,8 @@ namespace datx02_rally.Entities
             Effect.World = Matrix.Identity;
             Effect.View = view;
             Effect.Projection = projection;
+
+            Effect.Alpha = .5f;
 
             foreach (var pass in Effect.CurrentTechnique.Passes)
             {

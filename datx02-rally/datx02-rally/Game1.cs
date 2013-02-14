@@ -13,6 +13,7 @@ using datx02_rally.ModelPresenters;
 using datx02_rally.GameLogic;
 using datx02_rally.MapGeneration;
 using datx02_rally.Entities;
+using datx02_rally.Particles.Systems;
 
 namespace datx02_rally
 {
@@ -64,6 +65,7 @@ namespace datx02_rally
 
         List<ParticleSystem> particleSystems = new List<ParticleSystem>();
         ParticleSystem plasmaSystem;
+        ParticleSystem redSystem;
         ParticleSystem greenSystem;
         ParticleSystem airParticles;
         int nextSpawn;
@@ -137,6 +139,10 @@ namespace datx02_rally
             plasmaSystem = new PlasmaParticleSystem(this, Content);
             Components.Add(plasmaSystem);
             particleSystems.Add(plasmaSystem);
+
+            redSystem = new RedPlasmaParticleSystem(this, Content);
+            Components.Add(redSystem);
+            particleSystems.Add(redSystem);
 
             greenSystem = new GreenParticleSystem(this, Content);
             Components.Add(greenSystem);
@@ -574,49 +580,119 @@ namespace datx02_rally
             //}
 
             // Air particles.. In my opinion, more of those... /Marcus
-            for (int i = 0; i < 1; i++)
-            {
-                nextSpawn -= gameTime.ElapsedGameTime.Milliseconds;
-                Camera camera = this.GetService<CameraComponent>().CurrentCamera;
-                if (camera is ThirdPersonCamera && nextSpawn <= 0)
-                {
-                    Vector3 direction = car.Position - camera.Position;
-                    direction.Y = 0;
-                    direction = Vector3.Normalize(direction);
-                    Vector3 crossDirection = Vector3.Normalize(Vector3.Cross(direction, Vector3.Up));
+            //for (int i = 0; i < 1; i++)
+            //{
+            //    nextSpawn -= gameTime.ElapsedGameTime.Milliseconds;
+            //    Camera camera = this.GetService<CameraComponent>().CurrentCamera;
+            //    if (camera is ThirdPersonCamera && nextSpawn <= 0)
+            //    {
+            //        Vector3 direction = car.Position - camera.Position;
+            //        direction.Y = 0;
+            //        direction = Vector3.Normalize(direction);
+            //        Vector3 crossDirection = Vector3.Normalize(Vector3.Cross(direction, Vector3.Up));
 
-                    Vector3 position = camera.Position;
-                    position += direction * MathHelper.Lerp(400.0f, 1000.0f, (float)random.NextDouble());
-                    position += crossDirection * MathHelper.Lerp(-400.0f, 400.0f, (float)random.NextDouble());
-                    position += Vector3.Up * MathHelper.Lerp(-400.0f, 400.0f, (float)random.NextDouble());
-                    airParticles.AddParticle(position, Vector3.Up);
+            //        Vector3 position = camera.Position;
+            //        position += direction * MathHelper.Lerp(400.0f, 1000.0f, (float)random.NextDouble());
+            //        position += crossDirection * MathHelper.Lerp(-400.0f, 400.0f, (float)random.NextDouble());
+            //        position += Vector3.Up * MathHelper.Lerp(-400.0f, 400.0f, (float)random.NextDouble());
+            //        airParticles.AddParticle(position, Vector3.Up);
 
-                    nextSpawn += 100;
-                }
-            }
-
-
-            // Spawn particles at each vertex of navmesh
-
-
-            plasmaSystem.AddParticle(
-            navMesh.vertices[(int)((gameTime.TotalGameTime.TotalSeconds * 7) % 200)].Position
-            , Vector3.Zero);
-
-            for (int i = 0; i < navMesh.boxes.Length; i++)
-            {
-                if (navMesh.boxes[i].box.Intersects(car.Model.Meshes[0].BoundingSphere))
-                {
-                    Console.WriteLine(i);
-                }
-            }
+            //        nextSpawn += 100;
+            //    }
+            //}
 
 
             //Apply changes to car
             car.Update();
 
+            carGravity += 1.5f;
+            car.Position += Vector3.Down * carGravity;
+            
+            
+            var diff = car.BBox.Max - car.BBox.Min;
+            // Car bounding box
+            for (int i = 0; i < 10; i++)
+			{
+                redSystem.AddParticle(Vector3.Transform(car.BBox.Min + new Vector3(
+                    (float)random.NextDouble() * diff.X,
+                    (float)random.NextDouble() * diff.Y,
+                    (float)random.NextDouble() * diff.Z), car.RotationMatrix * car.TranslationMatrix)
+                    ,Vector3.Zero);
+			}
+
+            #region Triangle Bounding Spheres
+
+            foreach (var triangle in navMesh.triangles)
+            {
+                if (car.Model.Meshes[0].BoundingSphere.Transform(Matrix.CreateTranslation(car.Position)).
+                    Intersects(triangle.boundingSphere))
+                {
+                    for (int i = 0; i < 20; i++)
+                    {
+                        // TRIANGLE BOUNDING SPHERE
+                        //redSystem.AddParticle(triangle.boundingSphere.Center + Vector3.Transform(Vector3.Forward * triangle.boundingSphere.Radius,
+                        //    Matrix.CreateFromYawPitchRoll(
+                        //    MathHelper.TwoPi * (float)random.NextDouble(),
+                        //    MathHelper.TwoPi * (float)random.NextDouble(),
+                        //    MathHelper.TwoPi * (float)random.NextDouble())),
+                        //    Vector3.Zero);
+
+                        // TRIANGLESURFACE
+                        //for (int g = 0; i < 10; i++)
+                        //{
+                        //    float r = (float)random.NextDouble(),
+                        //    s = (float)random.NextDouble();
+                        //    if (r + s > 1)
+                        //    {
+                        //        r = 1 - r;
+                        //        s = 1 - s;
+                        //    }
+                        //    plasmaSystem.AddParticle(triangle.vertices[0] + r * triangle.ab + s * triangle.ac, Vector3.Zero);
+                        //}
+
+                        redSystem.AddParticle(triangle.baryCenter, Vector3.Zero);
+                    }
+
+                    // TODO: Perform BBox-triangle intersection.
+
+                    // car.BBox.Contains(
+
+                    var pos = car.Position;
+                    pos.Y = triangle.boundingSphere.Center.Y;
+                    car.Position = pos;
+                    carGravity = 0;
+                }
+            }
+
+            #endregion
+
+            #region Triangle
+
+            //if (Keyboard.GetState().IsKeyDown(Keys.T))
+            //    triIndex++;
+
+            //triIndex %= navMesh.triangles.Length;
+            //NavMeshVisualizer.Triangles t = navMesh.triangles[triIndex];
+            //for (int i = 0; i < 10; i++)
+            //{
+            //    float r = (float)random.NextDouble(),
+            //    s = (float)random.NextDouble();
+            //    if (r + s > 1)
+            //    {
+            //        r = 1 - r;
+            //        s = 1 - s;
+            //    }
+            //    plasmaSystem.AddParticle(t.vertices[0] + r * t.ab + s * t.ac, Vector3.Zero);
+            //}
+
+            #endregion
+
+
             base.Update(gameTime);
         }
+
+        float carGravity = 0;
+        int triIndex = 0;
 
         private void RenderEnvironmentMap()
         {
@@ -662,7 +738,7 @@ namespace datx02_rally
 
             #endregion
 
-            testTerrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight);
+            //testTerrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight);
 
             navMesh.Draw(view, projection);
 

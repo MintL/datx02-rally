@@ -44,6 +44,8 @@ namespace datx02_rally
         
         // Physics
 
+        public BoundingBox BBox { get; protected set; }
+
         // Distance between wheelaxis.
         private float L = 40.197f;
 
@@ -52,6 +54,9 @@ namespace datx02_rally
         public Car(Model model, float wheelRadius)
         {
             this.Model = model;
+
+            BBox = GetBoundingBox(model);
+
             this.Position = Vector3.Zero;
 
             // Constants
@@ -61,6 +66,40 @@ namespace datx02_rally
             TurnSpeed = .005f;
 
             this.wheelRadius = wheelRadius;
+        }
+
+        protected BoundingBox GetBoundingBox(Model model)
+        {
+            // Initialize minimum and maximum corners of the bounding box to max and min values
+            Vector3 min = new Vector3(float.MaxValue);
+            Vector3 max = new Vector3(float.MinValue);
+
+            // For each mesh of the model
+            foreach (ModelMesh mesh in model.Meshes)
+            {
+                foreach (ModelMeshPart meshPart in mesh.MeshParts)
+                {
+                    // Vertex buffer parameters
+                    int vertexStride = meshPart.VertexBuffer.VertexDeclaration.VertexStride;
+                    int vertexBufferSize = meshPart.NumVertices * vertexStride;
+
+                    // Get vertex data as float
+                    float[] vertexData = new float[vertexBufferSize / sizeof(float)];
+                    meshPart.VertexBuffer.GetData<float>(vertexData);
+
+                    // Iterate through vertices (possibly) growing bounding box, all calculations are done in world space
+                    for (int i = 0; i < vertexBufferSize / sizeof(float); i += vertexStride / sizeof(float))
+                    {
+                        Vector3 transformedPosition = new Vector3(vertexData[i], vertexData[i + 1], vertexData[i + 2]);
+
+                        min = Vector3.Min(min, transformedPosition);
+                        max = Vector3.Max(max, transformedPosition);
+                    }
+                }
+            }
+
+            // Create and return bounding box
+            return new BoundingBox(min, max);
         }
 
         public void Update()
