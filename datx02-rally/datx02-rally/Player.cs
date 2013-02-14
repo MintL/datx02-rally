@@ -17,7 +17,7 @@ namespace datx02_rally
         {
             // Local discoveredPlayer
             ID = LOCAL_PLAYER;
-            PlayerName = "LOCAL";
+            PlayerName = "Unnamed Player";
             // TODO
         }
 

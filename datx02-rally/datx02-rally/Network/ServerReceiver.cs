@@ -74,6 +74,9 @@ namespace datx02_rally
                         }
                     }
                     break;
+                case MessageType.OK:
+                    ServerHandler.connected = true;
+                    break;
                 default:
                     break;
             }

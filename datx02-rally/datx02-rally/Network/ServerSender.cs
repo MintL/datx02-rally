@@ -40,7 +40,16 @@ namespace datx02_rally
         public void SendChatMessage(string textMsg)
         {
             NetOutgoingMessage msg = ServerThread.CreateMessage();
+            msg.Write((byte)MessageType.Chat);
             msg.Write(textMsg);
+            ServerThread.SendMessage(msg, NetDeliveryMethod.Unreliable);
+        }
+
+        public void SendPlayerInfo()
+        {
+            NetOutgoingMessage msg = ServerThread.CreateMessage();
+            msg.Write((byte)MessageType.PlayerInfo);
+            msg.Write(ServerHandler.LocalPlayer.PlayerName);
             ServerThread.SendMessage(msg, NetDeliveryMethod.Unreliable);
         }
     }

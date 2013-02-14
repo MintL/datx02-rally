@@ -17,7 +17,11 @@ namespace GameServer
         NetServer serverThread;
         Boolean running;
 
-        public enum MessageType { PlayerPos, Chat, Debug, LobbyUpdate }
+        public enum MessageType
+        {
+            PlayerPos, Chat, Debug, // game info exchange stuff
+            LobbyUpdate, PlayerInfo, OK // handshake-y stuff    
+        }
 
         public Server()
         {
@@ -103,6 +107,12 @@ namespace GameServer
                     string debugMsg = msg.ReadString();
                     Console.WriteLine(" DEBUG: " + debugMsg);
                     break;
+                case MessageType.PlayerInfo:
+                    string playerName = msg.ReadString();
+                    player.PlayerName = playerName;
+                    Console.WriteLine(" of type PlayerInfo: " + playerName);
+                    SendOKHandshake(player);
+                    break;
                 default:
                     Console.WriteLine(" of unknown type!");
                     break;
@@ -127,6 +137,13 @@ namespace GameServer
             msg.Write(player.PlayerPos.y);
             msg.Write(player.PlayerPos.z);
             SendToAllOtherPlayers(msg, player.Connection);
+        }
+
+        private void SendOKHandshake(ServerPlayer player)
+        {
+            NetOutgoingMessage msg = serverThread.CreateMessage();
+            msg.Write((byte)MessageType.OK);
+            serverThread.SendMessage(msg, player.Connection, NetDeliveryMethod.Unreliable);
         }
 
         private void SendToAllOtherPlayers(NetOutgoingMessage msg, NetConnection exceptPlayer)

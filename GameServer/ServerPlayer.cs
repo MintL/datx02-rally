@@ -22,7 +22,7 @@ namespace GameServer
         public ServerPlayer(byte id, NetConnection connection)
         {
             PlayerID = id;
-            PlayerName = "Player "+id;
+            PlayerName = "Unnamed Player "+id;
             Connection = connection;
             PlayerPos = new Position();
         }
