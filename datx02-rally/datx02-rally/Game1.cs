@@ -19,6 +19,7 @@ namespace datx02_rally
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        private static Game1 Instance = null;
         GraphicsDeviceManager graphics;
         public SpriteBatch spriteBatch;
 
@@ -79,6 +80,12 @@ namespace datx02_rally
             //graphics.ToggleFullScreen();
 
             IsMouseVisible = true;
+            Instance = this;
+        }
+
+        public static Game1 GetInstance()
+        {
+            return Instance;
         }
 
         /// <summary>

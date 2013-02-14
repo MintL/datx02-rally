@@ -37,7 +37,7 @@ namespace datx02_rally
         private void ParseDataPackage(Dictionary<byte, Player> PlayerList, NetIncomingMessage msg) 
         {
             MessageType type = (MessageType)msg.ReadByte();
-            Player player;
+            Player player = null;
             if (type != MessageType.LobbyUpdate && !PlayerList.TryGetValue(msg.ReadByte(), out player))
             {
                 Console.WriteLine("Received message from unknown discoveredPlayer, discarding...");
