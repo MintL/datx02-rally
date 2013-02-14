@@ -16,7 +16,7 @@ namespace datx02_rally
             this.Client = Client;
         }
 
-        public void ReceiveMessages(IList<Player> Players)
+        public void ReceiveMessages(Dictionary<byte, Player> Players)
         {
             List<NetIncomingMessage> messages = new List<NetIncomingMessage>();
             Client.ReadMessages(messages);
@@ -34,19 +34,41 @@ namespace datx02_rally
             }
         }
 
-        private void ParseDataPackage(IList<Player> PlayerList, NetIncomingMessage msg) 
+        private void ParseDataPackage(Dictionary<byte, Player> PlayerList, NetIncomingMessage msg) 
         {
             MessageType type = (MessageType)msg.ReadByte();
+            Player player;
+            if (type != MessageType.LobbyUpdate && !PlayerList.TryGetValue(msg.ReadByte(), out player))
+            {
+                Console.WriteLine("Received message from unknown discoveredPlayer, discarding...");
+                return;
+            }
             switch (type)
             {
                 case MessageType.PlayerPos:
-                    
+                    player.SetPosition(msg.ReadFloat(), msg.ReadFloat(), msg.ReadFloat());
                     break;
                 case MessageType.Chat:
+                    Console.WriteLine("{0}: {1}", player.PlayerName, msg.ReadString());
                     break;
                 case MessageType.Debug:
                     break;
                 case MessageType.LobbyUpdate:
+                    byte playerCount = msg.ReadByte();
+                    for (int i = 0; i < playerCount; i++)
+                    {
+                        byte discoveredPlayerId = msg.ReadByte();
+                        string discoveredPlayerName = msg.ReadString();
+                        Player discoveredPlayer;
+                        if (!PlayerList.TryGetValue(discoveredPlayerId, out discoveredPlayer)) 
+                        {
+                            PlayerList[discoveredPlayerId] = new Player(Game1.GetInstance(), discoveredPlayerId, discoveredPlayerName);
+                        }
+                        else if (discoveredPlayer.PlayerName != discoveredPlayerName) //changed player name
+                        {
+                            discoveredPlayer.PlayerName = discoveredPlayerName;
+                        }
+                    }
                     break;
                 default:
                     break;

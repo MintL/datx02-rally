@@ -15,7 +15,7 @@ namespace datx02_rally
         ServerSender Sender;
         ServerReceiver Receiver;
         Game1 Game;
-        List<Player> Players = new List<Player>();
+        Dictionary<byte,Player> Players = new Dictionary<byte, Player>();
         readonly int PORT = 19283;
         
         public ServerClient(Game1 game) : base(game)

@@ -15,11 +15,11 @@ namespace GameServer
     class ServerPlayer
     {
         public string PlayerName { get; set; }
-        readonly int PlayerID;
+        public readonly byte PlayerID;
         public Position PlayerPos;
         public NetConnection Connection { get; set; }
 
-        public ServerPlayer(int id, NetConnection connection)
+        public ServerPlayer(byte id, NetConnection connection)
         {
             PlayerID = id;
             PlayerName = "Player "+id;

@@ -113,15 +113,16 @@ namespace GameServer
         {
             NetOutgoingMessage msg = serverThread.CreateMessage();
             msg.Write((byte)MessageType.Chat);
-            msg.Write(player.PlayerName);
+            msg.Write(player.PlayerID);
             msg.Write(chatMsg);
-            SendToAllOtherPlayers(msg, player.Connection);            
+            SendToAllOtherPlayers(msg, player.Connection);   
         }
 
         private void DistributePlayerPosition(ServerPlayer player)
         {
             NetOutgoingMessage msg = serverThread.CreateMessage();
             msg.Write((byte)MessageType.PlayerPos);
+            msg.Write(player.PlayerID);
             msg.Write(player.PlayerPos.x);
             msg.Write(player.PlayerPos.y);
             msg.Write(player.PlayerPos.z);
