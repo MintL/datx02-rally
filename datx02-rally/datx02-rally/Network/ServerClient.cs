@@ -15,6 +15,7 @@ namespace datx02_rally
         ServerSender Sender;
         ServerReceiver Receiver;
         Game1 Game;
+        List<Player> Players = new List<Player>();
         readonly int PORT = 19283;
         
         public ServerClient(Game1 game) : base(game)
@@ -37,6 +38,7 @@ namespace datx02_rally
         public override void Update(GameTime gameTime)
         {
             Sender.SendPlayerPosition(Game.car.Position, gameTime.TotalGameTime.TotalMilliseconds);
+            Receiver.ReceiveMessages(Players);
             base.Update(gameTime);
         }
 

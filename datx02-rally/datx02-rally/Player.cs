@@ -9,10 +9,19 @@ namespace datx02_rally
     class Player : GameComponent
     {
         Vector3 Position;
+        public readonly int ID;
+        public readonly int LOCAL_PLAYER = 0;
 
         public Player(Game1 game) : base(game)
         {
+            // Local player
+            ID = LOCAL_PLAYER;
             // TODO
+        }
+
+        public Player(Game1 game, int id) : base(game)
+        {
+            ID = id;
         }
 
         public override void Update(GameTime gameTime)
@@ -24,9 +33,12 @@ namespace datx02_rally
         /// Gets 
         /// </summary>
         /// <returns></returns>
-        private Vector3 GetPosition(GameTime gameTime) 
+        public void SetPosition(float x, float y, float z) 
         {
-            return new Vector3();
+            Position.X = x;
+            Position.Y = y;
+            Position.Z = z;
         }
+
     }
 }
