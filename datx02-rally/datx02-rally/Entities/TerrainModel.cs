@@ -41,8 +41,8 @@ namespace datx02_rally
     {
         private GraphicsDevice device;
 
-        private MultitexturedVertex[] vertices;
-        private VertexBuffer vertexbuffer;
+        public MultitexturedVertex[] vertices;
+        private VertexBuffer vertexBuffer;
 
         private IndexBuffer indexBuffer;
 
@@ -51,6 +51,9 @@ namespace datx02_rally
         public Matrix Projection { get; set; }
 
         public float HeightOffset { get; set; }
+        
+
+
         
         public TerrainModel(Vector2 start, Vector2 end, float uvScale, GraphicsDevice device, Texture2D texture, Matrix projection, Matrix world)
         {
@@ -146,7 +149,7 @@ namespace datx02_rally
 
 
                 Vector3 normal;
-                if(i % 2 == 1)
+                if(i % 2 == 0)
                 {
                     normal = Vector3.Cross(firstsub, secondsub);
                 }else{
@@ -165,15 +168,13 @@ namespace datx02_rally
             }
 
 
-
-
             indexBuffer = new IndexBuffer(device, typeof(int), (width-1) * (depth-1) * 6, BufferUsage.None);
             indexBuffer.SetData(indices);
 
-            vertexbuffer = new VertexBuffer(device,
+            vertexBuffer = new VertexBuffer(device,
                     typeof(MultitexturedVertex), vertices.Length,
                     BufferUsage.None);
-            vertexbuffer.SetData(vertices);
+            vertexBuffer.SetData(vertices);
         }
 
         
@@ -210,8 +211,8 @@ namespace datx02_rally
             {
                 pass.Apply();
                 device.Indices = indexBuffer;
-                device.SetVertexBuffer(vertexbuffer);
-                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexbuffer.VertexCount, 0, vertexbuffer.VertexCount*2);
+                device.SetVertexBuffer(vertexBuffer);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, vertexBuffer.VertexCount*2);
             }
         }
     }

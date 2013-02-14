@@ -484,6 +484,24 @@ namespace datx02_rally
                 }
             }
 
+            
+            #region normalspears
+            /*
+            for (int y = 250; y < 300; y++)
+            {
+                for (int x = 300; x < 350; x++)
+                {
+                    var vert = terrain.vertices[mapSize * y + x];
+                    for (float i = 0; i < 1; i += .1f)
+                    {
+                        plasmaSystem.AddParticle(vert.Position + 100 * vert.Normal * i, Vector3.Zero);
+                    }
+                }
+            }*/
+            #endregion
+
+            //terrain.vertices[0].Normal
+
             //Apply changes to car
             car.Update();
 
