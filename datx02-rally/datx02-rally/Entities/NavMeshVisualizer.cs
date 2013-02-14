@@ -19,28 +19,35 @@ namespace datx02_rally.Entities
 
         public BasicEffect Effect { get; set; }
 
-        public Triangles[] triangles;
+        public NavMeshTriangle[] triangles;
 
-        public struct Triangles
+        public struct NavMeshTriangle
         {
             public Vector3[] vertices;
             public Vector3 baryCenter;
             public Vector3 normal;
             
             public Vector3 ab, ac;
-            
 
-            public BoundingSphere boundingSphere;
+            public BoundingBox boundingBox;
 
-            public Triangles(params Vector3[] verts)
+            public Vector3[] wallPos;
+
+            public Plane wall;
+            public bool side;
+
+            public NavMeshTriangle(params Vector3[] verts)
             {
                 if (verts.Length != 3)
                     throw new ArgumentException("Not 3 vertices!");
 
                 vertices = verts;
-                normal = Vector3.Cross(ab = (vertices[1] - vertices[0]), ac = (vertices[2] - vertices[0]));
+                normal = Vector3.Normalize(Vector3.Cross(ab = (vertices[1] - vertices[0]), ac = (vertices[2] - vertices[0])));
                 baryCenter = vertices[0] + 1 / 3f * ab + 1 / 3f * ac;
-                boundingSphere = BoundingSphere.CreateFromPoints(vertices);
+                boundingBox = BoundingBox.CreateFromPoints(vertices);
+                wall = new Plane();
+                wallPos = new Vector3[3];
+                side = false;
             }
         }
 
@@ -91,17 +98,28 @@ namespace datx02_rally.Entities
 
             #endregion
 
-            #region 10-triangle spatial structure
+            #region Triangles
 
-
-
-            triangles = new Triangles[2 * resolution]; // 200
+            triangles = new NavMeshTriangle[2 * resolution]; // 200
 
             for (int i = 0; i < indices.Length; i += 3) // 600 // 0..3..6..9...
             {
-                triangles[i / 3] = new Triangles(vertices[indices[i]].Position,
+                triangles[i / 3] = new NavMeshTriangle(vertices[indices[i]].Position,
                     vertices[indices[i + 1]].Position,
                     vertices[indices[i + 2]].Position); // vert
+
+                triangles[i / 3].side = (i < indices.Length / 2);
+                var v0 = vertices[indices[i]].Position;
+                var v1 = vertices[indices[i + 2]].Position;
+
+                triangles[i / 3].wallPos[0] = v0;
+                triangles[i / 3].wallPos[1] = v1;
+                triangles[i / 3].wallPos[2] = v0 + 100 * triangles[i / 3].normal;
+                
+                triangles[i / 3].wall = new Plane(v0, v1, v0 + triangles[i / 3].normal);
+
+
+
             }
 
             #endregion

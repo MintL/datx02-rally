@@ -31,7 +31,7 @@ namespace datx02_rally
                 Car.WheelRotationY += (input.GetState(Input.Steer) * Car.TurnSpeed);
                 Car.WheelRotationY = MathHelper.Clamp(Car.WheelRotationY, -Car.MaxWheelTurn, Car.MaxWheelTurn);
                 if (Math.Abs(Car.WheelRotationY) > MathHelper.Pi / 720)
-                    Car.WheelRotationY *= .9f;
+                    Car.WheelRotationY *= .95f;
                 else
                     Car.WheelRotationY = 0;
             }

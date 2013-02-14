@@ -102,8 +102,14 @@ namespace datx02_rally
             return new BoundingBox(min, max);
         }
 
+        public Vector3 previousPos;
+        public float previousRotation;
+
         public void Update()
         {
+            previousPos = Position;
+            previousRotation = Rotation;
+
             Vector3 forward = Vector3.Transform(Vector3.Forward,
                 Matrix.CreateRotationY(Rotation));
             Vector3 axisOffset = L * forward;
@@ -119,8 +125,6 @@ namespace datx02_rally
             Position = (front + back) / 2;
             Rotation = (float)Math.Atan2(back.X - front.X, back.Z - front.Z);
             WheelRotationX += (Speed < 0 ? 1 : -1) * (Position - oldPos).Length() / wheelRadius;
-
-            
         }
     }
 }

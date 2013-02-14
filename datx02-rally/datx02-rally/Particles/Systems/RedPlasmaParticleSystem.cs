@@ -17,7 +17,7 @@ namespace datx02_rally.Particles.Systems
         {
             base.InitializeSettings(settings);
 
-            settings.MaxEndSize = settings.MinEndSize = settings.MaxStartSize = settings.MinStartSize = 5;
+            settings.MaxEndSize = settings.MinEndSize = settings.MaxStartSize = settings.MinStartSize = 15;
             settings.MinColor = settings.MaxColor = Color.Red;
         }
 
