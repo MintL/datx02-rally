@@ -9,23 +9,25 @@ namespace datx02_rally
 {
     class ServerReceiver
     {
-        NetClient Client;
+        NetClient ServerThread;
+        ServerClient ServerHandler;
 
-        public ServerReceiver(NetClient Client)
+        public ServerReceiver(NetClient serverThread, ServerClient handler)
         {
-            this.Client = Client;
+            this.ServerThread = serverThread;
+            this.ServerHandler = handler;
         }
 
-        public void ReceiveMessages(Dictionary<byte, Player> Players)
+        public void ReceiveMessages()
         {
             List<NetIncomingMessage> messages = new List<NetIncomingMessage>();
-            Client.ReadMessages(messages);
+            ServerThread.ReadMessages(messages);
             foreach (var message in messages)
             {
                 switch (message.MessageType)
                 {
                     case NetIncomingMessageType.Data:
-                        ParseDataPackage(Players, message);
+                        ParseDataPackage(message);
                         break;
                     default:
                         Console.WriteLine("Received unknown network message: " + message.MessageType);
@@ -35,9 +37,10 @@ namespace datx02_rally
             }
         }
 
-        private void ParseDataPackage(Dictionary<byte, Player> PlayerList, NetIncomingMessage msg) 
+        private void ParseDataPackage(NetIncomingMessage msg) 
         {
             MessageType type = (MessageType)msg.ReadByte();
+            Dictionary<byte, Player> PlayerList = ServerHandler.Players;
             Player player = null;
             if (type != MessageType.LobbyUpdate && !PlayerList.TryGetValue(msg.ReadByte(), out player))
             {

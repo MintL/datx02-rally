@@ -11,11 +11,11 @@ namespace datx02_rally
     public enum MessageType { PlayerPos, Chat, Debug, LobbyUpdate }
     class ServerClient : GameComponent
     {
-        NetClient Client;
+        NetClient ServerThread;
         ServerSender Sender;
         ServerReceiver Receiver;
         Game1 Game;
-        Dictionary<byte,Player> Players = new Dictionary<byte, Player>();
+        public Dictionary<byte,Player> Players = new Dictionary<byte, Player>();
         readonly int PORT = 19283;
         
         public ServerClient(Game1 game) : base(game)
@@ -23,22 +23,22 @@ namespace datx02_rally
             NetPeerConfiguration config = new NetPeerConfiguration("DATX02");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
             
-            Client = new NetClient(config);
-            Client.Start();
+            ServerThread = new NetClient(config);
+            ServerThread.Start();
 
-            Sender = new ServerSender(Client);
-            Receiver = new ServerReceiver(Client);
+            Sender = new ServerSender(ServerThread, this);
+            Receiver = new ServerReceiver(ServerThread, this);
             Game = game;
         }
 
         public void Connect(IPAddress IP) {
-            Client.Connect(new IPEndPoint(IP, PORT));
+            ServerThread.Connect(new IPEndPoint(IP, PORT));
         }
 
         public override void Update(GameTime gameTime)
         {
             Sender.SendPlayerPosition(Game.car.Position, gameTime.TotalGameTime.TotalMilliseconds);
-            Receiver.ReceiveMessages(Players);
+            Receiver.ReceiveMessages();
             base.Update(gameTime);
         }
 

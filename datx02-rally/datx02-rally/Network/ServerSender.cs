@@ -9,37 +9,39 @@ namespace datx02_rally
 {
     class ServerSender
     {
-        NetClient Client;
+        NetClient ServerThread;
+        ServerClient ServerHandler;
 
-        public ServerSender(NetClient client)
+        public ServerSender(NetClient serverThread, ServerClient handler)
         {
-            this.Client = client;
+            this.ServerThread = serverThread;
+            this.ServerHandler = handler;
         }
 
         public void SendTestData()
         {
-            NetOutgoingMessage msg = Client.CreateMessage();
+            NetOutgoingMessage msg = ServerThread.CreateMessage();
             msg.Write((byte)MessageType.Debug);
             msg.Write("Hello world! I'm connected.");
-            Client.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
+            ServerThread.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
         }
 
         public void SendPlayerPosition(Vector3 position, double ms)
         {
-            NetOutgoingMessage msg = Client.CreateMessage();
+            NetOutgoingMessage msg = ServerThread.CreateMessage();
             msg.Write((byte)MessageType.PlayerPos);
             msg.Write(ms);
             msg.Write(position.X);
             msg.Write(position.Y);
             msg.Write(position.Z);
-            Client.SendMessage(msg, NetDeliveryMethod.Unreliable);
+            ServerThread.SendMessage(msg, NetDeliveryMethod.Unreliable);
         }
 
         public void SendChatMessage(string textMsg)
         {
-            NetOutgoingMessage msg = Client.CreateMessage();
+            NetOutgoingMessage msg = ServerThread.CreateMessage();
             msg.Write(textMsg);
-            Client.SendMessage(msg, NetDeliveryMethod.Unreliable);
+            ServerThread.SendMessage(msg, NetDeliveryMethod.Unreliable);
         }
     }
 }

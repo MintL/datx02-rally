@@ -114,7 +114,8 @@ namespace datx02_rally
                 case "CHAT":
                     if (connected)
                     {
-                        Game.GetService<ServerClient>().Chat(String.Join(" ",command,1,command.Length-1));
+                        string chatMsg = String.Join(" ", command, 1, command.Length - 1);
+                        Game.GetService<ServerClient>().Chat(chatMsg);
                     }
                     break;
                 default:
