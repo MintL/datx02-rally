@@ -9,6 +9,7 @@ namespace GameServer
 {
     class Server
     {
+        byte PlayerIdCounter = 0;
         string ServerName;
         readonly int MaxPlayers;
         Dictionary<IPAddress, ServerPlayer> Players;
@@ -163,7 +164,7 @@ namespace GameServer
             foreach (NetConnection conn in serverThread.Connections)
                 Console.WriteLine(conn.RemoteEndPoint.Address);
 
-            Players[connection.RemoteEndPoint.Address] = new ServerPlayer(serverThread.ConnectionsCount, connection);
+            Players[connection.RemoteEndPoint.Address] = new ServerPlayer(++PlayerIdCounter, connection);
         }
 
         public void PlayerDisconnected(NetConnection connection)
