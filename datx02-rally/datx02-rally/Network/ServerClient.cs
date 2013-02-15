@@ -45,6 +45,13 @@ namespace datx02_rally
             TryConnectedTime = DateTime.Now;
         }
 
+        public void Disconnect()
+        {
+            connected = false;
+            TryConnectedTime = DateTime.MinValue;
+            ServerThread.Disconnect("");
+        }
+
         public override void Update(GameTime gameTime)
         {
             Receiver.ReceiveMessages();

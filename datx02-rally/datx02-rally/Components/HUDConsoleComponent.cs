@@ -14,7 +14,6 @@ namespace datx02_rally
         private StringBuilder EnteredCommand = new StringBuilder();
         SpriteFont Font;
         KeyboardState PrevKeyState;
-        Boolean connected = false;
         Boolean enabled = false;
         Game1 Game;
 
@@ -98,18 +97,20 @@ namespace datx02_rally
             switch (command[0])
             {
                 case "CONNECT":
+                    ServerClient client = Game.GetService<ServerClient>();
                     IPAddress ip;
-                    if (!connected && IPAddress.TryParse(command[1], out ip))
+                    if (!client.connected && IPAddress.TryParse(command[1], out ip))
                     {
                         Console.WriteLine("Connecting to server: " + command[1]);
-                        Game.GetService<ServerClient>().Connect(ip);
-
-                        connected = true;
+                        client.Connect(ip);
                     }
                     else
                     {
                         Console.WriteLine("Retard! Cannot connect to server " + command[1]);
                     }
+                    break;
+                case "DISCONNECT":
+                    Game.GetService<ServerClient>().Disconnect();
                     break;
                 case "CHAT":
                     if (connected)

@@ -29,9 +29,11 @@ namespace datx02_rally
                     case NetIncomingMessageType.Data:
                         ParseDataPackage(message);
                         break;
+                    case NetIncomingMessageType.WarningMessage:
+                        Console.WriteLine("WARNING message: " + message.ReadString());
+                        break;
                     default:
                         Console.WriteLine("Received unknown network message: " + message.MessageType);
-                        Console.WriteLine(message.ReadString());
                         break;
                 }
             }

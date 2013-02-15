@@ -130,7 +130,8 @@ namespace GameServer
                 msg.Write(player.PlayerID);
                 msg.Write(player.PlayerName);
             }
-            SendToAllOtherPlayers(msg, exceptPlayer.Connection);
+            NetConnection exceptConnection = exceptPlayer == null ? null : exceptPlayer.Connection;
+            SendToAllOtherPlayers(msg, exceptConnection);
         }
 
         private void DistributeChatMessage(ServerPlayer player, string chatMsg)
