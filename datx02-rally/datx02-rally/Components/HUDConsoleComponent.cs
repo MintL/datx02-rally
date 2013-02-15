@@ -17,11 +17,11 @@ namespace datx02_rally
         SpriteFont Font;
         KeyboardState PrevKeyState;
         Boolean enabled = false;
-        Game1 Game;
+        Game1 Game1;
 
         public HUDConsoleComponent(Game1 game) : base(game)
         {
-            Game = game;
+            Game1 = game;
         }
 
         protected override void LoadContent()
@@ -55,14 +55,13 @@ namespace datx02_rally
         {
             if (enabled)
             {
-                Game1 game = Game as Game1;
                 Vector2 topLeft = new Vector2(0, 0);
-                Vector2 bottomLeft = new Vector2(0, game.GraphicsDevice.Viewport.Height - Font.LineSpacing);
+                Vector2 bottomLeft = new Vector2(0, Game1.GraphicsDevice.Viewport.Height - Font.LineSpacing);
 
-                game.spriteBatch.Begin();
-                game.spriteBatch.DrawString(Font, CONSOLE_HEADING+"\n"+ReceivedOutput, topLeft, Color.White);
-                game.spriteBatch.DrawString(Font, EnteredCommand.ToString(), bottomLeft, Color.White);
-                game.spriteBatch.End();
+                Game1.spriteBatch.Begin();
+                Game1.spriteBatch.DrawString(Font, CONSOLE_HEADING + "\n" + ReceivedOutput, topLeft, Color.White);
+                Game1.spriteBatch.DrawString(Font, EnteredCommand.ToString(), bottomLeft, Color.White);
+                Game1.spriteBatch.End();
             }
 
             base.Draw(gameTime);
@@ -127,11 +126,58 @@ namespace datx02_rally
                         client.Chat(chatMsg);
                     }
                     break;
+                case "SHOW":
+                    if (command.Length > 1)
+                        HandleShowCommand(command);
+                    break;
+                case "CLEAR":
+                    WriteOutput("");
+                    break;
                 default:
                     WriteOutput("Unknown command: " + String.Join(" ", command));
                     break;
             }
             
+        }
+        
+        private void HandleShowCommand(string[] command) 
+        {
+            ServerClient client = Game.GetService<ServerClient>();
+            switch (command[1])
+            {
+                case "PLAYERPOS":
+                    WriteOutput("Player position: " + Game1.car.Position.ToString());
+                    break;
+                case "PLAYERS":
+                    StringBuilder output = new StringBuilder("Remote players: \n");
+                    foreach (var player in client.Players.Values)
+                        output.Append(player.PlayerName);
+                    WriteOutput(output.ToString());
+                    break;
+                case "CHAT":
+                    var lastChatMsg = client.ChatHistory.Last.Value;
+                    if (lastChatMsg == null)
+                        WriteOutput("(" + lastChatMsg.Item3.TimeOfDay + ") " + lastChatMsg.Item1 + ": " + lastChatMsg.Item2);
+                    break;
+                case "PLAYER":
+                    int playerIndex;
+                    if (int.TryParse(command[2], out playerIndex))
+                    {
+                        if (client.Players.Values.Count >= playerIndex - 1)
+                        {
+                            Player player = client.Players.Values.ElementAt(playerIndex);
+                            WriteOutput("Player name: " + player.PlayerName + "\nPosition: " + player.Position);
+                        }
+                        else
+                        {
+                            WriteOutput("No player with index " + playerIndex + " found!");
+                        }
+                        
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
 
         public void Toggle()

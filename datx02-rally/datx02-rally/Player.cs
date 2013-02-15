@@ -8,7 +8,7 @@ namespace datx02_rally
 {
     class Player : GameComponent
     {
-        Vector3 Position;
+        public Vector3 Position;
         public readonly byte ID;
         public readonly byte LOCAL_PLAYER = 0;
         public string PlayerName;

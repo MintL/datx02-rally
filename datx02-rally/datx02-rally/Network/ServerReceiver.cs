@@ -60,7 +60,10 @@ namespace datx02_rally
                     player.SetPosition(msg.ReadFloat(), msg.ReadFloat(), msg.ReadFloat());
                     break;
                 case MessageType.Chat:
-                    Console.WriteLine("CHAT {0}: {1}", player.PlayerName, msg.ReadString());
+                    string chatMsg = msg.ReadString();
+                    Console.WriteLine("CHAT {0}: {1}", player.PlayerName, chatMsg);
+                    var chatTuple = new Tuple<string, string, DateTime>(player.PlayerName, chatMsg, DateTime.Now);
+                    ServerHandler.ChatHistory.AddLast(chatTuple);
                     break;
                 case MessageType.Debug:
                     break;
