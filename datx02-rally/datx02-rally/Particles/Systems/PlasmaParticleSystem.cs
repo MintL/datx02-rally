@@ -19,9 +19,9 @@ namespace datx02_rally
         {
             settings.TextureName = @"Particles/plasma";
 
-            settings.MaxParticles = 10000;
+            settings.MaxParticles = 17500;
 
-            settings.Duration = TimeSpan.FromSeconds(1f);
+            settings.Duration = TimeSpan.FromSeconds(.5f);
 
             settings.MinHorizontalVelocity = 5;
             settings.MaxHorizontalVelocity = 10;
@@ -31,14 +31,21 @@ namespace datx02_rally
 
             settings.EndVelocity = 0.75f;
 
+            // All zero
+            settings.MinHorizontalVelocity = settings.MaxHorizontalVelocity = settings.MinVerticalVelocity = settings.MaxVerticalVelocity = settings.EndVelocity = 0;
+
+
             settings.MinRotateSpeed = -1;
             settings.MaxRotateSpeed = 1;
 
-            settings.MinStartSize = 100;
-            settings.MaxStartSize = 150;
+            settings.MinStartSize = 10;
+            settings.MaxStartSize = 10;
 
-            settings.MinEndSize = 100;
-            settings.MaxEndSize = 150;
+            settings.MinEndSize = 10;
+            settings.MaxEndSize = 10;
+
+            // All same
+            settings.MinStartSize = settings.MaxStartSize = settings.MinEndSize = settings.MaxEndSize = 25;
 
             settings.MinColor = settings.MaxColor = Color.Cyan;
 

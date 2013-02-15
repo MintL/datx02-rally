@@ -12,6 +12,8 @@ using Particle3DSample;
 using datx02_rally.ModelPresenters;
 using datx02_rally.GameLogic;
 using datx02_rally.MapGeneration;
+using datx02_rally.Entities;
+using datx02_rally.Particles.Systems;
 
 namespace datx02_rally
 {
@@ -35,11 +37,14 @@ namespace datx02_rally
 
         // 
 
-        static int mapSize = 512;
+        static int mapSize = 128;
         static int triangleSize = 100;
         static int heightScale = 33;
 
         RaceTrack raceTrack;
+        NavMeshVisualizer navMesh;
+        
+        Model oldTerrain;
 
         Matrix projection;
 
@@ -61,6 +66,8 @@ namespace datx02_rally
 
         List<ParticleSystem> particleSystems = new List<ParticleSystem>();
         ParticleSystem plasmaSystem;
+        ParticleSystem redSystem;
+        ParticleSystem yellowSystem;
         ParticleSystem greenSystem;
         ParticleSystem airParticles;
         int nextSpawn;
@@ -128,6 +135,14 @@ namespace datx02_rally
             plasmaSystem = new PlasmaParticleSystem(this, Content);
             Components.Add(plasmaSystem);
             particleSystems.Add(plasmaSystem);
+
+            redSystem = new RedPlasmaParticleSystem(this, Content);
+            Components.Add(redSystem);
+            particleSystems.Add(redSystem);
+
+            yellowSystem = new YellowPlasmaParticleSystem(this, Content);
+            Components.Add(yellowSystem);
+            particleSystems.Add(yellowSystem);
 
             greenSystem = new GreenParticleSystem(this, Content);
             Components.Add(greenSystem);
@@ -340,15 +355,11 @@ namespace datx02_rally
 
             #endregion
 
-            
+            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 50, 500);
+
             // Place car at start.
+            SetCarAtStart();
 
-            Vector3 carPosition = raceTrack.Curve.GetPoint(0);
-            Vector3 carHeading = (raceTrack.Curve.GetPoint(.001f) - carPosition);
-            car.Position = carPosition;
-            car.Rotation = (float)Math.Atan2(carHeading.X, carHeading.Z) - (float)Math.Atan2(0, -1);
-
-            //Creates pointlights along the track
             for (int j = 0; j < 200; j++)
             {
                 float i = j / 200.0f;
@@ -376,6 +387,14 @@ namespace datx02_rally
             carSettings.EnvironmentMap = refCubeMap;
             //skyBoxEffect.Parameters["SkyboxTexture"].SetValue(refCubeMap);
             #endregion
+        }
+
+        private void SetCarAtStart()
+        {
+            Vector3 carPosition = raceTrack.Curve.GetPoint(0);
+            Vector3 carHeading = (raceTrack.Curve.GetPoint(.001f) - carPosition);
+            car.Position = carPosition;
+            car.Rotation = (float)Math.Atan2(carHeading.X, carHeading.Z) - (float)Math.Atan2(0, -1);
         }
         
         /// <summary>
@@ -429,61 +448,87 @@ namespace datx02_rally
             if (input.GetPressed(Input.Exit))
                 this.Exit();
 
-            // Spawn particles
-            //Vector3 radius = 100 * Vector3.UnitX;
-            //for (int z = 0; z < 10000; z += 1000)
+            // Mushroom
+            //for (int i = 0; i < 1; i++)
             //{
-            //    float next = (float)random.NextDouble();
-            //    plasmaSystem.AddParticle(Vector3.Transform(radius + Vector3.UnitZ * next * -10000,
-            //        Matrix.CreateRotationZ(MathHelper.TwoPi * 20 * next)), Vector3.Zero);
+            //    greenSystem.AddParticle(new Vector3(105, 10, 100), Vector3.Up);
             //}
 
-            if (input.GetKey(Keys.Y))
-                ; // raceTrack.Curve = new GameLogic.Curve(25000);
+            // Air particles.. In my opinion, more of those... /Marcus
+            //for (int i = 0; i < 1; i++)
+            //{
+            //    nextSpawn -= gameTime.ElapsedGameTime.Milliseconds;
+            //    Camera camera = this.GetService<CameraComponent>().CurrentCamera;
+            //    if (camera is ThirdPersonCamera && nextSpawn <= 0)
+            //    {
+            //        Vector3 direction = car.Position - camera.Position;
+            //        direction.Y = 0;
+            //        direction = Vector3.Normalize(direction);
+            //        Vector3 crossDirection = Vector3.Normalize(Vector3.Cross(direction, Vector3.Up));
 
-            for (int j = 0; j < 20; j++)
-            {
-                var i = (float)random.NextDouble();
-                Vector3 point1 = raceTrack.Curve.GetPoint(i);
-                Vector3 point2 = raceTrack.Curve.GetPoint(i + .01f * (i > .5f ? -1 : 1));
-                var heading = (point2 - point1);
+            //        Vector3 position = camera.Position;
+            //        position += direction * MathHelper.Lerp(400.0f, 1000.0f, (float)random.NextDouble());
+            //        position += crossDirection * MathHelper.Lerp(-400.0f, 400.0f, (float)random.NextDouble());
+            //        position += Vector3.Up * MathHelper.Lerp(-400.0f, 400.0f, (float)random.NextDouble());
+            //        airParticles.AddParticle(position, Vector3.Up);
 
-                var side = 150 * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
-
-                plasmaSystem.AddParticle(point1 + side, Vector3.Zero);
-                plasmaSystem.AddParticle(point1 - side, Vector3.Zero);
-            }
-
-
-            for (int i = 0; i < 1; i++)
-            {
-                greenSystem.AddParticle(new Vector3(105, 10, 100), Vector3.Up);
-            }
-
-            for (int i = 0; i < 1; i++)
-            {
-                nextSpawn -= gameTime.ElapsedGameTime.Milliseconds;
-                Camera camera = this.GetService<CameraComponent>().CurrentCamera;
-                if (camera is ThirdPersonCamera && nextSpawn <= 0)
-                {
-                    Vector3 direction = car.Position - camera.Position;
-                    direction.Y = 0;
-                    direction = Vector3.Normalize(direction);
-                    Vector3 crossDirection = Vector3.Normalize(Vector3.Cross(direction, Vector3.Up));
-
-                    Vector3 position = camera.Position;
-                    position += direction * MathHelper.Lerp(400.0f, 1000.0f, (float)random.NextDouble());
-                    position += crossDirection * MathHelper.Lerp(-400.0f, 400.0f, (float)random.NextDouble());
-                    position += Vector3.Up * MathHelper.Lerp(-400.0f, 400.0f, (float)random.NextDouble());
-                    airParticles.AddParticle(position, Vector3.Up);
-
-                    nextSpawn += 100;
-                }
-            }
+            //        nextSpawn += 100;
+            //    }
+            //}
 
             //Apply changes to car
             car.Update();
 
+            #region Ray
+
+            bool onTrack = false;
+
+            float lerp = 1;
+            Vector3 carPos = car.Position;
+            for (; lerp > 0; lerp -= .01f)
+            {
+                foreach (var triangle in navMesh.triangles)
+                {
+                    var ray = new Ray(carPos, Vector3.Down);
+
+                    float? d = ray.Intersects(triangle.trianglePlane);
+
+                    if (d.HasValue)
+                    {
+                        var point = ray.Position + d.Value * ray.Direction - triangle.vertices[0];
+
+                        float orthogonal = Vector3.Dot(point, triangle.ab) / triangle.ab.LengthSquared(),
+                            parallel = Vector3.Dot(point, triangle.ac) / triangle.ac.LengthSquared();
+
+                        if (orthogonal < 0 || orthogonal > 1 || parallel < 0 || parallel > 1 || (orthogonal + parallel) > 1)
+                            continue;
+
+                        //lastTriangle = triangle;
+
+                        onTrack = true;
+                        break;
+                    }
+                }
+                if (!onTrack)
+                    carPos = Vector3.Lerp(car.Position, car.previousPos, lerp);
+            }
+
+            if (!onTrack)
+            {
+                // Project car.Pos on lastTriangle.
+                //if (lastTriangle != null)
+                //{
+                //    car.Position -= lastTriangle.vertices[0];
+                //    car.Position = Vector3.Dot(car.Position, lastTriangle.ac) /
+                //            lastTriangle.ac.LengthSquared() * lastTriangle.ac;
+                //    car.Position += lastTriangle.vertices[0];
+                //}
+            }
+
+
+            #endregion
+
+            
             base.Update(gameTime);
         }
 
@@ -532,6 +577,8 @@ namespace datx02_rally
             #endregion
 
             terrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight);
+
+            //navMesh.Draw(view, projection);
 
             //testTerrain1.Draw(view);
             //testTerrain2.Draw(view);
@@ -673,6 +720,7 @@ namespace datx02_rally
 
                 // Local modelspace, due to bad .X-file/exporter
                 world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
+
                 // World
                 world *= car.RotationMatrix * car.TranslationMatrix;
 
