@@ -12,6 +12,8 @@ namespace datx02_rally
     class HUDConsoleComponent : DrawableGameComponent
     {
         private StringBuilder EnteredCommand = new StringBuilder();
+        private readonly string CONSOLE_HEADING = "DATX02-Racing";
+        private string ReceivedOutput;
         SpriteFont Font;
         KeyboardState PrevKeyState;
         Boolean enabled = false;
@@ -44,6 +46,11 @@ namespace datx02_rally
             base.Update(gameTime);
         }
 
+        public void WriteOutput(string output) 
+        {
+            ReceivedOutput = output;
+        }
+
         public override void Draw(GameTime gameTime)
         {
             if (enabled)
@@ -53,7 +60,7 @@ namespace datx02_rally
                 Vector2 bottomLeft = new Vector2(0, game.GraphicsDevice.Viewport.Height - Font.LineSpacing);
 
                 game.spriteBatch.Begin();
-                game.spriteBatch.DrawString(Font, "DATX02 Rally", topLeft, Color.White);
+                game.spriteBatch.DrawString(Font, CONSOLE_HEADING+"\n"+ReceivedOutput, topLeft, Color.White);
                 game.spriteBatch.DrawString(Font, EnteredCommand.ToString(), bottomLeft, Color.White);
                 game.spriteBatch.End();
             }
@@ -80,7 +87,7 @@ namespace datx02_rally
             {
                 EnteredCommand.Append(sKey[1]);
             }
-            else if (key == Keys.Back)
+            else if (key == Keys.Back && EnteredCommand.Length > 0)
             {
                 EnteredCommand.Remove(EnteredCommand.Length - 1, 1);
             }
@@ -93,33 +100,35 @@ namespace datx02_rally
         private void ParseCommand()
         {
             string[] command = EnteredCommand.ToString().Split(" ".ToCharArray());
+            ServerClient client = Game.GetService<ServerClient>();
             EnteredCommand.Clear();
             switch (command[0])
             {
                 case "CONNECT":
-                    ServerClient client = Game.GetService<ServerClient>();
                     IPAddress ip;
                     if (!client.connected && IPAddress.TryParse(command[1], out ip))
                     {
-                        Console.WriteLine("Connecting to server: " + command[1]);
+                        WriteOutput("Connecting to server " + command[1] + "...");
                         client.Connect(ip);
                     }
                     else
                     {
-                        Console.WriteLine("Retard! Cannot connect to server " + command[1]);
+                        WriteOutput("Cannot connect to server " + command[1] + ". You may be already connected or entered a faulty IP");
                     }
                     break;
                 case "DISCONNECT":
                     Game.GetService<ServerClient>().Disconnect();
+                    WriteOutput("Disconnected!");
                     break;
                 case "CHAT":
-                    if (connected)
+                    if (client.connected)
                     {
                         string chatMsg = String.Join(" ", command, 1, command.Length - 1);
-                        Game.GetService<ServerClient>().Chat(chatMsg);
+                        client.Chat(chatMsg);
                     }
                     break;
                 default:
+                    WriteOutput("Unknown command: " + String.Join(" ", command));
                     break;
             }
             
