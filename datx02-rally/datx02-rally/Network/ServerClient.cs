@@ -47,6 +47,7 @@ namespace datx02_rally
 
         public override void Update(GameTime gameTime)
         {
+            Receiver.ReceiveMessages();
             // If not received handshake, has tried to connect, and has waited 3 secs, try again
             if (!connected)
             {
@@ -59,7 +60,6 @@ namespace datx02_rally
             }
 
             Sender.SendPlayerPosition(Game.car.Position, gameTime.TotalGameTime.TotalMilliseconds);
-            Receiver.ReceiveMessages();
             base.Update(gameTime);
         }
 

@@ -37,14 +37,19 @@ namespace datx02_rally
             }
         }
 
+        private Boolean isPlayerMessage(MessageType type)
+        {
+            return MessageType.Debug > type;
+        }
+
         private void ParseDataPackage(NetIncomingMessage msg) 
         {
             MessageType type = (MessageType)msg.ReadByte();
             Dictionary<byte, Player> PlayerList = ServerHandler.Players;
             Player player = null;
-            if (type != MessageType.LobbyUpdate && !PlayerList.TryGetValue(msg.ReadByte(), out player))
+            if (isPlayerMessage(type) && !PlayerList.TryGetValue(msg.ReadByte(), out player))
             {
-                Console.WriteLine("Received message from unknown discoveredPlayer, discarding...");
+                Console.WriteLine("Received message from unknown player, discarding...");
                 return;
             }
             switch (type)
@@ -53,7 +58,7 @@ namespace datx02_rally
                     player.SetPosition(msg.ReadFloat(), msg.ReadFloat(), msg.ReadFloat());
                     break;
                 case MessageType.Chat:
-                    Console.WriteLine("{0}: {1}", player.PlayerName, msg.ReadString());
+                    Console.WriteLine("CHAT {0}: {1}", player.PlayerName, msg.ReadString());
                     break;
                 case MessageType.Debug:
                     break;
@@ -75,6 +80,7 @@ namespace datx02_rally
                     }
                     break;
                 case MessageType.OK:
+                    Console.WriteLine("Received OK handshake from server");
                     ServerHandler.connected = true;
                     break;
                 default:

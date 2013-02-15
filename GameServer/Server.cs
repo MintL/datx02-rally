@@ -144,6 +144,7 @@ namespace GameServer
             NetOutgoingMessage msg = serverThread.CreateMessage();
             msg.Write((byte)MessageType.OK);
             serverThread.SendMessage(msg, player.Connection, NetDeliveryMethod.Unreliable);
+            Console.WriteLine("Sent OK handshake to player " + player.Connection.RemoteEndPoint.Address);
         }
 
         private void SendToAllOtherPlayers(NetOutgoingMessage msg, NetConnection exceptPlayer)
