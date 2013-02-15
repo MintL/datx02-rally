@@ -45,7 +45,7 @@ namespace datx02_rally
             settings.MaxEndSize = 10;
 
             // All same
-            settings.MinStartSize = settings.MaxStartSize = settings.MinEndSize = settings.MaxEndSize = 40;
+            settings.MinStartSize = settings.MaxStartSize = settings.MinEndSize = settings.MaxEndSize = 25;
 
             settings.MinColor = settings.MaxColor = Color.Cyan;
 

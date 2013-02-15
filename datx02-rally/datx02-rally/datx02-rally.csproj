@@ -147,6 +147,7 @@
     <Compile Include="MapGeneration\HeightMap.cs" />
     <Compile Include="MapGeneration\HeightMapInfo.cs" />
     <Compile Include="MapGeneration\PerlinGenerator.cs" />
+    <Compile Include="Particles\Systems\YellowPlasmaParticleSystem.cs" />
     <Compile Include="PointLight.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />

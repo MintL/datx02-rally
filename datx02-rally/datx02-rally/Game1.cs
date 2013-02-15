@@ -66,6 +66,7 @@ namespace datx02_rally
         List<ParticleSystem> particleSystems = new List<ParticleSystem>();
         ParticleSystem plasmaSystem;
         ParticleSystem redSystem;
+        ParticleSystem yellowSystem;
         ParticleSystem greenSystem;
         ParticleSystem airParticles;
         int nextSpawn;
@@ -143,6 +144,10 @@ namespace datx02_rally
             redSystem = new RedPlasmaParticleSystem(this, Content);
             Components.Add(redSystem);
             particleSystems.Add(redSystem);
+
+            yellowSystem = new YellowPlasmaParticleSystem(this, Content);
+            Components.Add(yellowSystem);
+            particleSystems.Add(yellowSystem);
 
             greenSystem = new GreenParticleSystem(this, Content);
             Components.Add(greenSystem);
@@ -342,7 +347,7 @@ namespace datx02_rally
 
             #endregion
 
-            HeightMap heightmapGenerator = new HeightMap(512);
+            HeightMap heightmapGenerator = new HeightMap(mapSize);
             var heightmap = heightmapGenerator.Generate();
 
             raceTrack = new RaceTrack(((mapSize / 2) * triangleSize));
@@ -388,8 +393,6 @@ namespace datx02_rally
             testTerrain.Effect = terrainEffect.Clone();
             testTerrain.Projection = projection;
             
-
-
             // Place car at start.
             SetCarAtStart();
 
@@ -499,7 +502,6 @@ namespace datx02_rally
 
         private void SetCarAtStart()
         {
-            carGravity = 0;
             Vector3 carPosition = raceTrack.Curve.GetPoint(0);
             Vector3 carHeading = (raceTrack.Curve.GetPoint(.001f) - carPosition);
             car.Position = carPosition;
@@ -557,26 +559,6 @@ namespace datx02_rally
             if (input.GetPressed(Input.Exit))
                 this.Exit();
 
-
-            // New track
-            //if (input.GetKey(Keys.Y))
-            //    raceTrack.Curve = new GameLogic.Curve(25000);
-
-            // Spawn particles st both side of raceTrack.Curve
-            //for (int j = 0; j < 20; j++)
-            //{
-            //    var i = (float)random.NextDouble();
-            //    Vector3 point1 = raceTrack.Curve.GetPoint(i);
-            //    Vector3 point2 = raceTrack.Curve.GetPoint(i + .01f * (i > .5f ? -1 : 1));
-            //    var heading = (point2 - point1);
-
-            //    var side = 150 * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
-
-            //    plasmaSystem.AddParticle(point1 + side, Vector3.Zero);
-            //    plasmaSystem.AddParticle(point1 - side, Vector3.Zero);
-            //}
-
-
             // Mushroom
             //for (int i = 0; i < 1; i++)
             //{
@@ -608,192 +590,57 @@ namespace datx02_rally
             //Apply changes to car
             car.Update();
 
-            //carGravity += 9.82f / 9f;
-            //car.Position += Vector3.Down * carGravity;
-            
-            var diff = car.BBox.Max - car.BBox.Min;
-            // Car bounding box
-            for (int i = 0; i < 10; i++)
-            {
-                redSystem.AddParticle(Vector3.Transform(car.BBox.Min + new Vector3(
-                    (float)random.NextDouble() * diff.X,
-                    (float)random.NextDouble() * diff.Y,
-                    (float)random.NextDouble() * diff.Z), car.RotationMatrix * car.TranslationMatrix), Vector3.Zero);
-            }
-            // Car bounding box rotated at origin
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    redSystem.AddParticle(Vector3.Transform(car.BBox.Min + new Vector3(
-            //        (float)random.NextDouble() * diff.X,
-            //        (float)random.NextDouble() * diff.Y,
-            //        (float)random.NextDouble() * diff.Z), car.RotationMatrix), Vector3.Zero);
-            //}
-            // Car bounding box at origin
-            //for (int i = 0; i < 5; i++)
-            //{
-            //    redSystem.AddParticle(car.BBox.Min + new Vector3(
-            //        (float)random.NextDouble() * diff.X,
-            //        (float)random.NextDouble() * diff.Y,
-            //        (float)random.NextDouble() * diff.Z), Vector3.Zero);
-            //}
-
-            #region Triangle Bounding Spheres
-
-            /// Step 1. test AABB
+            #region Ray
 
             bool onTrack = false;
 
-            foreach (var triangle in navMesh.triangles)
+            float lerp = 1;
+            Vector3 carPos = car.Position;
+            for (; lerp > 0; lerp -= .01f)
             {
-                Matrix inverseCarPosition = Matrix.CreateTranslation(-car.Position);
-                BoundingBox triangleBox = triangle.boundingBox.Translate(inverseCarPosition);
-                if (car.BBox.Intersects(triangleBox))
+                foreach (var triangle in navMesh.triangles)
                 {
-                    /// Step 2. test Plane
+                    var ray = new Ray(carPos, Vector3.Down);
 
-                    Plane trianglePlane = new Plane(triangle.vertices[0], 
-                        triangle.vertices[1], 
-                        triangle.vertices[2]);
+                    float? d = ray.Intersects(triangle.trianglePlane);
 
-                    if (car.BBox.Intersects(trianglePlane) == PlaneIntersectionType.Intersecting)
+                    if (d.HasValue)
                     {
-                        Vector3 h = (car.BBox.Max - car.BBox.Min) / 2f;
+                        var point = ray.Position + d.Value * ray.Direction - triangle.vertices[0];
 
-                        /// Step 3. SAT
+                        float orthogonal = Vector3.Dot(point, triangle.ab) / triangle.ab.LengthSquared(),
+                            parallel = Vector3.Dot(point, triangle.ac) / triangle.ac.LengthSquared();
 
-                        Vector3[] v = new Vector3[3];
-                        Matrix transformation = inverseCarPosition * Matrix.Invert(car.RotationMatrix);
-                        Vector3.Transform(triangle.vertices, ref transformation, v); // Transform to local space. 
+                        if (orthogonal < 0 || orthogonal > 1 || parallel < 0 || parallel > 1 || (orthogonal + parallel) > 1)
+                            continue;
 
-                        bool collision = SeparateAxisTheorem(v, h);
+                        //lastTriangle = triangle;
 
-                        //if (collision)
-                        //{
-                        //    // TRIANGLESURFACE
-                        //    for (int i = 0; i < 15; i++)
-                        //    {
-                        //        float r = (float)random.NextDouble(),
-                        //        s = (float)random.NextDouble();
-                        //        if (r + s > 1)
-                        //        {
-                        //            r = 1 - r;
-                        //            s = 1 - s;
-                        //        }
-                        //        redSystem.AddParticle(triangle.vertices[0] +
-                        //            r * (triangle.vertices[1] - triangle.vertices[0]) +
-                        //            s * (triangle.vertices[2] - triangle.vertices[0]),
-                        //            Vector3.Zero);
-                        //    }
-                        //}
-
-
-                        //for (float i = 0; i < 1; i += .1f)
-                        //{
-                        //    plasmaSystem.AddParticle(Vector3.Transform(triangle.vertices[0] + i * triangle.ab,
-                        //        inverseCarPosition * Matrix.Invert(car.RotationMatrix)), Vector3.Zero);
-                        //    plasmaSystem.AddParticle(Vector3.Transform(triangle.vertices[0] + i * triangle.ac,
-                        //        inverseCarPosition * Matrix.Invert(car.RotationMatrix)), Vector3.Zero);
-                        //    plasmaSystem.AddParticle(Vector3.Transform(triangle.vertices[0] + triangle.ab + i * (triangle.ac - triangle.ab),
-                        //        inverseCarPosition * Matrix.Invert(car.RotationMatrix)), Vector3.Zero);
-                        //}
-
-                        if (collision)
-                        {
-                            if (lastTriangle.wallPos != null)
-                            for (int i = 0; i < 3; i++)
-                            {
-                                plasmaSystem.AddParticle(lastTriangle.wallPos[i], Vector3.Zero);
-                            }
-                            
-
-                            lastTriangle = triangle;
-                            onTrack = true;
-                            //car.Position -= Vector3.Down * carGravity;
-                            //carGravity = 0;
-                        }
-
-
-
+                        onTrack = true;
+                        break;
                     }
                 }
+                if (!onTrack)
+                    carPos = Vector3.Lerp(car.Position, car.previousPos, lerp);
             }
 
             if (!onTrack)
             {
-
-                car.Position -= Vector3.Dot(lastTriangle.wall.Normal, car.Position) * lastTriangle.wall.Normal;
-                
-                //car.Position = Vector3.Transform(car.Position, Matrix.CreateShadow(car.Position, lastTriangle.wall));
-
-                //car.Position = car.previousPos;
-                //car.Rotation = car.previousRotation;
+                // Project car.Pos on lastTriangle.
+                //if (lastTriangle != null)
+                //{
+                //    car.Position -= lastTriangle.vertices[0];
+                //    car.Position = Vector3.Dot(car.Position, lastTriangle.ac) /
+                //            lastTriangle.ac.LengthSquared() * lastTriangle.ac;
+                //    car.Position += lastTriangle.vertices[0];
+                //}
             }
 
 
-            // Reset car
-            if (input.GetKey(Keys.M))
-                SetCarAtStart();
-
             #endregion
 
-            #region Triangle
-
-            //if (Keyboard.GetState().IsKeyDown(Keys.T))
-            //    triIndex++;
-
-            //triIndex %= navMesh.triangles.Length;
-            //NavMeshVisualizer.Triangles t = navMesh.triangles[triIndex];
-            //for (int i = 0; i < 10; i++)
-            //{
-            //    float r = (float)random.NextDouble(),
-            //    s = (float)random.NextDouble();
-            //    if (r + s > 1)
-            //    {
-            //        r = 1 - r;
-            //        s = 1 - s;
-            //    }
-            //    plasmaSystem.AddParticle(t.vertices[0] + r * t.ab + s * t.ac, Vector3.Zero);
-            //}
-
-            #endregion
             
             base.Update(gameTime);
-        }
-
-
-        NavMeshVisualizer.NavMeshTriangle lastTriangle;
-        float carGravity = 0;
-        int triIndex = 0;
-
-        // Unit vectors
-        Vector3[] e = new Vector3[] { Vector3.UnitX, Vector3.UnitY, Vector3.UnitZ };
-
-        private bool SeparateAxisTheorem(Vector3[] v, Vector3 h)
-        {
-            Vector3[] f = new Vector3[]{ // edge vectors
-                            v[1] - v[0],
-                            v[2] - v[1],
-                            v[0] - v[2]
-                        };
-
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    var a = Vector3.Cross(e[i], f[j]);
-
-                    float[] p = new float[3];
-                    for (int k = 0; k < 3; k++)
-                        p[k] = Vector3.Dot(a, v[k]);
-
-                    float r = h.X * Math.Abs(a.X) +
-                        h.Y * Math.Abs(a.Y) +
-                        h.Z * Math.Abs(a.Z);
-
-                    if (Math.Min(Math.Min(p[0], p[1]), p[2]) > r || Math.Max(Math.Max(p[0], p[1]), p[2]) < -r) return false;
-                }
-            }
-            return true;
         }
 
         private void RenderEnvironmentMap()
@@ -842,7 +689,7 @@ namespace datx02_rally
 
             testTerrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight);
 
-            navMesh.Draw(view, projection);
+            //navMesh.Draw(view, projection);
 
             //testTerrain1.Draw(view);
             //testTerrain2.Draw(view);
@@ -1001,6 +848,7 @@ namespace datx02_rally
 
                 // Local modelspace, due to bad .X-file/exporter
                 world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
+
                 // World
                 world *= car.RotationMatrix * car.TranslationMatrix;
 

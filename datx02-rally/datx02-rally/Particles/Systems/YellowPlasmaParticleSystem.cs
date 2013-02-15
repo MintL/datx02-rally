@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework;
 
 namespace datx02_rally.Particles.Systems
 {
-    class RedPlasmaParticleSystem : PlasmaParticleSystem
+    class YellowPlasmaParticleSystem : RedPlasmaParticleSystem
     {
-        public RedPlasmaParticleSystem(Game game, ContentManager content)
+        public YellowPlasmaParticleSystem(Game game, ContentManager content)
             : base(game, content)
         { }
 
@@ -17,12 +17,7 @@ namespace datx02_rally.Particles.Systems
         {
             base.InitializeSettings(settings);
 
-            settings.Duration = TimeSpan.FromSeconds(2);
-
-
-            settings.MaxEndSize = settings.MinEndSize = settings.MaxStartSize = settings.MinStartSize = 25;
-            settings.MinColor = settings.MaxColor = Color.Red;
+            settings.MinColor = settings.MaxColor = Color.Yellow;
         }
-
     }
 }
