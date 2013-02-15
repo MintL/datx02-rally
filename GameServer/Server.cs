@@ -112,11 +112,25 @@ namespace GameServer
                     player.PlayerName = playerName;
                     Console.WriteLine(" of type PlayerInfo: " + playerName);
                     SendOKHandshake(player);
+                    SendLobbyUpdate(player);
                     break;
                 default:
                     Console.WriteLine(" of unknown type!");
                     break;
             }
+        }
+
+        private void SendLobbyUpdate(ServerPlayer exceptPlayer)
+        {
+            NetOutgoingMessage msg = serverThread.CreateMessage();
+            msg.Write((byte)MessageType.LobbyUpdate);
+            msg.Write((byte)Players.Values.Count-1);
+            foreach (var player in Players.Values.Where(p => p != exceptPlayer))
+            {
+                msg.Write(player.PlayerID);
+                msg.Write(player.PlayerName);
+            }
+            SendToAllOtherPlayers(msg, exceptPlayer.Connection);
         }
 
         private void DistributeChatMessage(ServerPlayer player, string chatMsg)
@@ -183,12 +197,20 @@ namespace GameServer
             foreach (NetConnection conn in serverThread.Connections)
                 Console.WriteLine(conn.RemoteEndPoint.Address);
 
-            Players[connection.RemoteEndPoint.Address] = new ServerPlayer(++PlayerIdCounter, connection);
+            ServerPlayer player = new ServerPlayer(++PlayerIdCounter, connection);
+            Players[connection.RemoteEndPoint.Address] = player;
+            SendLobbyUpdate(player);
         }
 
         public void PlayerDisconnected(NetConnection connection)
         {
-            // TODO
+            Console.WriteLine("Player " + connection.RemoteEndPoint.Address + " disconnected!");
+            Console.WriteLine("Current players: " + serverThread.ConnectionsCount);
+            foreach (NetConnection conn in serverThread.Connections)
+                Console.WriteLine(conn.RemoteEndPoint.Address);
+
+            Players.Remove(connection.RemoteEndPoint.Address);
+            SendLobbyUpdate(null);
         }
     }
 }

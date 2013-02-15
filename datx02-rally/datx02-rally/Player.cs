@@ -37,7 +37,7 @@ namespace datx02_rally
         /// </summary>
         /// <returns></returns>
         public void SetPosition(float x, float y, float z) 
-        {
+        { 
             Position.X = x;
             Position.Y = y;
             Position.Z = z;
