@@ -9,22 +9,21 @@ namespace datx02_rally
     class Player : GameComponent
     {
         public Vector3 Position;
-        public readonly byte ID;
-        public readonly byte LOCAL_PLAYER = 0;
+        public byte ID;
+        public readonly bool LOCAL_PLAYER;
         public string PlayerName;
 
         public Player(Game1 game) : base(game)
         {
-            // Local discoveredPlayer
-            ID = LOCAL_PLAYER;
             PlayerName = "Unnamed Player";
-            // TODO
+            LOCAL_PLAYER = true;
         }
 
         public Player(Game1 game, byte id, string name) : base(game)
         {
             ID = id;
             PlayerName = name;
+            LOCAL_PLAYER = false;
         }
 
         public override void Update(GameTime gameTime)

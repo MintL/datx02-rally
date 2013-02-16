@@ -51,7 +51,7 @@ namespace datx02_rally
             Player player = null;
             if (isPlayerMessage(type) && !PlayerList.TryGetValue(msg.ReadByte(), out player))
             {
-                Console.WriteLine("Received message from unknown player, discarding...");
+                Console.WriteLine("Received message from unknown player, discarding... type: "+type+" isPlayerMessage: "+isPlayerMessage(type));
                 return;
             }
             switch (type)
@@ -68,27 +68,39 @@ namespace datx02_rally
                 case MessageType.Debug:
                     break;
                 case MessageType.LobbyUpdate:
-                    ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Received LobbyUpdate!");
+                    Dictionary<byte, Player> newPlayerList = new Dictionary<byte, Player>();
+
                     byte playerCount = msg.ReadByte();
+                    ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Received LobbyUpdate! Player count: "+playerCount);
                     for (int i = 0; i < playerCount; i++)
                     {
                         byte discoveredPlayerId = msg.ReadByte();
                         string discoveredPlayerName = msg.ReadString();
-                        Player discoveredPlayer;
-                        if (!PlayerList.TryGetValue(discoveredPlayerId, out discoveredPlayer)) 
+                        ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Player ID: "+discoveredPlayerId+", Player name: "+discoveredPlayerName);
+
+                        if (ServerHandler.LocalPlayer.ID != discoveredPlayerId) // ignore info of local player
                         {
-                            PlayerList[discoveredPlayerId] = new Player(Game1.GetInstance(), discoveredPlayerId, discoveredPlayerName);
+                            Player discoveredPlayer;
+                            if (!PlayerList.TryGetValue(discoveredPlayerId, out discoveredPlayer))
+                            {
+                                ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("New player!");
+                                newPlayerList[discoveredPlayerId] = new Player(Game1.GetInstance(), discoveredPlayerId, discoveredPlayerName);
+                            }
+                            else
+                            {
+                                discoveredPlayer.PlayerName = discoveredPlayerName; // maybe has changed name
+                                newPlayerList[discoveredPlayerId] = discoveredPlayer;
+                            }
                         }
-                        else if (discoveredPlayer.PlayerName != discoveredPlayerName) //changed player name
-                        {
-                            discoveredPlayer.PlayerName = discoveredPlayerName;
-                        }
+                        ServerHandler.Players = newPlayerList;
                     }
                     break;
                 case MessageType.OK:
                     Console.WriteLine("Received OK handshake from server");
+                    byte assignedID = msg.ReadByte();
+                    ServerHandler.LocalPlayer.ID = assignedID;
                     ServerHandler.connected = true;
-                    ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Connected!");
+                    ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Connected! (id "+assignedID+")");
                     break;
                 default:
                     break;

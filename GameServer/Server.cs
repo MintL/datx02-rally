@@ -16,6 +16,9 @@ namespace GameServer
         readonly int Port;
         NetServer serverThread;
         Boolean running;
+        
+        //Debug stuff
+        Boolean DbgPlayerPos = false;
 
         public enum MessageType
         {
@@ -78,7 +81,7 @@ namespace GameServer
 
         private void ProcessDataMessage(NetIncomingMessage msg)
         {
-            Console.Write("Received data from player " + msg.SenderEndPoint.Address);
+            //Console.Write("Received data from player " + msg.SenderEndPoint.Address);
             
             ServerPlayer player;
             if (!Players.TryGetValue(msg.SenderEndPoint.Address, out player)) 
@@ -93,14 +96,15 @@ namespace GameServer
                 case MessageType.PlayerPos:
                     double msGameTime = msg.ReadDouble();
                     float x = msg.ReadFloat(); float y = msg.ReadFloat(); float z = msg.ReadFloat();
-                    Console.WriteLine(" of type PlayerPos: X:{0}, Y:{1}, Z:{2}",x,y,z);
+                    if (DbgPlayerPos) 
+                        Console.WriteLine("PlayerPos: X:{0}, Y:{1}, Z:{2}",x,y,z);
                     player.UpdatePosition(x, y, z);
                     DistributePlayerPosition(player);
                     break;
                 case MessageType.Chat:
                     string chatMsg = msg.ReadString();
                     string chatSender = player.PlayerName;
-                    Console.WriteLine(" of type chat message: '{0}: {1}", chatSender, chatMsg);
+                    Console.WriteLine("Chat message: '{0}: {1}", chatSender, chatMsg);
                     DistributeChatMessage(player, chatMsg);
                     break;
                 case MessageType.Debug:
@@ -110,9 +114,9 @@ namespace GameServer
                 case MessageType.PlayerInfo:
                     string playerName = msg.ReadString();
                     player.PlayerName = playerName;
-                    Console.WriteLine(" of type PlayerInfo: " + playerName);
+                    Console.WriteLine("PlayerInfo: " + playerName);
                     SendOKHandshake(player);
-                    SendLobbyUpdate(player);
+                    DistributeLobbyUpdate();
                     break;
                 default:
                     Console.WriteLine(" of unknown type!");
@@ -120,18 +124,17 @@ namespace GameServer
             }
         }
 
-        private void SendLobbyUpdate(ServerPlayer exceptPlayer)
+        private void DistributeLobbyUpdate()
         {
             NetOutgoingMessage msg = serverThread.CreateMessage();
             msg.Write((byte)MessageType.LobbyUpdate);
-            msg.Write((byte)Players.Values.Count-1);
-            foreach (var player in Players.Values.Where(p => p != exceptPlayer))
+            msg.Write((byte)Players.Values.Count);
+            foreach (var player in Players.Values)
             {
                 msg.Write(player.PlayerID);
                 msg.Write(player.PlayerName);
             }
-            NetConnection exceptConnection = exceptPlayer == null ? null : exceptPlayer.Connection;
-            SendToAllOtherPlayers(msg, exceptConnection);
+            serverThread.SendToAll(msg, NetDeliveryMethod.Unreliable);
         }
 
         private void DistributeChatMessage(ServerPlayer player, string chatMsg)
@@ -158,6 +161,7 @@ namespace GameServer
         {
             NetOutgoingMessage msg = serverThread.CreateMessage();
             msg.Write((byte)MessageType.OK);
+            msg.Write(player.PlayerID);
             serverThread.SendMessage(msg, player.Connection, NetDeliveryMethod.Unreliable);
             Console.WriteLine("Sent OK handshake to player " + player.Connection.RemoteEndPoint.Address);
         }
@@ -166,7 +170,7 @@ namespace GameServer
         {
             List<NetConnection> otherPlayers = serverThread.Connections.Where(c => c != exceptPlayer).ToList();
             if (otherPlayers.Count > 0)
-                serverThread.SendMessage(msg, serverThread.Connections.Where(c => c != exceptPlayer).ToList(), NetDeliveryMethod.Unreliable, 0);
+                serverThread.SendMessage(msg, otherPlayers, NetDeliveryMethod.Unreliable, 0);
         }
 
         public void Start()
@@ -198,7 +202,6 @@ namespace GameServer
 
             ServerPlayer player = new ServerPlayer(++PlayerIdCounter, connection);
             Players[connection.RemoteEndPoint.Address] = player;
-            SendLobbyUpdate(player);
         }
 
         public void PlayerDisconnected(NetConnection connection)
@@ -209,7 +212,7 @@ namespace GameServer
                 Console.WriteLine(conn.RemoteEndPoint.Address);
 
             Players.Remove(connection.RemoteEndPoint.Address);
-            SendLobbyUpdate(null);
+            DistributeLobbyUpdate();
         }
     }
 }
