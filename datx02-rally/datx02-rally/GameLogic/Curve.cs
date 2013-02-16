@@ -36,7 +36,7 @@ namespace datx02_rally.GameLogic
             });
             nodes.Add(new CurveNode()
             {
-                Position = new Vector3(0, 0, halfSide),
+                Position = new Vector3(0, 1000, halfSide),
                 Tangent = Vector3.Transform(new Vector3(variation * -halfSide, 0, 0), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * random.NextDouble() - 1)))
             });
             nodes.Add(new CurveNode()

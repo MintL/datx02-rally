@@ -29,8 +29,6 @@ namespace datx02_rally.Entities
             
             public Vector3 ab, ac;
 
-            //public BoundingBox boundingBox;
-
             public Plane trianglePlane;
 
             public NavMeshTriangle(params Vector3[] verts)
@@ -42,13 +40,7 @@ namespace datx02_rally.Entities
                 normal = Vector3.Normalize(Vector3.Cross(ab = (vertices[1] - vertices[0]), ac = (vertices[2] - vertices[0])));
                 baryCenter = vertices[0] + 1 / 3f * ab + 1 / 3f * ac;
 
-                //boundingBox = BoundingBox.CreateFromPoints(vertices);
-
-                //wallPos = new Vector3[3];
-
                 trianglePlane = new Plane(verts[0], verts[1], verts[2]);
-
-
             }
         }
 
@@ -96,6 +88,21 @@ namespace datx02_rally.Entities
                 triangles[i / 3] = new NavMeshTriangle(vertices[indices[i]].Position,
                     vertices[indices[i + 1]].Position,
                     vertices[indices[i + 2]].Position);
+            }
+
+            for (int i = 1; i < triangles.Length; i += 2)
+            {
+                int j = i - 1, c = i - 2, d = j - 2;
+                if (c < 0)
+                {
+                    c += triangles.Length;
+                    d += triangles.Length;
+                }
+
+                Vector3 normal = Vector3.Lerp(triangles[i].normal, triangles[j].normal, .5f);
+                Vector3 others = Vector3.Lerp(triangles[c].normal, triangles[d].normal, .5f);
+                normal = Vector3.Lerp(normal, others, .6f);
+                triangles[i].normal = triangles[j].normal = normal;
             }
 
             #endregion

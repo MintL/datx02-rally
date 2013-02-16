@@ -38,7 +38,7 @@ namespace datx02_rally
         public ThirdPersonCamera(ITargetNode targetNode, Vector3 lookUpOffset, InputComponent input)
         {
             this.TargetNode = targetNode;
-            Zoom = 700;
+            Zoom = 300;
             RotationSpeed = .05f;
             this.lookUpOffset = lookUpOffset;
             this.input = input;

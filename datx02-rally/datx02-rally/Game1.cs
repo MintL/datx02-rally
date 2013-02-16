@@ -43,7 +43,7 @@ namespace datx02_rally
 
         RaceTrack raceTrack;
         NavMeshVisualizer navMesh;
-        
+
         Model oldTerrain;
 
         Matrix projection;
@@ -241,6 +241,8 @@ namespace datx02_rally
 
             raceTrack = new RaceTrack(((mapSize / 2) * triangleSize));
 
+            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 250, 500);
+
             float roadWidth = 2;
             float lerpDist = 5;
 
@@ -250,6 +252,7 @@ namespace datx02_rally
             for (float i = 0; i < 1; i += .0003f)
             {
                 var e = raceTrack.Curve.GetPoint(i);
+                var height = e.Y;
                 e /= triangleSize;
                 e += new Vector3(.5f, 0, .5f) * mapSize;
 
@@ -261,16 +264,17 @@ namespace datx02_rally
                     int x = (int)pos.X, z = (int)pos.Z;
 
                     if (Math.Abs(j) <= roadWidth)
-                        heightmap[x, z] = .429f;
+                        heightmap[x, z] = height; //.429f;
                     else
-                        heightmap[x, z] = MathHelper.Lerp(.43f, heightmap[x, z], (Math.Abs(j) - roadWidth) / (lerpDist - roadWidth));
+                        heightmap[x, z] = MathHelper.Lerp(height, // .43f, 
+                            heightmap[x, z], (Math.Abs(j) - roadWidth) / (lerpDist - roadWidth));
                 }
                 lastPosition = e;
             }
 
 
             // Creates a terrainmodel around Vector3.Zero
-            terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightScale,heightmap);
+            terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightScale, heightmap);
 
             Effect terrainEffect = Content.Load<Effect>(@"Effects\TerrainShading");
             terrainEffect.Parameters["ColorMap"].SetValue(Content.Load<Texture2D>("checker"));
@@ -355,7 +359,6 @@ namespace datx02_rally
 
             #endregion
 
-            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 50, 500);
 
             // Place car at start.
             SetCarAtStart();
@@ -374,7 +377,7 @@ namespace datx02_rally
             }
 
 
-            
+
 
             #region Cameras
             var input = this.GetService<InputComponent>();
@@ -396,7 +399,7 @@ namespace datx02_rally
             car.Position = carPosition;
             car.Rotation = (float)Math.Atan2(carHeading.X, carHeading.Z) - (float)Math.Atan2(0, -1);
         }
-        
+
         /// <summary>
         /// Loads a texture from Content and asign it to the cubemaps face.
         /// </summary>
@@ -483,53 +486,127 @@ namespace datx02_rally
 
             bool onTrack = false;
 
-            float lerp = 1;
-            Vector3 carPos = car.Position;
-            for (; lerp > 0; lerp -= .01f)
+            for (int i = 0; i < navMesh.triangles.Length; i++)
             {
-                foreach (var triangle in navMesh.triangles)
+                var triangle = navMesh.triangles[i];
+
+                if (CollisionCheck(triangle))
                 {
-                    var ray = new Ray(carPos, Vector3.Down);
-
-                    float? d = ray.Intersects(triangle.trianglePlane);
-
-                    if (d.HasValue)
-                    {
-                        var point = ray.Position + d.Value * ray.Direction - triangle.vertices[0];
-
-                        float orthogonal = Vector3.Dot(point, triangle.ab) / triangle.ab.LengthSquared(),
-                            parallel = Vector3.Dot(point, triangle.ac) / triangle.ac.LengthSquared();
-
-                        if (orthogonal < 0 || orthogonal > 1 || parallel < 0 || parallel > 1 || (orthogonal + parallel) > 1)
-                            continue;
-
-                        //lastTriangle = triangle;
-
-                        onTrack = true;
-                        break;
-                    }
+                    lastTriangle = i;
+                    onTrack = true;
+                    //break;
                 }
-                if (!onTrack)
-                    carPos = Vector3.Lerp(car.Position, car.previousPos, lerp);
             }
 
             if (!onTrack)
             {
                 // Project car.Pos on lastTriangle.
-                //if (lastTriangle != null)
-                //{
-                //    car.Position -= lastTriangle.vertices[0];
-                //    car.Position = Vector3.Dot(car.Position, lastTriangle.ac) /
-                //            lastTriangle.ac.LengthSquared() * lastTriangle.ac;
-                //    car.Position += lastTriangle.vertices[0];
-                //}
+                var t = navMesh.triangles[lastTriangle];
+
+                float coord = Vector3.Dot(car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared();
+                bool trans = false;
+
+                if (coord < 0)
+                {
+                    trans = true;
+                    lastTriangle += (lastTriangle % 2 == 0 ? -1 : 1) * 2;
+                }
+                else if (coord > 1)
+                {
+                    trans = true;
+                    lastTriangle += (lastTriangle % 2 == 0 ? 1 : -1) * 2;
+                }
+
+                if (lastTriangle < 0)
+                    lastTriangle += navMesh.triangles.Length;
+                if (lastTriangle >= navMesh.triangles.Length)
+                    lastTriangle -= navMesh.triangles.Length;
+
+                if (!trans)
+                {
+                    car.Position = coord * t.ac + t.vertices[0];
+                }
+                else if (!CollisionCheck(navMesh.triangles[lastTriangle]))
+                {
+                    t = navMesh.triangles[lastTriangle];
+                    coord = Vector3.Dot(car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared();
+                    car.Position = coord * t.ac + t.vertices[0];
+                    car.Normal = t.normal;
+                }
             }
 
 
             #endregion
 
-            
+
             base.Update(gameTime);
+        }
+
+        int lastTriangle;
+
+        private bool CollisionCheck(NavMeshVisualizer.NavMeshTriangle triangle)
+        {
+            var downray = new Ray(car.Position, Vector3.Down);
+            var upray = new Ray(car.Position, Vector3.Up);
+
+            float? d1 = downray.Intersects(triangle.trianglePlane),
+                d2 = upray.Intersects(triangle.trianglePlane);
+
+            if (d1.HasValue || d2.HasValue)
+            {
+                float d = d1.HasValue ? d1.Value : d2.Value;
+                Ray ray = d1.HasValue ? downray : upray;
+
+                var point = ray.Position + d * ray.Direction;
+
+                bool onTriangle = PointInTriangle(triangle.vertices[0],
+                    triangle.vertices[1],
+                    triangle.vertices[2],
+                    point);
+
+                if (onTriangle)
+                {
+                    car.Position = point;
+                    car.Normal = triangle.normal;
+                }
+
+                return onTriangle;
+            }
+            return false;
+        }
+
+
+        /// <summary>
+        /// Determine whether a point P is inside the triangle ABC. Note, this function
+        /// assumes that P is coplanar with the triangle.
+        /// </summary>
+        /// <returns>True if the point is inside, false if it is not.</returns>
+        public static bool PointInTriangle(Vector3 A, Vector3 B, Vector3 C, Vector3 P)
+        {
+            // Prepare our barycentric variables
+            Vector3 u = B - A;
+            Vector3 v = C - A;
+            Vector3 w = P - A;
+            Vector3 vCrossW = Vector3.Cross(v, w);
+            Vector3 vCrossU = Vector3.Cross(v, u);
+
+            // Test sign of r
+            if (Vector3.Dot(vCrossW, vCrossU) < 0)
+                return false;
+
+            Vector3 uCrossW = Vector3.Cross(u, w);
+            Vector3 uCrossV = Vector3.Cross(u, v);
+
+            // Test sign of t
+            if (Vector3.Dot(uCrossW, uCrossV) < 0)
+                return false;
+
+            // At this piont, we know that r and t and both > 0
+            float denom = uCrossV.Length();
+            float r = vCrossW.Length() / denom;
+            float t = uCrossW.Length() / denom;
+
+            return (r <= 1 && t <= 1 && r + t <= 1);
         }
 
         private void RenderEnvironmentMap()
@@ -576,9 +653,9 @@ namespace datx02_rally
 
             #endregion
 
-            terrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight);
+            //terrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight);
 
-            //navMesh.Draw(view, projection);
+            navMesh.Draw(view, projection);
 
             //testTerrain1.Draw(view);
             //testTerrain2.Draw(view);
@@ -682,7 +759,8 @@ namespace datx02_rally
                     {
                         return -1;
                     }
-                    else {
+                    else
+                    {
                         return 1;
                     }
                 }

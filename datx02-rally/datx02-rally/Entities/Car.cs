@@ -15,6 +15,9 @@ namespace datx02_rally
         /// Set only for repositioning, not driving
         /// </summary>
         public float Rotation { get; set; }
+
+        public Vector3 Normal { get; set; }
+        private Matrix normalMatrix;
         
         /// <summary>
         /// Set only for repositioning, not driving
@@ -25,7 +28,7 @@ namespace datx02_rally
         public float WheelRotationX { get; private set; }
 
         public Matrix TranslationMatrix { get { return Matrix.CreateTranslation(Position); } }
-        public Matrix RotationMatrix { get { return Matrix.CreateRotationY(Rotation); } }
+        public Matrix RotationMatrix { get { return Matrix.CreateRotationY(Rotation) * normalMatrix; } }
 
         /// <summary>
         /// This is set from outside to make the car go forward or backward.
@@ -64,6 +67,8 @@ namespace datx02_rally
             MaxSpeed = 40;
             MaxWheelTurn = MathHelper.PiOver4 / 1.7f;
             TurnSpeed = .005f;
+
+            Normal = Vector3.Up;
 
             this.wheelRadius = wheelRadius;
         }
@@ -125,6 +130,9 @@ namespace datx02_rally
             Position = (front + back) / 2;
             Rotation = (float)Math.Atan2(back.X - front.X, back.Z - front.Z);
             WheelRotationX += (Speed < 0 ? 1 : -1) * (Position - oldPos).Length() / wheelRadius;
+
+            normalMatrix = Matrix.Lerp(normalMatrix, Vector3.Up.GetRotationMatrix(Normal), .2f);
+
         }
     }
 }
