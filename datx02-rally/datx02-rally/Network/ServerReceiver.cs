@@ -87,6 +87,7 @@ namespace datx02_rally
                 case MessageType.OK:
                     Console.WriteLine("Received OK handshake from server");
                     ServerHandler.connected = true;
+                    ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Connected!");
                     break;
                 default:
                     break;

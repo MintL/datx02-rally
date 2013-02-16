@@ -28,8 +28,15 @@ namespace datx02_rally.DebugConsole.Commands
 
         public string[] Execute(string[] arguments)
         {
-            client.Disconnect();
-            return new string[] {"Disconnected!"};
+            if (client.connected)
+            {
+                client.Disconnect();
+                return new string[] { "Disconnected!" };
+            }
+            else
+            {
+                return new string[] { "Not connected to a server." };
+            }
         }
     }
 }
