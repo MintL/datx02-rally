@@ -121,6 +121,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\HUDConsoleComponent.cs" />
+    <Compile Include="DebugConsole\Commands\ConnectCommand.cs" />
+    <Compile Include="DebugConsole\Commands\ClearCommand.cs" />
+    <Compile Include="DebugConsole\Commands\ChatCommand.cs" />
+    <Compile Include="DebugConsole\Commands\ShowCommand.cs" />
+    <Compile Include="DebugConsole\Commands\HelpCommand.cs" />
+    <Compile Include="DebugConsole\Commands\ExitCommand.cs" />
+    <Compile Include="DebugConsole\Commands\DisconnectCommand.cs" />
+    <Compile Include="DebugConsole\ICommand.cs" />
     <Compile Include="Network\ServerReceiver.cs" />
     <Compile Include="Network\ServerSender.cs" />
     <Compile Include="Player.cs" />
