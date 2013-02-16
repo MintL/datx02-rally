@@ -46,6 +46,7 @@ namespace datx02_rally
             Commands.Add(new ClearCommand(this));
             Commands.Add(new ExitCommand(Game));
             Commands.Add(new HelpCommand(this));
+            Commands.Add(new NameCommand(client));
             
             base.LoadContent();
         }

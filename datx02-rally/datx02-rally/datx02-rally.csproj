@@ -124,6 +124,7 @@
     <Compile Include="DebugConsole\Commands\ConnectCommand.cs" />
     <Compile Include="DebugConsole\Commands\ClearCommand.cs" />
     <Compile Include="DebugConsole\Commands\ChatCommand.cs" />
+    <Compile Include="DebugConsole\Commands\NameCommand.cs" />
     <Compile Include="DebugConsole\Commands\ShowCommand.cs" />
     <Compile Include="DebugConsole\Commands\HelpCommand.cs" />
     <Compile Include="DebugConsole\Commands\ExitCommand.cs" />
