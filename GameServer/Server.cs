@@ -164,11 +164,9 @@ namespace GameServer
 
         private void SendToAllOtherPlayers(NetOutgoingMessage msg, NetConnection exceptPlayer)
         {
-            foreach (var playerConnection in serverThread.Connections)
-            {
-                if (playerConnection != exceptPlayer)
-                    serverThread.SendMessage(msg, playerConnection, NetDeliveryMethod.Unreliable);
-            }
+            List<NetConnection> otherPlayers = serverThread.Connections.Where(c => c != exceptPlayer).ToList();
+            if (otherPlayers.Count > 0)
+                serverThread.SendMessage(msg, serverThread.Connections.Where(c => c != exceptPlayer).ToList(), NetDeliveryMethod.Unreliable, 0);
         }
 
         public void Start()

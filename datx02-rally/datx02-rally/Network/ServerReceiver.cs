@@ -68,6 +68,7 @@ namespace datx02_rally
                 case MessageType.Debug:
                     break;
                 case MessageType.LobbyUpdate:
+                    ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Received LobbyUpdate!");
                     byte playerCount = msg.ReadByte();
                     for (int i = 0; i < playerCount; i++)
                     {
