@@ -51,7 +51,7 @@ namespace datx02_rally
             Player player = null;
             if (isPlayerMessage(type) && !PlayerList.TryGetValue(msg.ReadByte(), out player))
             {
-                Console.WriteLine("Received message from unknown player, discarding... type: "+type+" isPlayerMessage: "+isPlayerMessage(type));
+                //Console.WriteLine("Received message from unknown player, discarding...");
                 return;
             }
             switch (type)
@@ -71,19 +71,17 @@ namespace datx02_rally
                     Dictionary<byte, Player> newPlayerList = new Dictionary<byte, Player>();
 
                     byte playerCount = msg.ReadByte();
-                    ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Received LobbyUpdate! Player count: "+playerCount);
                     for (int i = 0; i < playerCount; i++)
                     {
                         byte discoveredPlayerId = msg.ReadByte();
                         string discoveredPlayerName = msg.ReadString();
-                        ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Player ID: "+discoveredPlayerId+", Player name: "+discoveredPlayerName);
 
                         if (ServerHandler.LocalPlayer.ID != discoveredPlayerId) // ignore info of local player
                         {
                             Player discoveredPlayer;
                             if (!PlayerList.TryGetValue(discoveredPlayerId, out discoveredPlayer))
                             {
-                                ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("New player!");
+                                ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("New remote player "+discoveredPlayerName+" discovered!");
                                 newPlayerList[discoveredPlayerId] = new Player(Game1.GetInstance(), discoveredPlayerId, discoveredPlayerName);
                             }
                             else
