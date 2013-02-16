@@ -115,7 +115,11 @@ namespace GameServer
                     string playerName = msg.ReadString();
                     player.PlayerName = playerName;
                     Console.WriteLine("PlayerInfo: " + playerName);
-                    SendOKHandshake(player);
+                    if (!player.connected)
+                    {
+                        SendOKHandshake(player);
+                        player.connected = true;
+                    }
                     DistributeLobbyUpdate();
                     break;
                 default:

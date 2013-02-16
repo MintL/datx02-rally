@@ -79,6 +79,8 @@ namespace datx02_rally
         public void SetPlayerName(string name)
         {
             LocalPlayer.PlayerName = name;
+            if (connected)
+                Sender.SendPlayerInfo();
         }
 
     }

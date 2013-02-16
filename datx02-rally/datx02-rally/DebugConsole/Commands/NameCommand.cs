@@ -30,7 +30,7 @@ namespace datx02_rally.DebugConsole.Commands
             if (arguments.Length > 1)
             {
                 string playerName = arguments[1];
-                Client.LocalPlayer.PlayerName = playerName;
+                Client.SetPlayerName(playerName);
                 return new string[] { "New name: " + playerName };
             }
             else
