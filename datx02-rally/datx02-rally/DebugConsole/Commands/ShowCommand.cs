@@ -39,20 +39,8 @@ namespace datx02_rally.DebugConsole.Commands
                     case "players":
                         if (client.connected)
                         {
-                            StringBuilder outputBuilder = new StringBuilder("Remote players: \n");
-                            if (client.Players.Values.Count > 1)
-                            {
-                                for (int i = 0; i < client.Players.Values.Count - 1; i++)
-                                {
-                                    var player = client.Players.Values.ElementAt(i);
-                                    outputBuilder.Append(player.PlayerName).Append(", ");
-                                }
-                            }
-                            if (client.Players.Values.Count > 0)
-                            {
-                                outputBuilder.Append(client.Players.Values.Last().PlayerName);
-                            }
-                            output.Add(outputBuilder.ToString());
+                            string playerList = String.Join(", ", client.Players.Values.Select(p => p.PlayerName)); 
+                            output.Add("Remote players: " + playerList);
                         }
                         else
                         {
