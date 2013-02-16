@@ -15,7 +15,7 @@ namespace datx02_rally
 
         public Player(Game1 game) : base(game)
         {
-            PlayerName = "Unnamed Player";
+            PlayerName = "UnnamedPlayer";
             LOCAL_PLAYER = true;
         }
 
