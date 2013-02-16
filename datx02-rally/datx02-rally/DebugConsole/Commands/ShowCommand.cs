@@ -62,9 +62,15 @@ namespace datx02_rally.DebugConsole.Commands
                     case "chat":
                         if (client.connected)
                         {
-                            var lastChatMsg = client.ChatHistory.Last.Value;
-                            if (lastChatMsg == null)
-                                output.Add("(" + lastChatMsg.Item3.TimeOfDay + ") " + lastChatMsg.Item1 + ": " + lastChatMsg.Item2);
+                            var lastChatMsg = client.ChatHistory.Last;
+                            if (lastChatMsg != null)
+                            {
+                                output.Add("(" + lastChatMsg.Value.Item3.TimeOfDay + ") " + lastChatMsg.Value.Item1 + ": " + lastChatMsg.Value.Item2);
+                            }
+                            else
+                            {
+                                output.Add("No chat messages to show.");
+                            }
                         }
                         else
                         {
@@ -88,6 +94,9 @@ namespace datx02_rally.DebugConsole.Commands
                         {
                             output.Add(client.LocalPlayer.PlayerName+ ": position " + client.LocalPlayer.Position);
                         }
+                        break;
+                    default:
+                        output.Add("Unknown show command: "+String.Join(" ",arguments, 1, arguments.Length-1));
                         break;
                 }
             }

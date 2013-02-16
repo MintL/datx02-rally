@@ -156,42 +156,6 @@ namespace datx02_rally
             {
                 WriteOutput("Unknown command: " + String.Join(" ", arguments));
             }
-            /*switch (command[0])
-            {
-                case "CONNECT":
-                    IPAddress ip;
-                    if (!client.connected && IPAddress.TryParse(command[1], out ip))
-                    {
-                        WriteOutput("Connecting to server " + command[1] + "...");
-                        client.Connect(ip);
-                    }
-                    else
-                    {
-                        WriteOutput("Cannot connect to server " + command[1] + ". You may be already connected or entered a faulty IP");
-                    }
-                    break;
-                case "DISCONNECT":
-                    Game.GetService<ServerClient>().Disconnect();
-                    WriteOutput("Disconnected!");
-                    break;
-                case "CHAT":
-                    if (client.connected)
-                    {
-                        string chatMsg = String.Join(" ", command, 1, command.Length - 1);
-                        client.Chat(chatMsg);
-                    }
-                    break;
-                case "SHOW":
-                    if (command.Length > 1)
-                        HandleShowCommand(command);
-                    break;
-                case "CLEAR":
-                    WriteOutput("");
-                    break;
-                default:
-                    WriteOutput("Unknown command: " + String.Join(" ", command));
-                    break;
-            }*/
             
         }
 
@@ -205,46 +169,6 @@ namespace datx02_rally
             {
                 string restOfTheCommand = match.Name.Substring(command.Length);
                 EnteredCommand.Append(restOfTheCommand).Append(" ");
-            }
-        }
-
-        private void HandleShowCommand(string[] command) 
-        {
-            ServerClient client = Game.GetService<ServerClient>();
-            switch (command[1])
-            {
-                case "PLAYERPOS":
-                    WriteOutput("Player position: " + Game1.car.Position.ToString());
-                    break;
-                case "PLAYERS":
-                    StringBuilder output = new StringBuilder("Remote players: \n");
-                    foreach (var player in client.Players.Values)
-                        output.Append(player.PlayerName);
-                    WriteOutput(output.ToString());
-                    break;
-                case "CHAT":
-                    var lastChatMsg = client.ChatHistory.Last.Value;
-                    if (lastChatMsg == null)
-                        WriteOutput("(" + lastChatMsg.Item3.TimeOfDay + ") " + lastChatMsg.Item1 + ": " + lastChatMsg.Item2);
-                    break;
-                case "PLAYER":
-                    int playerIndex;
-                    if (int.TryParse(command[2], out playerIndex))
-                    {
-                        if (client.Players.Values.Count >= playerIndex - 1)
-                        {
-                            Player player = client.Players.Values.ElementAt(playerIndex);
-                            WriteOutput("Player name: " + player.PlayerName + "\nPosition: " + player.Position);
-                        }
-                        else
-                        {
-                            WriteOutput("No player with index " + playerIndex + " found!");
-                        }
-                        
-                    }
-                    break;
-                default:
-                    break;
             }
         }
 
