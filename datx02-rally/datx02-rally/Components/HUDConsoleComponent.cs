@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using datx02_rally.DebugConsole.Commands;
 using datx02_rally.DebugConsole;
+using System.Collections;
 
 namespace datx02_rally
 {
@@ -16,6 +17,8 @@ namespace datx02_rally
         private readonly string CONSOLE_HEADING = "DATX02-Racing";
         
         private List<string> OutputHistory = new List<string>();
+        private List<string> CommandHistory = new List<string>();
+        private int CommandIndexIterator = 0;
         public int MaxHistory = 11;
 
         public List<ICommand> Commands = new List<ICommand>();
@@ -136,10 +139,33 @@ namespace datx02_rally
             {
                 AutoComplete();
             }
+            else if (key == Keys.Up)
+            {
+                if (CommandIndexIterator > 0)
+                {
+                    string prevCommand = CommandHistory[--CommandIndexIterator];
+                    EnteredCommand.Clear();
+                    EnteredCommand.Append(prevCommand);
+                }
+            }
+            else if (key == Keys.Down)
+            {
+                if (CommandIndexIterator < CommandHistory.Count - 1)
+                {
+                    string nextCommand = CommandHistory[++CommandIndexIterator];
+                    EnteredCommand.Clear();
+                    EnteredCommand.Append(nextCommand);
+                }
+            }
         }
 
         private void ParseCommand()
         {
+            CommandHistory.Add(EnteredCommand.ToString());
+            if (CommandHistory.Count > MaxHistory)
+                CommandHistory.RemoveAt(0);
+            CommandIndexIterator = CommandHistory.Count;
+
             string[] arguments = EnteredCommand.ToString().Split(" ".ToCharArray());
             ServerClient client = Game.GetService<ServerClient>();
             EnteredCommand.Clear();
