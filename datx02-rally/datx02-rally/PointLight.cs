@@ -11,7 +11,7 @@ using Microsoft.Xna.Framework.Media;
 
 namespace datx02_rally
 {
-    class PointLight
+    public class PointLight
     {
         public Vector3 Position { get; set; }
         public Vector3 Diffuse { get; set; }

@@ -64,7 +64,7 @@ namespace datx02_rally
 
             // Constants
             Acceleration = .35f;
-            MaxSpeed = 40;
+            MaxSpeed = 20;
             MaxWheelTurn = MathHelper.PiOver4 / 1.7f;
             TurnSpeed = .005f;
 

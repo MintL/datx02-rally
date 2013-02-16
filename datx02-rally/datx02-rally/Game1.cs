@@ -38,8 +38,8 @@ namespace datx02_rally
         // 
 
         static int mapSize = 128;
-        static int triangleSize = 100;
-        static int heightScale = 33;
+        static float triangleSize = 100;
+        static float heightScale = 33;
 
         RaceTrack raceTrack;
         NavMeshVisualizer navMesh;
@@ -190,7 +190,7 @@ namespace datx02_rally
 
                 //pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
             }
-            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.1f, Color.White.ToVector3() * 0.2f);
+            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.2f);
 
             #endregion
 
@@ -235,16 +235,16 @@ namespace datx02_rally
 
             #region MapGeneration
 
-
             HeightMap heightmapGenerator = new HeightMap(mapSize);
             var heightmap = heightmapGenerator.Generate();
+            var roadMap = new float[mapSize, mapSize];
 
             raceTrack = new RaceTrack(((mapSize / 2) * triangleSize));
 
-            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 250, 500);
-
             float roadWidth = 2;
             float lerpDist = 5;
+
+            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 250, roadWidth * triangleSize, triangleSize, heightScale);
 
             Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f);
             lastPosition /= triangleSize;
@@ -264,20 +264,29 @@ namespace datx02_rally
                     int x = (int)pos.X, z = (int)pos.Z;
 
                     if (Math.Abs(j) <= roadWidth)
-                        heightmap[x, z] = height; //.429f;
+                    {
+                        heightmap[x, z] = height;
+                        roadMap[x, z] = 1;
+                    }
                     else
-                        heightmap[x, z] = MathHelper.Lerp(height, // .43f, 
-                            heightmap[x, z], (Math.Abs(j) - roadWidth) / (lerpDist - roadWidth));
+                    {
+                        float amount = (Math.Abs(j) - roadWidth) / (lerpDist - roadWidth);
+                        heightmap[x, z] = MathHelper.Lerp(height,
+                            heightmap[x, z], amount);
+                        roadMap[x, z] = amount / 4f;
+                    }
                 }
                 lastPosition = e;
             }
 
-
             // Creates a terrainmodel around Vector3.Zero
-            terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightScale, heightmap);
+            terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightScale, heightmap, roadMap);
 
             Effect terrainEffect = Content.Load<Effect>(@"Effects\TerrainShading");
-            terrainEffect.Parameters["ColorMap"].SetValue(Content.Load<Texture2D>("checker"));
+            terrainEffect.Parameters["TextureMap0"].SetValue(Content.Load<Texture2D> (@"Terrain\sand"));
+            terrainEffect.Parameters["TextureMap1"].SetValue(Content.Load<Texture2D> (@"Terrain\grass"));
+            terrainEffect.Parameters["TextureMap2"].SetValue(Content.Load<Texture2D> (@"Terrain\rock"));
+            terrainEffect.Parameters["TextureMap3"].SetValue(Content.Load<Texture2D> (@"Terrain\snow"));
             terrain.Effect = terrainEffect.Clone();
             terrain.Projection = projection;
 
@@ -372,8 +381,8 @@ namespace datx02_rally
 
                 var side = 150 * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
 
-                pointLights.Add(new PointLight(point1 + side, Color.Cyan.ToVector3() * 0.3f, 800.0f));
-                pointLights.Add(new PointLight(point1 - side, Color.Cyan.ToVector3() * 0.3f, 800.0f));
+                pointLights.Add(new PointLight(point1 + side + Vector3.Up * 50, Color.Cyan.ToVector3() * 0.3f, 800.0f));
+                pointLights.Add(new PointLight(point1 - side + Vector3.Up * 50, Color.Cyan.ToVector3() * 0.3f, 800.0f));
             }
 
 
@@ -478,6 +487,15 @@ namespace datx02_rally
             //        nextSpawn += 100;
             //    }
             //}
+            //if (input.GetKey(Keys.Y))
+                 // raceTrack.Curve = new GameLogic.Curve(25000);
+
+            //for (int j = 0; j < 20; j++)
+            //{
+            //    var i = (float)random.NextDouble();
+            //    Vector3 point1 = raceTrack.Curve.GetPoint(i);
+            //    Vector3 point2 = raceTrack.Curve.GetPoint(i + .01f * (i > .5f ? -1 : 1));
+            //    var heading = (point2 - point1);
 
             //Apply changes to car
             car.Update();
@@ -535,9 +553,28 @@ namespace datx02_rally
                 }
             }
 
-
             #endregion
 
+            
+            #region normalspears
+            /*
+            for (int y = 250; y < 300; y++)
+            {
+                for (int x = 300; x < 350; x++)
+                {
+                    var vert = terrain.vertices[mapSize * y + x];
+                    for (float i = 0; i < 1; i += .1f)
+                    {
+                        plasmaSystem.AddParticle(vert.Position + 100 * vert.Normal * i, Vector3.Zero);
+                    }
+                }
+            }*/
+            #endregion
+
+            //terrain.vertices[0].Normal
+
+            //Apply changes to car
+            car.Update();
 
             base.Update(gameTime);
         }
@@ -653,9 +690,8 @@ namespace datx02_rally
 
             #endregion
 
-            //terrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight);
-
-            navMesh.Draw(view, projection);
+            terrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight, pointLights);
+            //navMesh.Draw(view, projection);
 
             //testTerrain1.Draw(view);
             //testTerrain2.Draw(view);
@@ -667,7 +703,7 @@ namespace datx02_rally
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
             // Set view to particlesystems
-            foreach (ParticleSystem pSystem in this.Components.Where(c => c is ParticleSystem))
+            foreach (ParticleSystem pSystem in particleSystems)
                 pSystem.SetCamera(view, projection);
 
             //smoke.SetCamera(view, projection);
@@ -751,6 +787,9 @@ namespace datx02_rally
             //carSettings.EyePosition = view.Translation;
             carSettings.EyePosition = this.GetService<CameraComponent>().Position;
 
+            Vector3 direction = car.Position - carSettings.EyePosition;
+            direction.Y = 0;
+            direction = Vector3.Normalize(direction);
             Vector3 carPosition = car.Position;
             pointLights.Sort(
                 delegate(PointLight x, PointLight y)

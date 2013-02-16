@@ -7,27 +7,52 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace datx02_rally
 {
+    public struct MultitexturedVertex : IVertexType
+    {
+        public Vector3 Position;
+        public Vector3 Normal;
+        public Vector2 TextureCoordinate;
+        public Vector4 TexWeights;
+
+        public static int SizeInBytes = (3 + 3 + 2 + 4) * sizeof(float);
+        public static VertexDeclaration VertexDeclaration = new VertexDeclaration
+        (
+             new VertexElement( 0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0 ),
+             new VertexElement( sizeof(float) * 3, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0 ),
+             new VertexElement( sizeof(float) * 6, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 0 ),
+             new VertexElement( sizeof(float) * 8, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 1 )
+        );
+
+        public MultitexturedVertex(Vector3 position, Vector3 normal, Vector2 texCoordinate, Vector4 texWeights)
+        {
+            Position = position;
+            Normal = normal;
+            TextureCoordinate = texCoordinate;
+            TexWeights = texWeights;
+        }
+
+        VertexDeclaration IVertexType.VertexDeclaration
+        {
+            get { return VertexDeclaration; }
+        }
+    }
+
     public class TerrainModel
     {
         private GraphicsDevice device;
 
-        private VertexPositionNormalTexture[] vertices;
-        private VertexBuffer vertexbuffer;
+        public MultitexturedVertex[] vertices;
+        private VertexBuffer vertexBuffer;
 
         private IndexBuffer indexBuffer;
 
         public Effect Effect { get; set; }
 
         public Matrix Projection { get; set; }
+
+        public float HeightOffset { get; set; }
         
-        public TerrainModel(Vector2 start, Vector2 end, float uvScale, GraphicsDevice device, Texture2D texture, Matrix projection, Matrix world)
-        {
-        }
-
-        public TerrainModel(GraphicsDevice device, int width, int height, int triangleSize) : this(device, 0, width,0, height, triangleSize, 0, null) {
-        }
-
-        public TerrainModel (GraphicsDevice device, int offsetX, int width, int offsetZ, int depth, float triangleSize, int heightScale, float[,] heightMap)
+        public TerrainModel (GraphicsDevice device, int offsetX, int width, int offsetZ, int depth, float triangleSize, float heightScale, float[,] heightMap, float[,] roadMap)
         {
             this.device = device;
 
@@ -38,19 +63,40 @@ namespace datx02_rally
             float halfWidth = width / 2f,
                 halfDepth = depth / 2f;
 
-            vertices = new VertexPositionNormalTexture[vertexCount];
+            HeightOffset = 0; // -1425;
+
+            vertices = new MultitexturedVertex[vertexCount];
 
             for (int z = 0; z < depth; z++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    vertices[z * width + x] = new VertexPositionNormalTexture(
+                    //Vector4 textureWeights = new Vector4(
+                    //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0) / 0.3f, 0, 1),
+                    //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0.4f) / 0.2f, 0, 1),
+                    //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0.7f) / 0.2f, 0, 1),
+                    //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 1) / 0.3f, 0, 1)
+                    //);
+
+
+
+                    Vector4 textureWeights = new Vector4(
+                        roadMap[x, z],
+                        (1 - roadMap[x, z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0.4f) / 0.2f, 0, 1),
+                        (1 - roadMap[x, z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0.7f) / 0.2f, 0, 1),
+                        (1 - roadMap[x, z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 1) / 0.3f, 0, 1)
+                    );
+
+                    textureWeights.Normalize();
+
+                    vertices[z * width + x] = new MultitexturedVertex(
                         new Vector3(
                             ((x - offsetX) - halfWidth) * triangleSize, // X
-                            (heightMap != null ? heightScale * triangleSize * heightMap[x, z] : 0) - 1425, // Y
+                            (heightMap != null ? heightScale * triangleSize * heightMap[x, z] : 0) + HeightOffset, // Y
                             ((z - offsetZ) - halfDepth) * triangleSize), // Z
                         Vector3.Zero, // Normal
-                        new Vector2(x % 2, z % 2));
+                        new Vector2(x / 2f, z / 2f),//new Vector2(x / 10f, z / 10f),
+                        textureWeights);
 
                 }
             }
@@ -102,7 +148,7 @@ namespace datx02_rally
 
 
                 Vector3 normal;
-                if(i % 2 == 1)
+                if(i % 2 == 0)
                 {
                     normal = Vector3.Cross(firstsub, secondsub);
                 }else{
@@ -121,19 +167,17 @@ namespace datx02_rally
             }
 
 
-
-
             indexBuffer = new IndexBuffer(device, typeof(int), (width-1) * (depth-1) * 6, BufferUsage.None);
             indexBuffer.SetData(indices);
 
-            vertexbuffer = new VertexBuffer(device,
-                    typeof(VertexPositionNormalTexture), vertices.Length,
+            vertexBuffer = new VertexBuffer(device,
+                    typeof(MultitexturedVertex), vertices.Length,
                     BufferUsage.None);
-            vertexbuffer.SetData(vertices);
+            vertexBuffer.SetData(vertices);
         }
 
         
-        public void Draw(Matrix view, Vector3 cameraPosition, DirectionalLight directionalLight)
+        public void Draw(Matrix view, Vector3 cameraPosition, DirectionalLight directionalLight, List<PointLight> pointLights)
         {
 
             Effect.Parameters["EyePosition"].SetValue(cameraPosition);
@@ -141,16 +185,33 @@ namespace datx02_rally
             Effect.Parameters["World"].SetValue(Matrix.Identity);
             Effect.Parameters["Projection"].SetValue(Projection);
 
+            Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
+
             Effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
             Effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
             Effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
 
+            /*Vector3[] positions = new Vector3[pointLights.Count];
+            Vector3[] diffuses = new Vector3[pointLights.Count];
+            float[] ranges = new float[pointLights.Count];
+            for (int i = 0; i < 10; i++)
+            {
+                positions[i] = pointLights[i].Position;
+                diffuses[i] = pointLights[i].Diffuse;
+                ranges[i] = pointLights[i].Range;
+            }
+
+            Effect.Parameters["LightPosition"].SetValue(positions);
+            Effect.Parameters["LightDiffuse"].SetValue(diffuses);
+            Effect.Parameters["LightRange"].SetValue(ranges);
+            Effect.Parameters["NumLights"].SetValue(10);
+            */
             foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
             {
                 pass.Apply();
                 device.Indices = indexBuffer;
-                device.SetVertexBuffer(vertexbuffer);
-                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexbuffer.VertexCount, 0, vertexbuffer.VertexCount*2);
+                device.SetVertexBuffer(vertexBuffer);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, vertexBuffer.VertexCount*2);
             }
         }
     }

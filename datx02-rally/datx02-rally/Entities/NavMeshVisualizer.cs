@@ -44,10 +44,9 @@ namespace datx02_rally.Entities
             }
         }
 
-        public NavMeshVisualizer(GraphicsDevice device, datx02_rally.GameLogic.Curve curve, int resolution, float width)
+        public NavMeshVisualizer(GraphicsDevice device, datx02_rally.GameLogic.Curve curve, int resolution, float width, float triangleSize, float heightScale)
         {
             this.device = device;
-            width /= 2f;
 
             #region Vertices
 
@@ -57,6 +56,7 @@ namespace datx02_rally.Entities
                 float t = i / (float)vertices.Length;
                 var position = curve.GetPoint(t);
                 var side = Vector3.Normalize(Vector3.Cross((curve.GetPoint(t + .0001f) - position), Vector3.Up));
+                position.Y *= triangleSize * heightScale;
 
                 vertices[i] = new VertexPositionColor(position - width * side, Color.White);
                 vertices[i + 1] = new VertexPositionColor(position + width * side, Color.Red);
@@ -133,7 +133,7 @@ namespace datx02_rally.Entities
             Effect.View = view;
             Effect.Projection = projection;
 
-            Effect.Alpha = .5f;
+            Effect.Alpha = .2f;
 
             foreach (var pass in Effect.CurrentTechnique.Passes)
             {
