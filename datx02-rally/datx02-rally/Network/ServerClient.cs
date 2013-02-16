@@ -25,7 +25,9 @@ namespace datx02_rally
         public bool connected = false;
 
         private DateTime TryConnectedTime = DateTime.MinValue;
-        private TimeSpan WaitConnect = new TimeSpan(0, 0, 3); // 3 second wait
+        private TimeSpan WaitConnect = new TimeSpan(0, 0, 1); // 3 second wait
+        public int ConnectTryCount = 0;
+        private int MAX_CONNECT_TRIES = 5;
         
         public ServerClient(Game1 game) : base(game)
         {
@@ -44,25 +46,34 @@ namespace datx02_rally
         public void Connect(IPAddress IP) {
             ServerThread.Connect(new IPEndPoint(IP, PORT));
             TryConnectedTime = DateTime.Now;
+            ConnectTryCount = 0;
         }
 
         public void Disconnect()
         {
             connected = false;
             TryConnectedTime = DateTime.MinValue;
+            ConnectTryCount = 0;
             ServerThread.Disconnect("");
         }
 
         public override void Update(GameTime gameTime)
         {
             Receiver.ReceiveMessages();
-            // If not received handshake, has tried to connect, and has waited 3 secs, try again
+            // If not received handshake, has tried to connect, and has waited 1 sec, try again
             if (!connected)
             {
-                if (TryConnectedTime != DateTime.MinValue && DateTime.Now - TryConnectedTime >= WaitConnect)
+                bool connectionTimeOut = ConnectTryCount > MAX_CONNECT_TRIES;
+                if (connectionTimeOut)
+                {
+                    Game.GetService<HUDConsoleComponent>().WriteOutput("Could not connect to server");
+                    Disconnect();
+                }
+                else if (TryConnectedTime != DateTime.MinValue && DateTime.Now - TryConnectedTime >= WaitConnect)
                 {
                     Sender.SendPlayerInfo();
                     TryConnectedTime = DateTime.Now;
+                    ConnectTryCount++;
                 }
                 return;
             }
