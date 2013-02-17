@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Input;
 
 namespace datx02_rally
 {
-    public enum Input { Thrust, Brake, Steer, ChangeController, ChangeCamera, CameraX, CameraY, Exit };
+    public enum Input { Thrust, Brake, Steer, ChangeController, ChangeCamera, CameraX, CameraY, Exit, Console };
     public enum Controller { Keyboard, GamePad };
 
     class InputComponent : GameComponent
@@ -16,6 +16,7 @@ namespace datx02_rally
         private KeyboardState previousKeyboard;
         private GamePadState gamePad;
         private GamePadState previousGamePad;
+        private Boolean enabled = true;
 
         public Controller CurrentController { get; set; }
 
@@ -26,7 +27,7 @@ namespace datx02_rally
 
         public float GetState(Input input)
         {
-            if (CurrentController == Controller.Keyboard)
+            if (CurrentController == Controller.Keyboard && enabled)
             {
                 switch (input)
                 {
@@ -66,7 +67,7 @@ namespace datx02_rally
 
         public bool GetPressed(Input input)
         {
-            if (CurrentController == Controller.Keyboard)
+            if (CurrentController == Controller.Keyboard && enabled)
             {
                 switch (input)
                 {
@@ -76,6 +77,10 @@ namespace datx02_rally
                         return GetKey(Keys.C);
                     case Input.Exit:
                         return keyboard.IsKeyDown(Keys.Escape);
+                    case Input.Console:
+                        if (previousKeyboard.IsKeyUp(Keys.F2) && keyboard.IsKeyDown(Keys.F2))
+                            enabled = !enabled;
+                        return previousKeyboard.IsKeyUp(Keys.F2) && keyboard.IsKeyDown(Keys.F2);
                 }
             }
             else if (CurrentController == Controller.GamePad)
@@ -89,6 +94,12 @@ namespace datx02_rally
                     case Input.Exit:
                         return gamePad.IsButtonDown(Buttons.Back);
                 }
+            }
+            else if (input == Input.Console) 
+            {
+                if (previousKeyboard.IsKeyUp(Keys.F2) && keyboard.IsKeyDown(Keys.F2))
+                    enabled = !enabled;
+                return previousKeyboard.IsKeyUp(Keys.F2) && keyboard.IsKeyDown(Keys.F2);
             }
             return false;
         }

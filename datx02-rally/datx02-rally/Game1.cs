@@ -22,8 +22,9 @@ namespace datx02_rally
     /// </summary>
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        private static Game1 Instance = null;
         GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
+        public SpriteBatch spriteBatch;
 
         #region Foliage
         Model oakTree;
@@ -52,8 +53,7 @@ namespace datx02_rally
         DirectionalLight directionalLight;
 
         // Car
-
-        Car car;
+        public Car car { get; private set; }
         Effect carEffect;
         CarShadingSettings carSettings = new CarShadingSettings()
         {
@@ -101,6 +101,12 @@ namespace datx02_rally
             //graphics.ToggleFullScreen();
 
             IsMouseVisible = true;
+            Instance = this;
+        }
+
+        public static Game1 GetInstance()
+        {
+            return Instance;
         }
 
         /// <summary>
@@ -127,6 +133,14 @@ namespace datx02_rally
             var carControlComponent = new CarControlComponent(this);
             Components.Add(carControlComponent);
             Services.AddService(typeof(CarControlComponent), carControlComponent);
+            
+            var consoleComponent = new HUDConsoleComponent(this);
+            Components.Add(consoleComponent);
+            Services.AddService(typeof(HUDConsoleComponent), consoleComponent);
+
+            var serverComponent = new ServerClient(this);
+            Components.Add(serverComponent);
+            Services.AddService(typeof(ServerClient), serverComponent);
 
             Console.WriteLine("isConnected " + GamePad.GetState(PlayerIndex.One).IsConnected);
 
@@ -459,6 +473,9 @@ namespace datx02_rally
             // Allows the game to exit
             if (input.GetPressed(Input.Exit))
                 this.Exit();
+            
+            if (input.GetPressed(Input.Console))
+                this.GetService<HUDConsoleComponent>().Toggle();
 
             // Mushroom
             //for (int i = 0; i < 1; i++)
