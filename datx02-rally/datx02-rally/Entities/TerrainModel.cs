@@ -78,8 +78,6 @@ namespace datx02_rally
                     //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 1) / 0.3f, 0, 1)
                     //);
 
-
-
                     Vector4 textureWeights = new Vector4(
                         roadMap[x, z],
                         (1 - roadMap[x, z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0.4f) / 0.2f, 0, 1),

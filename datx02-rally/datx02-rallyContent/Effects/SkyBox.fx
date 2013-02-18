@@ -57,7 +57,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	float size = 2;
 	float amount = 1 + (sin(2 * ElapsedTime) + 1) * 0.5 * size; // amount will be in range [1..1+size]
-	skyBoxColor = skyBoxColor * amount;
+	skyBoxColor = skyBoxColor * 5; //amount;
 
 	skyBoxColor.rgb = lerp(skyBoxColor.rgb, FogColor, 0.7);
 	return skyBoxColor;
