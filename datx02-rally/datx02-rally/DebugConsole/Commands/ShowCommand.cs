@@ -33,9 +33,6 @@ namespace datx02_rally.DebugConsole.Commands
             {
                 switch (arguments[1].ToLower())
                 {
-                    //case "playerpos":
-                    //    output.Add("Player position: " + client.LocalPlayer.Position.ToString());
-                    //    break;
                     case "players":
                         if (client.connected)
                         {
@@ -82,6 +79,9 @@ namespace datx02_rally.DebugConsole.Commands
                         {
                             output.Add(client.LocalPlayer.PlayerName+ ": position " + client.LocalPlayer.Position);
                         }
+                        break;
+                    case "name":
+                        output.Add("Name: " + client.LocalPlayer.PlayerName);
                         break;
                     default:
                         output.Add("Unknown show command: "+String.Join(" ",arguments, 1, arguments.Length-1));

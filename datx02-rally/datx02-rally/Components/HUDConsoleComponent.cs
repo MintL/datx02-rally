@@ -170,7 +170,7 @@ namespace datx02_rally
             ServerClient client = Game.GetService<ServerClient>();
             EnteredCommand.Clear();
 
-            ICommand command = Commands.Find(x => x.Name.ToLower().Equals(arguments[0]));
+            ICommand command = Commands.Find(x => x.Name.Equals(arguments[0].ToLower()));
             if (command != null)
             {
                 string[] outputs = command.Execute(arguments);
