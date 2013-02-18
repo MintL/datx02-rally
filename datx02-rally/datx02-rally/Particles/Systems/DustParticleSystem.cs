@@ -1,34 +1,22 @@
-#region File Description
-//-----------------------------------------------------------------------------
-// SmokePlumeParticleSystem.cs
-//
-// Microsoft XNA Community Game Platform
-// Copyright (C) Microsoft Corporation. All rights reserved.
-//-----------------------------------------------------------------------------
-#endregion
-
-#region Using Statements
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Particle3DSample;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
-#endregion
 
-namespace Particle3DSample
+namespace datx02_rally.Particles.Systems
 {
-    /// <summary>
-    /// Custom particle system for creating a giant plume of long lasting smoke.
-    /// </summary>
-    class SmokePlumeParticleSystem : ParticleSystem
+    class DustParticleSystem : ParticleSystem
     {
-        public SmokePlumeParticleSystem(Game game, ContentManager content)
+        public DustParticleSystem(Game game, ContentManager content)
             : base(game, content)
         { }
 
-
         protected override void InitializeSettings(ParticleSettings settings)
         {
-            settings.TextureName = @"Particles/smoke";
+            settings.TextureName = @"Particles/smoke_2";
 
             settings.MaxParticles = 6000;
 

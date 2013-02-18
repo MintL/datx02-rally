@@ -17,7 +17,7 @@ namespace datx02_rally
 
         protected override void InitializeSettings(ParticleSettings settings)
         {
-            settings.TextureName = @"Particles/plasma";
+            settings.TextureName = @"Particles/smoke";
 
             settings.MaxParticles = 1500;
 

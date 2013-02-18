@@ -150,6 +150,7 @@
     <Compile Include="Particles\ParticleSystem.cs" />
     <Compile Include="Particles\ParticleVertex.cs" />
     <Compile Include="Particles\Systems\AirParticleSystem.cs" />
+    <Compile Include="Particles\Systems\DustParticleSystem.cs" />
     <Compile Include="Particles\Systems\GreenParticleSystem.cs" />
     <Compile Include="Particles\Systems\ExplosionParticleSystem.cs" />
     <Compile Include="Particles\Systems\ExplosionSmokeParticleSystem.cs" />

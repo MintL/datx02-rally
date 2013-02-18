@@ -68,8 +68,13 @@ namespace datx02_rally
         ParticleSystem plasmaSystem;
         ParticleSystem redSystem;
         ParticleSystem yellowSystem;
+
         ParticleSystem greenSystem;
         ParticleSystem airParticles;
+
+        ParticleEmitter[] dustEmitter;
+        ParticleSystem[] dustParticles;
+
         int nextSpawn;
 
         Random random = new Random();
@@ -165,6 +170,16 @@ namespace datx02_rally
             airParticles = new AirParticleSystem(this, Content);
             Components.Add(airParticles);
             particleSystems.Add(airParticles);
+
+            dustParticles = new ParticleSystem[2];
+            dustParticles[0] = new SmokePlumeParticleSystem(this, Content);
+            dustParticles[1] = new SmokePlumeParticleSystem(this, Content);
+            foreach (var dustSystem in dustParticles)
+            {
+                Components.Add(dustSystem);
+                particleSystems.Add(dustSystem);
+            }
+
 
             //smoke = new SmokePlumeParticleSystem(this, Content);
             //smoke.DrawOrder = 500;
@@ -386,6 +401,13 @@ namespace datx02_rally
             // Place car at start.
             SetCarAtStart();
 
+            dustEmitter = new ParticleEmitter[]{
+                new ParticleEmitter(dustParticles[0], 150, car.Position),
+                new ParticleEmitter(dustParticles[1], 150, car.Position)
+            };
+
+            #region Point lights
+
             for (int j = 0; j < 200; j++)
             {
                 float i = j / 200.0f;
@@ -393,13 +415,19 @@ namespace datx02_rally
                 Vector3 point2 = raceTrack.Curve.GetPoint(i + .01f * (i > .5f ? -1 : 1));
                 var heading = (point2 - point1);
 
-                var side = 150 * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
+                var side = triangleSize * roadWidth * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
 
-                pointLights.Add(new PointLight(point1 + side + Vector3.Up * 50, Color.Cyan.ToVector3() * 0.3f, 800.0f));
-                pointLights.Add(new PointLight(point1 - side + Vector3.Up * 50, Color.Cyan.ToVector3() * 0.3f, 800.0f));
+                point1.Y *= heightScale * triangleSize;
+
+                Vector3 color = new Vector3(
+                    (float)random.NextDouble(), 
+                    (float)random.NextDouble(), 
+                    (float)random.NextDouble());
+                pointLights.Add(new PointLight(point1 + Vector3.Up * 50 + side, color * .3f, 800.0f));
+                pointLights.Add(new PointLight(point1 + Vector3.Up * 50 - side, color * .3f, 800.0f));
             }
 
-
+            #endregion
 
 
             #region Cameras
@@ -483,8 +511,8 @@ namespace datx02_rally
             //    greenSystem.AddParticle(new Vector3(105, 10, 100), Vector3.Up);
             //}
 
-            // Air particles.. In my opinion, more of those... /Marcus
-            //for (int i = 0; i < 1; i++)
+            // Air particles.
+            //for (int i = 0; i < 10; i++)
             //{
             //    nextSpawn -= gameTime.ElapsedGameTime.Milliseconds;
             //    Camera camera = this.GetService<CameraComponent>().CurrentCamera;
@@ -504,6 +532,35 @@ namespace datx02_rally
             //        nextSpawn += 100;
             //    }
             //}
+
+            //foreach (var emitter in dustEmitter)
+            //{
+            //    emitter.Update(gameTime, car.Position);
+            //}
+
+
+
+            for (int i = 0; i < 20; i++)
+            {
+                var triangle = navMesh.triangles[random.Next(navMesh.triangles.Length)];
+                float u = (float)random.NextDouble(),
+                    v = (float)random.NextDouble();
+                if (u + v > 1)
+                {
+                    u = 1 - u;
+                    v = 1 - v;
+                }
+                dustParticles[i < 10 ? 0 : 1].AddParticle(triangle.vertices[0] +
+                    u * triangle.ab + v * triangle.ac, Vector3.Zero);
+            }
+
+            
+
+
+            //dustParticles.AddParticle(Vector3.Transform(new Vector3(0,0,100), car.RotationMatrix * car.TranslationMatrix),
+            //    Vector3.Transform(new Vector3(0, 1, 1), car.RotationMatrix));
+
+
             //if (input.GetKey(Keys.Y))
                  // raceTrack.Curve = new GameLogic.Curve(25000);
 
