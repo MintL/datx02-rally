@@ -130,7 +130,7 @@
     <Compile Include="DebugConsole\Commands\ExitCommand.cs" />
     <Compile Include="DebugConsole\Commands\DisconnectCommand.cs" />
     <Compile Include="DebugConsole\ICommand.cs" />
-    <Compile Include="Menus\GameComponent1.cs" />
+    <Compile Include="Menus\MainMenu.cs" />
     <Compile Include="Network\ServerReceiver.cs" />
     <Compile Include="Network\ServerSender.cs" />
     <Compile Include="Player.cs" />

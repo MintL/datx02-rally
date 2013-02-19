@@ -15,9 +15,12 @@ namespace datx02_rally.Menus
     /// <summary>
     /// This is a game component that implements IUpdateable.
     /// </summary>
-    public class GameComponent1 : DrawableGameComponent
+    public class MainMenu : DrawableGameComponent
     {
-        public GameComponent1(Game game)
+        string[] menuItems = { "Singleplayer", "Multiplayer" };
+        int selectedIndex = 0;
+
+        public MainMenu(Game game)
             : base(game)
         {
             // TODO: Construct any child components here
@@ -43,6 +46,12 @@ namespace datx02_rally.Menus
             // TODO: Add your update code here
 
             base.Update(gameTime);
+        }
+
+        public override void Draw(GameTime gameTime)
+        {
+            
+            base.Draw(gameTime);
         }
     }
 }
