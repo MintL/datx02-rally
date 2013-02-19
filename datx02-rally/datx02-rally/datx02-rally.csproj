@@ -169,7 +169,6 @@
     <Compile Include="Entities\TerrainModel.cs" />
     <Compile Include="GameExtensions.cs" />
     <Compile Include="MapGeneration\HeightMap.cs" />
-    <Compile Include="MapGeneration\HeightMapInfo.cs" />
     <Compile Include="MapGeneration\PerlinGenerator.cs" />
     <Compile Include="Particles\Systems\YellowPlasmaParticleSystem.cs" />
     <Compile Include="Program.cs" />
