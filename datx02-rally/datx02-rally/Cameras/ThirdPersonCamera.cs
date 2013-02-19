@@ -42,6 +42,7 @@ namespace datx02_rally
             RotationSpeed = .05f;
             this.lookUpOffset = lookUpOffset;
             this.input = input;
+            Position = targetNode.TranslationMatrix.Translation + Vector3.Up * 50;
         }
 
         public override void Update(GameTime gameTime)

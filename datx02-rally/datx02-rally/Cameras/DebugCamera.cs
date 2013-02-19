@@ -56,7 +56,10 @@ namespace datx02_rally
             oldButtonState = Mouse.GetState().LeftButton;
 
             // Movement
-            Vector3 delta = (Keyboard.GetState().IsKeyDown(Keys.LeftShift) ? 20 : 1) * speed * (lookAt * (K(Keys.W) - K(Keys.S)) +
+            Vector3 delta = 
+                (Keyboard.GetState().IsKeyDown(Keys.LeftShift) ? 20 : 1) * 
+                (Keyboard.GetState().IsKeyDown(Keys.LeftControl) ? .2f : 1) * 
+                speed * (lookAt * (K(Keys.W) - K(Keys.S)) +
                 localX * (K(Keys.D) - K(Keys.A)) + Vector3.Up * (K(Keys.PageUp) - K(Keys.PageDown)));
 
        //   Does not exist in current version of master, only added in track
