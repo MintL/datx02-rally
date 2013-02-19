@@ -429,41 +429,34 @@ namespace datx02_rally
 
                 var treePos = t.vertices[0] + u * t.ab + v * t.ac;
 
-                treePos.X = (int)treePos.X;
-                treePos.Z = (int)treePos.Z;
+                float X = treePos.X / triangleSize + mapSize / 2f,
+                    Z = treePos.Z / triangleSize + mapSize / 2f;
 
-                int X = (int)((int)treePos.X / triangleSize + mapSize / 2f),
-                    Z = (int)((int)treePos.Y / triangleSize + mapSize / 2f);
+                float Xlerp = X % 1f,
+                    Zlerp = Z % 1f;
 
-                //float X = treePos.X / triangleSize + mapSize / 2f,
-                //    Z = treePos.Y / triangleSize + mapSize / 2f;
+                int x0 = (int)X,
+                    z0 = (int)Z,
+                    x1 = x0 + 1,
+                    z1 = z0 + 1;
 
-                //float Xlerp = X % 1f,
-                //    Zlerp = Z % 1f;
+                float height;
+                if (Xlerp + Zlerp > 1)
+                {
+                    height = MathHelper.Lerp(
+                        MathHelper.Lerp(heightmap[x0, z1], heightmap[x1, z1], Xlerp),
+                        MathHelper.Lerp(heightmap[x1, z0], heightmap[x1, z1], Zlerp),
+                        .5f);
+                }
+                else
+                {
+                    height = MathHelper.Lerp(
+                        MathHelper.Lerp(heightmap[x0, z0], heightmap[x1, z0], Xlerp),
+                        MathHelper.Lerp(heightmap[x0, z0], heightmap[x0, z1], Zlerp),
+                        .5f);
+                }
 
-                //int x0 = (int)X, 
-                //    z0 = (int)Z, 
-                //    x1 = x0 + 1, 
-                //    z1 = z0 + 1;
-
-                //float height;
-                //if (Xlerp + Zlerp > 1) 
-                //{
-                //    height = MathHelper.Lerp(
-                //        MathHelper.Lerp(heightmap[x0, z1], heightmap[x1, z1], Xlerp),
-                //        MathHelper.Lerp(heightmap[x1, z0], heightmap[x1, z1], Zlerp),
-                //        .5f);
-                //}
-                //else
-                //{
-                //    height = MathHelper.Lerp(
-                //        MathHelper.Lerp(heightmap[x0, z0], heightmap[x1, z0], Xlerp),
-                //        MathHelper.Lerp(heightmap[x0, z0], heightmap[x0, z1], Zlerp),
-                //        .5f);
-                //}
-
-                treePos.Y = heightmap[X, Z] * heightScale * triangleSize;
-
+                treePos.Y = height * heightScale * triangleSize;
 
                 treePositions[i] = treePos;
                 treeTransforms[i] = Matrix.CreateScale(1 + (float)random.NextDouble()) * Matrix.CreateRotationY(MathHelper.Lerp(0, MathHelper.Pi * 2, (float)random.NextDouble()));
