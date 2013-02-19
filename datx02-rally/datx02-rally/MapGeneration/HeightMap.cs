@@ -51,6 +51,11 @@ namespace datx02_rally.MapGeneration
             }
         }
 
+        public void Perturb(float d)
+        {
+            Perturb(d, d);
+        }
+
         public void Perturb(float f, float d)
         {
             int u, v;
@@ -139,17 +144,22 @@ namespace datx02_rally.MapGeneration
         //    return Heights;
         //}
 
+        public float[,] Generate(float perlinNoise, float pertube)
+        {
+            AddPerlinNoise(perlinNoise);
+
+            Perturb(pertube);
+
+            return Heights;
+        }
+
         public float[,] Generate()
         {
             AddPerlinNoise(4.0f);
 
-            Perturb(40.0f, 40.0f);
+            Perturb(5.0f);
             
-
-            for (int i = 0; i < 0; i++)
-                Erode(20.0f);
-
-            Smoothen();
+            //Smoothen();
 
             return Heights;
         }

@@ -51,9 +51,12 @@ namespace datx02_rally
 
         #region Map
 
-        static int mapSize = 512;
-        static float triangleSize = 50;
-        static float heightScale = 100;  //33;
+        int mapSize = 512;
+        float triangleSize = 50;
+        float heightScale = 150;  //33;
+
+        float roadWidth = 5; // Grids
+        float roadFalloff = 60; // Grids
 
         RaceTrack raceTrack;
         NavMeshVisualizer navMesh;
@@ -238,26 +241,39 @@ namespace datx02_rally
 
             HeightMap heightmapGenerator = new HeightMap(mapSize);
             var heightmap = heightmapGenerator.Generate();
+
+            HeightMap heightmap2Generator = new HeightMap(mapSize);
+            var h2 = heightmap2Generator.Generate(3, 50f);
+
+            for (int z = 0; z < mapSize; z++)
+            {
+                for (int x = 0; x < mapSize; x++)
+                {
+                    heightmap[x, z] = .6f * heightmap[x, z] + .4f * h2[x, z];
+                }
+            }
+
+
+
+
             var roadMap = new float[mapSize, mapSize];
 
             raceTrack = new RaceTrack(((mapSize / 2) * triangleSize));
-
-            float roadWidth = 5;
-            float lerpDist = 20;
 
             navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 250, roadWidth * triangleSize, triangleSize, heightScale);
 
             Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f);
             lastPosition /= triangleSize;
             lastPosition += new Vector3(.5f, 0, .5f) * mapSize;
-            for (float i = 0; i < 1; i += .0003f)
+            for (float t = 0; t < 1; t += .0003f)
             {
-                var e = raceTrack.Curve.GetPoint(i);
+                var e = raceTrack.Curve.GetPoint(t);
                 var height = e.Y;
                 e /= triangleSize;
-                e += new Vector3(.5f, 0, .5f) * mapSize;
+                //e += new Vector3(.5f, 0, .5f) * mapSize;
+                e += new Vector3(mapSize) / 2f;
 
-                for (float j = -lerpDist; j <= lerpDist; j++)
+                for (float j = -roadFalloff; j <= roadFalloff; j++)
                 {
                     var pos = e + j * Vector3.Normalize(Vector3.Cross(lastPosition - e, Vector3.Up));
 
@@ -271,7 +287,7 @@ namespace datx02_rally
                     }
                     else
                     {
-                        float amount = (Math.Abs(j) - roadWidth) / (lerpDist - roadWidth);
+                        float amount = (Math.Abs(j) - roadWidth) / (roadFalloff - roadWidth);
                         heightmap[x, z] = MathHelper.Lerp(height,
                             heightmap[x, z], amount);
                         roadMap[x, z] = amount / 4f;
@@ -279,6 +295,8 @@ namespace datx02_rally
                 }
                 lastPosition = e;
             }
+
+            heightmapGenerator.Smoothen();
 
             // Creates a terrainmodel around Vector3.Zero
             terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightScale, heightmap, roadMap);
@@ -896,7 +914,7 @@ namespace datx02_rally
 
         private void DrawGhostCar(Matrix view, Matrix projection, GameTime gameTime)
         {
-            float t = ((float)gameTime.TotalGameTime.TotalSeconds / 10f) % 1f;
+            float t = ((float)gameTime.TotalGameTime.TotalSeconds / 120f) % 1f;
             foreach (var mesh in car.Model.Meshes) // 5 meshes
             {
                 // Local modelspace, due to bad .X-file/exporter
