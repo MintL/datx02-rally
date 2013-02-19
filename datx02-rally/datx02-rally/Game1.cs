@@ -962,7 +962,7 @@ namespace datx02_rally
         {
             float t = ((float)gameTime.TotalGameTime.TotalSeconds / 1020f) % 1f;
 
-            foreach (var mesh in car.Model.Meshes) // 5 meshes
+            foreach (var mesh in Car.Model.Meshes) // 5 meshes
             {
                 Matrix world = Matrix.Identity;
 
