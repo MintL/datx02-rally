@@ -29,6 +29,9 @@ namespace datx02_rally
 
         Matrix projection;
 
+        RenderTarget2D renderTarget;
+        Effect postEffect;
+
         #region Foliage
 
         Model oakTree;
@@ -154,7 +157,7 @@ namespace datx02_rally
             var carControlComponent = new CarControlComponent(this);
             Components.Add(carControlComponent);
             Services.AddService(typeof(CarControlComponent), carControlComponent);
-            
+
             var consoleComponent = new HUDConsoleComponent(this);
             Components.Add(consoleComponent);
             Services.AddService(typeof(HUDConsoleComponent), consoleComponent);
@@ -284,10 +287,10 @@ namespace datx02_rally
             terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightScale, heightmap, roadMap);
 
             Effect terrainEffect = Content.Load<Effect>(@"Effects\TerrainShading");
-            terrainEffect.Parameters["TextureMap0"].SetValue(Content.Load<Texture2D> (@"Terrain\sand"));
-            terrainEffect.Parameters["TextureMap1"].SetValue(Content.Load<Texture2D> (@"Terrain\grass"));
-            terrainEffect.Parameters["TextureMap2"].SetValue(Content.Load<Texture2D> (@"Terrain\rock"));
-            terrainEffect.Parameters["TextureMap3"].SetValue(Content.Load<Texture2D> (@"Terrain\snow"));
+            terrainEffect.Parameters["TextureMap0"].SetValue(Content.Load<Texture2D>(@"Terrain\sand"));
+            terrainEffect.Parameters["TextureMap1"].SetValue(Content.Load<Texture2D>(@"Terrain\grass"));
+            terrainEffect.Parameters["TextureMap2"].SetValue(Content.Load<Texture2D>(@"Terrain\rock"));
+            terrainEffect.Parameters["TextureMap3"].SetValue(Content.Load<Texture2D>(@"Terrain\snow"));
             terrain.Effect = terrainEffect.Clone();
             terrain.Projection = projection;
 
@@ -355,25 +358,25 @@ namespace datx02_rally
             //    @"SkyBoxes/PurpleSky/skybox_back6_2" 
             //};
 
-            cubeMap = new TextureCube(GraphicsDevice, 1024, false, SurfaceFormat.Color);
-            string[] cubemapfaces = { 
-                @"SkyBoxes/StormyDays/stormydays_ft", 
-                @"SkyBoxes/StormyDays/stormydays_bk", 
-                @"SkyBoxes/StormyDays/stormydays_up", 
-                @"SkyBoxes/StormyDays/stormydays_dn", 
-                @"SkyBoxes/StormyDays/stormydays_rt", 
-                @"SkyBoxes/StormyDays/stormydays_lf" 
-            };
-
             //cubeMap = new TextureCube(GraphicsDevice, 1024, false, SurfaceFormat.Color);
             //string[] cubemapfaces = { 
-            //    @"SkyBoxes/Miramar/miramar_ft", 
-            //    @"SkyBoxes/Miramar/miramar_bk",
-            //    @"SkyBoxes/Miramar/miramar_up", 
-            //    @"SkyBoxes/Miramar/miramar_dn", 
-            //    @"SkyBoxes/Miramar/miramar_rt",
-            //    @"SkyBoxes/Miramar/miramar_lf"
+            //    @"SkyBoxes/StormyDays/stormydays_ft", 
+            //    @"SkyBoxes/StormyDays/stormydays_bk", 
+            //    @"SkyBoxes/StormyDays/stormydays_up", 
+            //    @"SkyBoxes/StormyDays/stormydays_dn", 
+            //    @"SkyBoxes/StormyDays/stormydays_rt", 
+            //    @"SkyBoxes/StormyDays/stormydays_lf" 
             //};
+
+            cubeMap = new TextureCube(GraphicsDevice, 1024, false, SurfaceFormat.Color);
+            string[] cubemapfaces = { 
+                @"SkyBoxes/Miramar/miramar_ft", 
+                @"SkyBoxes/Miramar/miramar_bk",
+                @"SkyBoxes/Miramar/miramar_up", 
+                @"SkyBoxes/Miramar/miramar_dn", 
+                @"SkyBoxes/Miramar/miramar_rt",
+                @"SkyBoxes/Miramar/miramar_lf"
+            };
 
 
             for (int i = 0; i < cubemapfaces.Length; i++)
@@ -489,8 +492,8 @@ namespace datx02_rally
                 point1.Y *= heightScale * triangleSize;
 
                 Vector3 color = new Vector3(
-                    (float)random.NextDouble(), 
-                    (float)random.NextDouble(), 
+                    (float)random.NextDouble(),
+                    (float)random.NextDouble(),
                     (float)random.NextDouble());
                 pointLights.Add(new PointLight(point1 + Vector3.Up * 50 + side, color * .3f, 800.0f));
                 pointLights.Add(new PointLight(point1 + Vector3.Up * 50 - side, color * .3f, 800.0f));
@@ -500,8 +503,8 @@ namespace datx02_rally
 
             #region Cameras
             var input = this.GetService<InputComponent>();
+            this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(car, 50 * Vector3.Up, input));
             this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100), input));
-            this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(car, Vector3.Up * 50, input));
             #endregion
 
             #region DynamicEnvironment
@@ -509,6 +512,11 @@ namespace datx02_rally
             carSettings.EnvironmentMap = refCubeMap;
             //skyBoxEffect.Parameters["SkyboxTexture"].SetValue(refCubeMap);
             #endregion
+
+            renderTarget = new RenderTarget2D(GraphicsDevice,
+                GraphicsDevice.Viewport.Width,
+                GraphicsDevice.Viewport.Height, false, SurfaceFormat.Color, GraphicsDevice.PresentationParameters.DepthStencilFormat);
+            postEffect = Content.Load<Effect>(@"Effects\PostProcess");
         }
 
         private void SetCarAtStart()
@@ -573,7 +581,7 @@ namespace datx02_rally
             // Allows the game to exit
             if (input.GetPressed(Input.Exit))
                 this.Exit();
-            
+
             if (input.GetPressed(Input.Console))
                 this.GetService<HUDConsoleComponent>().Toggle();
 
@@ -708,7 +716,7 @@ namespace datx02_rally
         #endregion
 
         #region Rendering
-
+        bool once = true;
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -721,10 +729,39 @@ namespace datx02_rally
             Matrix view = this.GetService<CameraComponent>().View;
 
             //RenderEnvironmentMap(gameTime);
+            //if (once)
+            //{
+                GraphicsDevice.SetRenderTarget(renderTarget);
+                GraphicsDevice.BlendState = BlendState.Opaque;
+                GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+                GraphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
 
-            RenderScene(gameTime, view, false);
+                GraphicsDevice.Clear(Color.White);
+                RenderScene(gameTime, view, false);
+                GraphicsDevice.SetRenderTarget(null);
+                once = false;
+            //}
+
+                //System.IO.Stream stream = System.IO.File.OpenWrite(@"C:\Development\tex.jpg");
+                //renderTarget.SaveAsJpeg(stream, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+                //stream.Dispose();
+
+            RenderPostProcess();
 
             base.Draw(gameTime);
+        }
+
+        private void RenderPostProcess()
+        {
+            spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
+            foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                postEffect.Parameters["ColorMap"].SetValue(renderTarget);
+                spriteBatch.Draw(renderTarget, Vector2.Zero, Color.White);
+            }
+            spriteBatch.End();
+
         }
 
         private void RenderEnvironmentMap(GameTime gameTime)
@@ -759,6 +796,7 @@ namespace datx02_rally
 
         private void RenderScene(GameTime gameTime, Matrix view, bool environment)
         {
+
             Matrix[] transforms = new Matrix[car.Model.Bones.Count];
             car.Model.CopyAbsoluteBoneTransformsTo(transforms);
 
@@ -772,7 +810,7 @@ namespace datx02_rally
             #endregion
 
             terrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight, pointLights);
-            
+
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
             // Set view to particlesystems
@@ -809,7 +847,7 @@ namespace datx02_rally
             {
                 foreach (Effect effect in mesh.Effects)
                 {
-                    Matrix world = transforms[mesh.ParentBone.Index] * transform * 
+                    Matrix world = transforms[mesh.ParentBone.Index] * transform *
                         Matrix.CreateTranslation(position);
                     Matrix normalMatrix = Matrix.Invert(Matrix.Transpose(world));
 
@@ -909,7 +947,7 @@ namespace datx02_rally
 
                 position.Y *= heightScale * triangleSize;
 
-                world *= Vector3.Forward.GetRotationMatrix(heading) * 
+                world *= Vector3.Forward.GetRotationMatrix(heading) *
                     Matrix.CreateTranslation(position);
 
                 carSettings.World = world;
