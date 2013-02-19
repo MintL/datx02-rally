@@ -28,7 +28,7 @@ namespace datx02_rally
 
         Random random = new Random();
 
-        Matrix projection;
+        Matrix projectionMatrix;
 
         RenderTarget2D renderTarget;
         Effect postEffect;
@@ -226,7 +226,7 @@ namespace datx02_rally
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
+            projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
                 GraphicsDevice.Viewport.AspectRatio, .1f, 500000f);
 
             #region Lights
@@ -235,20 +235,20 @@ namespace datx02_rally
             lightModel = Content.Load<Model>(@"Models/light");
 
             // Light specific parameters
-            for (int i = 0; i < 10; i++)
-            {
-                //float x = MathHelper.Lerp(-500.0f, 500.0f, (float)random.NextDouble());
-                float z = MathHelper.Lerp(-5000.0f, 0.0f, (float)random.NextDouble());
-                Vector3 color = new Vector3(
-                    MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
-                    MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
-                    MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()));
+            //for (int i = 0; i < 10; i++)
+            //{
+            //    //float x = MathHelper.Lerp(-500.0f, 500.0f, (float)random.NextDouble());
+            //    float z = MathHelper.Lerp(-5000.0f, 0.0f, (float)random.NextDouble());
+            //    Vector3 color = new Vector3(
+            //        MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
+            //        MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
+            //        MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()));
 
-                Console.WriteLine(color);
+            //    Console.WriteLine(color);
 
-                //pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
-            }
-            directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.2f);
+            //    //pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
+            //}
+            directionalLight = new DirectionalLight(new Vector3(-1.0f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.01f, Color.White.ToVector3() * 0.4f);
 
             #endregion
 
@@ -319,7 +319,6 @@ namespace datx02_rally
             terrainEffect.Parameters["TextureMap2"].SetValue(Content.Load<Texture2D>(@"Terrain\rock"));
             terrainEffect.Parameters["TextureMap3"].SetValue(Content.Load<Texture2D>(@"Terrain\snow"));
             terrain.Effect = terrainEffect.Clone();
-            terrain.Projection = projection;
 
             #endregion
 
@@ -375,7 +374,6 @@ namespace datx02_rally
                 LoadCubemapFace(cubeMap, cubemapfaces[i], (CubeMapFace)i);
 
             skyBoxEffect.Parameters["SkyboxTexture"].SetValue(cubeMap);
-            skyBoxEffect.Parameters["Projection"].SetValue(projection);
 
             foreach (var mesh in skyBoxModel.Meshes)
                 foreach (var part in mesh.MeshParts)
@@ -479,14 +477,14 @@ namespace datx02_rally
 
             #region Point lights
 
-            for (int j = 0; j < 200; j++)
+            for (int j = 0; j < 50; j++)
             {
-                float i = j / 200.0f;
+                float i = j / 50.0f;
                 Vector3 point1 = raceTrack.Curve.GetPoint(i);
-                Vector3 point2 = raceTrack.Curve.GetPoint(i + .01f * (i > .5f ? -1 : 1));
-                var heading = (point2 - point1);
+                //Vector3 point2 = raceTrack.Curve.GetPoint(i + .01f * (i > .5f ? -1 : 1));
+                //var heading = (point2 - point1);
 
-                var side = triangleSize * roadWidth * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
+                //var side = triangleSize * roadWidth * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
 
                 point1.Y *= heightScale * triangleSize;
 
@@ -494,8 +492,8 @@ namespace datx02_rally
                     (float)random.NextDouble(),
                     (float)random.NextDouble(),
                     (float)random.NextDouble());
-                pointLights.Add(new PointLight(point1 + Vector3.Up * 50 + side, color * .3f, 800.0f));
-                pointLights.Add(new PointLight(point1 + Vector3.Up * 50 - side, color * .3f, 800.0f));
+                pointLights.Add(new PointLight(point1 + Vector3.Up * 50, color, 1500.0f));
+                //pointLights.Add(new PointLight(point1 + Vector3.Up * 50 - side, color * .3f, 800.0f));
             }
 
             #endregion
@@ -539,7 +537,6 @@ namespace datx02_rally
                     mesh.Tag = 0;
             }
 
-            carSettings.Projection = projection;
 
             // Keep some old settings from imported modeleffect, then replace with carEffect
             foreach (ModelMesh mesh in car.Model.Meshes)
@@ -687,6 +684,16 @@ namespace datx02_rally
 
             #endregion
 
+            
+            Vector3 carDirection = Vector3.Transform(Vector3.Forward,
+                Matrix.CreateRotationY(Car.Rotation));
+            Vector3 carPosition = Car.Position + carDirection * 1000;
+            pointLights.Sort(
+                delegate(PointLight x, PointLight y)
+                {
+                    return (int)(Vector3.DistanceSquared(x.Position, carPosition) - Vector3.DistanceSquared(y.Position, carPosition));
+                }
+            );
 
             base.Update(gameTime);
         }
@@ -770,6 +777,9 @@ namespace datx02_rally
 
             Matrix view = this.GetService<CameraComponent>().View;
 
+
+            RenderEnvironmentMap(gameTime);
+
             GraphicsDevice.SetRenderTarget(renderTarget);
 
             // Reset render settings
@@ -779,7 +789,7 @@ namespace datx02_rally
 
             GraphicsDevice.Clear(Color.White);
 
-            RenderScene(gameTime, view, false);
+            RenderScene(gameTime, view, projectionMatrix, false);
             base.Draw(gameTime);
 
             GraphicsDevice.SetRenderTarget(null);
@@ -798,7 +808,7 @@ namespace datx02_rally
             foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                postEffect.Parameters["ColorMap"].SetValue(renderTarget);
+                //postEffect.Parameters["ColorMap"].SetValue(renderTarget);
                 spriteBatch.Draw(renderTarget, Vector2.Zero, Color.White);
             }
             spriteBatch.End();
@@ -814,7 +824,8 @@ namespace datx02_rally
                 if (cubeMapFace == CubeMapFace.NegativeX)
                     viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Left, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.NegativeY)
-                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Down, Vector3.Forward);
+                    continue;
+                //viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Down, Vector3.Forward);
                 else if (cubeMapFace == CubeMapFace.PositiveZ)
                     viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Backward, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.PositiveX)
@@ -828,14 +839,17 @@ namespace datx02_rally
 
                 GraphicsDevice.SetRenderTarget(refCubeMap, cubeMapFace);
                 GraphicsDevice.Clear(Color.White);
-                RenderScene(gameTime, viewMatrix, true);
+
+                Matrix projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
+                    1.0f, 100f, 5000f);
+                RenderScene(gameTime, viewMatrix, projection, true);
             }
 
             // Default target
             GraphicsDevice.SetRenderTarget(null);
         }
 
-        private void RenderScene(GameTime gameTime, Matrix view, bool environment)
+        private void RenderScene(GameTime gameTime, Matrix view, Matrix projection, bool environment)
         {
             Matrix[] transforms = new Matrix[Car.Model.Bones.Count];
             Car.Model.CopyAbsoluteBoneTransformsTo(transforms);
@@ -845,11 +859,12 @@ namespace datx02_rally
             #region SkyBox
 
             skyBoxEffect.Parameters["View"].SetValue(view);
+            skyBoxEffect.Parameters["Projection"].SetValue(projection);
             skyBoxModel.Meshes[0].Draw();
 
             #endregion
 
-            terrain.Draw(view, this.GetService<CameraComponent>().Position, directionalLight, pointLights);
+            terrain.Draw(view, projection, this.GetService<CameraComponent>().Position, directionalLight, pointLights);
 
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
@@ -857,14 +872,14 @@ namespace datx02_rally
             foreach (ParticleSystem pSystem in particleSystems)
                 pSystem.SetCamera(view, projection);
 
-            //for (int i = 0; i < 10; i++)
-            //    pointLights[i].Draw(lightModel, view, projection);
+            for (int i = 0; i < 10; i++)
+                pointLights[i].Draw(lightModel, view, projection);
 
             #region Foliage
 
             for (int i = 0; i < treePositions.Length; i++)
             {
-                DrawModel(oakTree, view, treePositions[i], treeTransforms[i]);
+                DrawModel(oakTree, view, projection, treePositions[i], treeTransforms[i]);
             }
 
             //DrawModel(mushroomGroup, new Vector3(100, 0, 100), 0.0f);
@@ -879,7 +894,7 @@ namespace datx02_rally
             }
         }
 
-        private void DrawModel(Model m, Matrix view, Vector3 position, Matrix transform)
+        private void DrawModel(Model m, Matrix view, Matrix projection, Vector3 position, Matrix transform)
         {
             Matrix[] transforms = new Matrix[m.Bones.Count];
             m.CopyAbsoluteBoneTransformsTo(transforms);
@@ -918,13 +933,7 @@ namespace datx02_rally
             //Vector3 direction = car.Position - carSettings.EyePosition;
             //direction.Y = 0;
             //direction = Vector3.Normalize(direction);
-            Vector3 carPosition = car.Position;
-            pointLights.Sort(
-                delegate(PointLight x, PointLight y)
-                {
-                    return (int)(Vector3.DistanceSquared(x.Position, carPosition) - Vector3.DistanceSquared(y.Position, carPosition));
-                }
-            );
+            
 
             Vector3[] positions = new Vector3[pointLights.Count];
             Vector3[] diffuses = new Vector3[pointLights.Count];

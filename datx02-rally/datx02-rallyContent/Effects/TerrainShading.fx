@@ -19,7 +19,7 @@ float3 DirectionalDiffuse;
 int FogEnabled = 1;
 float3 FogColor = float3(0.1, 0.1, 0.1);
 float FogStart = -1000;
-float FogEnd = 80000;
+float FogEnd = 8000;
 
 texture TextureMap0;
 sampler TextureMapSampler0 = sampler_state
@@ -129,7 +129,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 
 		totalLight.rgb +=
-			attenuation * (LightDiffuse[i] * saturate(dot(1-normal, directionToLight)));
+			attenuation * (LightDiffuse[i] * saturate(dot(normal, directionToLight)));
 	}
 	float3 directionToLight = -normalize(DirectionalDirection);
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
