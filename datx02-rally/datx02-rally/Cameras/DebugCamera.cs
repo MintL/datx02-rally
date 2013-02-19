@@ -27,7 +27,7 @@ namespace datx02_rally
             this.Position = position;
         }
 
-        public DebugCamera(InputComponent input)
+        public DebugCamera(InputComponent input) : base()
         {
             speed = MinSpeed = 3f;
             MaxSpeed = 50f;
@@ -71,6 +71,8 @@ namespace datx02_rally
             Position += delta;
 
             View = Matrix.CreateLookAt(Position, Position + lookAt, Vector3.Up);
+
+            base.Update(gameTime);
         }
     }
 }

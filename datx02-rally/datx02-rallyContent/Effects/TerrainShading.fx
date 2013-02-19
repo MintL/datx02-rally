@@ -17,9 +17,9 @@ float3 DirectionalAmbient;
 float3 DirectionalDiffuse;
 
 int FogEnabled = 1;
-float3 FogColor = float3(0.1, 0.1, 0.1);
+float3 FogColor = float3(0.05, 0.045, 0.04);
 float FogStart = -1000;
-float FogEnd = 80000;
+float FogEnd = 16000;
 
 texture TextureMap0;
 sampler TextureMapSampler0 = sampler_state

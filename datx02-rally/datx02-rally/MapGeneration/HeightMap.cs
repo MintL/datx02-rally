@@ -32,9 +32,9 @@ namespace datx02_rally.MapGeneration
             for (int i = 0; i < Size; i++)
             {
                 for (int j = 0; j < Size; j++)
-                {
-                    
-                    Heights[i, j] += (Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0)) + 0.5f;
+                {   
+                    //Heights[i, j] += (Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0)) + 0.5f;
+                    Heights[i, j] += (Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0));
                     if (Heights[i, j] > 1 || Heights[i, j] < 0) 
                     {
                         if (Heights[i, j] > 1)
@@ -45,7 +45,6 @@ namespace datx02_rally.MapGeneration
                         {
                             Heights[i, j] += Math.Abs(Heights[i, j]) / 2;
                         }
-
                     }
                 }
             }
@@ -58,17 +57,17 @@ namespace datx02_rally.MapGeneration
 
         public void Perturb(float f, float d)
         {
-            int u, v;
+            int v, u;
             float[,] temp = new float[Size, Size];
-            for (int i = 0; i < Size; ++i)
+            for (int z = 0; z < Size; z++)
             {
-                for (int j = 0; j < Size; ++j)
+                for (int x = 0; x < Size; x++)
                 {
-                    u = i + (int)(Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0) * d);
-                    v = j + (int)(Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 1) * d);
-                    if (u < 0) u = 0; if (u >= Size) u = Size - 1;
+                    v = z + (int)(Perlin.Noise(f * z / (float)Size, f * x / (float)Size, 0) * d);
+                    u = x + (int)(Perlin.Noise(f * z / (float)Size, f * x / (float)Size, 1) * d);
                     if (v < 0) v = 0; if (v >= Size) v = Size - 1;
-                    temp[i, j] = Heights[u, v];
+                    if (u < 0) u = 0; if (u >= Size) u = Size - 1;
+                    temp[x, z] = Heights[u, v];
                 }
             }
             Heights = temp;
@@ -109,22 +108,23 @@ namespace datx02_rally.MapGeneration
             }
         }
 
+        /// <summary>
+        /// Smoothens out terrain.
+        /// </summary>
         public void Smoothen()
         {
-            for (int i = 1; i < Size - 1; ++i)
+            int highCap = Size - 1;
+            for (int z = 1; z < highCap; z++)
             {
-                for (int j = 1; j < Size - 1; ++j)
+                for (int x = 1; x < highCap; x++)
                 {
                     float total = 0.0f;
+                    
                     for (int u = -1; u <= 1; u++)
-                    {
                         for (int v = -1; v <= 1; v++)
-                        {
-                            total += Heights[i + u, j + v];
-                        }
-                    }
+                            total += Heights[x + u, z + v];
 
-                    Heights[i, j] = total / 9.0f;
+                    Heights[x, z] = total / 9.0f;
                 }
             }
         }
@@ -147,19 +147,35 @@ namespace datx02_rally.MapGeneration
         public float[,] Generate(float perlinNoise, float pertube)
         {
             AddPerlinNoise(perlinNoise);
-
             Perturb(pertube);
-
             return Heights;
         }
 
         public float[,] Generate()
         {
-            AddPerlinNoise(4.0f);
+            // Start with the world in a bowl.
+            float halfSize = Size / 2f;
+            for (int z = 0; z < Size; z++)
+            {
+                for (int x = 0; x < Size; x++)
+                {
+                    float xH = (float)Math.Pow((x - halfSize) / halfSize, 2);
+                    float zH = (float)Math.Pow((z - halfSize) / halfSize, 2);
+                    Heights[x, z] = MathHelper.Lerp(xH, zH, .5f);
+                }
+            }
 
-            Perturb(5.0f);
-            
-            //Smoothen();
+            AddPerlinNoise(6.0f);
+            Perturb(35.0f);
+
+            float[,] additional = new HeightMap(Size / 4).Generate(9, 50);
+
+            int quadSize = Size / 4;
+            for (int z = 0; z < Size; z++)
+                for (int x = 0; x < Size; x++)
+                    Heights[x, z] += .15f * additional[x % quadSize, z % quadSize];
+
+            Smoothen();
 
             return Heights;
         }

@@ -37,8 +37,8 @@ namespace datx02_rally
 
         protected override void LoadContent()
         {
-            Font = Game.Content.Load<SpriteFont>(@"ConsoleFont");
-            Background = Game.Content.Load<Texture2D>("Console");
+            Font = Game.Content.Load<SpriteFont>(@"Menu/ConsoleFont");
+            Background = Game.Content.Load<Texture2D>(@"Menu/Console");
             WriteOutput(CONSOLE_HEADING);
 
             ServerClient client = Game.GetService<ServerClient>();

@@ -41,7 +41,7 @@ namespace datx02_rally.Particles.WeatherSystems
             //settings.MaxEndSize = 150;
 
             // All same
-            settings.MinStartSize = settings.MaxStartSize = settings.MinEndSize = settings.MaxEndSize = 100;
+            settings.MinStartSize = settings.MaxStartSize = settings.MinEndSize = settings.MaxEndSize = 50;
 
             settings.MinColor = settings.MaxColor = new Color(.15f, .1f, .6f);
 

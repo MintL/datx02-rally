@@ -59,8 +59,8 @@ namespace datx02_rally
         float triangleSize = 50;
         float heightScale = 150;  //33;
 
-        float roadWidth = 5; // Grids
-        float roadFalloff = 60; // Grids
+        float roadWidth = 6; // Grids
+        float roadFalloff = 35; // Grids
 
         RaceTrack raceTrack;
         NavMeshVisualizer navMesh;
@@ -111,6 +111,8 @@ namespace datx02_rally
 
         ThunderParticleSystem thunderParticleSystem;
         ThunderBoltGenerator thunderBoltGenerator;
+
+        RainParticleSystem rainSystem;
 
         #endregion
 
@@ -214,6 +216,10 @@ namespace datx02_rally
             Components.Add(thunderParticleSystem);
             particleSystems.Add(thunderParticleSystem);
 
+            rainSystem = new RainParticleSystem(this, Content);
+            Components.Add(rainSystem);
+            particleSystems.Add(rainSystem);
+
             base.Initialize();
         }
 
@@ -234,21 +240,8 @@ namespace datx02_rally
             // Load model to represent our lightsources
             lightModel = Content.Load<Model>(@"Models/light");
 
-            // Light specific parameters
-            for (int i = 0; i < 10; i++)
-            {
-                //float x = MathHelper.Lerp(-500.0f, 500.0f, (float)random.NextDouble());
-                float z = MathHelper.Lerp(-5000.0f, 0.0f, (float)random.NextDouble());
-                Vector3 color = new Vector3(
-                    MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
-                    MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()),
-                    MathHelper.Lerp(0.0f, 1.0f, (float)random.NextDouble()));
-
-                Console.WriteLine(color);
-
-                //pointLights.Add(new PointLight(new Vector3(0.0f, 100.0f, z), color * 0.8f, 400.0f));
-            }
             directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.2f);
+            Services.AddService(typeof(DirectionalLight), directionalLight);
 
             #endregion
 
@@ -257,20 +250,7 @@ namespace datx02_rally
             HeightMap heightmapGenerator = new HeightMap(mapSize);
             var heightmap = heightmapGenerator.Generate();
 
-            HeightMap heightmap2Generator = new HeightMap(mapSize);
-            var h2 = heightmap2Generator.Generate(3, 50f);
-
-            for (int z = 0; z < mapSize; z++)
-            {
-                for (int x = 0; x < mapSize; x++)
-                {
-                    heightmap[x, z] = .6f * heightmap[x, z] + .4f * h2[x, z];
-                }
-            }
-
-
             var roadMap = new float[mapSize, mapSize];
-
             raceTrack = new RaceTrack(((mapSize / 2) * triangleSize));
 
             navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 1500, roadWidth * triangleSize, triangleSize, heightScale);
@@ -302,13 +282,14 @@ namespace datx02_rally
                         float amount = (Math.Abs(j) - roadWidth) / (roadFalloff - roadWidth);
                         heightmap[x, z] = MathHelper.Lerp(height,
                             heightmap[x, z], amount);
-                        roadMap[x, z] = amount / 4f;
+                        roadMap[x, z] = amount / 10f;
                     }
                 }
                 lastPosition = e;
             }
 
             heightmapGenerator.Smoothen();
+            heightmapGenerator.Perturb(30f);
 
             // Creates a terrainmodel around Vector3.Zero
             terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightScale, heightmap, roadMap);
@@ -479,30 +460,33 @@ namespace datx02_rally
 
             #region Point lights
 
-            for (int j = 0; j < 200; j++)
+            int numlights = 200;
+            Vector3 pointLightOffset = new Vector3(0, 50, 0);
+            for (int i = 0; i < numlights; i++)
             {
-                float i = j / 200.0f;
-                Vector3 point1 = raceTrack.Curve.GetPoint(i);
-                Vector3 point2 = raceTrack.Curve.GetPoint(i + .01f * (i > .5f ? -1 : 1));
-                var heading = (point2 - point1);
-
-                var side = triangleSize * roadWidth * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
-
-                point1.Y *= heightScale * triangleSize;
+                float t = i / (float)numlights;
+                Vector3 point = raceTrack.Curve.GetPoint(t);
+                //Vector3 point2 = raceTrack.Curve.GetPoint(t + .01f * (t > .5f ? -1 : 1));
+                //var heading = (point2 - point1);
+                //var side = triangleSize * roadWidth * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
+                //point1.Y *= heightScale * triangleSize;
+                
+                point.Y *= heightScale * triangleSize;
 
                 Vector3 color = new Vector3(
-                    (float)random.NextDouble(),
-                    (float)random.NextDouble(),
-                    (float)random.NextDouble());
-                pointLights.Add(new PointLight(point1 + Vector3.Up * 50 + side, color * .3f, 800.0f));
-                pointLights.Add(new PointLight(point1 + Vector3.Up * 50 - side, color * .3f, 800.0f));
+                    .6f + .4f * (float)random.NextDouble(),
+                    .6f + .4f * (float)random.NextDouble(),
+                    .6f + .4f * (float)random.NextDouble());
+                pointLights.Add(new PointLight(point + pointLightOffset, color, 800.0f));
+                //pointLights.Add(new PointLight(point1 + Vector3.Up * 50 - side, color, 800.0f));
             }
 
             #endregion
 
             #region Cameras
+
             var input = this.GetService<InputComponent>();
-            this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(Car, 50 * Vector3.Up, input));
+            this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(Car, 75 * Vector3.Up, input));
             this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100), input));
 
             #endregion
@@ -686,6 +670,18 @@ namespace datx02_rally
             }
 
             #endregion
+
+            for (int x = -6; x < 6; x++)
+            {
+                for (int z = -6; z < 6; z++)
+                {
+                    rainSystem.AddParticle(Car.Position + new Vector3(
+                        (float)random.NextDouble() * x * 200, 
+                        500 * (float)random.NextDouble(), 
+                        (float)random.NextDouble() * z * 200), 
+                        Vector3.Down);
+                }
+            }
 
 
             base.Update(gameTime);
