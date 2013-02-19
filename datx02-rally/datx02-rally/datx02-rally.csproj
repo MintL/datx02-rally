@@ -133,6 +133,8 @@
     <Compile Include="Menus\GameComponent1.cs" />
     <Compile Include="Network\ServerReceiver.cs" />
     <Compile Include="Network\ServerSender.cs" />
+    <Compile Include="Particles\WeatherSystems\ThunderBoltGenerator.cs" />
+    <Compile Include="Particles\WeatherSystems\ThunderParticleSystem.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PointLight.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

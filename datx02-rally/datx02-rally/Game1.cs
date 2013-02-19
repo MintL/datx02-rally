@@ -14,6 +14,7 @@ using datx02_rally.GameLogic;
 using datx02_rally.MapGeneration;
 using datx02_rally.Entities;
 using datx02_rally.Particles.Systems;
+using datx02_rally.Particles.WeatherSystems;
 
 namespace datx02_rally
 {
@@ -103,6 +104,13 @@ namespace datx02_rally
         Model skyBoxModel;
         Effect skyBoxEffect;
         TextureCube cubeMap;
+
+        #endregion
+
+        #region Weather
+
+        ThunderParticleSystem thunderParticleSystem;
+        ThunderBoltGenerator thunderBoltGenerator;
 
         #endregion
 
@@ -201,6 +209,10 @@ namespace datx02_rally
                 Components.Add(dustSystem);
                 particleSystems.Add(dustSystem);
             }
+
+            thunderParticleSystem = new ThunderParticleSystem(this, Content);
+            Components.Add(thunderParticleSystem);
+            particleSystems.Add(thunderParticleSystem);
 
             base.Initialize();
         }
@@ -329,14 +341,14 @@ namespace datx02_rally
             skyBoxModel = Content.Load<Model>(@"Models/skybox");
             skyBoxEffect = Content.Load<Effect>(@"Effects/SkyBox");
 
-            //cubeMap = new TextureCube(GraphicsDevice, 2048, false, SurfaceFormat.Color);
-            //string[] cubemapfaces = { @"SkyBoxes/PurpleSky/skybox_right1", 
-            //    @"SkyBoxes/PurpleSky/skybox_left2", 
-            //    @"SkyBoxes/PurpleSky/skybox_top3", 
-            //    @"SkyBoxes/PurpleSky/skybox_bottom4", 
-            //    @"SkyBoxes/PurpleSky/skybox_front5", 
-            //    @"SkyBoxes/PurpleSky/skybox_back6_2" 
-            //};
+            cubeMap = new TextureCube(GraphicsDevice, 2048, false, SurfaceFormat.Color);
+            string[] cubemapfaces = { @"SkyBoxes/PurpleSky/skybox_right1", 
+                @"SkyBoxes/PurpleSky/skybox_left2", 
+                @"SkyBoxes/PurpleSky/skybox_top3", 
+                @"SkyBoxes/PurpleSky/skybox_bottom4", 
+                @"SkyBoxes/PurpleSky/skybox_front5", 
+                @"SkyBoxes/PurpleSky/skybox_back6_2" 
+            };
 
             //cubeMap = new TextureCube(GraphicsDevice, 1024, false, SurfaceFormat.Color);
             //string[] cubemapfaces = { 
@@ -348,15 +360,15 @@ namespace datx02_rally
             //    @"SkyBoxes/StormyDays/stormydays_lf" 
             //};
 
-            cubeMap = new TextureCube(GraphicsDevice, 1024, false, SurfaceFormat.Color);
-            string[] cubemapfaces = { 
-                @"SkyBoxes/Miramar/miramar_ft", 
-                @"SkyBoxes/Miramar/miramar_bk",
-                @"SkyBoxes/Miramar/miramar_up", 
-                @"SkyBoxes/Miramar/miramar_dn", 
-                @"SkyBoxes/Miramar/miramar_rt",
-                @"SkyBoxes/Miramar/miramar_lf"
-            };
+            //cubeMap = new TextureCube(GraphicsDevice, 1024, false, SurfaceFormat.Color);
+            //string[] cubemapfaces = { 
+            //    @"SkyBoxes/Miramar/miramar_ft", 
+            //    @"SkyBoxes/Miramar/miramar_bk",
+            //    @"SkyBoxes/Miramar/miramar_up", 
+            //    @"SkyBoxes/Miramar/miramar_dn", 
+            //    @"SkyBoxes/Miramar/miramar_rt",
+            //    @"SkyBoxes/Miramar/miramar_lf"
+            //};
 
 
             for (int i = 0; i < cubemapfaces.Length; i++)
@@ -368,6 +380,13 @@ namespace datx02_rally
             foreach (var mesh in skyBoxModel.Meshes)
                 foreach (var part in mesh.MeshParts)
                     part.Effect = skyBoxEffect;
+
+            #endregion
+
+            #region Weather
+
+            thunderBoltGenerator = new ThunderBoltGenerator(this, thunderParticleSystem);
+            Components.Add(thunderBoltGenerator);
 
             #endregion
 
@@ -739,7 +758,7 @@ namespace datx02_rally
         #endregion
 
         #region Rendering
-        bool once = true;
+
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -751,19 +770,19 @@ namespace datx02_rally
 
             Matrix view = this.GetService<CameraComponent>().View;
 
-            //RenderEnvironmentMap(gameTime);
-            //if (once)
-            //{
-                GraphicsDevice.SetRenderTarget(renderTarget);
-                GraphicsDevice.BlendState = BlendState.Opaque;
-                GraphicsDevice.DepthStencilState = DepthStencilState.Default;
-                GraphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
+            GraphicsDevice.SetRenderTarget(renderTarget);
 
-                GraphicsDevice.Clear(Color.White);
-                RenderScene(gameTime, view, false);
-                GraphicsDevice.SetRenderTarget(null);
-                once = false;
-            //}
+            // Reset render settings
+            GraphicsDevice.BlendState = BlendState.Opaque;
+            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+            GraphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
+
+            GraphicsDevice.Clear(Color.White);
+
+            RenderScene(gameTime, view, false);
+            base.Draw(gameTime);
+
+            GraphicsDevice.SetRenderTarget(null);
 
                 //System.IO.Stream stream = System.IO.File.OpenWrite(@"C:\Development\tex.jpg");
                 //renderTarget.SaveAsJpeg(stream, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
@@ -771,7 +790,6 @@ namespace datx02_rally
 
             RenderPostProcess();
 
-            base.Draw(gameTime);
         }
 
         private void RenderPostProcess()

@@ -93,7 +93,7 @@ namespace datx02_rally
                             (heightMap != null ? heightScale * triangleSize * heightMap[x, z] : 0) + HeightOffset, // Y
                             ((z - offsetZ) - halfDepth) * triangleSize), // Z
                         Vector3.Zero, // Normal
-                        new Vector2(x / 2f, z / 2f),//new Vector2(x / 10f, z / 10f),
+                        new Vector2(x / 50f, z / 50f), //new Vector2(x / 10f, z / 10f),
                         textureWeights);
 
                 }
