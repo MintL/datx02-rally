@@ -257,23 +257,20 @@ namespace datx02_rally
             }
 
 
-
-
             var roadMap = new float[mapSize, mapSize];
 
             raceTrack = new RaceTrack(((mapSize / 2) * triangleSize));
 
-            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 250, roadWidth * triangleSize, triangleSize, heightScale);
+            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 1500, roadWidth * triangleSize, triangleSize, heightScale);
 
             Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f);
             lastPosition /= triangleSize;
             lastPosition += new Vector3(.5f, 0, .5f) * mapSize;
-            for (float t = 0; t < 1; t += .0003f)
+            for (float t = 0; t < 1; t += .0002f)
             {
                 var e = raceTrack.Curve.GetPoint(t);
                 var height = e.Y;
                 e /= triangleSize;
-                //e += new Vector3(.5f, 0, .5f) * mapSize;
                 e += new Vector3(mapSize) / 2f;
 
                 for (float j = -roadFalloff; j <= roadFalloff; j++)
@@ -950,22 +947,68 @@ namespace datx02_rally
 
         }
 
+        float ghostWheelRotation = 0;
+        Vector3 ghostPosition;
+
         private void DrawGhostCar(Matrix view, Matrix projection, GameTime gameTime)
         {
-            float t = ((float)gameTime.TotalGameTime.TotalSeconds / 120f) % 1f;
+            float t = ((float)gameTime.TotalGameTime.TotalSeconds / 1020f) % 1f;
+
             foreach (var mesh in car.Model.Meshes) // 5 meshes
             {
+                Matrix world = Matrix.Identity;
+
+                // Wheel transformation
+                if ((int)mesh.Tag > 0)
+                {
+                    world *= Matrix.CreateRotationX(ghostWheelRotation);
+                }
+
                 // Local modelspace, due to bad .X-file/exporter
-                Matrix world = car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
+                world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
 
                 // World
                 Vector3 position = raceTrack.Curve.GetPoint(t);
                 Vector3 heading = raceTrack.Curve.GetPoint((t + .01f) % 1f) - position;
                 heading.Normalize();
 
+                Vector3 normal = Vector3.Up;
+
                 position.Y *= heightScale * triangleSize;
 
-                world *= Vector3.Forward.GetRotationMatrix(heading) *
+                foreach (var triangle in navMesh.triangles)
+                {
+                    var downray = new Ray(position, Vector3.Down);
+                    var upray = new Ray(position, Vector3.Up);
+
+                    float? d1 = downray.Intersects(triangle.trianglePlane),
+                        d2 = upray.Intersects(triangle.trianglePlane);
+
+                    if (d1.HasValue || d2.HasValue)
+                    {
+                        float d = d1.HasValue ? d1.Value : d2.Value;
+                        Ray ray = d1.HasValue ? downray : upray;
+
+                        var point = ray.Position + d * ray.Direction;
+
+                        bool onTriangle = PointInTriangle(triangle.vertices[0],
+                            triangle.vertices[1],
+                            triangle.vertices[2],
+                            point);
+
+                        if (onTriangle)
+                        {
+                            position = point;
+                            normal = triangle.normal;
+                            break;
+                        }
+                    }
+                }
+
+                ghostWheelRotation -= (position - ghostPosition).Length() / 10.4725f;
+                ghostPosition = position;
+
+                world *= Vector3.Forward.GetRotationMatrix(heading) * Vector3.Up.GetRotationMatrix(normal) *
                     Matrix.CreateTranslation(position);
 
                 carSettings.World = world;
