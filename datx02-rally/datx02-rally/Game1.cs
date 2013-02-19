@@ -64,7 +64,7 @@ namespace datx02_rally
 
         #region Car
 
-        public Car car { get; private set; }
+        public Car Car { get; private set; }
         Effect carEffect;
         CarShadingSettings carSettings = new CarShadingSettings()
         {
@@ -295,50 +295,15 @@ namespace datx02_rally
 
             #region Car
 
-            // Load car effect (10p-light, env-map)
-            carEffect = Content.Load<Effect>(@"Effects/CarShading");
-
-            car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
-
-            foreach (var mesh in car.Model.Meshes)
-            {
-                if (mesh.Name.StartsWith("wheel"))
-                {
-                    if (mesh.Name.EndsWith("001") || mesh.Name.EndsWith("002"))
-                        mesh.Tag = 2;
-                    else
-                        mesh.Tag = 1;
-                }
-                else
-                    mesh.Tag = 0;
-            }
-
-            carSettings.Projection = projection;
-
-            // Keep some old settings from imported modeleffect, then replace with carEffect
-            foreach (ModelMesh mesh in car.Model.Meshes)
-            {
-                foreach (ModelMeshPart part in mesh.MeshParts)
-                {
-                    BasicEffect oldEffect = part.Effect as BasicEffect;
-                    part.Effect = carEffect.Clone();
-                    part.Effect.Parameters["MaterialDiffuse"].SetValue(oldEffect.DiffuseColor);
-                    part.Effect.Parameters["MaterialAmbient"].SetValue(oldEffect.DiffuseColor * .5f);
-                    part.Effect.Parameters["MaterialSpecular"].SetValue(oldEffect.DiffuseColor * .3f);
-
-                }
-            }
-
-            // Place car at start.
-            SetCarAtStart();
-
-            this.GetService<CarControlComponent>().Car = car;
+            Car = MakeCar();
+            Player localPlayer = this.GetService<ServerClient>().LocalPlayer;
+            this.GetService<CarControlComponent>().Cars[localPlayer] = Car;
 
             #endregion
 
             dustEmitter = new ParticleEmitter[]{
-                new ParticleEmitter(dustParticles[0], 150, car.Position),
-                new ParticleEmitter(dustParticles[1], 150, car.Position)
+                new ParticleEmitter(dustParticles[0], 150, Car.Position),
+                new ParticleEmitter(dustParticles[1], 150, Car.Position)
             };
 
             #region SkySphere
@@ -501,7 +466,7 @@ namespace datx02_rally
             #region Cameras
             var input = this.GetService<InputComponent>();
             this.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100), input));
-            this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(car, Vector3.Up * 50, input));
+            this.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(Car, Vector3.Up * 50, input));
             #endregion
 
             #region DynamicEnvironment
@@ -511,7 +476,51 @@ namespace datx02_rally
             #endregion
         }
 
-        private void SetCarAtStart()
+        public Car MakeCar()
+        {
+            // Load car effect (10p-light, env-map)
+            carEffect = Content.Load<Effect>(@"Effects/CarShading");
+
+            Car car = new Car(Content.Load<Model>(@"Models/porsche"), 10.4725f);
+
+            foreach (var mesh in car.Model.Meshes)
+            {
+                if (mesh.Name.StartsWith("wheel"))
+                {
+                    if (mesh.Name.EndsWith("001") || mesh.Name.EndsWith("002"))
+                        mesh.Tag = 2;
+                    else
+                        mesh.Tag = 1;
+                }
+                else
+                    mesh.Tag = 0;
+            }
+
+            carSettings.Projection = projection;
+
+            // Keep some old settings from imported modeleffect, then replace with carEffect
+            foreach (ModelMesh mesh in car.Model.Meshes)
+            {
+                foreach (ModelMeshPart part in mesh.MeshParts)
+                {
+                    BasicEffect oldEffect = part.Effect as BasicEffect;
+                    if (oldEffect != null)
+                    {
+                        part.Effect = carEffect.Clone();
+                        part.Effect.Parameters["MaterialDiffuse"].SetValue(oldEffect.DiffuseColor);
+                        part.Effect.Parameters["MaterialAmbient"].SetValue(oldEffect.DiffuseColor * .5f);
+                        part.Effect.Parameters["MaterialSpecular"].SetValue(oldEffect.DiffuseColor * .3f);
+                    }
+                }
+            }
+
+            // Place car at start.
+            SetCarAtStart(car);
+            car.Update();
+            return car;
+        }
+
+        private void SetCarAtStart(Car car)
         {
             Vector3 carPosition = raceTrack.Curve.GetPoint(0);
             Vector3 carHeading = (raceTrack.Curve.GetPoint(.001f) - carPosition);
@@ -578,7 +587,7 @@ namespace datx02_rally
                 this.GetService<HUDConsoleComponent>().Toggle();
 
             //Apply changes to car
-            car.Update();
+            Car.Update();
 
             #region Ray
 
@@ -601,7 +610,7 @@ namespace datx02_rally
                 // Project car.Pos on lastTriangle.
                 var t = navMesh.triangles[lastTriangle];
 
-                float coord = Vector3.Dot(car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared();
+                float coord = Vector3.Dot(Car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared();
                 bool trans = false;
 
                 if (coord < 0)
@@ -622,29 +631,27 @@ namespace datx02_rally
 
                 if (!trans)
                 {
-                    car.Position = coord * t.ac + t.vertices[0];
+                    Car.Position = coord * t.ac + t.vertices[0];
                 }
                 else if (!CollisionCheck(navMesh.triangles[lastTriangle]))
                 {
                     t = navMesh.triangles[lastTriangle];
-                    coord = Vector3.Dot(car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared();
-                    car.Position = coord * t.ac + t.vertices[0];
-                    car.Normal = t.normal;
+                    coord = Vector3.Dot(Car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared();
+                    Car.Position = coord * t.ac + t.vertices[0];
+                    Car.Normal = t.normal;
                 }
             }
 
             #endregion
 
-            //Apply changes to car
-            car.Update();
 
             base.Update(gameTime);
         }
 
         private bool CollisionCheck(NavMeshVisualizer.NavMeshTriangle triangle)
         {
-            var downray = new Ray(car.Position, Vector3.Down);
-            var upray = new Ray(car.Position, Vector3.Up);
+            var downray = new Ray(Car.Position, Vector3.Down);
+            var upray = new Ray(Car.Position, Vector3.Up);
 
             float? d1 = downray.Intersects(triangle.trianglePlane),
                 d2 = upray.Intersects(triangle.trianglePlane);
@@ -663,8 +670,8 @@ namespace datx02_rally
 
                 if (onTriangle)
                 {
-                    car.Position = point;
-                    car.Normal = triangle.normal;
+                    Car.Position = point;
+                    Car.Normal = triangle.normal;
                 }
 
                 return onTriangle;
@@ -734,17 +741,17 @@ namespace datx02_rally
             {
                 CubeMapFace cubeMapFace = (CubeMapFace)i;
                 if (cubeMapFace == CubeMapFace.NegativeX)
-                    viewMatrix = Matrix.CreateLookAt(car.Position, car.Position + Vector3.Left, Vector3.Up);
+                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Left, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.NegativeY)
-                    viewMatrix = Matrix.CreateLookAt(car.Position, car.Position + Vector3.Down, Vector3.Forward);
+                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Down, Vector3.Forward);
                 else if (cubeMapFace == CubeMapFace.PositiveZ)
-                    viewMatrix = Matrix.CreateLookAt(car.Position, car.Position + Vector3.Backward, Vector3.Up);
+                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Backward, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.PositiveX)
-                    viewMatrix = Matrix.CreateLookAt(car.Position, car.Position + Vector3.Right, Vector3.Up);
+                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Right, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.PositiveY)
-                    viewMatrix = Matrix.CreateLookAt(car.Position, car.Position + Vector3.Up, Vector3.Backward);
+                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Up, Vector3.Backward);
                 else if (cubeMapFace == CubeMapFace.NegativeZ)
-                    viewMatrix = Matrix.CreateLookAt(car.Position, car.Position + Vector3.Forward, Vector3.Up);
+                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Forward, Vector3.Up);
                 else
                     viewMatrix = Matrix.Identity;
 
@@ -759,8 +766,8 @@ namespace datx02_rally
 
         private void RenderScene(GameTime gameTime, Matrix view, bool environment)
         {
-            Matrix[] transforms = new Matrix[car.Model.Bones.Count];
-            car.Model.CopyAbsoluteBoneTransformsTo(transforms);
+            Matrix[] transforms = new Matrix[Car.Model.Bones.Count];
+            Car.Model.CopyAbsoluteBoneTransformsTo(transforms);
 
             GraphicsDevice.BlendState = BlendState.Opaque;
 
@@ -795,7 +802,8 @@ namespace datx02_rally
 
             if (!environment)
             {
-                DrawCar(view, projection);
+                foreach (Car c in this.GetService<CarControlComponent>().Cars.Values) 
+                    DrawCar(view, projection, c);
                 DrawGhostCar(view, projection, gameTime);
             }
         }
@@ -828,7 +836,7 @@ namespace datx02_rally
 
         #region Car drawing
 
-        private void DrawCar(Matrix view, Matrix projection)
+        private void DrawCar(Matrix view, Matrix projection, Car car)
         {
             carSettings.View = view;
             carSettings.Projection = projection;
@@ -897,10 +905,10 @@ namespace datx02_rally
         private void DrawGhostCar(Matrix view, Matrix projection, GameTime gameTime)
         {
             float t = ((float)gameTime.TotalGameTime.TotalSeconds / 10f) % 1f;
-            foreach (var mesh in car.Model.Meshes) // 5 meshes
+            foreach (var mesh in Car.Model.Meshes) // 5 meshes
             {
                 // Local modelspace, due to bad .X-file/exporter
-                Matrix world = car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
+                Matrix world = Car.Model.Bones[1 + Car.Model.Meshes.IndexOf(mesh) * 2].Transform;
 
                 // World
                 Vector3 position = raceTrack.Curve.GetPoint(t);

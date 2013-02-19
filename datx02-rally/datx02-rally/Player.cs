@@ -24,6 +24,7 @@ namespace datx02_rally
             ID = id;
             PlayerName = name;
             LOCAL_PLAYER = false;
+            Game.GetService<CarControlComponent>().AddCar(this, null, 0);
         }
 
         public override void Update(GameTime gameTime)
@@ -40,6 +41,11 @@ namespace datx02_rally
             Position.X = x;
             Position.Y = y;
             Position.Z = z;
+        }
+
+        public Vector3 GetPosition()
+        {
+            return Game.GetService<CarControlComponent>().Cars[this].Position;
         }
 
     }

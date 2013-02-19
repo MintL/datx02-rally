@@ -68,7 +68,7 @@ namespace datx02_rally.DebugConsole.Commands
                             Player matchPlayer = client.Players.Values.ToList().Find(c => c.PlayerName.Equals(arguments[2]));
                             if (matchPlayer != null)
                             {
-                                output.Add(arguments[2] + ": position " + matchPlayer.Position);
+                                output.Add(arguments[2] + ": position " + matchPlayer.GetPosition());
                             }
                             else
                             {
@@ -77,7 +77,7 @@ namespace datx02_rally.DebugConsole.Commands
                         }
                         else
                         {
-                            output.Add(client.LocalPlayer.PlayerName+ ": position " + client.LocalPlayer.Position);
+                            output.Add(client.LocalPlayer.PlayerName+ ": position " + client.LocalPlayer.GetPosition());
                         }
                         break;
                     case "name":

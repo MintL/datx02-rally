@@ -78,7 +78,7 @@ namespace datx02_rally
                 return;
             }
 
-            Sender.SendPlayerPosition(Game.car.Position, gameTime.TotalGameTime.TotalMilliseconds);
+            Sender.SendPlayerPosition(Game.Car.Position, gameTime.TotalGameTime.TotalMilliseconds);
             base.Update(gameTime);
         }
 
