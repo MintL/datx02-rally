@@ -7,6 +7,7 @@ float4x4 NormalMatrix;
 
 float3 EyePosition;
 
+bool MaterialUnshaded;
 float3 MaterialAmbient;
 float3 MaterialDiffuse;
 float3 MaterialSpecular;
@@ -94,6 +95,11 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float3 directionFromEye = -normalize(input.ViewDirection);
 	float normalizationFactor = ((MaterialShininess + 2.0) / 8.0);
 	float3 totalLight = MaterialAmbient * DirectionalLightAmbient;
+
+	if (MaterialUnshaded) 
+	{
+		return float4(MaterialAmbient, 1);
+	}
 
 	for (int i = 0; i < NumLights; i++)
 	{
