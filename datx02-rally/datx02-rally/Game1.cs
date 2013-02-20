@@ -868,6 +868,8 @@ namespace datx02_rally
 
         private void RenderScene(GameTime gameTime, Matrix view, Matrix projection, bool environment)
         {
+            BoundingFrustum viewFrustum = new BoundingFrustum(view * projection);
+            
             Matrix[] transforms = new Matrix[Car.Model.Bones.Count];
             Car.Model.CopyAbsoluteBoneTransformsTo(transforms);
 
@@ -896,7 +898,9 @@ namespace datx02_rally
 
             for (int i = 0; i < treePositions.Length; i++)
             {
-                DrawModel(oakTree, view, projection, treePositions[i], treeTransforms[i]);
+                BoundingSphere sourceSphere = new BoundingSphere(treePositions[i], oakTree.Meshes[0].BoundingSphere.Radius);
+                if (viewFrustum.Intersects(sourceSphere))
+                    DrawModel(oakTree, view, projection, treePositions[i], treeTransforms[i]);
             }
 
             //DrawModel(mushroomGroup, new Vector3(100, 0, 100), 0.0f);
