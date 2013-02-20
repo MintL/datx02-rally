@@ -47,6 +47,7 @@ namespace datx02_rally
         private void UpdateNetworkCar(Player player, Car car)
         {
             car.Position = player.Position;
+            car.Rotation = player.Rotation;
         }
 
         private void UpdateLocalCar(Car car)

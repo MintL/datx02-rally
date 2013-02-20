@@ -26,7 +26,7 @@ namespace datx02_rally
             ServerThread.SendMessage(msg, NetDeliveryMethod.ReliableUnordered);
         }
 
-        public void SendPlayerPosition(Vector3 position, double ms)
+        public void SendPlayerPosition(Vector3 position, float rotation, double ms)
         {
             NetOutgoingMessage msg = ServerThread.CreateMessage();
             msg.Write((byte)MessageType.PlayerPos);
@@ -34,6 +34,7 @@ namespace datx02_rally
             msg.Write(position.X);
             msg.Write(position.Y);
             msg.Write(position.Z);
+            msg.Write(rotation);
             ServerThread.SendMessage(msg, NetDeliveryMethod.Unreliable);
         }
 

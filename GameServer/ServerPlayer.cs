@@ -11,6 +11,7 @@ namespace GameServer
         public float x { get; set; }
         public float y { get; set; }
         public float z { get; set; }
+        public float rotation { get; set; }
     }
     class ServerPlayer
     {
@@ -28,11 +29,12 @@ namespace GameServer
             PlayerPos = new Position();
         }
 
-        public void UpdatePosition(float x, float y, float z)
+        public void UpdatePosition(float x, float y, float z, float rotation)
         {
             PlayerPos.x = x;
             PlayerPos.y = y;
             PlayerPos.z = z;
+            PlayerPos.rotation = rotation;
         }
 
     }

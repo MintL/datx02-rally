@@ -96,9 +96,10 @@ namespace GameServer
                 case MessageType.PlayerPos:
                     double msGameTime = msg.ReadDouble();
                     float x = msg.ReadFloat(); float y = msg.ReadFloat(); float z = msg.ReadFloat();
+                    float rotation = msg.ReadFloat();
                     if (DbgPlayerPos) 
                         Console.WriteLine("PlayerPos: X:{0}, Y:{1}, Z:{2}",x,y,z);
-                    player.UpdatePosition(x, y, z);
+                    player.UpdatePosition(x, y, z, rotation);
                     DistributePlayerPosition(player);
                     break;
                 case MessageType.Chat:
@@ -158,6 +159,7 @@ namespace GameServer
             msg.Write(player.PlayerPos.x);
             msg.Write(player.PlayerPos.y);
             msg.Write(player.PlayerPos.z);
+            msg.Write(player.PlayerPos.rotation);
             SendToAllOtherPlayers(msg, player.Connection);
         }
 
