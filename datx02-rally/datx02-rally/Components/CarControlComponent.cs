@@ -30,6 +30,11 @@ namespace datx02_rally
             Cars[player] = Game1.GetInstance().MakeCar();
         }
 
+        public void RemoveCar(Player player)
+        {
+            Cars.Remove(player);
+        }
+
         public override void Update(GameTime gameTime)
         {
             foreach (var playerCarPair in Cars)
