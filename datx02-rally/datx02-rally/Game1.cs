@@ -15,6 +15,7 @@ using datx02_rally.MapGeneration;
 using datx02_rally.Entities;
 using datx02_rally.Particles.Systems;
 using datx02_rally.Particles.WeatherSystems;
+using datx02_rally.Graphics;
 
 namespace datx02_rally
 {
@@ -33,11 +34,8 @@ namespace datx02_rally
         #region PostProcess
         RenderTarget2D postProcessTexture;
         Effect postEffect;
-        Effect bloom;
-        RenderTarget2D bloomTexture;
-        RenderTarget2D bloomBlurITexture;
-        RenderTarget2D bloomBlurIITexture;
-        RenderTarget2D bloomCombinedTexture;
+        Bloom bloom;
+        GaussianBlur gaussianBlur;
 
         #endregion
 
@@ -526,16 +524,9 @@ namespace datx02_rally
                 GraphicsDevice.Viewport.Width,
                 GraphicsDevice.Viewport.Height, false, SurfaceFormat.Color, GraphicsDevice.PresentationParameters.DepthStencilFormat);
             postEffect = Content.Load<Effect>(@"Effects\PostProcess");
-            bloom = Content.Load<Effect>(@"Effects\Bloom");
 
-            bloomTexture = new RenderTarget2D(GraphicsDevice, postProcessTexture.Bounds.Width, postProcessTexture.Bounds.Height,
-                false, SurfaceFormat.Color, postProcessTexture.DepthStencilFormat);
-            bloomBlurITexture = new RenderTarget2D(GraphicsDevice, postProcessTexture.Bounds.Width, postProcessTexture.Bounds.Height,
-                false, SurfaceFormat.Color, postProcessTexture.DepthStencilFormat);
-            bloomBlurIITexture = new RenderTarget2D(GraphicsDevice, postProcessTexture.Bounds.Width, postProcessTexture.Bounds.Height,
-                false, SurfaceFormat.Color, postProcessTexture.DepthStencilFormat);
-            bloomCombinedTexture = new RenderTarget2D(GraphicsDevice, postProcessTexture.Bounds.Width, postProcessTexture.Bounds.Height,
-                false, SurfaceFormat.Color, postProcessTexture.DepthStencilFormat);
+            gaussianBlur = new GaussianBlur(this);
+            bloom = new Bloom(this, gaussianBlur);
 
             #endregion
         }
@@ -819,46 +810,15 @@ namespace datx02_rally
 
         private void RenderPostProcess()
         {
-            #region Bloom
-            GraphicsDevice.SetRenderTarget(bloomTexture);
-            spriteBatch.Begin(0, BlendState.Opaque, null, null, null, bloom);
-            bloom.CurrentTechnique = bloom.Techniques["Bloom"];
-            bloom.CurrentTechnique.Passes[0].Apply();
-            GraphicsDevice.Clear(Color.Black);
-            spriteBatch.Draw(postProcessTexture, Vector2.Zero, Color.White);
-            spriteBatch.End();
-
-            GraphicsDevice.SetRenderTarget(bloomBlurITexture);
-            spriteBatch.Begin(0, BlendState.Opaque, null, null, null, bloom);
-            bloom.CurrentTechnique = bloom.Techniques["Blur"];
-            bloom.CurrentTechnique.Passes[0].Apply();
-            GraphicsDevice.Clear(Color.Black);
-            spriteBatch.Draw(bloomTexture, Vector2.Zero, Color.White);
-            spriteBatch.End();
-
-            GraphicsDevice.SetRenderTarget(bloomBlurIITexture);
-            spriteBatch.Begin(0, BlendState.Opaque, null, null, null, bloom);
-            GraphicsDevice.Clear(Color.Black);
-            spriteBatch.Draw(bloomBlurITexture, Vector2.Zero, Color.White);
-            spriteBatch.End();
-            
-            GraphicsDevice.SetRenderTarget(bloomCombinedTexture);
-            spriteBatch.Begin(0, BlendState.Opaque, null, null, null, bloom);
-            bloom.CurrentTechnique = bloom.Techniques["BloomCombine"];
-            bloom.CurrentTechnique.Passes[0].Apply();
-            bloom.Parameters["ColorMap"].SetValue(postProcessTexture);
-            GraphicsDevice.Clear(Color.Black);
-            spriteBatch.Draw(bloomBlurIITexture, Vector2.Zero, Color.White);
-            spriteBatch.End();
-
-            GraphicsDevice.SetRenderTarget(null);
-            #endregion
+            // Apply bloom effect
+            Texture2D finalTexture;
+            finalTexture = bloom.PerformBloom(postProcessTexture);
 
             spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
             foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                spriteBatch.Draw(bloomCombinedTexture, Vector2.Zero, Color.White);
+                spriteBatch.Draw(finalTexture, Vector2.Zero, Color.White);
             }
             spriteBatch.End();
 

@@ -67,13 +67,13 @@ namespace datx02_rally.Particles.WeatherSystems
                         if (branches[i].position.Y < 0)
                             branches.RemoveAt(i--);
 
-                        if (random.NextDouble() < .001)
-                        {
-                            var newBolt = branches.Last().Clone();
-                            newBolt.target = offset;
-                            newBolt.target.Y = 0;
-                            branches.Add(newBolt);
-                        }
+                        //if (random.NextDouble() < .001)
+                        //{
+                        //    var newBolt = branches.Last().Clone();
+                        //    newBolt.target = offset;
+                        //    newBolt.target.Y = 0;
+                        //    branches.Add(newBolt);
+                        //}
 
                     }
                 }

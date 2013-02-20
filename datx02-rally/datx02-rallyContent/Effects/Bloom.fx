@@ -11,7 +11,6 @@ sampler2D ColorMapSampler = sampler_state
 };
 
 float Threshold = 0.8;
-float BlurDistance = 0.002;
 float BloomIntensity = 1.4;
 float OriginalIntensity = 1.0;
 float BloomSaturation = 1.0;
@@ -29,24 +28,6 @@ technique Bloom
     pass Pass1
     {
         PixelShader = compile ps_2_0 BloomFunction();
-    }
-}
-
-float4 BlurFunction(float2 texCoord : TEXCOORD0) : COLOR0
-{
-	float4 color = tex2D(TextureSampler, texCoord + float2(BlurDistance, 0));
-	color += tex2D(TextureSampler, texCoord + float2(0, BlurDistance));
-	color += tex2D(TextureSampler, texCoord + float2(0, -BlurDistance));
-	color += tex2D(TextureSampler, texCoord + float2(-BlurDistance, 0));
-
-    return color / 4;
-}
-
-technique Blur
-{
-    pass Pass1
-    {
-        PixelShader = compile ps_2_0 BlurFunction();
     }
 }
 
