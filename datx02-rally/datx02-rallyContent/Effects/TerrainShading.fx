@@ -114,8 +114,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	color += tex2D(TextureMapSampler2, input.TexCoord) * input.TexWeights.z;
 	color += tex2D(TextureMapSampler3, input.TexCoord) * input.TexWeights.w;
 	
-	//float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
-	float4 totalLight = color;
+	float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
+	//float4 totalLight = color;
 
 	// point lights
 	for (int i = 0; i < NumLights; i++)
@@ -130,7 +130,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 
 		totalLight.rgb +=
-			attenuation * (LightDiffuse[i] * saturate(dot(normal, directionToLight)));
+			attenuation * (LightDiffuse[i] * color.rgb * saturate(dot(normal, directionToLight)));
 	}
 	float3 directionToLight = -normalize(DirectionalDirection);
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
@@ -138,8 +138,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	totalLight.rgb += selfShadow * (DirectionalDiffuse * color.rgb * saturate(dot(normal, directionToLight)));
 	
 	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
-
-	return float4(DirectionalAmbient, 1.0) * totalLight;
+	//float4(DirectionalAmbient, 1.0) * 
+	return totalLight;
 }
 
 technique Technique1

@@ -482,7 +482,7 @@ namespace datx02_rally
                     .6f + .4f * (float)random.NextDouble(),
                     .6f + .4f * (float)random.NextDouble(),
                     .6f + .4f * (float)random.NextDouble());
-                pointLights.Add(new PointLight(point + pointLightOffset, color, 1300.0f));
+                pointLights.Add(new PointLight(point + pointLightOffset, color, 500.0f));
 
             }
 
