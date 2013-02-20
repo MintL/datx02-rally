@@ -102,7 +102,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 
 float ComputeFogFactor(float d)
 {
-	return clamp((d - FogStart) / (FogEnd - FogStart), 0, 1) * FogEnabled;
+	return clamp((d - FogStart) / (FogEnd - FogStart), 0, .75) * FogEnabled;
 }
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
@@ -114,7 +114,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	color += tex2D(TextureMapSampler2, input.TexCoord) * input.TexWeights.z;
 	color += tex2D(TextureMapSampler3, input.TexCoord) * input.TexWeights.w;
 	
-	float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
+	//float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
+	float4 totalLight = color;
 
 	// point lights
 	for (int i = 0; i < NumLights; i++)
@@ -138,7 +139,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	
 	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
 
-	return totalLight;
+	return float4(DirectionalAmbient, 1.0) * totalLight;
 }
 
 technique Technique1

@@ -391,7 +391,7 @@ namespace datx02_rally
                 mesh.Effects[1].Parameters["AlphaMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-a"));
             }
 
-            int numTrees = 200;
+            int numTrees = 50;
             treePositions = new Vector3[numTrees];
             treeTransforms = new Matrix[numTrees];
             for (int i = 0; i < numTrees; i++)
@@ -442,7 +442,7 @@ namespace datx02_rally
                 treePos.Y = height * heightScale * triangleSize;
 
                 treePositions[i] = treePos;
-                treeTransforms[i] = Matrix.CreateScale(1 + (float)random.NextDouble()) * Matrix.CreateRotationY(MathHelper.Lerp(0, MathHelper.Pi * 2, (float)random.NextDouble()));
+                treeTransforms[i] = Matrix.CreateScale(1 + 8 * (float)random.NextDouble()) * Matrix.CreateRotationY(MathHelper.Lerp(0, MathHelper.Pi * 2, (float)random.NextDouble()));
             }
 
             // {
@@ -643,12 +643,12 @@ namespace datx02_rally
                 if (coord < 0)
                 {
                     trans = true;
-                    lastTriangle += (lastTriangle % 2 == 0 ? -1 : 1) * 2;
+                    lastTriangle += (lastTriangle % 2 == 0 ? -2 : 2);
                 }
                 else if (coord > 1)
                 {
                     trans = true;
-                    lastTriangle += (lastTriangle % 2 == 0 ? 1 : -1) * 2;
+                    lastTriangle += (lastTriangle % 2 == 0 ? 2 : -2);
                 }
 
                 if (lastTriangle < 0)
@@ -663,7 +663,7 @@ namespace datx02_rally
                 else if (!CollisionCheck(navMesh.triangles[lastTriangle]))
                 {
                     t = navMesh.triangles[lastTriangle];
-                    coord = Vector3.Dot(Car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared();
+                    coord = MathHelper.Clamp(Vector3.Dot(Car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared(), 0, 1);
                     Car.Position = coord * t.ac + t.vertices[0];
                     Car.Normal = t.normal;
                 }

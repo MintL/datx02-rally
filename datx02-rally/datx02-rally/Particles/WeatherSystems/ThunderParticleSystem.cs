@@ -19,20 +19,20 @@ namespace datx02_rally.Particles.WeatherSystems
         {
             settings.TextureName = @"Particles/plasma";
 
-            settings.MaxParticles = 25000;
+            settings.MaxParticles = 16000;
 
-            settings.Duration = TimeSpan.FromSeconds(3.25f);
+            settings.Duration = TimeSpan.FromSeconds(2f);
 
-            settings.MinHorizontalVelocity = 5;
-            settings.MaxHorizontalVelocity = 10;
+            //settings.MinHorizontalVelocity = 5;
+            //settings.MaxHorizontalVelocity = 10;
 
-            settings.MinVerticalVelocity = 5;
-            settings.MaxVerticalVelocity = 15;
+            //settings.MinVerticalVelocity = 5;
+            //settings.MaxVerticalVelocity = 15;
 
-            settings.EndVelocity = 0.75f;
+            //settings.EndVelocity = 0.75f;
 
-            settings.MinRotateSpeed = -1;
-            settings.MaxRotateSpeed = 1;
+            //settings.MinRotateSpeed = -1;
+            //settings.MaxRotateSpeed = 1;
 
             //settings.MinStartSize = 50;
             //settings.MaxStartSize = 100;
@@ -43,7 +43,7 @@ namespace datx02_rally.Particles.WeatherSystems
             // All same
             settings.MinStartSize = settings.MaxStartSize = settings.MinEndSize = settings.MaxEndSize = 50;
 
-            settings.MinColor = settings.MaxColor = new Color(.15f, .1f, .6f);
+            settings.MinColor = settings.MaxColor = new Color(.3f, .2f, 1.2f);
 
             settings.BlendState = BlendState.Additive;
         }
