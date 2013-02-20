@@ -15,6 +15,7 @@ using datx02_rally.MapGeneration;
 using datx02_rally.Entities;
 using datx02_rally.Particles.Systems;
 using datx02_rally.Particles.WeatherSystems;
+using datx02_rally.Graphics;
 
 namespace datx02_rally
 {
@@ -30,8 +31,13 @@ namespace datx02_rally
 
         Matrix projection;
 
-        RenderTarget2D renderTarget;
+        #region PostProcess
+        RenderTarget2D postProcessTexture;
         Effect postEffect;
+        Bloom bloom;
+        GaussianBlur gaussianBlur;
+
+        #endregion
 
         #region Foliage
 
@@ -497,10 +503,16 @@ namespace datx02_rally
             //skyBoxEffect.Parameters["SkyboxTexture"].SetValue(refCubeMap);
             #endregion
 
-            renderTarget = new RenderTarget2D(GraphicsDevice,
+            #region PostProcess
+            postProcessTexture = new RenderTarget2D(GraphicsDevice,
                 GraphicsDevice.Viewport.Width,
                 GraphicsDevice.Viewport.Height, false, SurfaceFormat.Color, GraphicsDevice.PresentationParameters.DepthStencilFormat);
             postEffect = Content.Load<Effect>(@"Effects\PostProcess");
+
+            gaussianBlur = new GaussianBlur(this);
+            bloom = new Bloom(this, gaussianBlur);
+
+            #endregion
         }
 
         public Car MakeCar()
@@ -540,6 +552,10 @@ namespace datx02_rally
                     }
                 }
             }
+            car.Model.Meshes[0].Effects[1].Parameters["MaterialUnshaded"].SetValue(true);
+            car.Model.Meshes[0].Effects[1].Parameters["MaterialAmbient"].SetValue(Color.Red.ToVector3() * 2.0f);
+            car.Model.Meshes[0].Effects[2].Parameters["MaterialUnshaded"].SetValue(true);
+            car.Model.Meshes[0].Effects[2].Parameters["MaterialAmbient"].SetValue(Color.Red.ToVector3() * 2.0f);
 
             // Place car at start.
             SetCarAtStart(car);
@@ -766,7 +782,7 @@ namespace datx02_rally
 
             Matrix view = this.GetService<CameraComponent>().View;
 
-            GraphicsDevice.SetRenderTarget(renderTarget);
+            GraphicsDevice.SetRenderTarget(postProcessTexture);
 
             // Reset render settings
             GraphicsDevice.BlendState = BlendState.Opaque;
@@ -790,12 +806,15 @@ namespace datx02_rally
 
         private void RenderPostProcess()
         {
+            // Apply bloom effect
+            Texture2D finalTexture;
+            finalTexture = bloom.PerformBloom(postProcessTexture);
+
             spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
             foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                postEffect.Parameters["ColorMap"].SetValue(renderTarget);
-                spriteBatch.Draw(renderTarget, Vector2.Zero, Color.White);
+                spriteBatch.Draw(finalTexture, Vector2.Zero, Color.White);
             }
             spriteBatch.End();
 
@@ -925,7 +944,7 @@ namespace datx02_rally
             Vector3[] positions = new Vector3[pointLights.Count];
             Vector3[] diffuses = new Vector3[pointLights.Count];
             float[] ranges = new float[pointLights.Count];
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 2; i++)
             {
                 positions[i] = pointLights[i].Position;
                 diffuses[i] = pointLights[i].Diffuse;
@@ -935,7 +954,7 @@ namespace datx02_rally
             carSettings.LightPosition = positions;
             carSettings.LightDiffuse = diffuses;
             carSettings.LightRange = ranges;
-            carSettings.NumLights = 10;
+            carSettings.NumLights = 2;
 
             carSettings.DirectionalLightDirection = directionalLight.Direction;
             carSettings.DirectionalLightDiffuse = directionalLight.Diffuse;
