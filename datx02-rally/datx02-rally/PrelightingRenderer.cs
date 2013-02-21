@@ -15,7 +15,7 @@ namespace datx02_rally
         Effect depthNormalEffect;
         Effect lightingEffect;
 
-        Model lightMesh;
+
 
     }
 }

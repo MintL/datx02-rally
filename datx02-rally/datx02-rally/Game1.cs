@@ -128,6 +128,13 @@ namespace datx02_rally
 
         #endregion
 
+        RenderTarget2D depthTarget;
+        RenderTarget2D normalTarget;
+        RenderTarget2D lightTarget;
+
+        Effect depthNormalEffect;
+        Effect lightingEffect;
+
         #endregion
 
         #region Initialization
@@ -239,7 +246,7 @@ namespace datx02_rally
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
-                GraphicsDevice.Viewport.AspectRatio, .1f, 500000f);
+                GraphicsDevice.Viewport.AspectRatio, .1f, 50000f);
 
             #region Lights
 
@@ -511,6 +518,22 @@ namespace datx02_rally
             gaussianBlur = new GaussianBlur(this);
             bloom = new Bloom(this, gaussianBlur);
 
+            #endregion
+
+            #region Prelighting
+            int viewWidth = GraphicsDevice.Viewport.Width;
+            int viewHeight = GraphicsDevice.Viewport.Height;
+
+            depthTarget = new RenderTarget2D(GraphicsDevice, viewWidth, viewHeight, false, SurfaceFormat.Color, DepthFormat.Depth24);
+            normalTarget = new RenderTarget2D(GraphicsDevice, viewWidth, viewHeight, false, SurfaceFormat.Color, DepthFormat.Depth24);
+            lightTarget = new RenderTarget2D(GraphicsDevice, viewWidth, viewHeight, false, SurfaceFormat.Color, DepthFormat.Depth24);
+
+            depthNormalEffect = Content.Load<Effect>(@"Effects\Prelight\DepthNormal");
+            lightingEffect = Content.Load<Effect>(@"Effects\Prelight\Light");
+
+            lightingEffect.Parameters["viewportWidth"].SetValue(viewWidth);
+            lightingEffect.Parameters["viewportHeight"].SetValue(viewHeight);
+            //lightModel.Meshes[0].MeshParts[0].Effect = lightingEffect;
             #endregion
         }
 
@@ -790,6 +813,22 @@ namespace datx02_rally
 
             Matrix view = this.GetService<CameraComponent>().View;
 
+            #region Prelighting
+            GraphicsDevice.SetRenderTargets(normalTarget, depthTarget);
+            GraphicsDevice.Clear(Color.White);
+
+            Effect current = terrain.Effect;
+            terrain.Effect = depthNormalEffect;
+            terrain.Draw(view, projectionMatrix, this.GetService<CameraComponent>().Position, directionalLight, pointLights);
+            terrain.Effect = current;
+
+            GraphicsDevice.SetRenderTargets(null);
+
+            drawLightMap(view * projectionMatrix);
+            terrain.Effect.Parameters["LightTexture"].SetValue(lightTarget);
+            terrain.Effect.Parameters["viewportWidth"].SetValue(GraphicsDevice.Viewport.Width);
+            terrain.Effect.Parameters["viewportHeight"].SetValue(GraphicsDevice.Viewport.Height);
+            #endregion
 
             RenderEnvironmentMap(gameTime);
 
@@ -815,6 +854,45 @@ namespace datx02_rally
 
         }
 
+        private void drawLightMap(Matrix viewProjection)
+        {
+            lightingEffect.Parameters["DepthTexture"].SetValue(depthTarget);
+            lightingEffect.Parameters["NormalTexture"].SetValue(normalTarget);
+            Matrix invViewProjection = Matrix.Invert(viewProjection);
+            lightingEffect.Parameters["InvViewProjection"].SetValue(invViewProjection);
+
+            GraphicsDevice.SetRenderTarget(lightTarget);
+            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.BlendState = BlendState.Additive;
+            GraphicsDevice.DepthStencilState = DepthStencilState.None;
+
+            BasicEffect current = (BasicEffect)lightModel.Meshes[0].MeshParts[0].Effect;
+            foreach (PointLight light in pointLights)
+            {
+                lightingEffect.Parameters["LightColor"].SetValue(light.Diffuse);
+                lightingEffect.Parameters["LightPosition"].SetValue(light.Position);
+                lightingEffect.Parameters["LightAttenuation"].SetValue(light.Range);
+
+                lightModel.Meshes[0].MeshParts[0].Effect = lightingEffect;
+                Matrix wvp = (Matrix.CreateScale(light.Range / 50) * Matrix.CreateTranslation(light.Position)) * viewProjection;
+                lightingEffect.Parameters["WorldViewProjection"].SetValue(wvp);
+                //lightingEffect.CurrentTechnique.Passes[0].Apply();
+                float dist = Vector3.Distance(this.GetService<CameraComponent>().Position, light.Position);
+
+                //if (dist < light.Range)
+                   //GraphicsDevice.RasterizerState = RasterizerState.CullClockwise;
+                lightModel.Meshes[0].Draw();
+                //GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
+            }
+
+            lightModel.Meshes[0].MeshParts[0].Effect = current;
+
+            GraphicsDevice.BlendState = BlendState.Opaque;
+            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+
+            GraphicsDevice.SetRenderTarget(null);
+        }
+
         private void RenderPostProcess()
         {
             // Apply bloom effect
@@ -825,7 +903,7 @@ namespace datx02_rally
             foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                spriteBatch.Draw(finalTexture, Vector2.Zero, Color.White);
+                spriteBatch.Draw(lightTarget, Vector2.Zero, Color.White);
 
             }
             spriteBatch.End();

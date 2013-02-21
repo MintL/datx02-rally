@@ -20,7 +20,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     VertexShaderOutput output;
 
 	float4x4 viewProjection = mul(View, Projection);
-	float4x4 worldViewPorjection = mul(World, viewProjection);
+	float4x4 worldViewProjection = mul(World, viewProjection);
 
 	output.Position = mul(input.Position, worldViewProjection);
 	output.Normal = mul(input.Normal, World);
@@ -41,8 +41,8 @@ PixelShaderOutput PixelShaderFunction(VertexShaderOutput input)
 {
     PixelShaderOutput output;
 
-	// Depth is sotred as distance from camera / far plane distance to get value between 0 and 1
-	output.Depth = input.Depth.x / input.Depth.y;
+	// Depth is stored as distance from camera / far plane distance to get value between 0 and 1
+	output.Depth = input.Depth.x / 50000;//(input.Depth.y);
 
 	// Normal map simply stores x, y, and z of normal shifted from (-1 to 1) range to (0 to 1) range
 	output.Normal.xyz = (normalize(input.Normal).xyz / 2) + .5;

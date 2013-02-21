@@ -21,6 +21,15 @@ float3 FogColor = float3(0.05, 0.045, 0.04);
 float FogStart = -1000;
 float FogEnd = 8000;
 
+texture2D LightTexture;
+sampler2D lightSampler = sampler_state
+{
+	texture = <LightTexture>;
+	minfilter = point;
+	magfilter = point;
+	mipfilter = point;
+};
+
 texture TextureMap0;
 sampler TextureMapSampler0 = sampler_state
 {
@@ -83,7 +92,7 @@ struct VertexShaderOutput
 	float3 ViewDirection : TEXCOORD2;
 	float3 WorldPosition : TEXCOORD3;
 	float4 TexWeights : TEXCOORD4;
-	float3 PositionCopy : TEXCOORD5;
+	float4 PositionCopy : TEXCOORD5;
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
