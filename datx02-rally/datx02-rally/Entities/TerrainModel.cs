@@ -209,7 +209,7 @@ namespace datx02_rally
                 pass.Apply();
                 device.Indices = indexBuffer;
                 device.SetVertexBuffer(vertexBuffer);
-                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, vertexBuffer.VertexCount*2);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, indexBuffer.IndexCount/3);
             }
         }
     }
