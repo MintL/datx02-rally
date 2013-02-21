@@ -202,7 +202,7 @@ namespace datx02_rally
             Effect.Parameters["LightPosition"].SetValue(positions);
             Effect.Parameters["LightDiffuse"].SetValue(diffuses);
             Effect.Parameters["LightRange"].SetValue(ranges);
-            Effect.Parameters["NumLights"].SetValue(10);
+            Effect.Parameters["NumLights"].SetValue(0);
             
             foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
             {

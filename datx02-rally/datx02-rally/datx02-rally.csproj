@@ -120,6 +120,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\FPSComponent.cs" />
     <Compile Include="Components\HUDConsoleComponent.cs" />
     <Compile Include="DebugConsole\Commands\ConnectCommand.cs" />
     <Compile Include="DebugConsole\Commands\ClearCommand.cs" />
@@ -179,6 +180,7 @@
     <Compile Include="Particles\Systems\YellowPlasmaParticleSystem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Cameras\ThirdPersonCamera.cs" />
+    <Compile Include="ViewHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
