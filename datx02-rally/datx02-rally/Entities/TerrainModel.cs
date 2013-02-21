@@ -199,10 +199,12 @@ namespace datx02_rally
                 ranges[i] = pointLights[i].Range;
             }
 
+            int noOfLights = GameSettings.Default.PerformanceMode ? 0 : 10;
+
             Effect.Parameters["LightPosition"].SetValue(positions);
             Effect.Parameters["LightDiffuse"].SetValue(diffuses);
             Effect.Parameters["LightRange"].SetValue(ranges);
-            Effect.Parameters["NumLights"].SetValue(0);
+            Effect.Parameters["NumLights"].SetValue(noOfLights);
             
             foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
             {

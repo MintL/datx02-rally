@@ -685,28 +685,28 @@ namespace datx02_rally
 
             #endregion
 
-            /*for (int x = -6; x < 6; x++)
+            for (int x = -6; x < 6; x++)
             {
                 for (int z = -6; z < 6; z++)
                 {
                     rainSystem.AddParticle(Car.Position + new Vector3(
-                        (float)random.NextDouble() * x * 200, 
-                        500 * (float)random.NextDouble(), 
-                        (float)random.NextDouble() * z * 200), 
+                        (float)random.NextDouble() * x * 200,
+                        500 * (float)random.NextDouble(),
+                        (float)random.NextDouble() * z * 200),
                         Vector3.Down);
                 }
-            }*/
+            }
 
             
             Vector3 carDirection = Vector3.Transform(Vector3.Forward,
                 Matrix.CreateRotationY(Car.Rotation));
             Vector3 carPosition = Car.Position + carDirection * 1000;
-            /*pointLights.Sort(
+            pointLights.Sort(
                 delegate(PointLight x, PointLight y)
                 {
                     return (int)(Vector3.DistanceSquared(x.Position, carPosition) - Vector3.DistanceSquared(y.Position, carPosition));
                 }
-            );*/
+            );
 
             base.Update(gameTime);
         }
@@ -790,8 +790,8 @@ namespace datx02_rally
 
             Matrix view = this.GetService<CameraComponent>().View;
 
-
-            //RenderEnvironmentMap(gameTime);
+            if (!GameSettings.Default.PerformanceMode)
+                RenderEnvironmentMap(gameTime);
 
             GraphicsDevice.SetRenderTarget(postProcessTexture);
 
