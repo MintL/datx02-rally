@@ -57,19 +57,23 @@ namespace datx02_rally
 
         #endregion
 
-        #region Map
+        #region Level terrain
 
-        int mapSize = 512;
-        float triangleSize = 50;
-        float heightScale = 150;  //33;
+        int terrainSegmentSize = 64;
+        int terrainSegmentsCount = 8;
+        
+        // XZ- & Y scaling.
+        float terrainXZScale = 50;
+        float terrainYScale = 50 * 150;  //33;
 
-        float roadWidth = 6; // Grids
-        float roadFalloff = 35; // Grids
+        float roadWidth = 6; // #Quads
+        float roadFalloff = 35; // #Quads
 
         RaceTrack raceTrack;
         NavMeshVisualizer navMesh;
 
-        TerrainModel terrain;
+        //TerrainModel terrain;
+        TerrainModel[,] terrainSegments;
 
         #endregion
 
@@ -252,25 +256,26 @@ namespace datx02_rally
 
             #endregion
 
-            #region MapGeneration
+            #region Level terrain generation
 
-            HeightMap heightmapGenerator = new HeightMap(mapSize);
-            var heightmap = heightmapGenerator.Generate();
+            int heightmapSize = terrainSegmentsCount * terrainSegmentSize;
+            HeightMap heightmapGenerator = new HeightMap(heightmapSize);
+            var heightMap = heightmapGenerator.Generate();
 
-            var roadMap = new float[mapSize, mapSize];
-            raceTrack = new RaceTrack(((mapSize / 2) * triangleSize));
+            var roadMap = new float[heightmapSize, heightmapSize];
+            raceTrack = new RaceTrack(((heightmapSize / 2) * terrainXZScale));
 
-            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 1500, roadWidth * triangleSize, triangleSize, heightScale);
+            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 1500, roadWidth * terrainXZScale, terrainXZScale, terrainYScale);
 
             Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f);
-            lastPosition /= triangleSize;
-            lastPosition += new Vector3(.5f, 0, .5f) * mapSize;
+            lastPosition /= terrainXZScale;
+            lastPosition += new Vector3(.5f, 0, .5f) * heightmapSize;
             for (float t = 0; t < 1; t += .0002f)
             {
                 var e = raceTrack.Curve.GetPoint(t);
                 var height = e.Y;
-                e /= triangleSize;
-                e += new Vector3(mapSize) / 2f;
+                e /= terrainXZScale;
+                e += new Vector3(heightmapSize) / 2f;
 
                 for (float j = -roadFalloff; j <= roadFalloff; j++)
                 {
@@ -281,14 +286,14 @@ namespace datx02_rally
 
                     if (Math.Abs(j) <= roadWidth)
                     {
-                        heightmap[x, z] = height;
+                        heightMap[x, z] = height;
                         roadMap[x, z] = 1;
                     }
                     else
                     {
                         float amount = (Math.Abs(j) - roadWidth) / (roadFalloff - roadWidth);
-                        heightmap[x, z] = MathHelper.Lerp(height,
-                            heightmap[x, z], amount);
+                        heightMap[x, z] = MathHelper.Lerp(height,
+                            heightMap[x, z], amount);
                         roadMap[x, z] = amount / 10f;
                     }
                 }
@@ -298,15 +303,91 @@ namespace datx02_rally
             heightmapGenerator.Smoothen();
             heightmapGenerator.Perturb(30f);
 
-            // Creates a terrainmodel around Vector3.Zero
-            terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightScale, heightmap, roadMap);
-
             Effect terrainEffect = Content.Load<Effect>(@"Effects\TerrainShading");
             terrainEffect.Parameters["TextureMap0"].SetValue(Content.Load<Texture2D>(@"Terrain\sand"));
             terrainEffect.Parameters["TextureMap1"].SetValue(Content.Load<Texture2D>(@"Terrain\grass"));
             terrainEffect.Parameters["TextureMap2"].SetValue(Content.Load<Texture2D>(@"Terrain\rock"));
             terrainEffect.Parameters["TextureMap3"].SetValue(Content.Load<Texture2D>(@"Terrain\snow"));
-            terrain.Effect = terrainEffect.Clone();
+
+            // Creates a terrainmodel around Vector3.Zero
+            terrainSegments = new TerrainModel[terrainSegmentsCount, terrainSegmentsCount];
+            
+            float terrainStart = -.5f * heightmapSize;
+
+            for (int z = 0; z < terrainSegmentsCount; z++)
+            {
+                for (int x = 0; x < terrainSegmentsCount; x++)
+                {
+                    terrainSegments[x, z] = new TerrainModel(GraphicsDevice,
+                        terrainSegmentSize, terrainSegmentsCount, terrainStart,
+                        x * terrainSegmentSize, z * terrainSegmentSize, 
+                        terrainXZScale, terrainYScale, 
+                        heightMap, roadMap);
+                    terrainSegments[x, z].Effect = terrainEffect;
+                }
+            }
+
+
+            //terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, terrainXZScale, terrainYScale, heightMap, roadMap);
+            //terrain.Effect = terrainEffect.Clone();
+
+            #endregion
+
+            #region OLD Map generation
+
+            //HeightMap heightmapGenerator = new HeightMap(mapSize);
+            //var heightmap = heightmapGenerator.Generate();
+
+            //var roadMap = new float[mapSize, mapSize];
+            //raceTrack = new RaceTrack(((mapSize / 2) * triangleSize));
+
+            //navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 1500, roadWidth * triangleSize, triangleSize, heightScale);
+
+            //Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f);
+            //lastPosition /= triangleSize;
+            //lastPosition += new Vector3(.5f, 0, .5f) * mapSize;
+            //for (float t = 0; t < 1; t += .0002f)
+            //{
+            //    var e = raceTrack.Curve.GetPoint(t);
+            //    var height = e.Y;
+            //    e /= triangleSize;
+            //    e += new Vector3(mapSize) / 2f;
+
+            //    for (float j = -roadFalloff; j <= roadFalloff; j++)
+            //    {
+            //        var pos = e + j * Vector3.Normalize(Vector3.Cross(lastPosition - e, Vector3.Up));
+
+            //        // Indices
+            //        int x = (int)pos.X, z = (int)pos.Z;
+
+            //        if (Math.Abs(j) <= roadWidth)
+            //        {
+            //            heightmap[x, z] = height;
+            //            roadMap[x, z] = 1;
+            //        }
+            //        else
+            //        {
+            //            float amount = (Math.Abs(j) - roadWidth) / (roadFalloff - roadWidth);
+            //            heightmap[x, z] = MathHelper.Lerp(height,
+            //                heightmap[x, z], amount);
+            //            roadMap[x, z] = amount / 10f;
+            //        }
+            //    }
+            //    lastPosition = e;
+            //}
+
+            //heightmapGenerator.Smoothen();
+            //heightmapGenerator.Perturb(30f);
+
+            //// Creates a terrainmodel around Vector3.Zero
+            //terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightScale, heightmap, roadMap);
+
+            //Effect terrainEffect = Content.Load<Effect>(@"Effects\TerrainShading");
+            //terrainEffect.Parameters["TextureMap0"].SetValue(Content.Load<Texture2D>(@"Terrain\sand"));
+            //terrainEffect.Parameters["TextureMap1"].SetValue(Content.Load<Texture2D>(@"Terrain\grass"));
+            //terrainEffect.Parameters["TextureMap2"].SetValue(Content.Load<Texture2D>(@"Terrain\rock"));
+            //terrainEffect.Parameters["TextureMap3"].SetValue(Content.Load<Texture2D>(@"Terrain\snow"));
+            //terrain.Effect = terrainEffect.Clone();
 
             #endregion
 
@@ -396,7 +477,7 @@ namespace datx02_rally
                 mesh.Effects[1].Parameters["AlphaMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-a"));
             }
 
-            int numTrees = 50;
+            int numTrees = 1;
             treePositions = new Vector3[numTrees];
             treeTransforms = new Matrix[numTrees];
             for (int i = 0; i < numTrees; i++)
@@ -417,8 +498,8 @@ namespace datx02_rally
 
                 var treePos = t.vertices[0] + u * t.ab + v * t.ac;
 
-                float X = treePos.X / triangleSize + mapSize / 2f,
-                    Z = treePos.Z / triangleSize + mapSize / 2f;
+                float X = treePos.X / terrainXZScale + heightmapSize / 2f,
+                    Z = treePos.Z / terrainXZScale + heightmapSize / 2f;
 
                 float Xlerp = X % 1f,
                     Zlerp = Z % 1f;
@@ -432,23 +513,24 @@ namespace datx02_rally
                 if (Xlerp + Zlerp > 1)
                 {
                     height = MathHelper.Lerp(
-                        MathHelper.Lerp(heightmap[x0, z1], heightmap[x1, z1], Xlerp),
-                        MathHelper.Lerp(heightmap[x1, z0], heightmap[x1, z1], Zlerp),
+                        MathHelper.Lerp(heightMap[x0, z1], heightMap[x1, z1], Xlerp),
+                        MathHelper.Lerp(heightMap[x1, z0], heightMap[x1, z1], Zlerp),
                         .5f);
                 }
                 else
                 {
                     height = MathHelper.Lerp(
-                        MathHelper.Lerp(heightmap[x0, z0], heightmap[x1, z0], Xlerp),
-                        MathHelper.Lerp(heightmap[x0, z0], heightmap[x0, z1], Zlerp),
+                        MathHelper.Lerp(heightMap[x0, z0], heightMap[x1, z0], Xlerp),
+                        MathHelper.Lerp(heightMap[x0, z0], heightMap[x0, z1], Zlerp),
                         .5f);
                 }
 
-                treePos.Y = height * heightScale * triangleSize;
+                treePos.Y = height * terrainYScale * terrainXZScale;
 
-                treePositions[i] = treePos;
-                treeTransforms[i] = Matrix.CreateScale(1 + 8 * (float)UniversalRandom.GetInstance().NextDouble()) * 
-                    Matrix.CreateRotationY(MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()));
+                treePositions[i] = Vector3.Zero; //treePos;
+                treeTransforms[i] = Matrix.CreateScale(20f); 
+                //Matrix.CreateScale(1 + 8 * (float)UniversalRandom.GetInstance().NextDouble()) * 
+                //    Matrix.CreateRotationY(MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()));
             }
 
             // {
@@ -477,7 +559,7 @@ namespace datx02_rally
                 //var side = triangleSize * roadWidth * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
                 //point1.Y *= heightScale * triangleSize;
                 
-                point.Y *= heightScale * triangleSize;
+                point.Y *= terrainYScale * terrainXZScale;
 
                 Vector3 color = new Vector3(
                     .6f + .4f * (float)UniversalRandom.GetInstance().NextDouble(),
@@ -884,7 +966,12 @@ namespace datx02_rally
 
             #endregion
 
-            terrain.Draw(view, projection, this.GetService<CameraComponent>().Position, directionalLight, pointLights);
+            for (int z = 0; z < terrainSegmentsCount; z++)
+                for (int x = 0; x < terrainSegmentsCount; x++)
+                    terrainSegments[x, z].Draw(view, projection, 
+                        this.GetService<CameraComponent>().Position, 
+                        directionalLight, pointLights);
+            
 
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
@@ -1031,7 +1118,7 @@ namespace datx02_rally
 
                 Vector3 normal = Vector3.Up;
 
-                position.Y *= heightScale * triangleSize;
+                position.Y *= terrainYScale * terrainXZScale;
 
                 foreach (var triangle in navMesh.triangles)
                 {

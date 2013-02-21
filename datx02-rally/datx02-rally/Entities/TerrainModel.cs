@@ -50,26 +50,24 @@ namespace datx02_rally
 
         public Matrix Projection { get; set; }
 
-        public float HeightOffset { get; set; }
-        
-        public TerrainModel (GraphicsDevice device, int offsetX, int width, int offsetZ, int depth, float triangleSize, float heightScale, float[,] heightMap, float[,] roadMap)
+        public TerrainModel(GraphicsDevice device, int terrainSize, int terrainSegments, float terrainStart,
+            int xOffset, int zOffset,
+            float terrainXZScale, float terrainYScale, 
+            float[,] heightMap, float[,] roadMap)
         {
             this.device = device;
 
-            int vertexCount = width * depth,
-                lastWidthIndex = width - 1,
-                lastHeightIndex = depth - 1;
+            //int terrainSizeMinusOne = terrainSize;
+            //terrainSize++;
 
-            float halfWidth = width / 2f,
-                halfDepth = depth / 2f;
+            int terrainSizeMinusOne = terrainSize - 1;
 
-            HeightOffset = 0; // -1425;
-
+            int vertexCount = terrainSize * terrainSize;
             vertices = new MultitexturedVertex[vertexCount];
 
-            for (int z = 0; z < depth; z++)
+            for (int z = 0; z < terrainSize; z++)
             {
-                for (int x = 0; x < width; x++)
+                for (int x = 0; x < terrainSize; x++)
                 {
                     //Vector4 textureWeights = new Vector4(
                     //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0) / 0.3f, 0, 1),
@@ -87,24 +85,25 @@ namespace datx02_rally
 
                     textureWeights.Normalize();
 
-                    vertices[z * width + x] = new MultitexturedVertex(
+                    vertices[z * terrainSize + x] = new MultitexturedVertex(
                         new Vector3(
-                            ((x - offsetX) - halfWidth) * triangleSize, // X
-                            (heightMap != null ? heightScale * triangleSize * heightMap[x, z] : 0) + HeightOffset, // Y
-                            ((z - offsetZ) - halfDepth) * triangleSize), // Z
+                            (terrainStart + xOffset + x) * terrainXZScale, // X
+                            terrainYScale * heightMap[xOffset + x, zOffset + z], // Y
+                            (terrainStart + zOffset + z) * terrainXZScale), // Z
                         Vector3.Zero, // Normal
-                        new Vector2(x / 50f, z / 50f), //new Vector2(x / 10f, z / 10f),
+                        new Vector2(x / 21f, z / 21f), // TODO: TEXTUREWEIGHTS!!! CH
                         textureWeights);
 
                 }
             }
 
+            #region Indicies & Vertex normals setup
 
             int flexIndice = 1;
             int rowIndex = 2;
-            int[] indices = new int[(width-1) * (depth-1) * 6];
+            int[] indices = new int[terrainSizeMinusOne * terrainSizeMinusOne * 6];
             indices[0] = 0;
-            indices[1] = width;
+            indices[1] = terrainSize;
             indices[2] = flexIndice;
 
             for (int i = 5; i <= indices.Length; i += 3)
@@ -114,27 +113,26 @@ namespace datx02_rally
 
                 if (i % 2 == 0)
                 {
-                    flexIndice -= (width-1);
+                    flexIndice -= terrainSizeMinusOne;
                     indices[i] = flexIndice;
                 }
                 else
                 {
-                    flexIndice += width;
+                    flexIndice += terrainSize;
                     indices[i] = flexIndice;
                 }
                 if (i + 3 >= indices.Length)
                     break;
-                else if (rowIndex * width -1 == indices[i])
+                else if (rowIndex * terrainSize - 1 == indices[i])
                 {
-                    indices[i + 1] = flexIndice - width + 1;
+                    indices[i + 1] = flexIndice - terrainSize + 1;
                     indices[i + 2] = flexIndice + 1;
-                    indices[i + 3] = flexIndice - width + 2;
+                    indices[i + 3] = flexIndice - terrainSize + 2;
                     flexIndice = indices[i + 3];
                     rowIndex++;
                     i += 3;
                 }
             }
-
 
             for (int i = 0; i < indices.Length / 3; i++)
             {
@@ -143,7 +141,6 @@ namespace datx02_rally
                 Vector3 thirdvec = vertices[indices[i * 3 + 2]].Position;
                 Vector3 firstsub = secondvec - firstvec;
                 Vector3 secondsub = thirdvec - firstvec;
-
 
                 Vector3 normal;
                 if(i % 2 == 0)
@@ -164,8 +161,9 @@ namespace datx02_rally
                 vertices[i].Normal.Normalize();
             }
 
+            #endregion
 
-            indexBuffer = new IndexBuffer(device, typeof(int), (width-1) * (depth-1) * 6, BufferUsage.None);
+            indexBuffer = new IndexBuffer(device, typeof(int), terrainSizeMinusOne * terrainSizeMinusOne * 6, BufferUsage.None);
             indexBuffer.SetData(indices);
 
             vertexBuffer = new VertexBuffer(device,
