@@ -14,8 +14,6 @@ namespace datx02_rally.GameLogic
         private List<CurveNode> nodes = new List<CurveNode>();
         private Vector3[] subPath = new Vector3[4];
 
-        public static Random random = new Random();
-
         /// <summary>
         /// 
         /// </summary>
@@ -27,22 +25,22 @@ namespace datx02_rally.GameLogic
 
             nodes.Add(new CurveNode() {
                 Position = new Vector3(0, .2f, -halfSide),
-                Tangent = Vector3.Transform(new Vector3(variation * halfSide, 0, 0), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * random.NextDouble() - 1)))
+                Tangent = Vector3.Transform(new Vector3(variation * halfSide, 0, 0), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
             });
             nodes.Add(new CurveNode()
             {
                 Position = new Vector3(halfSide, .15f, 0),
-                Tangent = Vector3.Transform(new Vector3(0, 0, variation * halfSide), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * random.NextDouble() - 1)))
+                Tangent = Vector3.Transform(new Vector3(0, 0, variation * halfSide), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
             });
             nodes.Add(new CurveNode()
             {
                 Position = new Vector3(0, .18f, halfSide),
-                Tangent = Vector3.Transform(new Vector3(variation * -halfSide, 0, 0), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * random.NextDouble() - 1)))
+                Tangent = Vector3.Transform(new Vector3(variation * -halfSide, 0, 0), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
             });
             nodes.Add(new CurveNode()
             {
                 Position = new Vector3(-halfSide, .25f, 0),
-                Tangent = Vector3.Transform(new Vector3(0, 0, variation * -halfSide), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * random.NextDouble() - 1)))
+                Tangent = Vector3.Transform(new Vector3(0, 0, variation * -halfSide), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
             });
         }
 

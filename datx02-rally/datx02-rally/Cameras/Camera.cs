@@ -15,7 +15,6 @@ namespace datx02_rally
 
         protected bool ShakeEnabled { get; private set; }
         protected Matrix ShakeTransfomation { get; private set; }
-        private static Random random = new Random();
         protected float shake;
 
         public Camera()
@@ -30,8 +29,8 @@ namespace datx02_rally
 
             if (shake > 0.01)
                 ShakeTransfomation *= Matrix.CreateTranslation(
-                    20 * shake * (float)(random.NextDouble() - .5),
-                    20 * shake * (float)(random.NextDouble() - .5), 0);
+                    20 * shake * (float)(UniversalRandom.GetInstance().NextDouble() - .5),
+                    20 * shake * (float)(UniversalRandom.GetInstance().NextDouble() - .5), 0);
             else
                 ShakeTransfomation = Matrix.Identity;
 

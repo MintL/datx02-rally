@@ -179,6 +179,7 @@
     <Compile Include="Particles\Systems\YellowPlasmaParticleSystem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Cameras\ThirdPersonCamera.cs" />
+    <Compile Include="UniversalRandom.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

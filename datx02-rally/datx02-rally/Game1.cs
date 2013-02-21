@@ -27,8 +27,6 @@ namespace datx02_rally
         GraphicsDeviceManager graphics;
         public SpriteBatch spriteBatch;
 
-        Random random = new Random();
-
         Matrix projectionMatrix;
 
         #region PostProcess
@@ -134,6 +132,8 @@ namespace datx02_rally
 
         public Game1()
         {
+            UniversalRandom.ResetInstance(0);
+
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
@@ -407,9 +407,9 @@ namespace datx02_rally
                 //    MathHelper.Lerp(-200, 400, (float)random.NextDouble())
                 //);
 
-                var t = navMesh.triangles[random.Next(navMesh.triangles.Length)];
-                float v = (float)random.NextDouble();
-                float u = ((float)random.NextDouble() - .5f);
+                var t = navMesh.triangles[UniversalRandom.GetInstance().Next(navMesh.triangles.Length)];
+                float v = (float)UniversalRandom.GetInstance().NextDouble();
+                float u = ((float)UniversalRandom.GetInstance().NextDouble() - .5f);
                 if (u < 0)
                     u -= .5f;
                 else
@@ -447,7 +447,8 @@ namespace datx02_rally
                 treePos.Y = height * heightScale * triangleSize;
 
                 treePositions[i] = treePos;
-                treeTransforms[i] = Matrix.CreateScale(1 + 8 * (float)random.NextDouble()) * Matrix.CreateRotationY(MathHelper.Lerp(0, MathHelper.Pi * 2, (float)random.NextDouble()));
+                treeTransforms[i] = Matrix.CreateScale(1 + 8 * (float)UniversalRandom.GetInstance().NextDouble()) * 
+                    Matrix.CreateRotationY(MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()));
             }
 
             // {
@@ -479,9 +480,9 @@ namespace datx02_rally
                 point.Y *= heightScale * triangleSize;
 
                 Vector3 color = new Vector3(
-                    .6f + .4f * (float)random.NextDouble(),
-                    .6f + .4f * (float)random.NextDouble(),
-                    .6f + .4f * (float)random.NextDouble());
+                    .6f + .4f * (float)UniversalRandom.GetInstance().NextDouble(),
+                    .6f + .4f * (float)UniversalRandom.GetInstance().NextDouble(),
+                    .6f + .4f * (float)UniversalRandom.GetInstance().NextDouble());
                 pointLights.Add(new PointLight(point + pointLightOffset, color, 500.0f));
 
             }
@@ -690,9 +691,9 @@ namespace datx02_rally
                 for (int z = -6; z < 6; z++)
                 {
                     rainSystem.AddParticle(Car.Position + new Vector3(
-                        (float)random.NextDouble() * x * 200, 
-                        500 * (float)random.NextDouble(), 
-                        (float)random.NextDouble() * z * 200), 
+                        (float)UniversalRandom.GetInstance().NextDouble() * x * 200,
+                        500 * (float)UniversalRandom.GetInstance().NextDouble(),
+                        (float)UniversalRandom.GetInstance().NextDouble() * z * 200), 
                         Vector3.Down);
                 }
             }
