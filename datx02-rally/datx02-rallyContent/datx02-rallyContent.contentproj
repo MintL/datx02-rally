@@ -342,7 +342,7 @@
       <Name>rainDrop</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
-	</Compile>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Effects\Bloom.fx">
@@ -354,6 +354,27 @@
   <ItemGroup>
     <Compile Include="Effects\GaussianBlur.fx">
       <Name>GaussianBlur</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Effects\Prelight\DepthNormal.fx">
+      <Name>DepthNormal</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Effects\Prelight\Shared.vsi">
+      <Name>Shared</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Effects\Prelight\Light.fx">
+      <Name>Light</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </Compile>
