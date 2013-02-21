@@ -73,6 +73,8 @@ struct VertexShaderInput
 	float4 TexWeights : TEXCOORD1;
 };
 
+#include "Prelight/Shared.vsi"
+
 struct VertexShaderOutput
 {
     float4 Position : POSITION0;
@@ -81,6 +83,7 @@ struct VertexShaderOutput
 	float3 ViewDirection : TEXCOORD2;
 	float3 WorldPosition : TEXCOORD3;
 	float4 TexWeights : TEXCOORD4;
+	float3 PositionCopy : TEXCOORD5;
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
@@ -96,6 +99,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     output.Normal = mul(input.Normal, NormalMatrix);
 	output.WorldPosition = worldPosition.xyz;
 	output.TexWeights = input.TexWeights;
+	output.PositionCopy = output.Position;
 
     return output;
 }
@@ -114,6 +118,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	color += tex2D(TextureMapSampler2, input.TexCoord) * input.TexWeights.z;
 	color += tex2D(TextureMapSampler3, input.TexCoord) * input.TexWeights.w;
 	
+	/*
 	float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
 	//float4 totalLight = color;
 
@@ -138,8 +143,13 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	totalLight.rgb += selfShadow * (DirectionalDiffuse * color.rgb * saturate(dot(normal, directionToLight)));
 	
 	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
-	//float4(DirectionalAmbient, 1.0) * 
-	return totalLight;
+	*/
+
+	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
+	float3 light = tex2D(lightSampler, texCoord);
+	light += DirectionalAmbient;
+
+	return float4(color * light, 1);
 }
 
 technique Technique1
