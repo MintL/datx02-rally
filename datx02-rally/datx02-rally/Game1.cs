@@ -865,6 +865,7 @@ namespace datx02_rally
             GraphicsDevice.Clear(Color.Black);
             GraphicsDevice.BlendState = BlendState.Additive;
             GraphicsDevice.DepthStencilState = DepthStencilState.None;
+            
 
             BasicEffect current = (BasicEffect)lightModel.Meshes[0].MeshParts[0].Effect;
             foreach (PointLight light in pointLights)
@@ -877,7 +878,7 @@ namespace datx02_rally
                 Matrix wvp = (Matrix.CreateScale(light.Range / 50) * Matrix.CreateTranslation(light.Position)) * viewProjection;
                 lightingEffect.Parameters["WorldViewProjection"].SetValue(wvp);
                 //lightingEffect.CurrentTechnique.Passes[0].Apply();
-                float dist = Vector3.Distance(this.GetService<CameraComponent>().Position, light.Position);
+                //float dist = Vector3.Distance(this.GetService<CameraComponent>().Position, light.Position);
 
                 //if (dist < light.Range)
                    //GraphicsDevice.RasterizerState = RasterizerState.CullClockwise;

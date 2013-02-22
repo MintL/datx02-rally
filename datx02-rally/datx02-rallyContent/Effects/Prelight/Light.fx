@@ -63,17 +63,21 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	// Extract the normal from the normal map and move from
 	// 0 to 1 range to -1 to 1 range
-	float4 normal = (tex2D(normalSampler, texCoord) - .5) * 2;
+	float4 normal = normalize((tex2D(normalSampler, texCoord) - .5) * 2);
 
 	// Perform lighting calculations
-	float3 lightDirection = normalize(LightPosition - position);
+	float3 lightDirection = LightPosition - position;
+	float att = saturate(1 - dot(lightDirection / LightAttenuation, lightDirection / LightAttenuation));
+
+	lightDirection = normalize(lightDirection);
 	float lighting = clamp(dot(normal, lightDirection), 0, 1);
 
-	// Attenuate the light to simulate a point light
-	float d = distance(LightPosition, position);
-	float att = 1 - pow(d / LightAttenuation, 6);
 
-	return float4(LightColor * lighting, 1);
+	// Attenuate the light to simulate a point light
+	//float d = distance(LightPosition, position);
+	
+
+	return float4(LightColor * lighting * att, 1);
 }
 
 technique Technique1
