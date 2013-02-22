@@ -35,7 +35,7 @@ namespace datx02_rally
 
         public ITargetNode TargetNode { get; set; }
 
-        public ThirdPersonCamera(ITargetNode targetNode, Vector3 lookUpOffset, InputComponent input)
+        public ThirdPersonCamera(ITargetNode targetNode, Vector3 lookUpOffset, InputComponent input) : base()
         {
             this.TargetNode = targetNode;
             Zoom = 300;
@@ -58,9 +58,10 @@ namespace datx02_rally
             cameraRotation = Matrix.Lerp(cameraRotation, TargetNode.RotationMatrix, .075f);
             cameraTranslation = Matrix.Lerp(cameraTranslation, TargetNode.TranslationMatrix, .98f);
             //cameraTranslation = TargetNode.TranslationMatrix;
-            Position = Vector3.Transform(Zoom * offset, extraOffset * cameraRotation * cameraTranslation);
+            Position = Vector3.Transform(Zoom * offset, extraOffset * cameraRotation * cameraTranslation * Matrix.CreateTranslation(Vector3.Down * 25));
             View = Matrix.CreateLookAt(Position,
                 Vector3.Transform(lookUpOffset, cameraRotation * cameraTranslation), Vector3.Up);
+            base.Update(gameTime);
         }
 
     }

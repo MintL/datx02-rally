@@ -63,9 +63,9 @@ namespace datx02_rally
             this.Position = Vector3.Zero;
 
             // Constants
-            Acceleration = .35f;
-            MaxSpeed = 20;
-            MaxWheelTurn = MathHelper.PiOver4 / 1.7f;
+            Acceleration = .1f;
+            MaxSpeed = 50;
+            MaxWheelTurn = MathHelper.PiOver4 / 0.7f;
             TurnSpeed = .005f;
 
             Normal = Vector3.Up;

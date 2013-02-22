@@ -120,19 +120,27 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Components\FPSComponent.cs" />
     <Compile Include="Components\HUDConsoleComponent.cs" />
     <Compile Include="DebugConsole\Commands\ConnectCommand.cs" />
     <Compile Include="DebugConsole\Commands\ClearCommand.cs" />
     <Compile Include="DebugConsole\Commands\ChatCommand.cs" />
     <Compile Include="DebugConsole\Commands\NameCommand.cs" />
+    <Compile Include="DebugConsole\Commands\SetCommand.cs" />
     <Compile Include="DebugConsole\Commands\ShowCommand.cs" />
     <Compile Include="DebugConsole\Commands\HelpCommand.cs" />
     <Compile Include="DebugConsole\Commands\ExitCommand.cs" />
     <Compile Include="DebugConsole\Commands\DisconnectCommand.cs" />
     <Compile Include="DebugConsole\ICommand.cs" />
     <Compile Include="Menus\MainMenu.cs" />
+    <Compile Include="Graphics\Bloom.cs" />
+    <Compile Include="Graphics\GaussianBlur.cs" />
+    <Compile Include="Menus\GameComponent1.cs" />
     <Compile Include="Network\ServerReceiver.cs" />
     <Compile Include="Network\ServerSender.cs" />
+    <Compile Include="Particles\WeatherSystems\RainParticleSystem.cs" />
+    <Compile Include="Particles\WeatherSystems\ThunderBoltGenerator.cs" />
+    <Compile Include="Particles\WeatherSystems\ThunderParticleSystem.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PointLight.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -174,6 +182,12 @@
     <Compile Include="Particles\Systems\YellowPlasmaParticleSystem.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Cameras\ThirdPersonCamera.cs" />
+    <Compile Include="GameSettings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>GameSettings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="ViewHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
@@ -213,7 +227,15 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="app.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="GameSettings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>GameSettings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--

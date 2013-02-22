@@ -46,11 +46,11 @@ namespace datx02_rally
 
             BlendState bs = new BlendState();
 
-            bs.AlphaDestinationBlend = Blend.One; //BlendState.Additive.AlphaDestinationBlend;
-            bs.AlphaSourceBlend = Blend.One;// BlendState.Additive.AlphaSourceBlend;
+            bs.AlphaDestinationBlend = Blend.One;
+            bs.AlphaSourceBlend = Blend.One;
 
             bs.ColorDestinationBlend = Blend.InverseSourceAlpha;
-            bs.ColorSourceBlend = Blend.SourceAlpha; // BlendState.Additive.ColorSourceBlend;
+            bs.ColorSourceBlend = Blend.SourceAlpha;
 
             settings.BlendState = bs;
 

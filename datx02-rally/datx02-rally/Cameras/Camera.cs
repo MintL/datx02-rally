@@ -13,7 +13,30 @@ namespace datx02_rally
 
         public abstract Vector3 Position { get; protected set; }
 
-        public abstract void Update(GameTime gameTime);
+        protected bool ShakeEnabled { get; private set; }
+        protected Matrix ShakeTransfomation { get; private set; }
+        private static Random random = new Random();
+        protected float shake;
+
+        public Camera()
+        {
+            ShakeTransfomation = Matrix.Identity;
+            ShakeEnabled = true;
+        }
+
+        public virtual void Update(GameTime gameTime)
+        {
+            shake *= .9f;
+
+            if (shake > 0.01)
+                ShakeTransfomation *= Matrix.CreateTranslation(
+                    20 * shake * (float)(random.NextDouble() - .5),
+                    20 * shake * (float)(random.NextDouble() - .5), 0);
+            else
+                ShakeTransfomation = Matrix.Identity;
+
+            View *= ShakeTransfomation;
+        }
 
         protected InputComponent input;
 
@@ -35,5 +58,11 @@ namespace datx02_rally
         }
 
         public event EventHandler<EventArgs> UpdateOrderChanged;
+
+        internal void Shake()
+        {
+            if (ShakeEnabled)
+                shake = 1;
+        }
     }
 }

@@ -93,7 +93,7 @@ namespace datx02_rally
                             (heightMap != null ? heightScale * triangleSize * heightMap[x, z] : 0) + HeightOffset, // Y
                             ((z - offsetZ) - halfDepth) * triangleSize), // Z
                         Vector3.Zero, // Normal
-                        new Vector2(x / 2f, z / 2f),//new Vector2(x / 10f, z / 10f),
+                        new Vector2(x / 50f, z / 50f), //new Vector2(x / 10f, z / 10f),
                         textureWeights);
 
                 }
@@ -175,9 +175,9 @@ namespace datx02_rally
         }
 
         
-        public void Draw(Matrix view, Vector3 cameraPosition, DirectionalLight directionalLight, List<PointLight> pointLights)
+        public void Draw(Matrix view, Matrix projection, Vector3 cameraPosition, DirectionalLight directionalLight, List<PointLight> pointLights)
         {
-
+            Projection = projection;
             Effect.Parameters["EyePosition"].SetValue(cameraPosition);
             Effect.Parameters["View"].SetValue(view);
             Effect.Parameters["World"].SetValue(Matrix.Identity);
@@ -189,7 +189,7 @@ namespace datx02_rally
             Effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
             Effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
 
-            /*Vector3[] positions = new Vector3[pointLights.Count];
+            Vector3[] positions = new Vector3[pointLights.Count];
             Vector3[] diffuses = new Vector3[pointLights.Count];
             float[] ranges = new float[pointLights.Count];
             for (int i = 0; i < 10; i++)
@@ -199,17 +199,19 @@ namespace datx02_rally
                 ranges[i] = pointLights[i].Range;
             }
 
+            int noOfLights = GameSettings.Default.PerformanceMode ? 0 : 10;
+
             Effect.Parameters["LightPosition"].SetValue(positions);
             Effect.Parameters["LightDiffuse"].SetValue(diffuses);
             Effect.Parameters["LightRange"].SetValue(ranges);
-            Effect.Parameters["NumLights"].SetValue(10);
-            */
+            Effect.Parameters["NumLights"].SetValue(noOfLights);
+            
             foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
             {
                 pass.Apply();
                 device.Indices = indexBuffer;
                 device.SetVertexBuffer(vertexBuffer);
-                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, vertexBuffer.VertexCount*2);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, indexBuffer.IndexCount/3);
             }
         }
     }

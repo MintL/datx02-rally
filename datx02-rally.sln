@@ -1,11 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+# Visual C# Express 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "datx02-rally", "datx02-rally\datx02-rally\datx02-rally.csproj", "{4E994360-DF8F-4459-A4CF-0DA97B35B390}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "datx02-rallyContent", "datx02-rally\datx02-rallyContent\datx02-rallyContent.contentproj", "{E3618D78-69E9-4178-98DA-0B28EE92D4FC}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeightmapProcessor", "HeightmapProcessorN\HeightmapProcessor.csproj", "{E9295A6F-82D3-4214-BDF8-CD151DEFF527}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameServer", "GameServer\GameServer.csproj", "{5A974BCA-3176-46B1-8A1B-33ACC33E32DB}"
 EndProject
@@ -26,23 +24,13 @@ Global
 		{E3618D78-69E9-4178-98DA-0B28EE92D4FC}.Debug|x86.ActiveCfg = Debug|x86
 		{E3618D78-69E9-4178-98DA-0B28EE92D4FC}.Debug|Xbox 360.ActiveCfg = Debug|x86
 		{E3618D78-69E9-4178-98DA-0B28EE92D4FC}.Release|x86.ActiveCfg = Release|x86
-		{B77B7730-EEE4-46D2-AC5C-3943C1B1E57C}.Debug|x86.ActiveCfg = Debug|x86
-		{B77B7730-EEE4-46D2-AC5C-3943C1B1E57C}.Debug|x86.Build.0 = Debug|x86
-		{B77B7730-EEE4-46D2-AC5C-3943C1B1E57C}.Release|x86.ActiveCfg = Release|x86
-		{B77B7730-EEE4-46D2-AC5C-3943C1B1E57C}.Release|x86.Build.0 = Release|x86
+		{E3618D78-69E9-4178-98DA-0B28EE92D4FC}.Release|Xbox 360.ActiveCfg = Release|x86
 		{5A974BCA-3176-46B1-8A1B-33ACC33E32DB}.Debug|x86.ActiveCfg = Debug|x86
 		{5A974BCA-3176-46B1-8A1B-33ACC33E32DB}.Debug|x86.Build.0 = Debug|x86
+		{5A974BCA-3176-46B1-8A1B-33ACC33E32DB}.Debug|Xbox 360.ActiveCfg = Debug|x86
 		{5A974BCA-3176-46B1-8A1B-33ACC33E32DB}.Release|x86.ActiveCfg = Release|x86
 		{5A974BCA-3176-46B1-8A1B-33ACC33E32DB}.Release|x86.Build.0 = Release|x86
-		{E3618D78-69E9-4178-98DA-0B28EE92D4FC}.Release|Xbox 360.ActiveCfg = Release|x86
-		{E9295A6F-82D3-4214-BDF8-CD151DEFF527}.Debug|x86.ActiveCfg = Debug|x86
-		{E9295A6F-82D3-4214-BDF8-CD151DEFF527}.Debug|x86.Build.0 = Debug|x86
-		{E9295A6F-82D3-4214-BDF8-CD151DEFF527}.Debug|Xbox 360.ActiveCfg = Debug|x86
-		{E9295A6F-82D3-4214-BDF8-CD151DEFF527}.Debug|Xbox 360.Build.0 = Debug|x86
-		{E9295A6F-82D3-4214-BDF8-CD151DEFF527}.Release|x86.ActiveCfg = Debug|x86
-		{E9295A6F-82D3-4214-BDF8-CD151DEFF527}.Release|x86.Build.0 = Debug|x86
-		{E9295A6F-82D3-4214-BDF8-CD151DEFF527}.Release|Xbox 360.ActiveCfg = Debug|x86
-		{E9295A6F-82D3-4214-BDF8-CD151DEFF527}.Release|Xbox 360.Build.0 = Debug|x86
+		{5A974BCA-3176-46B1-8A1B-33ACC33E32DB}.Release|Xbox 360.ActiveCfg = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

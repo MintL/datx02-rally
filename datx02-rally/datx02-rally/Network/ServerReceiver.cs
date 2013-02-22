@@ -57,7 +57,7 @@ namespace datx02_rally
             switch (type)
             {
                 case MessageType.PlayerPos:
-                    player.SetPosition(msg.ReadFloat(), msg.ReadFloat(), msg.ReadFloat());
+                    player.SetPosition(msg.ReadFloat(), msg.ReadFloat(), msg.ReadFloat(), msg.ReadFloat());
                     break;
                 case MessageType.Chat:
                     string chatMsg = msg.ReadString();
@@ -88,9 +88,16 @@ namespace datx02_rally
                             {
                                 discoveredPlayer.PlayerName = discoveredPlayerName; // maybe has changed name
                                 newPlayerList[discoveredPlayerId] = discoveredPlayer;
+                                PlayerList.Remove(discoveredPlayerId);
                             }
                         }
                         ServerHandler.Players = newPlayerList;
+                    }
+                    // Remaining players in PlayerList are no longer connected to server.
+                    foreach (var disconnectedPlayer in PlayerList.Values)
+                    {
+                        ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Player "+disconnectedPlayer.PlayerName+" disconnected!");
+                        ServerHandler.Game.GetService<CarControlComponent>().RemoveCar(disconnectedPlayer);
                     }
                     break;
                 case MessageType.OK:

@@ -8,11 +8,11 @@ namespace datx02_rally
 {
     class Player : GameComponent
     {
-        public Vector3 Position;
+        public Vector3 Position { get; set; }
+        public float Rotation { get; set; }
         public byte ID;
         public readonly bool LOCAL_PLAYER;
         public string PlayerName;
-
         public Player(Game1 game) : base(game)
         {
             PlayerName = "UnnamedPlayer";
@@ -36,17 +36,17 @@ namespace datx02_rally
         /// Gets 
         /// </summary>
         /// <returns></returns>
-        public void SetPosition(float x, float y, float z) 
-        { 
-            Position.X = x;
-            Position.Y = y;
-            Position.Z = z;
+        public void SetPosition(float x, float y, float z, float rotation) 
+        {
+            Position = new Vector3(x, y, z);
+            Rotation = rotation;
         }
 
         public Vector3 GetPosition()
         {
             return Game.GetService<CarControlComponent>().Cars[this].Position;
         }
+
 
     }
 }
