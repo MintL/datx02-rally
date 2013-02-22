@@ -183,12 +183,15 @@ namespace datx02_rally
             Effect.Parameters["World"].SetValue(Matrix.Identity);
             Effect.Parameters["Projection"].SetValue(Projection);
 
-            /*Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
+            //Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
 
-            Effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
-            Effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
-            Effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
-
+            if (Effect.CurrentTechnique.Name == "TerrainShading")
+            {
+                Effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
+                Effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
+                Effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
+            }
+/*
             Vector3[] positions = new Vector3[pointLights.Count];
             Vector3[] diffuses = new Vector3[pointLights.Count];
             float[] ranges = new float[pointLights.Count];

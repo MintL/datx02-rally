@@ -246,7 +246,7 @@ namespace datx02_rally
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
-                GraphicsDevice.Viewport.AspectRatio, .1f, 50000f);
+                GraphicsDevice.Viewport.AspectRatio, 0.1f, 50000f);
 
             #region Lights
 
@@ -524,7 +524,7 @@ namespace datx02_rally
             int viewWidth = GraphicsDevice.Viewport.Width;
             int viewHeight = GraphicsDevice.Viewport.Height;
 
-            depthTarget = new RenderTarget2D(GraphicsDevice, viewWidth, viewHeight, false, SurfaceFormat.Color, DepthFormat.Depth24);
+            depthTarget = new RenderTarget2D(GraphicsDevice, viewWidth, viewHeight, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
             normalTarget = new RenderTarget2D(GraphicsDevice, viewWidth, viewHeight, false, SurfaceFormat.Color, DepthFormat.Depth24);
             lightTarget = new RenderTarget2D(GraphicsDevice, viewWidth, viewHeight, false, SurfaceFormat.Color, DepthFormat.Depth24);
 
@@ -814,13 +814,22 @@ namespace datx02_rally
             Matrix view = this.GetService<CameraComponent>().View;
 
             #region Prelighting
+            GraphicsDevice.RasterizerState = RasterizerState.CullNone;
+            GraphicsDevice.DepthStencilState = new DepthStencilState { DepthBufferEnable = true, DepthBufferFunction = CompareFunction.LessEqual };
             GraphicsDevice.SetRenderTargets(normalTarget, depthTarget);
-            GraphicsDevice.Clear(Color.White);
+            GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.DarkSlateBlue, 1.0f, 0);
+            //GraphicsDevice.Clear(Color.Black);
 
             Effect current = terrain.Effect;
             terrain.Effect = depthNormalEffect;
             terrain.Draw(view, projectionMatrix, this.GetService<CameraComponent>().Position, directionalLight, pointLights);
             terrain.Effect = current;
+            //oakTree.Meshes[0].MeshParts[0].Effect = depthNormalEffect;
+            //oakTree.Meshes[0].MeshParts[1].Effect = depthNormalEffect;
+            //for (int i = 0; i < treePositions.Length; i++)
+            //{
+            //    DrawModel(oakTree, view, projectionMatrix, treePositions[i], treeTransforms[i]);
+            //}
 
             GraphicsDevice.SetRenderTargets(null);
 
@@ -878,12 +887,12 @@ namespace datx02_rally
                 Matrix wvp = (Matrix.CreateScale(light.Range / 50) * Matrix.CreateTranslation(light.Position)) * viewProjection;
                 lightingEffect.Parameters["WorldViewProjection"].SetValue(wvp);
                 //lightingEffect.CurrentTechnique.Passes[0].Apply();
-                //float dist = Vector3.Distance(this.GetService<CameraComponent>().Position, light.Position);
+                float dist = Vector3.Distance(this.GetService<CameraComponent>().Position, light.Position);
 
                 //if (dist < light.Range)
-                   //GraphicsDevice.RasterizerState = RasterizerState.CullClockwise;
+                GraphicsDevice.RasterizerState = RasterizerState.CullNone;
                 lightModel.Meshes[0].Draw();
-                //GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
+                GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
             }
 
             lightModel.Meshes[0].MeshParts[0].Effect = current;
@@ -970,8 +979,8 @@ namespace datx02_rally
             foreach (ParticleSystem pSystem in particleSystems)
                 pSystem.SetCamera(view, projection);
 
-            for (int i = 0; i < 10; i++)
-                pointLights[i].Draw(lightModel, view, projection);
+            //for (int i = 0; i < 10; i++)
+              //  pointLights[i].Draw(lightModel, view, projection);
 
             #region Foliage
 
@@ -1012,9 +1021,9 @@ namespace datx02_rally
                     effect.Parameters["View"].SetValue(view);
                     effect.Parameters["Projection"].SetValue(projection);
 
-                    effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
-                    effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
-                    effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
+                    //effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
+                    //effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
+                    //effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
                 }
                 mesh.Draw();
             }

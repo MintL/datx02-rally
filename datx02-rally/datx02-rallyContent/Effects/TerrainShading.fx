@@ -127,10 +127,10 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	color += tex2D(TextureMapSampler2, input.TexCoord) * input.TexWeights.z;
 	color += tex2D(TextureMapSampler3, input.TexCoord) * input.TexWeights.w;
 	
-	/*
+	
 	float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
 	//float4 totalLight = color;
-
+/*
 	// point lights
 	for (int i = 0; i < NumLights; i++)
 	{
@@ -145,23 +145,24 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 		totalLight.rgb +=
 			attenuation * (LightDiffuse[i] * color.rgb * saturate(dot(normal, directionToLight)));
-	}
+	}*/
+	
 	float3 directionToLight = -normalize(DirectionalDirection);
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 	
 	totalLight.rgb += selfShadow * (DirectionalDiffuse * color.rgb * saturate(dot(normal, directionToLight)));
 	
 	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
-	*/
+	
 
 	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
-	float3 light = tex2D(lightSampler, texCoord);
-	light += DirectionalAmbient;
+	totalLight += tex2D(lightSampler, texCoord);
+	//light += DirectionalAmbient;
 
-	return float4(color * light, 1);
+	return color * totalLight;
 }
 
-technique Technique1
+technique TerrainShading
 {
     pass Pass1
     {
