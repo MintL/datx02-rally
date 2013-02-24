@@ -41,9 +41,9 @@ PixelShaderOutput PixelShaderFunction(VertexShaderOutput input)
 {
     PixelShaderOutput output;
 
-	output.Depth = float4(0, 1, 1, 1);
+	output.Depth = float4(1, 1, 1, 1);
 	// Depth is stored as distance from camera / far plane distance to get value between 0 and 1
-	output.Depth.r = (input.Depth.x / input.Depth.y);
+	output.Depth.r = 1 - (input.Depth.x / input.Depth.y);
 
 	// Normal map simply stores x, y, and z of normal shifted from (-1 to 1) range to (0 to 1) range
 	output.Normal.xyz = (normalize(input.Normal).xyz / 2) + .5;

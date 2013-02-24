@@ -3,6 +3,7 @@
 float4x4 World;
 float4x4 View;
 float4x4 Projection;
+float4x4 PrelightProjection;
 float3 EyePosition;
 float4x4 NormalMatrix;
 
@@ -108,7 +109,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     output.Normal = mul(input.Normal, NormalMatrix);
 	output.WorldPosition = worldPosition.xyz;
 	output.TexWeights = input.TexWeights;
-	output.PositionCopy = output.Position;
+	output.PositionCopy = mul(viewPosition, PrelightProjection);
 
     return output;
 }

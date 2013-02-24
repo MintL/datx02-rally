@@ -524,7 +524,7 @@ namespace datx02_rally
             int viewWidth = GraphicsDevice.Viewport.Width;
             int viewHeight = GraphicsDevice.Viewport.Height;
 
-            depthTarget = new RenderTarget2D(GraphicsDevice, viewWidth, viewHeight, false, SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
+            depthTarget = new RenderTarget2D(GraphicsDevice, viewWidth, viewHeight, false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
             normalTarget = new RenderTarget2D(GraphicsDevice, viewWidth, viewHeight, false, SurfaceFormat.Color, DepthFormat.Depth24);
             lightTarget = new RenderTarget2D(GraphicsDevice, viewWidth, viewHeight, false, SurfaceFormat.Color, DepthFormat.Depth24);
 
@@ -721,15 +721,15 @@ namespace datx02_rally
             }
 
             
-            Vector3 carDirection = Vector3.Transform(Vector3.Forward,
-                Matrix.CreateRotationY(Car.Rotation));
-            Vector3 carPosition = Car.Position + carDirection * 1000;
-            pointLights.Sort(
-                delegate(PointLight x, PointLight y)
-                {
-                    return (int)(Vector3.DistanceSquared(x.Position, carPosition) - Vector3.DistanceSquared(y.Position, carPosition));
-                }
-            );
+            //Vector3 carDirection = Vector3.Transform(Vector3.Forward,
+            //    Matrix.CreateRotationY(Car.Rotation));
+            //Vector3 carPosition = Car.Position + carDirection * 1000;
+            //pointLights.Sort(
+            //    delegate(PointLight x, PointLight y)
+            //    {
+            //        return (int)(Vector3.DistanceSquared(x.Position, carPosition) - Vector3.DistanceSquared(y.Position, carPosition));
+            //    }
+            //);
 
             base.Update(gameTime);
         }
@@ -814,15 +814,17 @@ namespace datx02_rally
             Matrix view = this.GetService<CameraComponent>().View;
 
             #region Prelighting
+            Matrix lightProjection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
+                GraphicsDevice.Viewport.AspectRatio, 100f, 15000f);
             GraphicsDevice.RasterizerState = RasterizerState.CullNone;
             GraphicsDevice.DepthStencilState = new DepthStencilState { DepthBufferEnable = true, DepthBufferFunction = CompareFunction.LessEqual };
             GraphicsDevice.SetRenderTargets(normalTarget, depthTarget);
-            GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.DarkSlateBlue, 1.0f, 0);
-            //GraphicsDevice.Clear(Color.Black);
+            //GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.DarkSlateBlue, 0, 0);
+            GraphicsDevice.Clear(new Color(0, 255, 255));
 
             Effect current = terrain.Effect;
             terrain.Effect = depthNormalEffect;
-            terrain.Draw(view, projectionMatrix, this.GetService<CameraComponent>().Position, directionalLight, pointLights);
+            terrain.Draw(view, lightProjection, this.GetService<CameraComponent>().Position, directionalLight, pointLights);
             terrain.Effect = current;
             //oakTree.Meshes[0].MeshParts[0].Effect = depthNormalEffect;
             //oakTree.Meshes[0].MeshParts[1].Effect = depthNormalEffect;
@@ -833,8 +835,9 @@ namespace datx02_rally
 
             GraphicsDevice.SetRenderTargets(null);
 
-            drawLightMap(view * projectionMatrix);
+            drawLightMap(view * lightProjection);
             terrain.Effect.Parameters["LightTexture"].SetValue(lightTarget);
+            terrain.Effect.Parameters["PrelightProjection"].SetValue(lightProjection);
             terrain.Effect.Parameters["viewportWidth"].SetValue(GraphicsDevice.Viewport.Width);
             terrain.Effect.Parameters["viewportHeight"].SetValue(GraphicsDevice.Viewport.Height);
             #endregion
@@ -879,18 +882,18 @@ namespace datx02_rally
             BasicEffect current = (BasicEffect)lightModel.Meshes[0].MeshParts[0].Effect;
             foreach (PointLight light in pointLights)
             {
-                lightingEffect.Parameters["LightColor"].SetValue(light.Diffuse);
+                lightingEffect.Parameters["LightColor"].SetValue(light.Diffuse * 2);
                 lightingEffect.Parameters["LightPosition"].SetValue(light.Position);
                 lightingEffect.Parameters["LightAttenuation"].SetValue(light.Range);
 
                 lightModel.Meshes[0].MeshParts[0].Effect = lightingEffect;
-                Matrix wvp = (Matrix.CreateScale(light.Range / 50) * Matrix.CreateTranslation(light.Position)) * viewProjection;
+                Matrix wvp = (Matrix.CreateScale(light.Range / 10) * Matrix.CreateTranslation(light.Position)) * viewProjection;
                 lightingEffect.Parameters["WorldViewProjection"].SetValue(wvp);
                 //lightingEffect.CurrentTechnique.Passes[0].Apply();
                 float dist = Vector3.Distance(this.GetService<CameraComponent>().Position, light.Position);
 
                 //if (dist < light.Range)
-                GraphicsDevice.RasterizerState = RasterizerState.CullNone;
+                //GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
                 lightModel.Meshes[0].Draw();
                 GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
             }
@@ -913,7 +916,7 @@ namespace datx02_rally
             foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
-                spriteBatch.Draw(lightTarget, Vector2.Zero, Color.White);
+                spriteBatch.Draw(finalTexture, Vector2.Zero, Color.White);
 
             }
             spriteBatch.End();

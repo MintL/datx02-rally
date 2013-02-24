@@ -54,12 +54,13 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float4 position;
 	position.x = texCoord.x * 2 - 1;
 	position.y = (1 - texCoord.y) * 2 - 1;
-	position.z = depth.r;
+	position.z = 1 - depth.r;
 	position.w = 1.0f;
 
 	// Transform position from screen space to world space
 	position = mul(position, InvViewProjection);
 	position.xyz /= position.w;
+	position.w = 1;
 
 	// Extract the normal from the normal map and move from
 	// 0 to 1 range to -1 to 1 range
