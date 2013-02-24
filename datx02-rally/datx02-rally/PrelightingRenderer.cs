@@ -16,7 +16,9 @@ namespace datx02_rally
 
         TerrainModel terrain;
         List<PointLight> pointLights;
-        Model lightModel;
+        List<SpotLight> spotLights;
+        Model pointLightModel;
+        Model spotLightModel;
 
         Effect depthNormalEffect;
         Effect lightingEffect;
@@ -29,11 +31,12 @@ namespace datx02_rally
         int viewWidth;
         int viewHeight;
 
-        public PrelightingRenderer(GraphicsDevice device, ContentManager content, Model lightModel)
+        public PrelightingRenderer(GraphicsDevice device, ContentManager content, Model pointLightModel, Model spotLightModel)
         {
             this.device = device;
             this.content = content;
-            this.lightModel = lightModel;
+            this.pointLightModel = pointLightModel;
+            this.spotLightModel = spotLightModel;
             
             lightProjection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
                 device.Viewport.AspectRatio, 100f, 15000f);
@@ -52,10 +55,11 @@ namespace datx02_rally
             lightingEffect.Parameters["viewportHeight"].SetValue(viewHeight);
         }
 
-        public void Render(Matrix view, DirectionalLight directionalLight, TerrainModel terrain, List<PointLight> pointLights)
+        public void Render(Matrix view, DirectionalLight directionalLight, TerrainModel terrain, List<PointLight> pointLights, List<SpotLight> spotLights)
         {
             this.terrain = terrain;
             this.pointLights = pointLights;
+            this.spotLights = spotLights;
             
             RenderDepthNormal(view);
             RenderLight(view * lightProjection);
@@ -94,22 +98,22 @@ namespace datx02_rally
             device.DepthStencilState = DepthStencilState.None;
 
 
-            BasicEffect current = (BasicEffect)lightModel.Meshes[0].MeshParts[0].Effect;
+            BasicEffect current = (BasicEffect)pointLightModel.Meshes[0].MeshParts[0].Effect;
             foreach (PointLight light in pointLights)
             {
                 lightingEffect.Parameters["LightColor"].SetValue(light.Diffuse * 2);
                 lightingEffect.Parameters["LightPosition"].SetValue(light.Position);
                 lightingEffect.Parameters["LightAttenuation"].SetValue(light.Range);
 
-                lightModel.Meshes[0].MeshParts[0].Effect = lightingEffect;
+                pointLightModel.Meshes[0].MeshParts[0].Effect = lightingEffect;
                 Matrix wvp = (Matrix.CreateScale(light.Range / 10) * Matrix.CreateTranslation(light.Position)) * viewProjection;
                 lightingEffect.Parameters["WorldViewProjection"].SetValue(wvp);
 
                 device.RasterizerState = RasterizerState.CullCounterClockwise;
-                lightModel.Meshes[0].Draw();
+                pointLightModel.Meshes[0].Draw();
             }
 
-            lightModel.Meshes[0].MeshParts[0].Effect = current;
+            pointLightModel.Meshes[0].MeshParts[0].Effect = current;
 
             device.BlendState = BlendState.Opaque;
             device.DepthStencilState = DepthStencilState.Default;

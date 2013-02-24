@@ -52,9 +52,11 @@ namespace datx02_rally
         #region Lights
 
         // Model to represent a location of a pointlight
-        Model lightModel;
+        Model pointLightModel;
+        Model spotLightModel;
 
         List<PointLight> pointLights = new List<PointLight>();
+        List<SpotLight> spotLights = new List<SpotLight>();
         DirectionalLight directionalLight;
 
         #endregion
@@ -243,17 +245,6 @@ namespace datx02_rally
             projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
                 GraphicsDevice.Viewport.AspectRatio, 0.1f, 50000f);
 
-            #region Lights
-
-            // Load model to represent our lightsources
-            lightModel = Content.Load<Model>(@"Models/light");
-
-            //directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.2f);
-            directionalLight = new DirectionalLight(new Vector3(-1.0f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.4f);
-            Services.AddService(typeof(DirectionalLight), directionalLight);
-
-            #endregion
-
             #region MapGeneration
 
             HeightMap heightmapGenerator = new HeightMap(mapSize);
@@ -318,6 +309,43 @@ namespace datx02_rally
             Player localPlayer = this.GetService<ServerClient>().LocalPlayer;
             this.GetService<CarControlComponent>().Cars[localPlayer] = Car;
 
+            #endregion
+
+            #region Lights
+
+            // Load model to represent our lightsources
+            pointLightModel = Content.Load<Model>(@"Models/light");
+            spotLightModel = Content.Load<Model>(@"Models\Cone");
+            //directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.2f);
+            directionalLight = new DirectionalLight(new Vector3(-1.0f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.4f);
+            Services.AddService(typeof(DirectionalLight), directionalLight);
+
+            int numlights = 50;
+            Vector3 pointLightOffset = new Vector3(0, 50, 0);
+            for (int i = 0; i < numlights; i++)
+            {
+                float t = i / (float)numlights;
+                Vector3 point = raceTrack.Curve.GetPoint(t);
+                //Vector3 point2 = raceTrack.Curve.GetPoint(t + .01f * (t > .5f ? -1 : 1));
+                //var heading = (point2 - point1);
+                //var side = triangleSize * roadWidth * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
+                //point1.Y *= heightScale * triangleSize;
+
+                point.Y *= heightScale * triangleSize;
+
+                Vector3 color = new Vector3(
+                    .6f + .4f * (float)random.NextDouble(),
+                    .6f + .4f * (float)random.NextDouble(),
+                    .6f + .4f * (float)random.NextDouble());
+                pointLights.Add(new PointLight(point + pointLightOffset, color, 500.0f));
+
+            }
+
+            Vector3 forward = Vector3.Transform(Vector3.Backward,
+                Matrix.CreateRotationY(Car.Rotation));
+            Vector3 position = Car.Position;
+            position.Y *= heightScale * triangleSize;
+            spotLights.Add(new SpotLight(position + new Vector3(0, 50, 0), forward, Color.White.ToVector3(), 45, 45, 500));
             #endregion
 
             dustEmitter = new ParticleEmitter[]{
@@ -465,31 +493,6 @@ namespace datx02_rally
 
             #endregion
 
-            #region Point lights
-
-            int numlights = 50;
-            Vector3 pointLightOffset = new Vector3(0, 50, 0);
-            for (int i = 0; i < numlights; i++)
-            {
-                float t = i / (float)numlights;
-                Vector3 point = raceTrack.Curve.GetPoint(t);
-                //Vector3 point2 = raceTrack.Curve.GetPoint(t + .01f * (t > .5f ? -1 : 1));
-                //var heading = (point2 - point1);
-                //var side = triangleSize * roadWidth * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
-                //point1.Y *= heightScale * triangleSize;
-                
-                point.Y *= heightScale * triangleSize;
-
-                Vector3 color = new Vector3(
-                    .6f + .4f * (float)random.NextDouble(),
-                    .6f + .4f * (float)random.NextDouble(),
-                    .6f + .4f * (float)random.NextDouble());
-                pointLights.Add(new PointLight(point + pointLightOffset, color, 500.0f));
-
-            }
-
-            #endregion
-
             #region Cameras
 
             var input = this.GetService<InputComponent>();
@@ -516,7 +519,7 @@ namespace datx02_rally
             #endregion
 
             #region Prelighting
-            prelightingRenderer = new PrelightingRenderer(GraphicsDevice, Content, lightModel);
+            prelightingRenderer = new PrelightingRenderer(GraphicsDevice, Content, pointLightModel, spotLightModel);
             #endregion
         }
 
@@ -796,7 +799,7 @@ namespace datx02_rally
 
             Matrix view = this.GetService<CameraComponent>().View;
 
-            prelightingRenderer.Render(view, directionalLight, terrain, pointLights);
+            prelightingRenderer.Render(view, directionalLight, terrain, pointLights, spotLights);
 
 
             RenderEnvironmentMap(gameTime);
@@ -901,6 +904,10 @@ namespace datx02_rally
 
             //for (int i = 0; i < 10; i++)
               //  pointLights[i].Draw(lightModel, view, projection);
+            foreach (SpotLight spot in spotLights)
+            {
+                spot.Draw(spotLightModel, view, projection);
+            }
 
             #region Foliage
 

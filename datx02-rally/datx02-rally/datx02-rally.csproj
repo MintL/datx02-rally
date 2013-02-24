@@ -121,6 +121,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Components\HUDConsoleComponent.cs" />
+    <Compile Include="SpotLight.cs" />
     <Compile Include="DebugConsole\Commands\ConnectCommand.cs" />
     <Compile Include="DebugConsole\Commands\ClearCommand.cs" />
     <Compile Include="DebugConsole\Commands\ChatCommand.cs" />
