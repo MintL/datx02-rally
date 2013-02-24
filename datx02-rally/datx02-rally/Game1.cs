@@ -258,14 +258,14 @@ namespace datx02_rally
 
             #region Level terrain generation
 
-            int heightmapSize = terrainSegmentsCount * terrainSegmentSize;
+            int heightmapSize = terrainSegmentsCount * terrainSegmentSize + 1;
             HeightMap heightmapGenerator = new HeightMap(heightmapSize);
             var heightMap = heightmapGenerator.Generate();
 
             var roadMap = new float[heightmapSize, heightmapSize];
             raceTrack = new RaceTrack(((heightmapSize / 2) * terrainXZScale));
 
-            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 1500, roadWidth * terrainXZScale, terrainXZScale, terrainYScale);
+            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 1500, roadWidth * terrainXZScale, terrainXZScale, terrainYScale / terrainXZScale);
 
             Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f);
             lastPosition /= terrainXZScale;
@@ -308,6 +308,7 @@ namespace datx02_rally
             terrainEffect.Parameters["TextureMap1"].SetValue(Content.Load<Texture2D>(@"Terrain\grass"));
             terrainEffect.Parameters["TextureMap2"].SetValue(Content.Load<Texture2D>(@"Terrain\rock"));
             terrainEffect.Parameters["TextureMap3"].SetValue(Content.Load<Texture2D>(@"Terrain\snow"));
+            terrainEffect.Parameters["Projection"].SetValue(projectionMatrix);
 
             // Creates a terrainmodel around Vector3.Zero
             terrainSegments = new TerrainModel[terrainSegmentsCount, terrainSegmentsCount];
@@ -768,17 +769,17 @@ namespace datx02_rally
 
             #endregion
 
-            for (int x = -6; x < 6; x++)
-            {
-                for (int z = -6; z < 6; z++)
-                {
-                    rainSystem.AddParticle(Car.Position + new Vector3(
-                        (float)UniversalRandom.GetInstance().NextDouble() * x * 200,
-                        500 * (float)UniversalRandom.GetInstance().NextDouble(),
-                        (float)UniversalRandom.GetInstance().NextDouble() * z * 200), 
-                        Vector3.Down);
-                }
-            }
+            //for (int x = -6; x < 6; x++)
+            //{
+            //    for (int z = -6; z < 6; z++)
+            //    {
+            //        rainSystem.AddParticle(Car.Position + new Vector3(
+            //            (float)UniversalRandom.GetInstance().NextDouble() * x * 200,
+            //            500 * (float)UniversalRandom.GetInstance().NextDouble(),
+            //            (float)UniversalRandom.GetInstance().NextDouble() * z * 200), 
+            //            Vector3.Down);
+            //    }
+            //}
 
             
             Vector3 carDirection = Vector3.Transform(Vector3.Forward,
@@ -968,9 +969,14 @@ namespace datx02_rally
 
             for (int z = 0; z < terrainSegmentsCount; z++)
                 for (int x = 0; x < terrainSegmentsCount; x++)
-                    terrainSegments[x, z].Draw(view, projection, 
-                        this.GetService<CameraComponent>().Position, 
-                        directionalLight, pointLights);
+                {
+                    var terrain = terrainSegments[x, z];
+                    if (viewFrustum.Intersects(terrain.BoundingBox))
+                    {
+                        terrain.Draw(view, this.GetService<CameraComponent>().Position,
+                            directionalLight, pointLights);
+                    }
+                }
             
 
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
@@ -997,8 +1003,8 @@ namespace datx02_rally
 
             if (!environment)
             {
-                foreach (Car c in this.GetService<CarControlComponent>().Cars.Values) 
-                    DrawCar(view, projection, c);
+                foreach (Car car in this.GetService<CarControlComponent>().Cars.Values) 
+                    DrawCar(view, projection, car);
                 DrawGhostCar(view, projection, gameTime);
             }
         }

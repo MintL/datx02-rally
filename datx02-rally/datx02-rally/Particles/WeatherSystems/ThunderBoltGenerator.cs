@@ -43,7 +43,8 @@ namespace datx02_rally.Particles.WeatherSystems
 
         public override void Update(GameTime gameTime)
         {
-            if (UniversalRandom.GetInstance().NextDouble() < .002 || Game.GetService<InputComponent>().GetKey(Microsoft.Xna.Framework.Input.Keys.B))
+            if (//UniversalRandom.GetInstance().NextDouble() < .002 || 
+                Game.GetService<InputComponent>().GetKey(Microsoft.Xna.Framework.Input.Keys.B))
             {
                 flash = 1;
                 Game.GetService<CameraComponent>().CurrentCamera.Shake();

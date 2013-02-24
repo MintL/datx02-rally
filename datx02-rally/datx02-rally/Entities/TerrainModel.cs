@@ -41,15 +41,32 @@ namespace datx02_rally
     {
         private GraphicsDevice device;
 
-        public MultitexturedVertex[] vertices;
+        private MultitexturedVertex[] vertices;
+        
         private VertexBuffer vertexBuffer;
-
         private IndexBuffer indexBuffer;
+
 
         public Effect Effect { get; set; }
 
-        public Matrix Projection { get; set; }
+        public BoundingBox BoundingBox { get; set; }
 
+        public Vector3 StartPoint { get; set; }
+        public Vector3 EndPoint { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="terrainSize"></param>
+        /// <param name="terrainSegments"></param>
+        /// <param name="terrainStart"></param>
+        /// <param name="xOffset"></param>
+        /// <param name="zOffset"></param>
+        /// <param name="terrainXZScale"></param>
+        /// <param name="terrainYScale"></param>
+        /// <param name="heightMap"></param>
+        /// <param name="roadMap"></param>
         public TerrainModel(GraphicsDevice device, int terrainSize, int terrainSegments, float terrainStart,
             int xOffset, int zOffset,
             float terrainXZScale, float terrainYScale, 
@@ -57,10 +74,8 @@ namespace datx02_rally
         {
             this.device = device;
 
-            //int terrainSizeMinusOne = terrainSize;
-            //terrainSize++;
-
-            int terrainSizeMinusOne = terrainSize - 1;
+            int terrainSizeMinusOne = terrainSize;
+            terrainSize++;
 
             int vertexCount = terrainSize * terrainSize;
             vertices = new MultitexturedVertex[vertexCount];
@@ -69,18 +84,11 @@ namespace datx02_rally
             {
                 for (int x = 0; x < terrainSize; x++)
                 {
-                    //Vector4 textureWeights = new Vector4(
-                    //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0) / 0.3f, 0, 1),
-                    //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0.4f) / 0.2f, 0, 1),
-                    //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0.7f) / 0.2f, 0, 1),
-                    //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 1) / 0.3f, 0, 1)
-                    //);
-
-                    Vector4 textureWeights = new Vector4(
-                        roadMap[x, z],
-                        (1 - roadMap[x, z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0.2f) / 0.4f, 0, 1),
-                        (1 - roadMap[x, z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0.7f) / 0.2f, 0, 1),
-                        (1 - roadMap[x, z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 1) / 0.3f, 0, 1)
+                    var textureWeights = new Vector4(
+                        roadMap[xOffset + x, zOffset + z],
+                        (1 - roadMap[xOffset + x, zOffset + z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[xOffset + x, zOffset + z] - 0.2f) / 0.4f, 0, 1),
+                        (1 - roadMap[xOffset + x, zOffset + z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[xOffset + x, zOffset + z] - 0.7f) / 0.2f, 0, 1),
+                        (1 - roadMap[xOffset + x, zOffset + z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[xOffset + x, zOffset + z] - 1) / 0.3f, 0, 1)
                     );
 
                     textureWeights.Normalize();
@@ -91,11 +99,16 @@ namespace datx02_rally
                             terrainYScale * heightMap[xOffset + x, zOffset + z], // Y
                             (terrainStart + zOffset + z) * terrainXZScale), // Z
                         Vector3.Zero, // Normal
-                        new Vector2(x / 21f, z / 21f), // TODO: TEXTUREWEIGHTS!!! CH
+                        new Vector2(x / 21f, z / 21f),
                         textureWeights);
 
                 }
             }
+
+            BoundingBox = BoundingBox.CreateFromPoints(vertices.Select(vert => vert.Position));
+
+            StartPoint = vertices.First().Position;
+            EndPoint = vertices.Last().Position;
 
             #region Indicies & Vertex normals setup
 
@@ -173,13 +186,11 @@ namespace datx02_rally
         }
 
         
-        public void Draw(Matrix view, Matrix projection, Vector3 cameraPosition, DirectionalLight directionalLight, List<PointLight> pointLights)
+        public void Draw(Matrix view, Vector3 cameraPosition, DirectionalLight directionalLight, List<PointLight> pointLights)
         {
-            Projection = projection;
             Effect.Parameters["EyePosition"].SetValue(cameraPosition);
             Effect.Parameters["View"].SetValue(view);
             Effect.Parameters["World"].SetValue(Matrix.Identity);
-            Effect.Parameters["Projection"].SetValue(Projection);
 
             Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
 
