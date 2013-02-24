@@ -178,7 +178,7 @@ namespace datx02_rally
         public void Draw(Matrix view, Matrix projection, Vector3 cameraPosition, DirectionalLight directionalLight, List<PointLight> pointLights)
         {
             Projection = projection;
-            //Effect.Parameters["EyePosition"].SetValue(cameraPosition);
+            Effect.Parameters["EyePosition"].SetValue(cameraPosition);
             Effect.Parameters["View"].SetValue(view);
             Effect.Parameters["World"].SetValue(Matrix.Identity);
             Effect.Parameters["Projection"].SetValue(Projection);
@@ -207,6 +207,22 @@ namespace datx02_rally
             Effect.Parameters["LightRange"].SetValue(ranges);
             Effect.Parameters["NumLights"].SetValue(10);
             */
+            foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                device.Indices = indexBuffer;
+                device.SetVertexBuffer(vertexBuffer);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, indexBuffer.IndexCount / 3);
+            }
+        }
+
+        public void Draw(Matrix view, Matrix projection)
+        {
+            Projection = projection;
+            Effect.Parameters["View"].SetValue(view);
+            Effect.Parameters["World"].SetValue(Matrix.Identity);
+            Effect.Parameters["Projection"].SetValue(Projection);
+
             foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
             {
                 pass.Apply();

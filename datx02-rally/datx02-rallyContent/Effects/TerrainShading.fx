@@ -152,15 +152,13 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 	
 	totalLight.rgb += selfShadow * (DirectionalDiffuse * color.rgb * saturate(dot(normal, directionToLight)));
-	
-	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
-	
 
 	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
-	totalLight += tex2D(lightSampler, texCoord);
-	//light += DirectionalAmbient;
+	totalLight += tex2D(lightSampler, texCoord) * color;
 
-	return color * totalLight;
+	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
+
+	return totalLight;
 }
 
 technique TerrainShading
