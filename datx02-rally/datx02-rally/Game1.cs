@@ -16,11 +16,15 @@ using datx02_rally.Entities;
 using datx02_rally.Particles.Systems;
 using datx02_rally.Particles.WeatherSystems;
 using datx02_rally.Graphics;
+using datx02_rally.Menus;
 
 namespace datx02_rally
 {
+    public enum GameState { None, MainMenu, OptionsMenu, Gameplay, PausedGameplay, MultiplayerMenu, SingleplayerMenu, Exiting };
     public class Game1 : Microsoft.Xna.Framework.Game
     {
+        GameStateView currentView;
+        GameState currentState;
         #region Field
 
         private static Game1 Instance = null;
@@ -225,6 +229,8 @@ namespace datx02_rally
             rainSystem = new RainParticleSystem(this, Content);
             Components.Add(rainSystem);
             particleSystems.Add(rainSystem);
+
+            currentView = new MainMenu(this);
 
             base.Initialize();
         }
@@ -603,8 +609,37 @@ namespace datx02_rally
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            GameState nextState = currentView.UpdateState();
+            if (currentState != nextState) 
+            {
+                switch (nextState)
+                {
+                    case GameState.None:
+                        break;
+                    case GameState.MainMenu:
+                        currentView = new MainMenu(this);
+                        break;
+                    case GameState.OptionsMenu:
+                        currentView = new OptionsMenu(this);
+                        break;
+                    case GameState.Gameplay:
+                        break;
+                    case GameState.PausedGameplay:
+                        break;
+                    case GameState.MultiplayerMenu:
+                        break;
+                    case GameState.SingleplayerMenu:
+                        break;
+                    case GameState.Exiting:
+                        this.Exit();
+                        break;
+                    default:
+                        break;
+                }
+                currentState = nextState;
+            }
             base.Update(gameTime);
-
+            /*
             InputComponent input = this.GetService<InputComponent>();
 
             if (input.GetPressed(Input.ChangeController))
@@ -709,6 +744,7 @@ namespace datx02_rally
             );
 
             base.Update(gameTime);
+             */
         }
 
         private bool CollisionCheck(NavMeshVisualizer.NavMeshTriangle triangle)
@@ -786,6 +822,10 @@ namespace datx02_rally
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Honeydew);
+            base.Draw(gameTime);
+            currentView.Draw(gameTime);
+            /*
+            GraphicsDevice.Clear(Color.Honeydew);
             skyBoxEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
 
             Matrix view = this.GetService<CameraComponent>().View;
@@ -811,7 +851,7 @@ namespace datx02_rally
                 //renderTarget.SaveAsJpeg(stream, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
                 //stream.Dispose();
 
-            RenderPostProcess();
+            RenderPostProcess();*/
 
         }
 

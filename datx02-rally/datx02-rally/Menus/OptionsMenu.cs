@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
@@ -15,7 +15,7 @@ namespace datx02_rally.Menus
     /// <summary>
     /// This is a game component that implements IUpdateable.
     /// </summary>
-    public class MainMenu : GameStateView
+    public class OptionsMenu : GameStateView
     {
         List<MenuItem> menuItems = new List<MenuItem>();
         int selectedIndex = 0;
@@ -23,16 +23,17 @@ namespace datx02_rally.Menus
         Color itemColor;
         Color selectedColor;
 
-        public MainMenu(Game game) : base(game)
+        public OptionsMenu(Game game)
+            : base(game)
         {
             font = game.Content.Load<SpriteFont>(@"Menu/MenuFont");
-            menuItems.Add(new MenuItem("Singleplayer", GameState.Gameplay));
-            menuItems.Add(new MenuItem("Multiplayer", GameState.MultiplayerMenu));
-            menuItems.Add(new MenuItem("Options", GameState.OptionsMenu));
-            menuItems.Add(new MenuItem("Exit", GameState.Exiting));
+            menuItems.Add(new MenuItem("Option 1"));
+            menuItems.Add(new MenuItem("Option 2"));
+            menuItems.Add(new MenuItem("Option 3"));
+            menuItems.Add(new MenuItem("Back", GameState.MainMenu));
 
             itemColor = Color.Blue;
-            selectedColor = Color.Red;
+            selectedColor = Color.RoyalBlue;
         }
 
         public override void Draw(GameTime gameTime)
@@ -46,7 +47,7 @@ namespace datx02_rally.Menus
             {
                 Color color = i == selectedIndex ? selectedColor : itemColor;
                 Vector2 textSize = font.MeasureString(menuItems[i].Text);
-                game.spriteBatch.DrawString(font, menuItems[i].Text, new Vector2(centerX - (textSize.X/2), centerY + (fontSize * i)), color);
+                game.spriteBatch.DrawString(font, menuItems[i].Text, new Vector2(centerX - (textSize.X / 2), centerY + (fontSize * i)), color);
             }
             game.spriteBatch.End();
 
@@ -63,7 +64,7 @@ namespace datx02_rally.Menus
                 selectedIndex = Math.Max(0, selectedIndex - 1);
             else if (input.GetKey(Keys.Enter))
                 nextGameState = menuItems[selectedIndex].NextState;
-            return nextGameState != GameState.None ? nextGameState : GameState.MainMenu;
+            return nextGameState != GameState.None ? nextGameState : GameState.OptionsMenu;
         }
     }
 }

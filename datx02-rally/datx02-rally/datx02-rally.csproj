@@ -132,10 +132,12 @@
     <Compile Include="DebugConsole\Commands\ExitCommand.cs" />
     <Compile Include="DebugConsole\Commands\DisconnectCommand.cs" />
     <Compile Include="DebugConsole\ICommand.cs" />
+    <Compile Include="Menus\GameStateView.cs" />
     <Compile Include="Menus\MainMenu.cs" />
     <Compile Include="Graphics\Bloom.cs" />
     <Compile Include="Graphics\GaussianBlur.cs" />
-    <Compile Include="Menus\GameComponent1.cs" />
+    <Compile Include="Menus\MenuItem.cs" />
+    <Compile Include="Menus\OptionsMenu.cs" />
     <Compile Include="Network\ServerReceiver.cs" />
     <Compile Include="Network\ServerSender.cs" />
     <Compile Include="Particles\WeatherSystems\RainParticleSystem.cs" />
@@ -187,7 +189,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>GameSettings.settings</DependentUpon>
     </Compile>
-    <Compile Include="ViewHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
