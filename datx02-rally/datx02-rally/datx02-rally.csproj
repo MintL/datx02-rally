@@ -122,6 +122,7 @@
   <ItemGroup>
     <Compile Include="Components\FPSComponent.cs" />
     <Compile Include="Components\HUDConsoleComponent.cs" />
+    <Compile Include="Menus\GamePlayView.cs" />
     <Compile Include="SpotLight.cs" />
     <Compile Include="DebugConsole\Commands\ConnectCommand.cs" />
     <Compile Include="DebugConsole\Commands\ClearCommand.cs" />

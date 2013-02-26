@@ -18,6 +18,7 @@ namespace datx02_rally.Menus
     public class MainMenu : GameStateView
     {
         List<MenuItem> menuItems = new List<MenuItem>();
+        SpriteBatch spriteBatch;
         int selectedIndex = 0;
         SpriteFont font;
         Color itemColor;
@@ -33,11 +34,12 @@ namespace datx02_rally.Menus
 
             itemColor = Color.Blue;
             selectedColor = Color.Red;
+            spriteBatch = new SpriteBatch(game.GraphicsDevice);
         }
 
         public override void Draw(GameTime gameTime)
         {
-            game.spriteBatch.Begin();
+            spriteBatch.Begin();
             float centerX = game.GraphicsDevice.Viewport.Width / 2;
             float centerY = game.GraphicsDevice.Viewport.Height / 2;
             int fontSize = font.LineSpacing;
@@ -46,14 +48,14 @@ namespace datx02_rally.Menus
             {
                 Color color = i == selectedIndex ? selectedColor : itemColor;
                 Vector2 textSize = font.MeasureString(menuItems[i].Text);
-                game.spriteBatch.DrawString(font, menuItems[i].Text, new Vector2(centerX - (textSize.X/2), centerY + (fontSize * i)), color);
+                spriteBatch.DrawString(font, menuItems[i].Text, new Vector2(centerX - (textSize.X/2), centerY + (fontSize * i)), color);
             }
-            game.spriteBatch.End();
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
-        public override GameState UpdateState()
+        public override GameState UpdateState(GameTime gameTime)
         {
             InputComponent input = game.GetService<InputComponent>();
             GameState nextGameState = GameState.None;

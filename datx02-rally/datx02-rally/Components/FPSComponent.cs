@@ -26,7 +26,7 @@ namespace datx02_rally.Components
         public FPSComponent(Game game)
             : base(game)
         {
-            spriteBatch = ((Game1)game).spriteBatch;
+            spriteBatch = new SpriteBatch(game.GraphicsDevice);
             timeSinceLastFPS = new TimeSpan(0);
             font = Game.Content.Load<SpriteFont>(@"Menu/FPSFont");
             // TODO: Construct any child components here

@@ -19,6 +19,6 @@ namespace datx02_rally.Menus
         /// Updates the state.
         /// </summary>
         /// <returns>Next game state</returns>
-        public abstract GameState UpdateState();
+        public abstract GameState UpdateState(GameTime gameTime);
     }
 }
