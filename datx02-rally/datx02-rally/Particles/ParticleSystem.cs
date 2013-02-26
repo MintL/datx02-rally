@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
+using datx02_rally;
 #endregion
 
 namespace Particle3DSample
@@ -142,11 +143,6 @@ namespace Particle3DSample
         // Count how many times Draw has been called. This is used to know
         // when it is safe to retire old particles back into the free list.
         int drawCounter;
-
-
-        // Shared random number generator.
-        static Random random = new Random();
-
 
         #endregion
 
@@ -521,9 +517,9 @@ namespace Particle3DSample
             // Add in some random amount of horizontal velocity.
             float horizontalVelocity = MathHelper.Lerp(settings.MinHorizontalVelocity,
                                                        settings.MaxHorizontalVelocity,
-                                                       (float)random.NextDouble());
+                                                       (float)UniversalRandom.GetInstance().NextDouble());
 
-            double horizontalAngle = random.NextDouble() * MathHelper.TwoPi;
+            double horizontalAngle = UniversalRandom.GetInstance().NextDouble() * MathHelper.TwoPi;
 
             velocity.X += horizontalVelocity * (float)Math.Cos(horizontalAngle);
             velocity.Z += horizontalVelocity * (float)Math.Sin(horizontalAngle);
@@ -531,14 +527,14 @@ namespace Particle3DSample
             // Add in some random amount of vertical velocity.
             velocity.Y += MathHelper.Lerp(settings.MinVerticalVelocity,
                                           settings.MaxVerticalVelocity,
-                                          (float)random.NextDouble());
+                                          (float)UniversalRandom.GetInstance().NextDouble());
 
             // Choose four random control values. These will be used by the vertex
             // shader to give each particle a different size, rotation, and color.
-            Color randomValues = new Color((byte)random.Next(255),
-                                           (byte)random.Next(255),
-                                           (byte)random.Next(255),
-                                           (byte)random.Next(255));
+            Color randomValues = new Color((byte)UniversalRandom.GetInstance().Next(255),
+                                           (byte)UniversalRandom.GetInstance().Next(255),
+                                           (byte)UniversalRandom.GetInstance().Next(255),
+                                           (byte)UniversalRandom.GetInstance().Next(255));
 
             // Fill in the particle vertex structure.
             for (int i = 0; i < 4; i++)

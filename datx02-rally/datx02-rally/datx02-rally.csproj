@@ -189,6 +189,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>GameSettings.settings</DependentUpon>
     </Compile>
+    <Compile Include="UniversalRandom.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

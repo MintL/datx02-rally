@@ -32,7 +32,6 @@ namespace datx02_rally.MapGeneration
     public class PerlinGenerator
     {
         private const int GradientSizeTable = 256;
-        private readonly Random _random;
         private readonly float[] _gradients = new float[GradientSizeTable * 3];
         /* Borrowed from Darwyn Peachey (see references above).
                   The gradient table is indexed with an XYZ triplet, which is first turned
@@ -58,7 +57,7 @@ namespace datx02_rally.MapGeneration
 
         public PerlinGenerator(int seed)
         {
-            _random = new Random(seed);
+            // TODO: Set random
             InitGradients();
         }
 
@@ -108,9 +107,9 @@ namespace datx02_rally.MapGeneration
         {
             for (int i = 0; i < GradientSizeTable; i++)
             {
-                float z = 1f - 2f * (float)_random.NextDouble();
+                float z = 1f - 2f * (float)UniversalRandom.GetInstance().NextDouble();
                 float r = (float)Math.Sqrt(1f - z * z);
-                float theta = 2 * (float)Math.PI * (float)_random.NextDouble();
+                float theta = 2 * (float)Math.PI * (float)UniversalRandom.GetInstance().NextDouble();
                 _gradients[i * 3] = r * (float)Math.Cos(theta);
                 _gradients[i * 3 + 1] = r * (float)Math.Sin(theta);
                 _gradients[i * 3 + 2] = z;
