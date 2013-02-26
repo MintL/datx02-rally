@@ -130,6 +130,8 @@
     <Compile Include="DebugConsole\Commands\ExitCommand.cs" />
     <Compile Include="DebugConsole\Commands\DisconnectCommand.cs" />
     <Compile Include="DebugConsole\ICommand.cs" />
+    <Compile Include="GameLogic\BirdCurve.cs" />
+    <Compile Include="GameLogic\RaceTrackCurve.cs" />
     <Compile Include="Graphics\Bloom.cs" />
     <Compile Include="Graphics\GaussianBlur.cs" />
     <Compile Include="Menus\GameComponent1.cs" />

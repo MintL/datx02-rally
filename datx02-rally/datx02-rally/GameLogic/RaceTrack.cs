@@ -14,9 +14,9 @@ namespace datx02_rally.GameLogic
 
         public float SectionLength = .1f;
 
-        public RaceTrack(float side)
+        public RaceTrack(float terrainWidth)
         {
-            Curve = new Curve(side);
+            Curve = new RaceTrackCurve(terrainWidth);
 
             for (float i = 0; i < 1; i += .1f)
             {

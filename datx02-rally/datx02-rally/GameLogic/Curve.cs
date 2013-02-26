@@ -9,40 +9,12 @@ namespace datx02_rally.GameLogic
     /// <summary>
     /// Implementation of Bezier-curve
     /// </summary>
-    class Curve
+    abstract class Curve
     {
-        private List<CurveNode> nodes = new List<CurveNode>();
+        protected List<CurveNode> nodes = new List<CurveNode>();
+        
+        // Used for computing a point
         private Vector3[] subPath = new Vector3[4];
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="halfSide">The half length of the side of the square that makes the area where the curve will be placed.</param>
-        public Curve(float halfSide)
-        {
-            halfSide /= 2f;
-            float variation = 1f;
-
-            nodes.Add(new CurveNode() {
-                Position = new Vector3(0, .2f, -halfSide),
-                Tangent = Vector3.Transform(new Vector3(variation * halfSide, 0, 0), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
-            });
-            nodes.Add(new CurveNode()
-            {
-                Position = new Vector3(halfSide, .15f, 0),
-                Tangent = Vector3.Transform(new Vector3(0, 0, variation * halfSide), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
-            });
-            nodes.Add(new CurveNode()
-            {
-                Position = new Vector3(0, .18f, halfSide),
-                Tangent = Vector3.Transform(new Vector3(variation * -halfSide, 0, 0), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
-            });
-            nodes.Add(new CurveNode()
-            {
-                Position = new Vector3(-halfSide, .25f, 0),
-                Tangent = Vector3.Transform(new Vector3(0, 0, variation * -halfSide), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
-            });
-        }
 
         /// <summary>
         /// 

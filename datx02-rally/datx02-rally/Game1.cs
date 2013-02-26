@@ -47,6 +47,13 @@ namespace datx02_rally
 
         #endregion
 
+        #region Animals
+
+        Model birdModel;
+        datx02_rally.GameLogic.Curve birdCurve;
+
+        #endregion
+
         #region Lights
 
         // Model to represent a location of a pointlight
@@ -258,7 +265,7 @@ namespace datx02_rally
             var heightmap = heightmapGenerator.Generate();
 
             var roadMap = new float[mapSize, mapSize];
-            raceTrack = new RaceTrack(((mapSize / 2) * triangleSize));
+            raceTrack = new RaceTrack((mapSize * triangleSize));
 
             navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 1500, roadWidth * triangleSize, triangleSize, heightScale);
 
@@ -461,6 +468,13 @@ namespace datx02_rally
             //         part.Effect.Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-n"));
             //     }
             // }
+
+            #endregion
+
+            #region Animals
+
+            birdModel = Content.Load<Model>(@"Models\bird");
+            birdCurve = new BirdCurve();
 
             #endregion
 
@@ -870,7 +884,7 @@ namespace datx02_rally
         private void RenderScene(GameTime gameTime, Matrix view, Matrix projection, bool environment)
         {
             BoundingFrustum viewFrustum = new BoundingFrustum(view * projection);
-            
+
             Matrix[] transforms = new Matrix[Car.Model.Bones.Count];
             Car.Model.CopyAbsoluteBoneTransformsTo(transforms);
 
@@ -908,9 +922,26 @@ namespace datx02_rally
 
             #endregion
 
+            #region Animals
+
+            {
+                var t = ((float)gameTime.TotalGameTime.TotalSeconds / 3f) % 1;
+                var position = birdCurve.GetPoint(t);
+                var heading = Vector3.Normalize(birdCurve.GetPoint(t + (t > .5 ? -.01f : .01f)) - position);
+                if (t > .5)
+                    heading *= -1;
+
+                birdModel.Draw(Matrix.CreateScale(1) * 
+                    Vector3.Forward.GetRotationMatrix(heading) *
+                    Matrix.CreateTranslation(position),
+                    view, projection);
+            }
+
+            #endregion
+
             if (!environment)
             {
-                foreach (Car c in this.GetService<CarControlComponent>().Cars.Values) 
+                foreach (Car c in this.GetService<CarControlComponent>().Cars.Values)
                     DrawCar(view, projection, c);
                 DrawGhostCar(view, projection, gameTime);
             }
