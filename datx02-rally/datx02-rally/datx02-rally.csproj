@@ -122,6 +122,7 @@
   <ItemGroup>
     <Compile Include="Components\FPSComponent.cs" />
     <Compile Include="Components\HUDConsoleComponent.cs" />
+    <Compile Include="SpotLight.cs" />
     <Compile Include="DebugConsole\Commands\ConnectCommand.cs" />
     <Compile Include="DebugConsole\Commands\ClearCommand.cs" />
     <Compile Include="DebugConsole\Commands\ChatCommand.cs" />
@@ -145,6 +146,7 @@
     <Compile Include="Particles\WeatherSystems\ThunderParticleSystem.cs" />
     <Compile Include="Player.cs" />
     <Compile Include="PointLight.cs" />
+    <Compile Include="PrelightingRenderer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Game1.cs" />
     <Compile Include="Network\ServerClient.cs" />

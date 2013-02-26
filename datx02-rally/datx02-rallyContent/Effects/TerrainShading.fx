@@ -3,6 +3,7 @@
 float4x4 World;
 float4x4 View;
 float4x4 Projection;
+float4x4 PrelightProjection;
 float3 EyePosition;
 float4x4 NormalMatrix;
 
@@ -20,6 +21,15 @@ int FogEnabled = 1;
 float3 FogColor = float3(0.05, 0.045, 0.04);
 float FogStart = -1000;
 float FogEnd = 8000;
+
+texture2D LightTexture;
+sampler2D lightSampler = sampler_state
+{
+	texture = <LightTexture>;
+	minfilter = point;
+	magfilter = point;
+	mipfilter = point;
+};
 
 texture TextureMap0;
 sampler TextureMapSampler0 = sampler_state
@@ -73,6 +83,8 @@ struct VertexShaderInput
 	float4 TexWeights : TEXCOORD1;
 };
 
+#include "Prelight/Shared.vsi"
+
 struct VertexShaderOutput
 {
     float4 Position : POSITION0;
@@ -81,6 +93,7 @@ struct VertexShaderOutput
 	float3 ViewDirection : TEXCOORD2;
 	float3 WorldPosition : TEXCOORD3;
 	float4 TexWeights : TEXCOORD4;
+	float4 PositionCopy : TEXCOORD5;
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
@@ -96,6 +109,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     output.Normal = mul(input.Normal, NormalMatrix);
 	output.WorldPosition = worldPosition.xyz;
 	output.TexWeights = input.TexWeights;
+	output.PositionCopy = mul(viewPosition, PrelightProjection);
 
     return output;
 }
@@ -114,9 +128,10 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	color += tex2D(TextureMapSampler2, input.TexCoord) * input.TexWeights.z;
 	color += tex2D(TextureMapSampler3, input.TexCoord) * input.TexWeights.w;
 	
+	
 	float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
 	//float4 totalLight = color;
-
+/*
 	// point lights
 	for (int i = 0; i < NumLights; i++)
 	{
@@ -131,18 +146,22 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 		totalLight.rgb +=
 			attenuation * (LightDiffuse[i] * color.rgb * saturate(dot(normal, directionToLight)));
-	}
+	}*/
+	
 	float3 directionToLight = -normalize(DirectionalDirection);
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 	
 	totalLight.rgb += selfShadow * (DirectionalDiffuse * color.rgb * saturate(dot(normal, directionToLight)));
-	
+
+	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
+	totalLight += tex2D(lightSampler, texCoord) * color;
+
 	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
-	//float4(DirectionalAmbient, 1.0) * 
+
 	return totalLight;
 }
 
-technique Technique1
+technique TerrainShading
 {
     pass Pass1
     {

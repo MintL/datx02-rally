@@ -192,35 +192,37 @@ namespace datx02_rally
             Effect.Parameters["View"].SetValue(view);
             Effect.Parameters["World"].SetValue(Matrix.Identity);
 
-            Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
+            //Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
 
-            Effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
-            Effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
-            Effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
-
-            Vector3[] positions = new Vector3[pointLights.Count];
-            Vector3[] diffuses = new Vector3[pointLights.Count];
-            float[] ranges = new float[pointLights.Count];
-            for (int i = 0; i < 10; i++)
+            if (Effect.CurrentTechnique.Name == "TerrainShading")
             {
-                positions[i] = pointLights[i].Position;
-                diffuses[i] = pointLights[i].Diffuse;
-                ranges[i] = pointLights[i].Range;
+                Effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
+                Effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
+                Effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
             }
 
-            int noOfLights = GameSettings.Default.PerformanceMode ? 0 : 10;
-
-            Effect.Parameters["LightPosition"].SetValue(positions);
-            Effect.Parameters["LightDiffuse"].SetValue(diffuses);
-            Effect.Parameters["LightRange"].SetValue(ranges);
-            Effect.Parameters["NumLights"].SetValue(noOfLights);
-            
             foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
             {
                 pass.Apply();
                 device.Indices = indexBuffer;
                 device.SetVertexBuffer(vertexBuffer);
-                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, indexBuffer.IndexCount/3);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, indexBuffer.IndexCount / 3);
+            }
+        }
+
+        public void Draw(Matrix view, Matrix projection)
+        {
+            Effect.Parameters["View"].SetValue(view);
+            Effect.Parameters["World"].SetValue(Matrix.Identity);
+            Effect.Parameters["Projection"].SetValue(projection);
+
+            foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                device.Indices = indexBuffer;
+                device.SetVertexBuffer(vertexBuffer);
+
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, indexBuffer.IndexCount / 3);
             }
         }
     }
