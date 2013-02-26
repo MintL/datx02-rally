@@ -22,11 +22,8 @@ namespace datx02_rally.Menus
         #region Field
 
         GamePlayMode mode;
-        GraphicsDeviceManager graphics;
-        ContentManager content;
         public SpriteBatch spriteBatch;
         Matrix projectionMatrix;
-        Game1 gameInstance;
 
         #region PostProcess
 
@@ -138,20 +135,12 @@ namespace datx02_rally.Menus
 
         #region Initialization
 
-        public GamePlayView(Game game, int? seed, GamePlayMode mode) : this(game)
+        public GamePlayView(Game game, int? seed, GamePlayMode mode)
+            : base(game)
         {
             int usedSeed = seed.HasValue ? seed.Value : 0;
             UniversalRandom.ResetInstance(usedSeed);
             this.mode = mode;
-        }
-
-        private GamePlayView(Game game) : base(game)
-        {
-            gameInstance = game as Game1;
-            UniversalRandom.ResetInstance(0);
-
-            graphics = gameInstance.Graphics;
-            content = gameInstance.Content;
         }
 
         public override void Initialize()
@@ -167,6 +156,10 @@ namespace datx02_rally.Menus
             var carControlComponent = new CarControlComponent(gameInstance);
             components.Add(carControlComponent);
             services.AddService(typeof(CarControlComponent), carControlComponent);
+
+            var serverComponent = new ServerClient(gameInstance, this);
+            components.Add(serverComponent);
+            services.AddService(typeof(ServerClient), serverComponent);
 
             // Particle systems
 
@@ -369,6 +362,7 @@ namespace datx02_rally.Menus
             spotLightModel = content.Load<Model>(@"Models\Cone");
             //directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.2f);
             directionalLight = new DirectionalLight(new Vector3(-1.0f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.4f);
+
             gameInstance.Services.AddService(typeof(DirectionalLight), directionalLight);
 
             int numlights = 50;

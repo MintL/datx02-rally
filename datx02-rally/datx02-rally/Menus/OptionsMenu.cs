@@ -41,8 +41,8 @@ namespace datx02_rally.Menus
         public override void Draw(GameTime gameTime)
         {
             spriteBatch.Begin();
-            float centerX = game.GraphicsDevice.Viewport.Width / 2;
-            float centerY = game.GraphicsDevice.Viewport.Height / 2;
+            float centerX = gameInstance.GraphicsDevice.Viewport.Width / 2;
+            float centerY = gameInstance.GraphicsDevice.Viewport.Height / 2;
             int fontSize = font.LineSpacing;
 
             for (int i = 0; i < menuItems.Count; i++)
@@ -58,7 +58,7 @@ namespace datx02_rally.Menus
 
         public override GameState UpdateState(GameTime gameTime)
         {
-            InputComponent input = game.GetService<InputComponent>();
+            InputComponent input = gameInstance.GetService<InputComponent>();
             GameState nextGameState = GameState.None;
             if (input.GetKey(Keys.Down))
                 selectedIndex = Math.Min(menuItems.Count - 1, selectedIndex + 1);

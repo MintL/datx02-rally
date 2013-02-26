@@ -3,16 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 
 namespace datx02_rally.Menus
 {
     public abstract class GameStateView : DrawableGameComponent
     {
-        public Game1 game;
+        public Game1 gameInstance;
+        public GraphicsDeviceManager graphics;
+        public ContentManager content;
 
         public GameStateView(Game game) : base(game)
         {
-            this.game = game as Game1;
+            this.gameInstance = game as Game1;
+            graphics = gameInstance.Graphics;
+            content = gameInstance.Content;
+            Initialize();
         }
 
         /// <summary>

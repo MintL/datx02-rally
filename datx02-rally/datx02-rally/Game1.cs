@@ -28,14 +28,13 @@ namespace datx02_rally
         private static Game1 Instance = null;
         public GraphicsDeviceManager Graphics { get; private set; }
         // shared sprite batch
-        public readonly SpriteBatch spriteBatch;
+        public SpriteBatch spriteBatch;
 
         #region Initialization
 
         public Game1()
         {
             Graphics = new GraphicsDeviceManager(this);
-            spriteBatch = new SpriteBatch(GraphicsDevice);
             Content.RootDirectory = "Content";
             Instance = this;
 
@@ -72,10 +71,6 @@ namespace datx02_rally
             Components.Add(consoleComponent);
             Services.AddService(typeof(HUDConsoleComponent), consoleComponent);
 
-            var serverComponent = new ServerClient(this);
-            Components.Add(serverComponent);
-            Services.AddService(typeof(ServerClient), serverComponent);
-
             currentView = new MainMenu(this);
 
             base.Initialize();
@@ -87,6 +82,7 @@ namespace datx02_rally
         /// </summary>
         protected override void LoadContent()
         {
+            spriteBatch = new SpriteBatch(GraphicsDevice);
             base.LoadContent();
         }
 
@@ -125,6 +121,7 @@ namespace datx02_rally
                         break;
                     case GameState.Gameplay:
                         currentView = new GamePlayView(this, null, GamePlayMode.Singleplayer);
+                        //
                         break;
                     case GameState.PausedGameplay:
                         break;
