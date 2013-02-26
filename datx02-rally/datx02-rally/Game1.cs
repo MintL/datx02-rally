@@ -38,8 +38,8 @@ namespace datx02_rally
             Content.RootDirectory = "Content";
             Instance = this;
 
-            Graphics.PreferredBackBufferWidth = 1366;
-            Graphics.PreferredBackBufferHeight = 768;
+            Graphics.PreferredBackBufferWidth = GameSettings.Default.ResolutionX;
+            Graphics.PreferredBackBufferHeight = GameSettings.Default.ResolutionY;
             Graphics.ApplyChanges();
 
             //graphics.ToggleFullScreen();
