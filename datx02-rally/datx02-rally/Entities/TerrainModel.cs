@@ -186,11 +186,17 @@ namespace datx02_rally
         }
 
         
-        public void Draw(Matrix view, Vector3 cameraPosition, DirectionalLight directionalLight, List<PointLight> pointLights)
+        public void Draw(Matrix view, Matrix projection, Vector3 cameraPosition, DirectionalLight directionalLight, 
+            Matrix lightView, Matrix lightProjection, Texture2D shadowMap)
         {
             Effect.Parameters["EyePosition"].SetValue(cameraPosition);
             Effect.Parameters["View"].SetValue(view);
             Effect.Parameters["World"].SetValue(Matrix.Identity);
+            Effect.Parameters["Projection"].SetValue(projection);
+
+            Effect.Parameters["LightView"].SetValue(lightView);
+            Effect.Parameters["LightProjection"].SetValue(lightProjection);
+            Effect.Parameters["ShadowMap"].SetValue(shadowMap);
 
             //Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
 

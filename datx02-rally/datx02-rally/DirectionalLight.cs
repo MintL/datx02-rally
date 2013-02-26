@@ -14,6 +14,7 @@ namespace datx02_rally
     public class DirectionalLight
     {
         public Vector3 Direction { get; set; }
+        public Vector3 Position { get; set; }
         
         private Vector3 defaultAmbient, additionalAmbient;
         public Vector3 Ambient { get { return defaultAmbient + additionalAmbient; } set { additionalAmbient = value; } }
@@ -21,9 +22,10 @@ namespace datx02_rally
         private Vector3 defaultDiffuse, additionalDiffuse;
         public Vector3 Diffuse { get { return defaultDiffuse + additionalDiffuse; } set { additionalDiffuse = value; } }
 
-        public DirectionalLight(Vector3 direction, Vector3 ambient, Vector3 diffuse)
+        public DirectionalLight(Vector3 position, Vector3 ambient, Vector3 diffuse)
         {
-            Direction = direction;
+            Direction = -position;
+            Position = position;
             defaultAmbient = ambient;
             defaultDiffuse = diffuse;
         }

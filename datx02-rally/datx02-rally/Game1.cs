@@ -136,6 +136,13 @@ namespace datx02_rally
 
         #endregion
 
+        #region ShadowMap
+        RenderTarget2D shadowMap;
+        Effect shadowMapEffect;
+        Matrix lightView;
+        Matrix lightProjection;
+        #endregion
+
         PrelightingRenderer prelightingRenderer;
 
         #endregion
@@ -404,8 +411,9 @@ namespace datx02_rally
             // Load model to represent our lightsources
             pointLightModel = Content.Load<Model>(@"Models/light");
             spotLightModel = Content.Load<Model>(@"Models\Cone");
-            //directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.2f);
-            directionalLight = new DirectionalLight(new Vector3(-1.0f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.4f);
+            //new Vector3(0.6f, 1.0f, -1.0f)
+            directionalLight = new DirectionalLight(Car.Position + new Vector3(0.6f,1f,1f) * 5000, new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.4f);
+            //directionalLight = new DirectionalLight(new Vector3(-1.0f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.4f);
             Services.AddService(typeof(DirectionalLight), directionalLight);
 
             int numlights = 50;
@@ -515,7 +523,7 @@ namespace datx02_rally
                 mesh.Effects[1].Parameters["AlphaMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-a"));
             }
 
-            int numTrees = 1;
+            int numTrees = 30;
             treePositions = new Vector3[numTrees];
             treeTransforms = new Matrix[numTrees];
             for (int i = 0; i < numTrees; i++)
@@ -563,12 +571,12 @@ namespace datx02_rally
                         .5f);
                 }
 
-                treePos.Y = height * terrainYScale * terrainXZScale;
+                treePos.Y = height * terrainYScale;// *terrainXZScale;
 
-                treePositions[i] = Vector3.Zero; //treePos;
-                treeTransforms[i] = Matrix.CreateScale(20f); 
-                //Matrix.CreateScale(1 + 8 * (float)UniversalRandom.GetInstance().NextDouble()) * 
-                //    Matrix.CreateRotationY(MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()));
+                treePositions[i] = treePos;// Vector3.Zero; //treePos;
+                //treeTransforms[i] = Matrix.CreateScale(20f); 
+                treeTransforms[i] = Matrix.CreateScale(1 + 8 * (float)UniversalRandom.GetInstance().NextDouble()) * 
+                    Matrix.CreateRotationY(MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()));
             }
 
             // {
@@ -611,6 +619,12 @@ namespace datx02_rally
 
             #region Prelighting
             prelightingRenderer = new PrelightingRenderer(GraphicsDevice, Content, pointLightModel, spotLightModel);
+            #endregion
+
+            #region ShadowMap
+            shadowMap = new RenderTarget2D(GraphicsDevice, 2048, 2048,//GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height,
+                 false, SurfaceFormat.Single, DepthFormat.Depth24);
+            shadowMapEffect = Content.Load<Effect>(@"Effects\Shadowmap");
             #endregion
         }
 
@@ -703,7 +717,7 @@ namespace datx02_rally
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            GameState nextState = currentView.UpdateState();
+            /*GameState nextState = currentView.UpdateState();
             if (currentState != nextState) 
             {
                 switch (nextState)
@@ -732,8 +746,8 @@ namespace datx02_rally
                 }
                 currentState = nextState;
             }
-            base.Update(gameTime);
-            /*
+            base.Update(gameTime);*/
+            
             InputComponent input = this.GetService<InputComponent>();
 
             if (input.GetPressed(Input.ChangeController))
@@ -838,7 +852,7 @@ namespace datx02_rally
             //);
 
             base.Update(gameTime);
-             */
+             
         }
 
         private bool CollisionCheck(NavMeshVisualizer.NavMeshTriangle triangle)
@@ -915,24 +929,31 @@ namespace datx02_rally
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Honeydew);
+            /*GraphicsDevice.Clear(Color.Honeydew);
             base.Draw(gameTime);
-            currentView.Draw(gameTime);
-            /*
+            currentView.Draw(gameTime);*/
+            
             GraphicsDevice.Clear(Color.Honeydew);
             skyBoxEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
 
             Matrix view = this.GetService<CameraComponent>().View;
 
-<<<<<<< HEAD
+            #region ShadowMap
+            GraphicsDevice.SetRenderTarget(shadowMap);
+            GraphicsDevice.Clear(Color.Black);
+
+            lightView = Matrix.CreateLookAt(directionalLight.Position, Car.Position, Vector3.Up);
+            lightProjection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45),
+                1, 1000f, 10000f);
+            RenderShadowCasters(lightView, lightProjection);
+            GraphicsDevice.SetRenderTarget(null);
+
+            #endregion
+
             if (!GameSettings.Default.PerformanceMode)
                 RenderEnvironmentMap(gameTime);
-=======
-            prelightingRenderer.Render(view, directionalLight, terrain, pointLights, spotLights);
 
-
-            RenderEnvironmentMap(gameTime);
->>>>>>> prelight
+            //prelightingRenderer.Render(view, directionalLight, terrain, pointLights, spotLights);
 
             GraphicsDevice.SetRenderTarget(postProcessTexture);
 
@@ -944,6 +965,7 @@ namespace datx02_rally
             GraphicsDevice.Clear(Color.White);
 
             RenderScene(gameTime, view, projectionMatrix, false);
+            //RenderScene(gameTime, lightView, lightProjection, false);
             base.Draw(gameTime);
 
             GraphicsDevice.SetRenderTarget(null);
@@ -952,7 +974,7 @@ namespace datx02_rally
                 //renderTarget.SaveAsJpeg(stream, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
                 //stream.Dispose();
 
-            RenderPostProcess();*/
+            RenderPostProcess();
 
         }
 
@@ -971,6 +993,25 @@ namespace datx02_rally
             }
             spriteBatch.End();
 
+        }
+
+        private void RenderShadowCasters(Matrix lightView, Matrix lightProjection)
+        {
+            foreach (ModelMesh mesh in oakTree.Meshes)
+            {
+                for (int i = 0; i < mesh.MeshParts.Count; i++)
+                {
+                    mesh.MeshParts[i].Effect = shadowMapEffect.Clone();
+                }
+            }
+
+            for (int i = 0; i < treePositions.Length; i++)
+            {
+                BoundingSphere sourceSphere = new BoundingSphere(treePositions[i], oakTree.Meshes[0].BoundingSphere.Radius);
+                //if (viewFrustum.Intersects(sourceSphere))
+
+                DrawModel(oakTree, lightView, lightProjection, treePositions[i], treeTransforms[i]);
+            }
         }
 
         private void RenderEnvironmentMap(GameTime gameTime)
@@ -1030,8 +1071,8 @@ namespace datx02_rally
                     var terrain = terrainSegments[x, z];
                     if (viewFrustum.Intersects(terrain.BoundingBox))
                     {
-                        terrain.Draw(view, this.GetService<CameraComponent>().Position,
-                            directionalLight, pointLights);
+                        terrain.Draw(view, projection, this.GetService<CameraComponent>().Position,
+                            directionalLight, lightView, lightProjection, shadowMap);
                     }
                 }
             
@@ -1042,8 +1083,8 @@ namespace datx02_rally
             foreach (ParticleSystem pSystem in particleSystems)
                 pSystem.SetCamera(view, projection);
 
-            //for (int i = 0; i < 10; i++)
-              //  pointLights[i].Draw(lightModel, view, projection);
+            for (int i = 0; i < 10; i++)
+                pointLights[i].Draw(pointLightModel, view, projection);
             foreach (SpotLight spot in spotLights)
             {
                 spot.Draw(spotLightModel, view, projection);
@@ -1054,7 +1095,7 @@ namespace datx02_rally
             for (int i = 0; i < treePositions.Length; i++)
             {
                 BoundingSphere sourceSphere = new BoundingSphere(treePositions[i], oakTree.Meshes[0].BoundingSphere.Radius);
-                if (viewFrustum.Intersects(sourceSphere))
+                //if (viewFrustum.Intersects(sourceSphere))
                     DrawModel(oakTree, view, projection, treePositions[i], treeTransforms[i]);
             }
 

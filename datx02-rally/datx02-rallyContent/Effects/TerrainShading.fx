@@ -31,6 +31,19 @@ sampler2D lightSampler = sampler_state
 	mipfilter = point;
 };
 
+float4x4 LightView;
+float4x4 LightProjection;
+texture2D ShadowMap;
+sampler2D shadowMapSampler = sampler_state
+{
+	texture = <ShadowMap>;
+	minfilter = point;
+	magfilter = point;
+	mipfilter = point;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
 texture TextureMap0;
 sampler TextureMapSampler0 = sampler_state
 {
@@ -94,6 +107,7 @@ struct VertexShaderOutput
 	float3 WorldPosition : TEXCOORD3;
 	float4 TexWeights : TEXCOORD4;
 	float4 PositionCopy : TEXCOORD5;
+	float4 OriginalPosition : TEXCOORD6;
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
@@ -110,6 +124,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 	output.WorldPosition = worldPosition.xyz;
 	output.TexWeights = input.TexWeights;
 	output.PositionCopy = mul(viewPosition, PrelightProjection);
+	output.OriginalPosition = input.Position;
 
     return output;
 }
@@ -118,6 +133,13 @@ float ComputeFogFactor(float d)
 {
 	return clamp((d - FogStart) / (FogEnd - FogStart), 0, .75) * FogEnabled;
 }
+
+float4 GetPositionFromLight(float4 position)
+{
+	float4x4 wvp = mul(mul(World, LightView), LightProjection);
+	return mul(position, wvp);
+}
+
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
@@ -155,6 +177,22 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
 	totalLight += tex2D(lightSampler, texCoord) * color;
+
+	float4 lightingPosition = GetPositionFromLight(input.OriginalPosition);
+	//float2 shadowCoord = postProjToScreen(lightingPosition) + float2(0.5, 0.5);
+	float2 shadowCoord = 0.5 * lightingPosition.xy / lightingPosition.w;
+	
+	shadowCoord += 0.5f;// / float2(2048, 2048);
+	shadowCoord.y = 1.0f - shadowCoord.y;
+
+	float shadowDepth = tex2D(shadowMapSampler, shadowCoord).r;
+	float ourDepth = 1 - (lightingPosition.z / lightingPosition.w);
+	if (shadowDepth - 0.03 > ourDepth)
+	{
+		// shadow
+		totalLight.rgb = 0;
+	};
+
 
 	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
 
