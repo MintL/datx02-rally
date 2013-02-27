@@ -17,7 +17,7 @@ namespace datx02_rally.Menus
     /// </summary>
     public class MainMenu : GameStateView
     {
-        List<ActionMenuItem> menuItems = new List<ActionMenuItem>();
+        List<StateActionMenuItem> menuItems = new List<StateActionMenuItem>();
         SpriteBatch spriteBatch;
         int selectedIndex = 0;
         SpriteFont font;
@@ -27,10 +27,10 @@ namespace datx02_rally.Menus
         public MainMenu(Game game) : base(game)
         {
             font = game.Content.Load<SpriteFont>(@"Menu/MenuFont");
-            menuItems.Add(new ActionMenuItem("Singleplayer", GameState.Gameplay));
-            menuItems.Add(new ActionMenuItem("Multiplayer", GameState.MultiplayerMenu));
-            menuItems.Add(new ActionMenuItem("Options", GameState.OptionsMenu));
-            menuItems.Add(new ActionMenuItem("Exit", GameState.Exiting));
+            menuItems.Add(new StateActionMenuItem("Singleplayer", GameState.Gameplay));
+            menuItems.Add(new StateActionMenuItem("Multiplayer", GameState.MultiplayerMenu));
+            menuItems.Add(new StateActionMenuItem("Options", GameState.OptionsMenu));
+            menuItems.Add(new StateActionMenuItem("Exit", GameState.Exiting));
 
             itemColor = Color.Blue;
             selectedColor = Color.Red;

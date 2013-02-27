@@ -5,11 +5,14 @@
     <Setting Name="PerformanceMode" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
-    <Setting Name="ResolutionX" Type="System.Int32" Scope="User">
+    <Setting Name="ResolutionWidth" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1366</Value>
     </Setting>
-    <Setting Name="ResolutionY" Type="System.Int32" Scope="User">
+    <Setting Name="ResolutionHeight" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">768</Value>
+    </Setting>
+    <Setting Name="FullScreen" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>
 </SettingsFile>
