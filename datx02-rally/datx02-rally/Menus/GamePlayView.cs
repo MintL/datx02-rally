@@ -145,6 +145,7 @@ namespace datx02_rally.Menus
         public GamePlayView(Game game, int? seed, GamePlayMode mode)
             : base(game)
         {
+            game.GetService<ServerClient>().GamePlay = this;
             int usedSeed = seed.HasValue ? seed.Value : 0;
             UniversalRandom.ResetInstance(usedSeed);
             this.mode = mode;
@@ -163,10 +164,6 @@ namespace datx02_rally.Menus
             var carControlComponent = new CarControlComponent(gameInstance);
             components.Add(carControlComponent);
             services.AddService(typeof(CarControlComponent), carControlComponent);
-
-            var serverComponent = new ServerClient(gameInstance, this);
-            components.Add(serverComponent);
-            services.AddService(typeof(ServerClient), serverComponent);
 
             // Particle systems
 

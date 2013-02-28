@@ -62,6 +62,10 @@ namespace datx02_rally
         {
             // Components
 
+            var serverComponent = new ServerClient(this);
+            Components.Add(serverComponent);
+            Services.AddService(typeof(ServerClient), serverComponent);
+
             var inputComponent = new InputComponent(this);
             //inputComponent.CurrentController = Controller.GamePad;
             Components.Add(inputComponent);
@@ -127,6 +131,7 @@ namespace datx02_rally
                     case GameState.PausedGameplay:
                         break;
                     case GameState.MultiplayerMenu:
+                        currentView = new MultiplayerMenu(this);
                         break;
                     case GameState.SingleplayerMenu:
                         break;
