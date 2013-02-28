@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Net;
 using Microsoft.Xna.Framework;
+using datx02_rally.Components;
 
 namespace datx02_rally.DebugConsole.Commands
 {
@@ -82,6 +83,10 @@ namespace datx02_rally.DebugConsole.Commands
                         break;
                     case "name":
                         output.Add("Name: " + client.LocalPlayer.PlayerName);
+                        break;
+                    case "fps":
+                        Game1 game = Game1.GetInstance();
+                        game.Components.Add(new FPSComponent(game));
                         break;
                     default:
                         output.Add("Unknown show command: "+String.Join(" ",arguments, 1, arguments.Length-1));

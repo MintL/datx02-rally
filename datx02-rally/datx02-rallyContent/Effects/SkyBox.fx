@@ -17,6 +17,7 @@ sampler SkyboxSampler = sampler_state
 
 int FogEnabled = 1;
 float3 FogColor = float3(0.1, 0.1, 0.1);
+float FogFactor = 0.8;
 
 struct VertexShaderInput
 {
@@ -59,7 +60,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float amount = 1 + (sin(2 * ElapsedTime) + 1) * 0.5 * size; // amount will be in range [1..1+size]
 	skyBoxColor = skyBoxColor * 5; //amount;
 
-	skyBoxColor.rgb = lerp(skyBoxColor.rgb, FogColor, 0.7);
+	skyBoxColor.rgb = lerp(skyBoxColor.rgb, FogColor, FogEnabled * FogFactor);
 	return skyBoxColor;
 }
 

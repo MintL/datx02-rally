@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Lidgren.Network;
 using System.Net;
+using datx02_rally.Menus;
 
 namespace datx02_rally
 {
@@ -18,6 +19,7 @@ namespace datx02_rally
         ServerSender Sender;
         ServerReceiver Receiver;
         Game1 Game;
+        GamePlayView GamePlay;
         public readonly Player LocalPlayer;
         public LinkedList<Tuple<string, string, DateTime>> ChatHistory = new LinkedList<Tuple<string, string, DateTime>>();
         public Dictionary<byte,Player> Players = new Dictionary<byte, Player>();
@@ -28,8 +30,13 @@ namespace datx02_rally
         private TimeSpan WaitConnect = new TimeSpan(0, 0, 1); // 3 second wait
         public int ConnectTryCount = 0;
         private int MAX_CONNECT_TRIES = 5;
-        
-        public ServerClient(Game1 game) : base(game)
+
+        public ServerClient(Game1 game, GamePlayView gamePlay) : this(game)
+        {
+            GamePlay = gamePlay;
+        }
+
+        private ServerClient(Game1 game) : base(game)
         {
             NetPeerConfiguration config = new NetPeerConfiguration("DATX02");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
@@ -78,7 +85,7 @@ namespace datx02_rally
                 return;
             }
 
-            Sender.SendPlayerPosition(Game.Car.Position, Game.Car.Rotation, gameTime.TotalGameTime.TotalMilliseconds);
+            Sender.SendPlayerPosition(GamePlay.Car.Position, GamePlay.Car.Rotation, gameTime.TotalGameTime.TotalMilliseconds);
             base.Update(gameTime);
         }
 

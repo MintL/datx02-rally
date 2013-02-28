@@ -16,16 +16,21 @@ using datx02_rally.Entities;
 using datx02_rally.Particles.Systems;
 using datx02_rally.Particles.WeatherSystems;
 using datx02_rally.Graphics;
+using datx02_rally.Menus;
 
 namespace datx02_rally
 {
+    public enum GameState { None, MainMenu, OptionsMenu, Gameplay, PausedGameplay, MultiplayerMenu, SingleplayerMenu, Exiting };
     public class Game1 : Microsoft.Xna.Framework.Game
     {
-        #region Field
-
+        public GameStateView currentView { get; private set; }
+        public GameState currentState { get; private set; }
         private static Game1 Instance = null;
-        GraphicsDeviceManager graphics;
+        public GraphicsDeviceManager Graphics { get; private set; }
+        // shared sprite batch
         public SpriteBatch spriteBatch;
+
+        #region Field
 
         Matrix projectionMatrix;
 
@@ -139,19 +144,18 @@ namespace datx02_rally
 
         public Game1()
         {
-            UniversalRandom.ResetInstance(0);
-
-            graphics = new GraphicsDeviceManager(this);
+            Graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            Instance = this;
 
-            graphics.PreferredBackBufferWidth = 1366;
-            graphics.PreferredBackBufferHeight = 768;
-            graphics.ApplyChanges();
+            Graphics.PreferredBackBufferWidth = GameSettings.Default.ResolutionWidth;
+            Graphics.PreferredBackBufferHeight = GameSettings.Default.ResolutionHeight;
+            //Graphics.ApplyChanges();
 
-            //graphics.ToggleFullScreen();
+            //if (GameSettings.Default.FullScreen != Graphics.IsFullScreen)
+            //    Graphics.ToggleFullScreen();
 
             IsMouseVisible = true;
-            Instance = this;
         }
 
         public static Game1 GetInstance()
@@ -174,64 +178,11 @@ namespace datx02_rally
             Components.Add(inputComponent);
             Services.AddService(typeof(InputComponent), inputComponent);
 
-            // Components
-
-            var cameraComponent = new CameraComponent(this);
-            Components.Add(cameraComponent);
-            Services.AddService(typeof(CameraComponent), cameraComponent);
-
-            var carControlComponent = new CarControlComponent(this);
-            Components.Add(carControlComponent);
-            Services.AddService(typeof(CarControlComponent), carControlComponent);
-
             var consoleComponent = new HUDConsoleComponent(this);
             Components.Add(consoleComponent);
             Services.AddService(typeof(HUDConsoleComponent), consoleComponent);
 
-            var serverComponent = new ServerClient(this);
-            Components.Add(serverComponent);
-            Services.AddService(typeof(ServerClient), serverComponent);
-
-            Console.WriteLine("isConnected " + GamePad.GetState(PlayerIndex.One).IsConnected);
-
-            // Particle systems
-
-            plasmaSystem = new PlasmaParticleSystem(this, Content);
-            Components.Add(plasmaSystem);
-            particleSystems.Add(plasmaSystem);
-
-            redSystem = new RedPlasmaParticleSystem(this, Content);
-            Components.Add(redSystem);
-            particleSystems.Add(redSystem);
-
-            yellowSystem = new YellowPlasmaParticleSystem(this, Content);
-            Components.Add(yellowSystem);
-            particleSystems.Add(yellowSystem);
-
-            greenSystem = new GreenParticleSystem(this, Content);
-            Components.Add(greenSystem);
-            particleSystems.Add(greenSystem);
-
-            airParticles = new AirParticleSystem(this, Content);
-            Components.Add(airParticles);
-            particleSystems.Add(airParticles);
-
-            dustParticles = new ParticleSystem[2];
-            dustParticles[0] = new SmokePlumeParticleSystem(this, Content);
-            dustParticles[1] = new SmokePlumeParticleSystem(this, Content);
-            foreach (var dustSystem in dustParticles)
-            {
-                Components.Add(dustSystem);
-                particleSystems.Add(dustSystem);
-            }
-
-            thunderParticleSystem = new ThunderParticleSystem(this, Content);
-            Components.Add(thunderParticleSystem);
-            particleSystems.Add(thunderParticleSystem);
-
-            rainSystem = new RainParticleSystem(this, Content);
-            Components.Add(rainSystem);
-            particleSystems.Add(rainSystem);
+            currentView = new MainMenu(this);
 
             base.Initialize();
         }
@@ -242,7 +193,6 @@ namespace datx02_rally
         /// </summary>
         protected override void LoadContent()
         {
-            // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
@@ -306,14 +256,14 @@ namespace datx02_rally
             heightmapGenerator.Perturb(30f);
 
             // Creates a terrainmodel around Vector3.Zero
-            terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightScale, heightmap, roadMap);
+            //terrain = new TerrainModel(GraphicsDevice, 0, mapSize, 0, mapSize, triangleSize, heightScale, heightmap, roadMap);
 
-            Effect terrainEffect = Content.Load<Effect>(@"Effects\TerrainShading");
-            terrainEffect.Parameters["TextureMap0"].SetValue(Content.Load<Texture2D>(@"Terrain\sand"));
-            terrainEffect.Parameters["TextureMap1"].SetValue(Content.Load<Texture2D>(@"Terrain\grass"));
-            terrainEffect.Parameters["TextureMap2"].SetValue(Content.Load<Texture2D>(@"Terrain\rock"));
-            terrainEffect.Parameters["TextureMap3"].SetValue(Content.Load<Texture2D>(@"Terrain\snow"));
-            terrain.Effect = terrainEffect.Clone();
+            //Effect terrainEffect = Content.Load<Effect>(@"Effects\TerrainShading");
+            //terrainEffect.Parameters["TextureMap0"].SetValue(Content.Load<Texture2D>(@"Terrain\sand"));
+            //terrainEffect.Parameters["TextureMap1"].SetValue(Content.Load<Texture2D>(@"Terrain\grass"));
+            //terrainEffect.Parameters["TextureMap2"].SetValue(Content.Load<Texture2D>(@"Terrain\rock"));
+            //terrainEffect.Parameters["TextureMap3"].SetValue(Content.Load<Texture2D>(@"Terrain\snow"));
+            //terrain.Effect = terrainEffect.Clone();
 
             #endregion
 
@@ -596,6 +546,7 @@ namespace datx02_rally
             byte[] data = new byte[texture.Width * texture.Height * 4];
             texture.GetData<byte>(data);
             cubeMap.SetData<byte>(face, data);
+            base.LoadContent();
         }
 
         /// <summary>
@@ -618,176 +569,38 @@ namespace datx02_rally
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            GameState nextState = currentView.UpdateState(gameTime);
+            if (currentState != nextState) 
+            {
+                switch (nextState)
+                {
+                    case GameState.None:
+                        break;
+                    case GameState.MainMenu:
+                        currentView = new MainMenu(this);
+                        break;
+                    case GameState.OptionsMenu:
+                        currentView = new OptionsMenu(this);
+                        break;
+                    case GameState.Gameplay:
+                        currentView = new GamePlayView(this, null, GamePlayMode.Singleplayer);
+                        //
+                        break;
+                    case GameState.PausedGameplay:
+                        break;
+                    case GameState.MultiplayerMenu:
+                        break;
+                    case GameState.SingleplayerMenu:
+                        break;
+                    case GameState.Exiting:
+                        this.Exit();
+                        break;
+                    default:
+                        break;
+                }
+                currentState = nextState;
+            }
             base.Update(gameTime);
-
-            InputComponent input = this.GetService<InputComponent>();
-
-            if (input.GetPressed(Input.ChangeController))
-            {
-                if (input.CurrentController == Controller.Keyboard)
-                {
-                    input.CurrentController = Controller.GamePad;
-                    Console.WriteLine("CurrentController equals GamePad");
-                }
-                else
-                {
-                    input.CurrentController = Controller.Keyboard;
-                    Console.WriteLine("CurrentController equals Keyboard");
-                }
-            }
-            // Allows the game to exit
-            if (input.GetPressed(Input.Exit))
-                this.Exit();
-
-            if (input.GetPressed(Input.Console))
-                this.GetService<HUDConsoleComponent>().Toggle();
-
-            //Apply changes to car
-            Car.Update();
-
-            #region Ray
-
-            bool onTrack = false;
-
-            for (int i = 0; i < navMesh.triangles.Length; i++)
-            {
-                var triangle = navMesh.triangles[i];
-
-                if (CollisionCheck(triangle))
-                {
-                    lastTriangle = i;
-                    onTrack = true;
-                    //break;
-                }
-            }
-
-            if (!onTrack)
-            {
-                // Project car.Pos on lastTriangle.
-                var t = navMesh.triangles[lastTriangle];
-
-                float coord = Vector3.Dot(Car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared();
-                bool trans = false;
-
-                if (coord < 0)
-                {
-                    trans = true;
-                    lastTriangle += (lastTriangle % 2 == 0 ? -2 : 2);
-                }
-                else if (coord > 1)
-                {
-                    trans = true;
-                    lastTriangle += (lastTriangle % 2 == 0 ? 2 : -2);
-                }
-
-                if (lastTriangle < 0)
-                    lastTriangle += navMesh.triangles.Length;
-                if (lastTriangle >= navMesh.triangles.Length)
-                    lastTriangle -= navMesh.triangles.Length;
-
-                if (!trans)
-                {
-                    Car.Position = coord * t.ac + t.vertices[0];
-                }
-                else if (!CollisionCheck(navMesh.triangles[lastTriangle]))
-                {
-                    t = navMesh.triangles[lastTriangle];
-                    coord = MathHelper.Clamp(Vector3.Dot(Car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared(), 0, 1);
-                    Car.Position = coord * t.ac + t.vertices[0];
-                    Car.Normal = t.normal;
-                }
-            }
-
-            #endregion
-
-            for (int x = -6; x < 6; x++)
-            {
-                for (int z = -6; z < 6; z++)
-                {
-                    rainSystem.AddParticle(Car.Position + new Vector3(
-                        (float)UniversalRandom.GetInstance().NextDouble() * x * 200,
-                        500 * (float)UniversalRandom.GetInstance().NextDouble(),
-                        (float)UniversalRandom.GetInstance().NextDouble() * z * 200), 
-                        Vector3.Down);
-                }
-            }
-
-            
-            Vector3 carDirection = Vector3.Transform(Vector3.Forward,
-                Matrix.CreateRotationY(Car.Rotation));
-            Vector3 carPosition = Car.Position + carDirection * 1000;
-            pointLights.Sort(
-                delegate(PointLight x, PointLight y)
-                {
-                    return (int)(Vector3.DistanceSquared(x.Position, carPosition) - Vector3.DistanceSquared(y.Position, carPosition));
-                }
-            );
-
-            base.Update(gameTime);
-        }
-
-        private bool CollisionCheck(NavMeshVisualizer.NavMeshTriangle triangle)
-        {
-            var downray = new Ray(Car.Position, Vector3.Down);
-            var upray = new Ray(Car.Position, Vector3.Up);
-
-            float? d1 = downray.Intersects(triangle.trianglePlane),
-                d2 = upray.Intersects(triangle.trianglePlane);
-
-            if (d1.HasValue || d2.HasValue)
-            {
-                float d = d1.HasValue ? d1.Value : d2.Value;
-                Ray ray = d1.HasValue ? downray : upray;
-
-                var point = ray.Position + d * ray.Direction;
-
-                bool onTriangle = PointInTriangle(triangle.vertices[0],
-                    triangle.vertices[1],
-                    triangle.vertices[2],
-                    point);
-
-                if (onTriangle)
-                {
-                    Car.Position = point;
-                    Car.Normal = triangle.normal;
-                }
-
-                return onTriangle;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Determine whether a point P is inside the triangle ABC. Note, this function
-        /// assumes that P is coplanar with the triangle.
-        /// </summary>
-        /// <returns>True if the point is inside, false if it is not.</returns>
-        public static bool PointInTriangle(Vector3 A, Vector3 B, Vector3 C, Vector3 P)
-        {
-            // Prepare our barycentric variables
-            Vector3 u = B - A;
-            Vector3 v = C - A;
-            Vector3 w = P - A;
-            Vector3 vCrossW = Vector3.Cross(v, w);
-            Vector3 vCrossU = Vector3.Cross(v, u);
-
-            // Test sign of r
-            if (Vector3.Dot(vCrossW, vCrossU) < 0)
-                return false;
-
-            Vector3 uCrossW = Vector3.Cross(u, w);
-            Vector3 uCrossV = Vector3.Cross(u, v);
-
-            // Test sign of t
-            if (Vector3.Dot(uCrossW, uCrossV) < 0)
-                return false;
-
-            // At this piont, we know that r and t and both > 0
-            float denom = uCrossV.Length();
-            float r = vCrossW.Length() / denom;
-            float t = uCrossW.Length() / denom;
-
-            return (r <= 1 && t <= 1 && r + t <= 1);
         }
 
         #endregion
@@ -801,23 +614,7 @@ namespace datx02_rally
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.Honeydew);
-            skyBoxEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
-
-            Matrix view = this.GetService<CameraComponent>().View;
-
-
-            RenderEnvironmentMap(gameTime);
-
-            GraphicsDevice.SetRenderTarget(postProcessTexture);
-
-            // Reset render settings
-            GraphicsDevice.BlendState = BlendState.Opaque;
-            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
-            GraphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
-
-            GraphicsDevice.Clear(Color.White);
-
-            RenderScene(gameTime, view, projectionMatrix, false);
+            currentView.Draw(gameTime);
             base.Draw(gameTime);
 
             GraphicsDevice.SetRenderTarget(null);
@@ -898,7 +695,7 @@ namespace datx02_rally
 
             #endregion
 
-            terrain.Draw(view, projection, this.GetService<CameraComponent>().Position, directionalLight, pointLights);
+            //terrain.Draw(view, projection, this.GetService<CameraComponent>().Position, directionalLight, pointLights);
 
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
@@ -943,7 +740,7 @@ namespace datx02_rally
             {
                 foreach (Car c in this.GetService<CarControlComponent>().Cars.Values)
                     DrawCar(view, projection, c);
-                DrawGhostCar(view, projection, gameTime);
+                //DrawGhostCar(view, projection, gameTime);
             }
         }
 
@@ -1034,82 +831,7 @@ namespace datx02_rally
             }
 
         }
-
-        float ghostWheelRotation = 0;
-        Vector3 ghostPosition;
-
-        private void DrawGhostCar(Matrix view, Matrix projection, GameTime gameTime)
-        {
-            float t = ((float)gameTime.TotalGameTime.TotalSeconds / 1020f) % 1f;
-
-            foreach (var mesh in Car.Model.Meshes) // 5 meshes
-            {
-                Matrix world = Matrix.Identity;
-
-                // Wheel transformation
-                if ((int)mesh.Tag > 0)
-                {
-                    world *= Matrix.CreateRotationX(ghostWheelRotation);
-                }
-
-                // Local modelspace, due to bad .X-file/exporter
-                world *= Car.Model.Bones[1 + Car.Model.Meshes.IndexOf(mesh) * 2].Transform;
-
-                // World
-                Vector3 position = raceTrack.Curve.GetPoint(t);
-                Vector3 heading = raceTrack.Curve.GetPoint((t + .01f) % 1f) - position;
-                heading.Normalize();
-
-                Vector3 normal = Vector3.Up;
-
-                position.Y *= heightScale * triangleSize;
-
-                foreach (var triangle in navMesh.triangles)
-                {
-                    var downray = new Ray(position, Vector3.Down);
-                    var upray = new Ray(position, Vector3.Up);
-
-                    float? d1 = downray.Intersects(triangle.trianglePlane),
-                        d2 = upray.Intersects(triangle.trianglePlane);
-
-                    if (d1.HasValue || d2.HasValue)
-                    {
-                        float d = d1.HasValue ? d1.Value : d2.Value;
-                        Ray ray = d1.HasValue ? downray : upray;
-
-                        var point = ray.Position + d * ray.Direction;
-
-                        bool onTriangle = PointInTriangle(triangle.vertices[0],
-                            triangle.vertices[1],
-                            triangle.vertices[2],
-                            point);
-
-                        if (onTriangle)
-                        {
-                            position = point;
-                            normal = triangle.normal;
-                            break;
-                        }
-                    }
-                }
-
-                ghostWheelRotation -= (position - ghostPosition).Length() / 10.4725f;
-                ghostPosition = position;
-
-                world *= Vector3.Forward.GetRotationMatrix(heading) * Vector3.Up.GetRotationMatrix(normal) *
-                    Matrix.CreateTranslation(position);
-
-                carSettings.World = world;
-                carSettings.NormalMatrix = Matrix.Invert(Matrix.Transpose(world));
-
-                foreach (Effect effect in mesh.Effects) // 5 effects for main, 1 for each wheel
-                    effect.SetCarShadingParameters(carSettings);
-
-                mesh.Draw();
-            }
-
-        }
-
+        
         #endregion
 
         #endregion

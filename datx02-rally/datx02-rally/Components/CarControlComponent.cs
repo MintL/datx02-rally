@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Graphics;
+using datx02_rally.Menus;
 
 namespace datx02_rally
 {
@@ -27,7 +28,8 @@ namespace datx02_rally
                 model = Game.Content.Load<Model>(@"Models/porsche");
                 wheelRadius = 10.4725f;
             }
-            Cars[player] = Game1.GetInstance().MakeCar();
+            if (Game1.GetInstance().currentState == GameState.Gameplay)
+                Cars[player] = (Game1.GetInstance().currentView as GamePlayView).MakeCar();
         }
 
         public void RemoveCar(Player player)

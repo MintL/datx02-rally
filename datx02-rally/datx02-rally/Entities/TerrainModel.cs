@@ -41,70 +41,82 @@ namespace datx02_rally
     {
         private GraphicsDevice device;
 
-        public MultitexturedVertex[] vertices;
+        private MultitexturedVertex[] vertices;
+        
         private VertexBuffer vertexBuffer;
-
         private IndexBuffer indexBuffer;
+
 
         public Effect Effect { get; set; }
 
-        public Matrix Projection { get; set; }
+        public BoundingBox BoundingBox { get; set; }
 
-        public float HeightOffset { get; set; }
-        
-        public TerrainModel (GraphicsDevice device, int offsetX, int width, int offsetZ, int depth, float triangleSize, float heightScale, float[,] heightMap, float[,] roadMap)
+        public Vector3 StartPoint { get; set; }
+        public Vector3 EndPoint { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="terrainSize"></param>
+        /// <param name="terrainSegments"></param>
+        /// <param name="terrainStart"></param>
+        /// <param name="xOffset"></param>
+        /// <param name="zOffset"></param>
+        /// <param name="terrainXZScale"></param>
+        /// <param name="terrainYScale"></param>
+        /// <param name="heightMap"></param>
+        /// <param name="roadMap"></param>
+        public TerrainModel(GraphicsDevice device, int terrainSize, int terrainSegments, float terrainStart,
+            int xOffset, int zOffset,
+            float terrainXZScale, float terrainYScale, 
+            float[,] heightMap, float[,] roadMap)
         {
             this.device = device;
 
-            int vertexCount = width * depth,
-                lastWidthIndex = width - 1,
-                lastHeightIndex = depth - 1;
+            int terrainSizeMinusOne = terrainSize;
+            terrainSize++;
 
-            float halfWidth = width / 2f,
-                halfDepth = depth / 2f;
-
-            HeightOffset = 0; // -1425;
-
+            int vertexCount = terrainSize * terrainSize;
             vertices = new MultitexturedVertex[vertexCount];
 
-            for (int z = 0; z < depth; z++)
+            for (int z = 0; z < terrainSize; z++)
             {
-                for (int x = 0; x < width; x++)
+                for (int x = 0; x < terrainSize; x++)
                 {
-                    //Vector4 textureWeights = new Vector4(
-                    //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0) / 0.3f, 0, 1),
-                    //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0.4f) / 0.2f, 0, 1),
-                    //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0.7f) / 0.2f, 0, 1),
-                    //    MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 1) / 0.3f, 0, 1)
-                    //);
-
-                    Vector4 textureWeights = new Vector4(
-                        roadMap[x, z],
-                        (1 - roadMap[x, z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0.2f) / 0.4f, 0, 1),
-                        (1 - roadMap[x, z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 0.7f) / 0.2f, 0, 1),
-                        (1 - roadMap[x, z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[x, z] - 1) / 0.3f, 0, 1)
+                    var textureWeights = new Vector4(
+                        roadMap[xOffset + x, zOffset + z],
+                        (1 - roadMap[xOffset + x, zOffset + z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[xOffset + x, zOffset + z] - 0.2f) / 0.4f, 0, 1),
+                        (1 - roadMap[xOffset + x, zOffset + z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[xOffset + x, zOffset + z] - 0.7f) / 0.2f, 0, 1),
+                        (1 - roadMap[xOffset + x, zOffset + z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[xOffset + x, zOffset + z] - 1) / 0.3f, 0, 1)
                     );
 
                     textureWeights.Normalize();
 
-                    vertices[z * width + x] = new MultitexturedVertex(
+                    vertices[z * terrainSize + x] = new MultitexturedVertex(
                         new Vector3(
-                            ((x - offsetX) - halfWidth) * triangleSize, // X
-                            (heightMap != null ? heightScale * triangleSize * heightMap[x, z] : 0) + HeightOffset, // Y
-                            ((z - offsetZ) - halfDepth) * triangleSize), // Z
+                            (terrainStart + xOffset + x) * terrainXZScale, // X
+                            terrainYScale * heightMap[xOffset + x, zOffset + z], // Y
+                            (terrainStart + zOffset + z) * terrainXZScale), // Z
                         Vector3.Zero, // Normal
-                        new Vector2(x / 50f, z / 50f), //new Vector2(x / 10f, z / 10f),
+                        new Vector2(x / 21f, z / 21f),
                         textureWeights);
 
                 }
             }
 
+            BoundingBox = BoundingBox.CreateFromPoints(vertices.Select(vert => vert.Position));
+
+            StartPoint = vertices.First().Position;
+            EndPoint = vertices.Last().Position;
+
+            #region Indicies & Vertex normals setup
 
             int flexIndice = 1;
             int rowIndex = 2;
-            int[] indices = new int[(width-1) * (depth-1) * 6];
+            int[] indices = new int[terrainSizeMinusOne * terrainSizeMinusOne * 6];
             indices[0] = 0;
-            indices[1] = width;
+            indices[1] = terrainSize;
             indices[2] = flexIndice;
 
             for (int i = 5; i <= indices.Length; i += 3)
@@ -114,27 +126,26 @@ namespace datx02_rally
 
                 if (i % 2 == 0)
                 {
-                    flexIndice -= (width-1);
+                    flexIndice -= terrainSizeMinusOne;
                     indices[i] = flexIndice;
                 }
                 else
                 {
-                    flexIndice += width;
+                    flexIndice += terrainSize;
                     indices[i] = flexIndice;
                 }
                 if (i + 3 >= indices.Length)
                     break;
-                else if (rowIndex * width -1 == indices[i])
+                else if (rowIndex * terrainSize - 1 == indices[i])
                 {
-                    indices[i + 1] = flexIndice - width + 1;
+                    indices[i + 1] = flexIndice - terrainSize + 1;
                     indices[i + 2] = flexIndice + 1;
-                    indices[i + 3] = flexIndice - width + 2;
+                    indices[i + 3] = flexIndice - terrainSize + 2;
                     flexIndice = indices[i + 3];
                     rowIndex++;
                     i += 3;
                 }
             }
-
 
             for (int i = 0; i < indices.Length / 3; i++)
             {
@@ -143,7 +154,6 @@ namespace datx02_rally
                 Vector3 thirdvec = vertices[indices[i * 3 + 2]].Position;
                 Vector3 firstsub = secondvec - firstvec;
                 Vector3 secondsub = thirdvec - firstvec;
-
 
                 Vector3 normal;
                 if(i % 2 == 0)
@@ -164,8 +174,9 @@ namespace datx02_rally
                 vertices[i].Normal.Normalize();
             }
 
+            #endregion
 
-            indexBuffer = new IndexBuffer(device, typeof(int), (width-1) * (depth-1) * 6, BufferUsage.None);
+            indexBuffer = new IndexBuffer(device, typeof(int), terrainSizeMinusOne * terrainSizeMinusOne * 6, BufferUsage.None);
             indexBuffer.SetData(indices);
 
             vertexBuffer = new VertexBuffer(device,
@@ -175,41 +186,43 @@ namespace datx02_rally
         }
 
         
-        public void Draw(Matrix view, Matrix projection, Vector3 cameraPosition, DirectionalLight directionalLight, List<PointLight> pointLights)
+        public void Draw(Matrix view, Vector3 cameraPosition, DirectionalLight directionalLight, List<PointLight> pointLights)
         {
-            Projection = projection;
             Effect.Parameters["EyePosition"].SetValue(cameraPosition);
             Effect.Parameters["View"].SetValue(view);
             Effect.Parameters["World"].SetValue(Matrix.Identity);
-            Effect.Parameters["Projection"].SetValue(Projection);
 
-            Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
+            //Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
 
-            Effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
-            Effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
-            Effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
-
-            Vector3[] positions = new Vector3[pointLights.Count];
-            Vector3[] diffuses = new Vector3[pointLights.Count];
-            float[] ranges = new float[pointLights.Count];
-            for (int i = 0; i < 10; i++)
+            if (Effect.CurrentTechnique.Name == "TerrainShading")
             {
-                positions[i] = pointLights[i].Position;
-                diffuses[i] = pointLights[i].Diffuse;
-                ranges[i] = pointLights[i].Range;
+                Effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
+                Effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
+                Effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
             }
 
-            Effect.Parameters["LightPosition"].SetValue(positions);
-            Effect.Parameters["LightDiffuse"].SetValue(diffuses);
-            Effect.Parameters["LightRange"].SetValue(ranges);
-            Effect.Parameters["NumLights"].SetValue(10);
-            
             foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
             {
                 pass.Apply();
                 device.Indices = indexBuffer;
                 device.SetVertexBuffer(vertexBuffer);
-                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, vertexBuffer.VertexCount*2);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, indexBuffer.IndexCount / 3);
+            }
+        }
+
+        public void Draw(Matrix view, Matrix projection)
+        {
+            Effect.Parameters["View"].SetValue(view);
+            Effect.Parameters["World"].SetValue(Matrix.Identity);
+            Effect.Parameters["Projection"].SetValue(projection);
+
+            foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                device.Indices = indexBuffer;
+                device.SetVertexBuffer(vertexBuffer);
+
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, indexBuffer.IndexCount / 3);
             }
         }
     }
