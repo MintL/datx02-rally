@@ -2,15 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.Xna.Framework;
 
 namespace datx02_rally.Menus
 {
-    interface IMenuItem
+    public enum ItemPositionX { LEFT, CENTER, RIGHT }
+    public enum ItemPositionY { TOP, CENTER, BOTTOM }
+
+    public interface IMenuItem
     {
-        string Text {get; set; }
+        string Identifier { get; set; }
+        string Text { get; set; }
+        ItemPositionX MenuPositionX { get; set; }
+        ItemPositionY MenuPositionY { get; set; }
     }
 
-    interface IOptionMenuItem : IMenuItem
+    public interface IOptionMenuItem : IMenuItem
     {
         bool IsLastOption();
 
@@ -24,62 +31,89 @@ namespace datx02_rally.Menus
 
     }
 
-    class StateActionMenuItem : IMenuItem
+    public class StateActionMenuItem : IMenuItem
     {
         public string Text { get; set; }
+        public string Identifier { get; set; }
+        public ItemPositionX MenuPositionX { get; set; }
+        public ItemPositionY MenuPositionY { get; set; }
+        public GameState NextState { get; set; }
 
-        public GameState NextState { get; private set; }
+        public StateActionMenuItem(string text) : this(text, null, null) { }
 
-        public StateActionMenuItem(string text) : this(text, null) { }
+        public StateActionMenuItem(string text, GameState? nextState) : this(text, nextState, null) { }
 
-        public StateActionMenuItem(string text, GameState? nextState)
+        public StateActionMenuItem(string text, GameState? nextState, string identifier)
         {
             this.Text = text;
+            this.Identifier = identifier != null ? identifier : text;
             this.NextState = nextState.HasValue ? nextState.Value : GameState.None;
+
+            MenuPositionX = ItemPositionX.CENTER;
+            MenuPositionY = ItemPositionY.CENTER;
         }
     }
 
-    class ActionMenuItem : IMenuItem
+    public class ActionMenuItem : IMenuItem
     {
         public string Text { get; set; }
+        public string Identifier { get; set; }
+        public ItemPositionX MenuPositionX { get; set; }
+        public ItemPositionY MenuPositionY { get; set; }
 
         public delegate void Action();
         public Action PerformAction;
 
-        public ActionMenuItem(string text) : this(text, null) { }
+        public ActionMenuItem(string text) : this(text, null, null) { }
 
-        public ActionMenuItem(string text, Action action)
+        public ActionMenuItem(string text, Action action) : this(text, action, null) { }
+
+        public ActionMenuItem(string text, Action action, string identifier)
         {
             this.Text = text;
+            this.Identifier = identifier != null ? identifier : text;
             this.PerformAction = action;
+
+            MenuPositionX = ItemPositionX.CENTER;
+            MenuPositionY = ItemPositionY.CENTER;
         }
     }
 
-    class BoolOptionMenuItem : OptionMenuItem<bool>
+    public class BoolOptionMenuItem : OptionMenuItem<bool>
     {
-        public BoolOptionMenuItem(string text)
-            : base(text)
+        public BoolOptionMenuItem(string text) : this(text, null) { }
+
+        public BoolOptionMenuItem(string text, string identifier)
+            : base(text, identifier)
         {
             this.AddOption("Off", false).AddOption("On", true);
         }
 
-        
     }
 
-    class OptionMenuItem<T> : IOptionMenuItem
+    public class OptionMenuItem<T> : IOptionMenuItem
     {
         public string text;
         public string Text {
             set { text = value; }
-            get { return text + ": " + SelectedOption(); } 
+            get { return text + ": " + SelectedOption(); }
         }
+        public string Identifier { get; set; }
+        public ItemPositionX MenuPositionX { get; set; }
+        public ItemPositionY MenuPositionY { get; set; }
 
         public List<Tuple<string,T>> options = new List<Tuple<string, T>>();
         public int selectedOptionIndex = 0;
 
-        public OptionMenuItem(string text)
+        public OptionMenuItem(string text) : this(text, null) { }
+
+        public OptionMenuItem(string text, string identifier)
         {
             this.text = text;
+            this.Identifier = identifier != null ? identifier : text;
+
+            MenuPositionX = ItemPositionX.CENTER;
+            MenuPositionY = ItemPositionY.CENTER;
         }
 
         public OptionMenuItem<T> AddOption(string text, T value) 

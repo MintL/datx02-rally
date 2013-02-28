@@ -42,8 +42,8 @@ namespace datx02_rally
             Graphics.PreferredBackBufferHeight = GameSettings.Default.ResolutionHeight;
             Graphics.ApplyChanges();
 
-            if (GameSettings.Default.FullScreen != Graphics.IsFullScreen)
-                Graphics.ToggleFullScreen();
+            /*if (GameSettings.Default.FullScreen != Graphics.IsFullScreen)
+                Graphics.ToggleFullScreen();*/
 
             IsMouseVisible = true;
         }
