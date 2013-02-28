@@ -13,6 +13,7 @@ using datx02_rally.Particles.WeatherSystems;
 using Microsoft.Xna.Framework.Content;
 using datx02_rally.Particles.Systems;
 using datx02_rally.MapGeneration;
+using datx02_rally.EventTrigger;
 
 namespace datx02_rally.Menus
 {
@@ -580,6 +581,9 @@ namespace datx02_rally.Menus
             #region Prelighting
             prelightingRenderer = new PrelightingRenderer(GraphicsDevice, content, pointLightModel, spotLightModel);
             #endregion
+
+            TriggerManager.GetInstance().CreatePositionTrigger("test", new Vector3(0, 1500, -3200), 3000f, new TimeSpan(0, 0, 5));
+
         }
 
         public Car MakeCar()
@@ -759,6 +763,9 @@ namespace datx02_rally.Menus
             //        return (int)(Vector3.DistanceSquared(x.Position, carPosition) - Vector3.DistanceSquared(y.Position, carPosition));
             //    }
             //);
+            TriggerManager.GetInstance().Update(gameTime, Car.Position);
+
+
             return GameState.Gameplay;
         }
 
@@ -867,8 +874,12 @@ namespace datx02_rally.Menus
         private void RenderPostProcess()
         {
             // Apply bloom effect
-            Texture2D finalTexture;
-            finalTexture = bloom.PerformBloom(postProcessTexture);
+            Texture2D finalTexture = postProcessTexture;
+
+            if (TriggerManager.GetInstance().IsActive("test"))
+            {
+                finalTexture = bloom.PerformBloom(postProcessTexture);
+            }
 
             spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
             foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
