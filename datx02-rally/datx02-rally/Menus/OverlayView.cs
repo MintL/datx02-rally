@@ -6,16 +6,23 @@ using Microsoft.Xna.Framework;
 
 namespace datx02_rally.Menus
 {
-    public abstract class OverlayView : GameStateView
+    public class OverlayView : MenuView
     {
-        public OverlayView(Game game) : base(game)
+        public OverlayView(Game game) : base(game, GameState.None)
         {
 
         }
+
         public override GameState UpdateState(Microsoft.Xna.Framework.GameTime gameTime)
         {
             
             throw new NotImplementedException();
+        }
+
+        public override void Draw(GameTime gameTime)
+        {
+            
+            base.Draw(gameTime);
         }
     }
 }

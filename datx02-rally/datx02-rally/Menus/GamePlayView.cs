@@ -143,7 +143,7 @@ namespace datx02_rally.Menus
         #region Initialization
 
         public GamePlayView(Game game, int? seed, GamePlayMode mode)
-            : base(game)
+            : base(game, GameState.Gameplay)
         {
             game.GetService<ServerClient>().GamePlay = this;
             int usedSeed = seed.HasValue ? seed.Value : 0;
