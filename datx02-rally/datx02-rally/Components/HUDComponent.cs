@@ -20,7 +20,7 @@ namespace datx02_rally.Components
     {
         private SpriteBatch spriteBatch;
         private SpriteFont font;
-        private TimeSpan timeSinceLastDraw;
+        private TimeSpan timeSinceLastFPS;
 
         private int frameCount = 0;
         private int currentFps;
@@ -30,17 +30,19 @@ namespace datx02_rally.Components
         public bool ConsoleEnabled { get; set; }
         public bool SpeedEnabled { get; set; }
         public bool PlayerPlaceEnabled { get; set; }
+        public bool TimeEnabled { get; set; }
 
         public HUDComponent(Game game)
             : base(game)
         {
             spriteBatch = new SpriteBatch(game.GraphicsDevice);
-            timeSinceLastDraw = new TimeSpan(0);
+            timeSinceLastFPS = new TimeSpan(0);
             font = Game.Content.Load<SpriteFont>(@"Menu/FPSFont");
 
             ConsoleEnabled = false;
             SpeedEnabled = true;
             PlayerPlaceEnabled = true;
+            TimeEnabled = true;
         }
 
         /// <summary>
@@ -59,45 +61,48 @@ namespace datx02_rally.Components
 
         public override void Draw(GameTime gameTime)
         {
-            timeSinceLastDraw = timeSinceLastDraw.Add(gameTime.ElapsedGameTime);
+            spriteBatch.Begin();
+            timeSinceLastFPS = timeSinceLastFPS.Add(gameTime.ElapsedGameTime);
             if (ConsoleEnabled)
             {
-                if (timeSinceLastDraw.Ticks >= TimeSpan.TicksPerSecond)
+                if (timeSinceLastFPS.Ticks >= TimeSpan.TicksPerSecond)
                 {
                     currentFps = ++frameCount;
+                    timeSinceLastFPS = new TimeSpan(0);
                     frameCount = 0;
-                    timeSinceLastDraw = new TimeSpan(0);
                 }
                 else
                 {
                     frameCount++;
                 }
 
-                spriteBatch.Begin();
                 Vector2 topLeft = new Vector2(0, 0);
                 spriteBatch.DrawString(font, currentFps == 0 ? "" : currentFps.ToString(), topLeft, Color.Moccasin);
-                spriteBatch.End();
             }
             if (SpeedEnabled)
             {
-                if (timeSinceLastDraw.Ticks >= TimeSpan.TicksPerSecond/10)
-                {
-                    spriteBatch.Begin();
-                    double carSpeed = Math.Abs(Math.Round(((Game as Game1).currentView as GamePlayView).Car.Speed, 1));
-                    Vector2 bottomLeft = new Vector2(0, Game.GraphicsDevice.Viewport.Height - font.LineSpacing);
-                    spriteBatch.DrawString(font, carSpeed.ToString(), bottomLeft, Color.Moccasin);
-                    spriteBatch.End();
-                }
+                double carSpeed = Math.Abs(Math.Round(((Game as Game1).currentView as GamePlayView).Car.Speed, 1));
+                Vector2 bottomLeft = new Vector2(0, Game.GraphicsDevice.Viewport.Height - font.LineSpacing);
+                spriteBatch.DrawString(font, carSpeed.ToString(), bottomLeft, Color.Moccasin);
             }
             if (PlayerPlaceEnabled)
             {
-                spriteBatch.Begin();
                 int totalPlayers = Game.GetService<CarControlComponent>().Cars.Count;
                 string positionText = playerPosition + "/" + totalPlayers;
                 Vector2 topRight = new Vector2(Game.GraphicsDevice.Viewport.Width - font.MeasureString(positionText).X, 0);
                 spriteBatch.DrawString(font, positionText, topRight, Color.Moccasin);
-                spriteBatch.End();
             }
+            if (TimeEnabled)
+            {
+                string totalGameTime = gameTime.TotalGameTime.ToString(@"ss\:ff");
+                string lapTime = gameTime.TotalGameTime.ToString(@"m\:ss\:ff");
+                Vector2 topCenter1 = new Vector2((Game.GraphicsDevice.Viewport.Width / 2) - (font.MeasureString(lapTime).X / 2), 0);
+                Vector2 topCenter2 = new Vector2((Game.GraphicsDevice.Viewport.Width / 2) - (font.MeasureString(totalGameTime).X / 2), font.MeasureString(totalGameTime).Y);
+                spriteBatch.DrawString(font, lapTime, topCenter1, Color.Red);
+                spriteBatch.DrawString(font, totalGameTime, topCenter2, Color.Red);
+            }
+            spriteBatch.End();
+
             base.Draw(gameTime);
         }
 
