@@ -14,7 +14,8 @@ namespace datx02_rally
         public RenderTarget2D NormalTarget { get; protected set; }
         public RenderTarget2D LightTarget { get; protected set; }
 
-        TerrainModel terrain;
+        TerrainModel[,] terrainSegments;
+        int terrainSegmentsCount;
         List<PointLight> pointLights;
         List<SpotLight> spotLights;
         Model pointLightModel;
@@ -55,32 +56,47 @@ namespace datx02_rally
             lightingEffect.Parameters["viewportHeight"].SetValue(viewHeight);
         }
 
-        public void Render(Matrix view, DirectionalLight directionalLight, TerrainModel terrain, List<PointLight> pointLights, List<SpotLight> spotLights)
+        public void Render(Matrix view, DirectionalLight directionalLight, TerrainModel[,] terrainSegments, int terrainSegmentsCount, List<PointLight> pointLights, List<SpotLight> spotLights)
         {
-            this.terrain = terrain;
+            this.terrainSegments = terrainSegments;
+            this.terrainSegmentsCount = terrainSegmentsCount;
             this.pointLights = pointLights;
             this.spotLights = spotLights;
             
             RenderDepthNormal(view);
             RenderLight(view * lightProjection);
+
+            for (int z = 0; z < terrainSegmentsCount; z++)
+                for (int x = 0; x < terrainSegmentsCount; x++)
+                {
+                    var terrain = terrainSegments[x, z];
+                    terrain.Effect.Parameters["LightTexture"].SetValue(LightTarget);
+                    terrain.Effect.Parameters["PrelightProjection"].SetValue(lightProjection);
+                    terrain.Effect.Parameters["viewportWidth"].SetValue(device.Viewport.Width);
+                    terrain.Effect.Parameters["viewportHeight"].SetValue(device.Viewport.Height);
+
+                }
             
-            terrain.Effect.Parameters["LightTexture"].SetValue(LightTarget);
-            terrain.Effect.Parameters["PrelightProjection"].SetValue(lightProjection);
-            terrain.Effect.Parameters["viewportWidth"].SetValue(device.Viewport.Width);
-            terrain.Effect.Parameters["viewportHeight"].SetValue(device.Viewport.Height);
         }
 
         public void RenderDepthNormal(Matrix view)
         {
             device.RasterizerState = RasterizerState.CullNone;
             device.DepthStencilState = new DepthStencilState { DepthBufferEnable = true, DepthBufferFunction = CompareFunction.LessEqual };
+            device.BlendState = BlendState.Opaque;
             device.SetRenderTargets(NormalTarget, DepthTarget);
             device.Clear(new Color(0, 255, 255));
 
-            Effect current = terrain.Effect;
-            terrain.Effect = depthNormalEffect;
-            terrain.Draw(view, lightProjection);
-            terrain.Effect = current;
+            for (int z = 0; z < terrainSegmentsCount; z++)
+                for (int x = 0; x < terrainSegmentsCount; x++)
+                {
+                    var terrain = terrainSegments[x, z];
+                    Effect current = terrain.Effect;
+                    terrain.Effect = depthNormalEffect;
+                    terrain.Draw(view, lightProjection);
+                    //terrain.Draw(view, Vector3.Zero, null, null);
+                    terrain.Effect = current;
+                }
 
             device.SetRenderTargets(null);
         }

@@ -386,7 +386,7 @@ namespace datx02_rally.Menus
                 //var side = triangleSize * roadWidth * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
                 //point1.Y *= heightScale * triangleSize;
 
-                point.Y *= terrainYScale * terrainXZScale;
+                point.Y *= terrainYScale;
                 Random random = UniversalRandom.GetInstance();
 
                 Vector3 color = new Vector3(
@@ -400,7 +400,7 @@ namespace datx02_rally.Menus
             Vector3 forward = Vector3.Transform(Vector3.Backward,
                 Matrix.CreateRotationY(Car.Rotation));
             Vector3 position = Car.Position;
-            position.Y *= terrainYScale * terrainXZScale;
+            position.Y *= terrainYScale;
             spotLights.Add(new SpotLight(position + new Vector3(0, 50, 0), forward, Color.White.ToVector3(), 45, 45, 500));
             #endregion
 
@@ -858,13 +858,15 @@ namespace datx02_rally.Menus
         {
             gameInstance.GraphicsDevice.Clear(Color.Honeydew);
             skyBoxEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
-
-            Matrix view = gameInstance.GetService<CameraComponent>().View;
             
+            Matrix view = gameInstance.GetService<CameraComponent>().View;
+            prelightingRenderer.Render(view, directionalLight, terrainSegments, terrainSegmentsCount, pointLights, spotLights);
+
             if (!GameSettings.Default.PerformanceMode)
                 RenderEnvironmentMap(gameTime);
 
-            //prelightingRenderer.Render(view, directionalLight, terrain, pointLights, spotLights);
+
+            
 
             GraphicsDevice.SetRenderTarget(postProcessTexture);
 
@@ -893,10 +895,8 @@ namespace datx02_rally.Menus
             // Apply bloom effect
             Texture2D finalTexture = postProcessTexture;
 
-            if (TriggerManager.GetInstance().IsActive("test"))
-            {
-                finalTexture = bloom.PerformBloom(postProcessTexture);
-            }
+            finalTexture = bloom.PerformBloom(postProcessTexture);
+
             if (TriggerManager.GetInstance().IsActive("goalTest"))
             {
                 Game.GetService<CameraComponent>().CurrentCamera.Shake();
@@ -982,18 +982,18 @@ namespace datx02_rally.Menus
             foreach (ParticleSystem pSystem in particleSystems)
                 pSystem.SetCamera(view, projection);
 
-            //for (int i = 0; i < 10; i++)
-            //  pointLights[i].Draw(lightModel, view, projection);
-            foreach (SpotLight spot in spotLights)
-            {
-                spot.Draw(spotLightModel, view, projection);
-            }
+            for (int i = 0; i < pointLights.Count; i++)
+                pointLights[i].Draw(pointLightModel, view, projection);
+            //foreach (SpotLight spot in spotLights)
+            //{
+            //    spot.Draw(spotLightModel, view, projection);
+            //}
 
             #region Foliage
 
             for (int i = 0; i < treePositions.Length; i++)
             {
-                BoundingSphere sourceSphere = new BoundingSphere(treePositions[i], oakTree.Meshes[0].BoundingSphere.Radius);
+                BoundingSphere sourceSphere = new BoundingSphere(treePositions[i], oakTree.Meshes[0].BoundingSphere.Radius * 1000);
                 if (viewFrustum.Intersects(sourceSphere))
                     DrawModel(oakTree, view, projection, treePositions[i], treeTransforms[i]);
             }
@@ -1071,7 +1071,7 @@ namespace datx02_rally.Menus
             Vector3[] positions = new Vector3[pointLights.Count];
             Vector3[] diffuses = new Vector3[pointLights.Count];
             float[] ranges = new float[pointLights.Count];
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 4; i++)
             {
                 positions[i] = pointLights[i].Position;
                 diffuses[i] = pointLights[i].Diffuse;
@@ -1142,7 +1142,7 @@ namespace datx02_rally.Menus
 
                 Vector3 normal = Vector3.Up;
 
-                position.Y *= terrainYScale * terrainXZScale;
+                position.Y *= terrainYScale;
 
                 foreach (var triangle in navMesh.triangles)
                 {
