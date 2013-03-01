@@ -60,7 +60,7 @@ namespace datx02_rally.Menus
 
         public override GameState UpdateState(GameTime gameTime)
         {
-            CurrentOverlay.OffsetPosition(new Vector2(10, 0));//GetScreenPosition(new Vector2(0.5f, 0)  * gameTime.ElapsedGameTime.Seconds));
+            CurrentOverlay.OffsetPosition(GetScreenPosition(new Vector2(0.001f, 0f)));//GetScreenPosition(new Vector2(0.5f, 0)  * gameTime.ElapsedGameTime.Seconds));
 
             return CurrentOverlay.UpdateState(gameTime);
         }
