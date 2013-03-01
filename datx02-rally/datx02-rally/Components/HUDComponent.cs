@@ -25,12 +25,11 @@ namespace datx02_rally.Components
         private int frameCount = 0;
         private int currentFps;
 
-        /*private float distance = 0;
-        private float prevPosition;
-        private float currentSpeed;*/
+        private int playerPosition = 1;
 
         public bool ConsoleEnabled { get; set; }
         public bool SpeedEnabled { get; set; }
+        public bool PlayerPlaceEnabled { get; set; }
 
         public HUDComponent(Game game)
             : base(game)
@@ -41,6 +40,7 @@ namespace datx02_rally.Components
 
             ConsoleEnabled = false;
             SpeedEnabled = true;
+            PlayerPlaceEnabled = true;
         }
 
         /// <summary>
@@ -50,6 +50,11 @@ namespace datx02_rally.Components
         public override void Initialize()
         {
             base.Initialize();
+        }
+
+        public void setPlayerPosition(int position) 
+        {
+            playerPosition = position;
         }
 
         public override void Draw(GameTime gameTime)
@@ -84,7 +89,18 @@ namespace datx02_rally.Components
                     spriteBatch.End();
                 }
             }
+            if (PlayerPlaceEnabled)
+            {
+                spriteBatch.Begin();
+                int totalPlayers = Game.GetService<CarControlComponent>().Cars.Count;
+                string positionText = playerPosition + "/" + totalPlayers;
+                Vector2 topRight = new Vector2(Game.GraphicsDevice.Viewport.Width - font.MeasureString(positionText).X, 0);
+                spriteBatch.DrawString(font, positionText, topRight, Color.Moccasin);
+                spriteBatch.End();
+            }
             base.Draw(gameTime);
         }
+
+
     }
 }
