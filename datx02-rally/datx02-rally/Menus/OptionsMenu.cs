@@ -14,7 +14,7 @@ namespace datx02_rally.Menus
     /// <summary>
     /// This is a game component that implements IUpdateable.
     /// </summary>
-    public class OptionsMenu : MenuView
+    public class OptionsMenu : OverlayView
     {
 
         public OptionsMenu(Game game) : base(game, GameState.OptionsMenu) { }

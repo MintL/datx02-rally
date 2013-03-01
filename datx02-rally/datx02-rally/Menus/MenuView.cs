@@ -8,119 +8,62 @@ using Microsoft.Xna.Framework.Input;
 
 namespace datx02_rally.Menus
 {
-    public abstract class MenuView : GameStateView
+    public class MenuView : GameStateView
     {
-        public SpriteFont MenuFont { get; set; }
         public Texture2D Background { get; set; }
-        public Color ItemColor { get; set; }
-        public Color ItemColorSelected { get; set; }
-        public float Transparency { get; set; }
-        private List<IMenuItem> menuItems = new List<IMenuItem>();
-        private int selectedIndex = 0;
+        public Texture2D Logo { get; set; }
+
+        public List<OverlayView> Overlays = new List<OverlayView>();
+        public OverlayView CurrentOverlay;
 
         public MenuView(Game game, GameState gameState) : base(game, gameState)
         {
-            ItemColor = Color.Black;
-            ItemColorSelected = Color.Red;
-            Transparency = 1f; //no transparency
+            Overlays.Add(new MainMenu(game));
+            CurrentOverlay = Overlays.First<OverlayView>();
 
-            MenuFont = game.Content.Load<SpriteFont>(@"Menu/MenuFont");
-            Background = game.Content.Load<Texture2D>(@"Menu/Menu_bg");
+            
+        }
+
+        protected override void LoadContent()
+        {
+            base.LoadContent();
+
+            Background = Game.Content.Load<Texture2D>(@"Menu\Background");
+            Logo = Game.Content.Load<Texture2D>(@"Menu\Menu-Title");
+
+            
+        }
+
+        public override void ChangeResolution()
+        {
+            Rectangle bounds = CurrentOverlay.Bounds;
+            Vector2 offset = GetScreenPosition(new Vector2(0.5f, 0.5f));
+            offset -= new Vector2(bounds.Width, bounds.Height) / 2;
+            CurrentOverlay.Bounds = new Rectangle((int)offset.X, (int)offset.Y, bounds.Width, bounds.Height);
         }
 
         public override void Draw(GameTime gameTime)
         {
-            int noOfItemsBottom = 0,
-                noOfItemsTop = 0,
-                noOfItemsCenter = 0;
+            Vector2 position = new Vector2(0.5f, 0.15f);
 
             spriteBatch.Begin();
-            spriteBatch.Draw(Background, Bounds, new Color(1f, 1f, 1f, Transparency));
-
-            for (int i = 0; i < menuItems.Count; i++)
-            {
-                IMenuItem menuItem = menuItems[i];
-                int noInOrder;
-                if (menuItem.MenuPositionY == ItemPositionY.TOP)
-                    noInOrder = noOfItemsTop++;
-                else if (menuItem.MenuPositionY == ItemPositionY.BOTTOM)
-                    noInOrder = noOfItemsBottom++;
-                else
-                    noInOrder = noOfItemsCenter++;
-
-                Color color = i == selectedIndex ? ItemColorSelected : ItemColor;
-
-                spriteBatch.DrawString(MenuFont, menuItem.Text, CalculateMenuItemPosition(menuItem, noInOrder), color);
-            }
-
+            spriteBatch.Draw(Background, Bounds, Color.White);
+            spriteBatch.Draw(Logo, GetScreenPosition(position) - new Vector2(Logo.Bounds.Width, Logo.Bounds.Height) / 2, Color.White);
             spriteBatch.End();
 
+            
+            CurrentOverlay.Draw(gameTime);
+            
+            
             base.Draw(gameTime);
         }
 
-        public override GameState UpdateState(Microsoft.Xna.Framework.GameTime gameTime)
+        public override GameState UpdateState(GameTime gameTime)
         {
-            InputComponent input = gameInstance.GetService<InputComponent>();
-            GameState nextGameState = GameState.None;
-            if (input.GetKey(Keys.Down))
-                selectedIndex = Math.Min(menuItems.Count - 1, selectedIndex + 1);
-            else if (input.GetKey(Keys.Up))
-                selectedIndex = Math.Max(0, selectedIndex - 1);
-            else if (input.GetKey(Keys.Right) && menuItems[selectedIndex] is IOptionMenuItem)
-                (menuItems[selectedIndex] as IOptionMenuItem).NextOption();
-            else if (input.GetKey(Keys.Left) && menuItems[selectedIndex] is IOptionMenuItem)
-                (menuItems[selectedIndex] as IOptionMenuItem).PreviousOption();
-            else if (input.GetKey(Keys.Enter) && menuItems[selectedIndex] is StateActionMenuItem)
-                nextGameState = (menuItems[selectedIndex] as StateActionMenuItem).NextState;
-            else if (input.GetKey(Keys.Enter) && menuItems[selectedIndex] is ActionMenuItem)
-                (menuItems[selectedIndex] as ActionMenuItem).PerformAction();
-            return nextGameState != GameState.None ? nextGameState : this.gameState;
+            CurrentOverlay.OffsetPosition(new Vector2(10, 0));//GetScreenPosition(new Vector2(0.5f, 0)  * gameTime.ElapsedGameTime.Seconds));
+
+            return CurrentOverlay.UpdateState(gameTime);
         }
 
-        public void AddMenuItem(IMenuItem menuItem)
-        {
-            menuItems.Add(menuItem);
-        }
-
-        // TODO: Only works if all menuitems have equal height
-        private Vector2 CalculateMenuItemPosition(IMenuItem menuItem, int numberInOrder)
-        {
-            Vector2 textSize = MenuFont.MeasureString(menuItem.Text);
-
-            float posX = 0;
-            switch (menuItem.MenuPositionX)
-            {
-                case ItemPositionX.LEFT:
-                    posX = 0;
-                    break;
-                case ItemPositionX.CENTER:
-                    posX = (Bounds.Width / 2) - (textSize.X / 2);
-                    break;
-                case ItemPositionX.RIGHT:
-                    posX = (Bounds.Width) - textSize.X;
-                    break;
-            }
-
-            float posY = 0;
-            switch (menuItem.MenuPositionY)
-            {
-                case ItemPositionY.TOP:
-                    posY = 0 + (numberInOrder * textSize.Y);
-                    break;
-                case ItemPositionY.CENTER:
-                    posY = (Bounds.Height / 2) + (numberInOrder * textSize.Y);
-                    break;
-                case ItemPositionY.BOTTOM:
-                    posY = (Bounds.Height) - (numberInOrder * textSize.Y);
-                    break;
-            }
-
-            return new Vector2(posX, posY);
-        }
-
-        public IMenuItem GetMenuItem(string identifier)
-        {
-            return menuItems.Find(item => item.Identifier == identifier);
-        }
     }
 }

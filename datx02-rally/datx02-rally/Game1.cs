@@ -75,7 +75,9 @@ namespace datx02_rally
             Components.Add(consoleComponent);
             Services.AddService(typeof(HUDConsoleComponent), consoleComponent);
 
-            currentView = new MainMenu(this);
+            currentState = GameState.MainMenu;
+            currentView = new MenuView(this, currentState);
+            currentView.ChangeResolution();
 
             base.Initialize();
         }
@@ -119,7 +121,7 @@ namespace datx02_rally
                     case GameState.None:
                         break;
                     case GameState.MainMenu:
-                        currentView = new MainMenu(this);
+                        currentView = new MenuView(this, GameState.MainMenu);
                         break;
                     case GameState.OptionsMenu:
                         currentView = new OptionsMenu(this);

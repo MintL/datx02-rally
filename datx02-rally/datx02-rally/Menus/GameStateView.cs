@@ -39,5 +39,12 @@ namespace datx02_rally.Menus
         /// </summary>
         /// <returns>Next game state</returns>
         public abstract GameState UpdateState(GameTime gameTime);
+
+        public abstract void ChangeResolution();
+
+        public Vector2 GetScreenPosition(Vector2 position)
+        {
+            return position * new Vector2(Bounds.Width, Bounds.Height);
+        }
     }
 }

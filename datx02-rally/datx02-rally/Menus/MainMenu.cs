@@ -15,18 +15,33 @@ namespace datx02_rally.Menus
     /// <summary>
     /// This is a game component that implements IUpdateable.
     /// </summary>
-    public class MainMenu : MenuView
+    public class MainMenu : OverlayView
     {
-        public MainMenu(Game game) : base(game, GameState.MainMenu) { }
+        public MainMenu(Game game) : base(game, GameState.MainMenu) 
+        { 
+            Vector2 size = GetScreenPosition(new Vector2(0.3f, 0.6f));
+            Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
+        }
 
         protected override void LoadContent()
         {
-            AddMenuItem(new StateActionMenuItem("Singleplayer", GameState.Gameplay));
-            AddMenuItem(new StateActionMenuItem("Multiplayer", GameState.MultiplayerMenu));
-            AddMenuItem(new StateActionMenuItem("Options", GameState.OptionsMenu));
-            AddMenuItem(new StateActionMenuItem("Exit", GameState.Exiting));
-
             base.LoadContent();
+
+            List<Tuple<String, GameState>> itemInfo = new List<Tuple<string,GameState>>();
+            itemInfo.Add(new Tuple<String, GameState>("Start", GameState.Gameplay));
+            itemInfo.Add(new Tuple<String, GameState>("Multiplayer", GameState.MultiplayerMenu));
+            itemInfo.Add(new Tuple<String, GameState>("Options", GameState.OptionsMenu));
+            itemInfo.Add(new Tuple<String, GameState>("Exit", GameState.Exiting));
+            
+            foreach (var info in itemInfo) 
+            {
+                MenuItem item = new StateActionMenuItem(info.Item1, info.Item2);
+                item.Background = ButtonBackground;
+                item.Font = MenuFont;
+                AddMenuItem(item);
+            }
+
+            
         }
     }
 }

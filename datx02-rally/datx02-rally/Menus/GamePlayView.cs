@@ -152,6 +152,10 @@ namespace datx02_rally.Menus
             this.mode = mode;
         }
 
+        public override void ChangeResolution()
+        {
+        }
+
         public override void Initialize()
         {
             // Components

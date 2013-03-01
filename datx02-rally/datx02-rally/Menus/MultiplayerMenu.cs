@@ -16,13 +16,17 @@ namespace datx02_rally.Menus
 
         protected override void LoadContent()
         {
-            connectOverlay = new OverlayView(gameInstance);
+            /*connectOverlay = new OverlayView(gameInstance);
             connectOverlay.AddMenuItem(new ActionMenuItem("Connect", new ActionMenuItem.Action(ConnectToServer)));
             connectOverlay.Transparency = 0.2f;
             connectOverlay.Background = gameInstance.Content.Load<Texture2D>(@"Menu\Overlay_bg");
             connectOverlay.Bounds = new Rectangle(graphics.GraphicsDevice.Viewport.Bounds.Center.X - 250, graphics.GraphicsDevice.Viewport.Bounds.Center.Y - 250, 500, 500);
-
+            */
             base.LoadContent();
+        }
+
+        public override void ChangeResolution()
+        {
         }
 
         public override GameState UpdateState(GameTime gameTime)
