@@ -33,6 +33,11 @@ namespace datx02_rally.EventTrigger
             Triggers.Add(name, new PositionTrigger(position, distance, duration));
         }
 
+        public void CreateRectangleTrigger(string name, Vector3 cornerOne, Vector3 cornerTwo, Vector3 cornerThree, Vector3 cornerFour, TimeSpan duration)
+        {
+            Triggers.Add(name, new RectangleTrigger(cornerOne, cornerTwo, cornerThree, cornerFour, duration));
+        }
+
         public bool IsActive(string name)
         {
             if (Triggers.ContainsKey(name))

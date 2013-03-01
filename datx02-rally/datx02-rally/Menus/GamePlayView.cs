@@ -588,6 +588,9 @@ namespace datx02_rally.Menus
             #endregion
 
             TriggerManager.GetInstance().CreatePositionTrigger("test", new Vector3(0, 1500, -3200), 3000f, new TimeSpan(0, 0, 5));
+            TriggerManager.GetInstance().CreateRectangleTrigger("goalTest", new Vector3(-200, 1500, 2000), new Vector3(1500, 1500, 2000),
+                                                                            new Vector3(-200, 1500, 4000), new Vector3(1500, 1500, 4000),
+                                                                            new TimeSpan(0, 0, 5));
 
         }
 
@@ -768,6 +771,15 @@ namespace datx02_rally.Menus
             //        return (int)(Vector3.DistanceSquared(x.Position, carPosition) - Vector3.DistanceSquared(y.Position, carPosition));
             //    }
             //);
+
+            yellowSystem.AddParticle(new Vector3(-200, 1500, 2000), Vector3.Up);
+            redSystem.AddParticle(new Vector3(1500, 1500, 2000), Vector3.Up);
+            plasmaSystem.AddParticle(new Vector3(-200, 1500, 4000), Vector3.Up);
+            greenSystem.AddParticle(new Vector3(1500, 1500, 4000), Vector3.Up);
+
+
+
+
             TriggerManager.GetInstance().Update(gameTime, Car.Position);
 
 
@@ -884,6 +896,10 @@ namespace datx02_rally.Menus
             if (TriggerManager.GetInstance().IsActive("test"))
             {
                 finalTexture = bloom.PerformBloom(postProcessTexture);
+            }
+            if (TriggerManager.GetInstance().IsActive("goalTest"))
+            {
+                Game.GetService<CameraComponent>().CurrentCamera.Shake();
             }
 
             spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
