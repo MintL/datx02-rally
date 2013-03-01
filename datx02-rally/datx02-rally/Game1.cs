@@ -137,10 +137,12 @@ namespace datx02_rally
         #endregion
 
         #region ShadowMap
+        
         RenderTarget2D shadowMap;
         Effect shadowMapEffect;
         Matrix lightView;
         Matrix lightProjection;
+
         #endregion
 
         PrelightingRenderer prelightingRenderer;
@@ -271,43 +273,51 @@ namespace datx02_rally
             var roadMap = new float[heightmapSize, heightmapSize];
             raceTrack = new RaceTrack(((heightmapSize / 2) * terrainXZScale));
 
-            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 1500, roadWidth * terrainXZScale, terrainXZScale, terrainYScale / terrainXZScale);
-
-            Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f);
-            lastPosition /= terrainXZScale;
-            lastPosition += new Vector3(.5f, 0, .5f) * heightmapSize;
-            for (float t = 0; t < 1; t += .0002f)
+            for (int z = 0; z < heightmapSize; z++)
             {
-                var e = raceTrack.Curve.GetPoint(t);
-                var height = e.Y;
-                e /= terrainXZScale;
-                e += new Vector3(heightmapSize) / 2f;
-
-                for (float j = -roadFalloff; j <= roadFalloff; j++)
+                for (int x = 0; x < heightmapSize; x++)
                 {
-                    var pos = e + j * Vector3.Normalize(Vector3.Cross(lastPosition - e, Vector3.Up));
-
-                    // Indices
-                    int x = (int)pos.X, z = (int)pos.Z;
-
-                    if (Math.Abs(j) <= roadWidth)
-                    {
-                        heightMap[x, z] = height;
-                        roadMap[x, z] = 1;
-                    }
-                    else
-                    {
-                        float amount = (Math.Abs(j) - roadWidth) / (roadFalloff - roadWidth);
-                        heightMap[x, z] = MathHelper.Lerp(height,
-                            heightMap[x, z], amount);
-                        roadMap[x, z] = amount / 10f;
-                    }
+                    heightMap[x, z] = roadMap[x, z] = 0;
                 }
-                lastPosition = e;
             }
 
-            heightmapGenerator.Smoothen();
-            heightmapGenerator.Perturb(30f);
+            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 1500, roadWidth * terrainXZScale, terrainXZScale, 0); // terrainYScale / terrainXZScale);
+
+            //Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f);
+            //lastPosition /= terrainXZScale;
+            //lastPosition += new Vector3(.5f, 0, .5f) * heightmapSize;
+            //for (float t = 0; t < 1; t += .0002f)
+            //{
+            //    var e = raceTrack.Curve.GetPoint(t);
+            //    var height = e.Y;
+            //    e /= terrainXZScale;
+            //    e += new Vector3(heightmapSize) / 2f;
+
+            //    for (float j = -roadFalloff; j <= roadFalloff; j++)
+            //    {
+            //        var pos = e + j * Vector3.Normalize(Vector3.Cross(lastPosition - e, Vector3.Up));
+
+            //        // Indices
+            //        int x = (int)pos.X, z = (int)pos.Z;
+
+            //        if (Math.Abs(j) <= roadWidth)
+            //        {
+            //            heightMap[x, z] = height;
+            //            roadMap[x, z] = 1;
+            //        }
+            //        else
+            //        {
+            //            float amount = (Math.Abs(j) - roadWidth) / (roadFalloff - roadWidth);
+            //            heightMap[x, z] = MathHelper.Lerp(height,
+            //                heightMap[x, z], amount);
+            //            roadMap[x, z] = amount / 10f;
+            //        }
+            //    }
+            //    lastPosition = e;
+            //}
+
+            //heightmapGenerator.Smoothen();
+            //heightmapGenerator.Perturb(30f);
 
             Effect terrainEffect = Content.Load<Effect>(@"Effects\TerrainShading");
             terrainEffect.Parameters["TextureMap0"].SetValue(Content.Load<Texture2D>(@"Terrain\sand"));
@@ -412,8 +422,11 @@ namespace datx02_rally
             pointLightModel = Content.Load<Model>(@"Models/light");
             spotLightModel = Content.Load<Model>(@"Models\Cone");
             //new Vector3(0.6f, 1.0f, -1.0f)
-            directionalLight = new DirectionalLight(Car.Position + new Vector3(0.6f,1f,1f) * 5000, new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.4f);
-            //directionalLight = new DirectionalLight(new Vector3(-1.0f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.4f);
+            //directionalLight = new DirectionalLight(Car.Position + new Vector3(0.6f,1f,1f) * 5000, new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.4f);
+            directionalLight = new DirectionalLight(
+                new Vector3(1.0f, -1.0f, 1.0f), // Direction
+                new Vector3(1.0f, 0.8f, 1.0f) * 0.2f, // Diffuse
+                Color.White.ToVector3() * 0.6f); // Ambient
             Services.AddService(typeof(DirectionalLight), directionalLight);
 
             int numlights = 50;
@@ -622,9 +635,12 @@ namespace datx02_rally
             #endregion
 
             #region ShadowMap
-            shadowMap = new RenderTarget2D(GraphicsDevice, 2048, 2048,//GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height,
+
+            int shadowMapResoulution = 1024;
+            shadowMap = new RenderTarget2D(GraphicsDevice, shadowMapResoulution, shadowMapResoulution, //GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height,
                  false, SurfaceFormat.Single, DepthFormat.Depth24);
             shadowMapEffect = Content.Load<Effect>(@"Effects\Shadowmap");
+
             #endregion
         }
 
@@ -939,12 +955,14 @@ namespace datx02_rally
             Matrix view = this.GetService<CameraComponent>().View;
 
             #region ShadowMap
+
             GraphicsDevice.SetRenderTarget(shadowMap);
             GraphicsDevice.Clear(Color.Black);
 
-            lightView = Matrix.CreateLookAt(directionalLight.Position, Car.Position, Vector3.Up);
-            lightProjection = Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45),
-                1, 1000f, 10000f);
+            float near = 100, far = 10000; // whereever you are
+            float camOffset = near + (far - near) / 2f;
+            lightView = Matrix.CreateLookAt(Car.Position - camOffset * directionalLight.Direction, Car.Position, Vector3.Up); // Matrix.CreateLookAt(directionalLight.Position, Car.Position, Vector3.Up);
+            lightProjection = Matrix.CreateOrthographic(10000, 10000, near, far); // Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), 1, 1000f, 10000f);
             RenderShadowCasters(lightView, lightProjection);
             GraphicsDevice.SetRenderTarget(null);
 
@@ -976,41 +994,64 @@ namespace datx02_rally
 
             RenderPostProcess();
 
+            //spriteBatch.Begin();
+            //spriteBatch.Draw(shadowMap, Vector2.Zero, Color.White);
+            //spriteBatch.End();
+
         }
 
         private void RenderPostProcess()
         {
             // Apply bloom effect
-            Texture2D finalTexture;
-            finalTexture = bloom.PerformBloom(postProcessTexture);
+            //Texture2D finalTexture;
+            //finalTexture = bloom.PerformBloom(postProcessTexture);
 
-            spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
-            foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
-                spriteBatch.Draw(finalTexture, Vector2.Zero, Color.White);
+            //spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
+            //foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
+            //{
+            //    pass.Apply();
+            //    spriteBatch.Draw(finalTexture, Vector2.Zero, Color.White);
 
-            }
+            //}
+            //spriteBatch.End();
+
+            spriteBatch.Begin();
+            spriteBatch.Draw(postProcessTexture, Vector2.Zero, Color.White);
             spriteBatch.End();
-
         }
 
         private void RenderShadowCasters(Matrix lightView, Matrix lightProjection)
         {
+            List<Effect> oldEffects = new List<Effect>();
+
             foreach (ModelMesh mesh in oakTree.Meshes)
             {
                 for (int i = 0; i < mesh.MeshParts.Count; i++)
                 {
-                    mesh.MeshParts[i].Effect = shadowMapEffect.Clone();
+                    oldEffects.Add(mesh.MeshParts[i].Effect);
+                    mesh.MeshParts[i].Effect = shadowMapEffect;
                 }
             }
 
+            GraphicsDevice.BlendState = BlendState.Opaque;
+            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+            GraphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
+
             for (int i = 0; i < treePositions.Length; i++)
             {
-                BoundingSphere sourceSphere = new BoundingSphere(treePositions[i], oakTree.Meshes[0].BoundingSphere.Radius);
+                //BoundingSphere sourceSphere = new BoundingSphere(treePositions[i], oakTree.Meshes[0].BoundingSphere.Radius);
                 //if (viewFrustum.Intersects(sourceSphere))
 
                 DrawModel(oakTree, lightView, lightProjection, treePositions[i], treeTransforms[i]);
+            }
+
+            // Reset effects
+            foreach (ModelMesh mesh in oakTree.Meshes)
+            {
+                for (int i = 0; i < mesh.MeshParts.Count; i++)
+                {
+                    mesh.MeshParts[i].Effect = oldEffects[i];
+                }
             }
         }
 
