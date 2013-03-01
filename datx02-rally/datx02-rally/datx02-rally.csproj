@@ -120,7 +120,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Components\FPSComponent.cs" />
+    <Compile Include="Components\HUDComponent.cs" />
     <Compile Include="Components\HUDConsoleComponent.cs" />
     <Compile Include="EventTrigger\AbstractTrigger.cs" />
     <Compile Include="EventTrigger\PositionTrigger.cs" />

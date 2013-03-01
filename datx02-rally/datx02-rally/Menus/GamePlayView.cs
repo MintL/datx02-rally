@@ -14,6 +14,7 @@ using Microsoft.Xna.Framework.Content;
 using datx02_rally.Particles.Systems;
 using datx02_rally.MapGeneration;
 using datx02_rally.EventTrigger;
+using datx02_rally.Components;
 
 namespace datx02_rally.Menus
 {
@@ -162,6 +163,10 @@ namespace datx02_rally.Menus
             components.Add(cameraComponent);
             services.AddService(typeof(CameraComponent), cameraComponent);
 
+            var hudComponent = new HUDComponent(gameInstance);
+            components.Add(hudComponent);
+            services.AddService(typeof(HUDComponent), hudComponent);
+            
             var carControlComponent = new CarControlComponent(gameInstance);
             components.Add(carControlComponent);
             services.AddService(typeof(CarControlComponent), carControlComponent);
