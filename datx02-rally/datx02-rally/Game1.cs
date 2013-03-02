@@ -77,7 +77,6 @@ namespace datx02_rally
 
             currentState = GameState.MainMenu;
             currentView = new MenuView(this, currentState);
-            currentView.ChangeResolution();
 
             base.Initialize();
         }

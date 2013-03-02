@@ -22,15 +22,19 @@ namespace datx02_rally.Menus
         private List<MenuItem> menuItems = new List<MenuItem>();
         private int selectedIndex = 0;
 
+        public Rectangle RenderBounds { get; set; }
         private RenderTarget2D renderTarget;
 
         public OverlayView(Game game, GameState gameState)
             : base(game, gameState)
         {
-            ItemColor = Color.Black;
+            ItemColor = Color.White;
             ItemColorSelected = Color.Red;
             Transparency = 1f; //no transparency
             MenuItemOffset = new Vector2(0.005f, 0.005f);
+            
+            Vector2 size = GetScreenPosition(new Vector2(0.6f, 0.6f));
+            RenderBounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
             Rotation = 0;
             
@@ -49,7 +53,8 @@ namespace datx02_rally.Menus
 
         public override void ChangeResolution()
         {
-            renderTarget = new RenderTarget2D(GraphicsDevice, Bounds.Width, Bounds.Height);
+            
+            renderTarget = new RenderTarget2D(GraphicsDevice, RenderBounds.Width, RenderBounds.Height);
         }
 
         public void OffsetPosition(Vector2 offset)
@@ -68,8 +73,13 @@ namespace datx02_rally.Menus
             GraphicsDevice.SetRenderTarget(renderTarget);
             GraphicsDevice.Clear(Color.Transparent);
 
+            Vector2 renderOffset = new Vector2((RenderBounds.Width - Bounds.Width) / 2,
+                    (RenderBounds.Height - Bounds.Height) / 2);
+
             spriteBatch.Begin();
-            spriteBatch.Draw(Background, new Rectangle(0, 0, Bounds.Width, Bounds.Height), Color.White);
+            spriteBatch.Draw(Background,
+                new Rectangle((int)renderOffset.X, (int)renderOffset.Y, Bounds.Width, Bounds.Height),
+                Color.White);
 
             for (int i = 0; i < menuItems.Count; i++)
             {
@@ -83,11 +93,12 @@ namespace datx02_rally.Menus
                     noInOrder = noOfItemsCenter++;
 
                 Color color = i == selectedIndex ? ItemColorSelected : ItemColor;
+                menuItem.FontColor = color;
 
-                Vector2 textPosition = Vector2.Zero;
+                Vector2 textPosition = renderOffset;
                 Vector2 offset = GetScreenPosition(MenuItemOffset);
                 textPosition.X += Bounds.Width / 2 - menuItem.Background.Bounds.Width / 2;
-                textPosition.Y += Bounds.Height / 2 - menuItems.Count / 2 * (menuItem.Background.Bounds.Height + offset.Y) + 
+                textPosition.Y += Bounds.Height / 2 - menuItems.Count / 2 * (menuItem.Background.Bounds.Height + offset.Y) +
                     noInOrder * (menuItem.Background.Bounds.Height + offset.Y);
                 menuItem.Draw(spriteBatch, textPosition); 
             }

@@ -17,11 +17,16 @@ namespace datx02_rally.Menus
     public class OptionsMenu : OverlayView
     {
 
-        public OptionsMenu(Game game) : base(game, GameState.OptionsMenu) { }
+        public OptionsMenu(Game game)
+            : base(game, GameState.OptionsMenu)
+        {
+            Vector2 size = GetScreenPosition(new Vector2(0.6f, 0.6f));
+            Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
+        }
 
         protected override void LoadContent()
         {
-            OptionMenuItem<DisplayMode> resolution = new OptionMenuItem<DisplayMode>("Resolution", "Resolution");
+            /*OptionMenuItem<DisplayMode> resolution = new OptionMenuItem<DisplayMode>("Resolution", "Resolution");
             foreach (DisplayMode mode in GraphicsAdapter.DefaultAdapter.SupportedDisplayModes)
                 resolution.AddOption(mode.Width + "x" + mode.Height, mode);
             resolution.SetStartOption(Game1.GetInstance().GraphicsDevice.Viewport.Width + "x" + GraphicsDevice.Viewport.Height);
@@ -35,9 +40,23 @@ namespace datx02_rally.Menus
             AddMenuItem(fullscreen);
             AddMenuItem(performanceMode);
             AddMenuItem(applyButton);
-            AddMenuItem(backButton);
+            AddMenuItem(backButton);*/
 
             base.LoadContent();
+
+            List<Tuple<String, GameState>> itemInfo = new List<Tuple<string, GameState>>();
+            itemInfo.Add(new Tuple<String, GameState>("MainMenu", GameState.MainMenu));
+            itemInfo.Add(new Tuple<String, GameState>("OptionsMenu", GameState.OptionsMenu));
+            
+            foreach (var info in itemInfo)
+            {
+                MenuItem item = new StateActionMenuItem(info.Item1, info.Item2);
+                item.Background = ButtonBackground;
+                item.Font = MenuFont;
+                AddMenuItem(item);
+            }
+
+            
         }
 
         private void ApplySettings()
