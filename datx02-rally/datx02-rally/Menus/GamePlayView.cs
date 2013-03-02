@@ -113,6 +113,9 @@ namespace datx02_rally.Menus
         ParticleEmitter[] dustEmitter;
         ParticleSystem[] dustParticles;
 
+        ParticleSystem smokeSystem;
+        float smokeTime;
+
         #endregion
 
         #region SkyBox
@@ -209,6 +212,10 @@ namespace datx02_rally.Menus
             rainSystem = new RainParticleSystem(gameInstance, content);
             components.Add(rainSystem);
             particleSystems.Add(rainSystem);
+
+            smokeSystem = new SmokeCloudParticleSystem(gameInstance, content);
+            components.Add(smokeSystem);
+            particleSystems.Add(smokeSystem);
 
             base.Initialize();
         }
@@ -749,18 +756,29 @@ namespace datx02_rally.Menus
 
             #endregion
 
-            //for (int x = -6; x < 6; x++)
-            //{
-            //    for (int z = -6; z < 6; z++)
-            //    {
-            //        rainSystem.AddParticle(Car.Position + new Vector3(
-            //            (float)UniversalRandom.GetInstance().NextDouble() * x * 200,
-            //            500 * (float)UniversalRandom.GetInstance().NextDouble(),
-            //            (float)UniversalRandom.GetInstance().NextDouble() * z * 200), 
-            //            Vector3.Down);
-            //    }
-            //}
+            for (int x = -3; x < 3; x++)
+            {
+                for (int z = -3; z < 3; z++)
+                {
+                    rainSystem.AddParticle(Car.Position + new Vector3(
+                        (float)UniversalRandom.GetInstance().NextDouble() * x * 200,
+                        500 * (float)UniversalRandom.GetInstance().NextDouble(),
+                        (float)UniversalRandom.GetInstance().NextDouble() * z * 200),
+                        new Vector3(-1, -1, -1));//Vector3.Down);
+                }
+            }
 
+            smokeTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (smokeTime > 0.2)
+            {
+                smokeSystem.AddParticle(Car.Position + Car.Forward * 500 +
+                    new Vector3(
+                        (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 500,
+                        500 * (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()),
+                        (float)UniversalRandom.GetInstance().NextDouble() * 500),
+                        Vector3.Up);
+                smokeTime = 0;
+            }
 
             //Vector3 carDirection = Vector3.Transform(Vector3.Forward,
             //    Matrix.CreateRotationY(Car.Rotation));
