@@ -16,6 +16,7 @@ namespace datx02_rally.Menus
         public readonly GameState gameState;
         protected SpriteBatch spriteBatch;
         public Rectangle Bounds { get; set; }
+        public Vector2 Position { get; set; }
 
         public GameStateView(Game game, GameState gameState)
             : base(game)
