@@ -33,6 +33,7 @@ sampler2D lightSampler = sampler_state
 
 float4x4 LightView;
 float4x4 LightProjection;
+
 texture2D ShadowMap;
 sampler2D shadowMapSampler = sampler_state
 {
@@ -182,17 +183,50 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	//float2 shadowCoord = postProjToScreen(lightingPosition) + float2(0.5, 0.5);
 	float2 shadowCoord = 0.5 * lightingPosition.xy / lightingPosition.w;
 	
-	shadowCoord += 0.5f;// / float2(2048, 2048);
+	shadowCoord += 0.5f;
 	shadowCoord.y = 1.0f - shadowCoord.y;
+	
+	if (shadowCoord.x > 0 && shadowCoord.x < 1 && shadowCoord.y > 0 && shadowCoord.y < 1){
+		
+		float d = 1.0 / 2048.0;
+		float shadowDepth[9] = { 
+			tex2D(shadowMapSampler, shadowCoord + float2(-d, -d)).r,
+			tex2D(shadowMapSampler, shadowCoord + float2(0, -d)).r,
+			tex2D(shadowMapSampler, shadowCoord + float2(d, -d)).r,
+			
+			tex2D(shadowMapSampler, shadowCoord + float2(-d, 0)).r,
+			tex2D(shadowMapSampler, shadowCoord + float2(0, 0)).r,
+			tex2D(shadowMapSampler, shadowCoord + float2(d, 0)).r,
 
-	float shadowDepth = tex2D(shadowMapSampler, shadowCoord).r;
-	float ourDepth = 1 - (lightingPosition.z / lightingPosition.w);
-	if (shadowDepth - 0.03 > ourDepth)
-	{
-		// shadow
-		totalLight.rgb = 0;
-	};
+			tex2D(shadowMapSampler, shadowCoord + float2(-d, d)).r,
+			tex2D(shadowMapSampler, shadowCoord + float2(0, d)).r,
+			tex2D(shadowMapSampler, shadowCoord + float2(d, d)).r
+		};
 
+		float ourDepth = 1 - (lightingPosition.z / lightingPosition.w);
+		
+		for (int i = 0; i < 9; i++){
+			if (shadowDepth[i] + 0.03 > ourDepth)
+			{
+				totalLight.rgb *= .8;
+			}
+		}
+
+		//if (tex2D(shadowMapSampler, shadowCoord).r + 0.03 > ourDepth)
+			//totalLight.rgb = 0;
+
+		//float shadowDepth = tex2D(shadowMapSampler, shadowCoord).r;
+
+		
+		//if (shadowDepth + 0.03 > ourDepth)
+		//{
+			// shadow
+			//totalLight.rgb *= .2;
+		//}
+
+	}
+	else
+		totalLight.r *= 2;
 
 	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
 

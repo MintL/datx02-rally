@@ -2,8 +2,6 @@ float4x4 World;
 float4x4 View;
 float4x4 Projection;
 
-bool AlphaEnabled;
-
 texture AlphaMap;
 sampler AlphaMapSampler = sampler_state
 {
@@ -19,13 +17,19 @@ struct VertexShaderInput
 {
     float4 Position : POSITION0;
 	float2 TexCoord : TEXCOORD;
+
+    // TODO: add input channels such as texture
+    // coordinates and vertex colors here.
 };
 
 struct VertexShaderOutput
 {
     float4 Position : POSITION0;
-	float2 Depth : TEXCOORD0;
-	float2 TexCoord : TEXCOORD1;
+	float2 TexCoord : TEXCOORD0;
+
+    // TODO: add vertex shader outputs such as colors and texture
+    // coordinates here. These values will automatically be interpolated
+    // over the triangle, and provided as input to your pixel shader.
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
@@ -36,32 +40,25 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     float4 viewPosition = mul(worldPosition, View);
     output.Position = mul(viewPosition, Projection);
 
-    output.Depth.xy = output.Position.zw;
-	output.TexCoord = input.TexCoord;
+    output.TexCoord = input.TexCoord;
 
     return output;
 }
 
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-    float4 depth = float4(1, 1, 1, 1);
-	// Depth is stored as distance from camera / far plane distance to get value between 0 and 1
-	
-	float alpha = 1;
-	
-	if (AlphaEnabled)
-		alpha = 1 - tex2D(AlphaMapSampler, input.TexCoord).r;
+    // TODO: add your pixel shader code here.
 
-	depth.r = (1 - (input.Depth.x / input.Depth.y)) * alpha;
+	float4 color = float4(1, 0, 0, 1 - tex2D(AlphaMapSampler, input.TexCoord).r);
 
-	return depth;
+    return color;
 }
 
 technique Technique1
 {
     pass Pass1
     {
-        VertexShader = compile vs_2_0 VertexShaderFunction();
+		VertexShader = compile vs_2_0 VertexShaderFunction();
         PixelShader = compile ps_2_0 PixelShaderFunction();
     }
 }

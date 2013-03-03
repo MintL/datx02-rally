@@ -7,6 +7,8 @@ float4x4 NormalMatrix;
 
 float3 EyePosition;
 
+float4x4 PrelightProjection;
+
 bool MaterialUnshaded;
 float3 MaterialAmbient;
 float3 MaterialDiffuse;
@@ -35,12 +37,25 @@ samplerCUBE EnvironmentSampler = sampler_state
 	AddressV = Mirror;
 };
 
+float4x4 LightView;
+float4x4 LightProjection;
+
+texture2D ShadowMap;
+sampler2D shadowMapSampler = sampler_state
+{
+	texture = <ShadowMap>;
+	minfilter = point;
+	magfilter = point;
+	mipfilter = point;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
 struct VertexShaderInput
 {
     float4 Position : POSITION0;
 	float3 Normal : NORMAL;
-    // TODO: add input channels such as texture
-    // coordinates and vertex colors here.
+	float2 TexCoord : TEXCOORD0;
 };
 
 struct VertexShaderOutput
@@ -49,6 +64,8 @@ struct VertexShaderOutput
 	float3 Normal : TEXCOORD0;
 	float3 ViewDirection : TEXCOORD1;
 	float3 WorldPosition : TEXCOORD2;
+	float4 PositionCopy : TEXCOORD3;
+	float4 OriginalPosition : TEXCOORD4;
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
@@ -57,11 +74,15 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 
     float4 worldPosition = mul(input.Position, World);
     float4 viewPosition = mul(worldPosition, View);
+
     output.Position = mul(viewPosition, Projection);
 	output.ViewDirection = EyePosition - worldPosition.xyz;
 	output.WorldPosition = worldPosition.xyz;
-
+	
 	output.Normal = mul(input.Normal, NormalMatrix);
+	
+	output.PositionCopy = mul(viewPosition, PrelightProjection);
+	output.OriginalPosition = input.Position;
 	
     return output;
 }
@@ -89,12 +110,18 @@ float3 CalculateEnvironmentReflection(float3 normal, float3 directionFromEye)
 	return normalize(reflect(directionFromEye, normal));
 }
 
+float4 GetPositionFromLight(float4 position)
+{
+	float4x4 wvp = mul(mul(World, LightView), LightProjection);
+	return mul(position, wvp);
+}
+
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
 	float3 normal = normalize(input.Normal);
 	float3 directionFromEye = -normalize(input.ViewDirection);
 	float normalizationFactor = ((MaterialShininess + 2.0) / 8.0);
-	float3 totalLight = MaterialAmbient * DirectionalLightAmbient;
+	float4 totalLight = float4(MaterialAmbient * DirectionalLightAmbient, 1);
 
 	if (MaterialUnshaded) 
 	{
@@ -116,10 +143,10 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		float3 fresnel = MaterialSpecular + (float3(1.0, 1.0, 1.0) - MaterialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
 			0.0, 1.0), 5.0);
 
-		totalLight +=
+		totalLight += float4(
 			attenuation * selfShadow *
 			(LightDiffuse[i] * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) + 
-			LightDiffuse[i] * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor);
+			LightDiffuse[i] * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor), 1);
 	}
 
 	// Directional light
@@ -130,12 +157,48 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 			
 	
 	//float3 reflection = normalize(2 * saturate(dot(directionFromEye, normal)) * normal - directionFromEye);
-	totalLight += selfShadow * (DirectionalLightDiffuse * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) +
+	totalLight += float4(selfShadow * (DirectionalLightDiffuse * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) +
 					DirectionalLightDiffuse * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor +
-					texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye)) * fresnel * MaterialReflection);
+					texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye)) * fresnel * MaterialReflection), 1);
 	
-	return float4(saturate(totalLight), 1.0);
+	totalLight = saturate(totalLight);
+
+	float4 lightingPosition = GetPositionFromLight(input.OriginalPosition);
+	float2 shadowCoord = 0.5 * lightingPosition.xy / lightingPosition.w;
+	
+	shadowCoord += 0.5f;
+	shadowCoord.y = 1.0f - shadowCoord.y;
+
+	if (shadowCoord.x > 0 && shadowCoord.x < 1 && shadowCoord.y > 0 && shadowCoord.y < 1){
+		
+		float d = 1.0 / 2048.0;
+		float shadowDepth[9] = { 
+			tex2D(shadowMapSampler, shadowCoord + float2(-d, -d)).r,
+			tex2D(shadowMapSampler, shadowCoord + float2(0, -d)).r,
+			tex2D(shadowMapSampler, shadowCoord + float2(d, -d)).r,
+			
+			tex2D(shadowMapSampler, shadowCoord + float2(-d, 0)).r,
+			tex2D(shadowMapSampler, shadowCoord + float2(0, 0)).r,
+			tex2D(shadowMapSampler, shadowCoord + float2(d, 0)).r,
+
+			tex2D(shadowMapSampler, shadowCoord + float2(-d, d)).r,
+			tex2D(shadowMapSampler, shadowCoord + float2(0, d)).r,
+			tex2D(shadowMapSampler, shadowCoord + float2(d, d)).r
+		};
+
+		float ourDepth = 1 - (lightingPosition.z / lightingPosition.w);
+		
+		for (int i = 0; i < 9; i++){
+			if (shadowDepth[i] + 0.03 > ourDepth)
+			{
+				totalLight.rgb *= .8;
+			}
+		}
+	}
+
+	return totalLight;
 }
+
 
 technique CarShading
 {
