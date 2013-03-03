@@ -91,7 +91,7 @@ namespace datx02_rally.Menus
         Effect carEffect;
         CarShadingSettings carSettings = new CarShadingSettings()
         {
-            MaterialReflection = .3f,
+            MaterialReflection = .7f,
             MaterialShininess = 10
         };
 
@@ -576,6 +576,10 @@ namespace datx02_rally.Menus
             #region DynamicEnvironment
             refCubeMap = new RenderTargetCube(this.GraphicsDevice, 256, true, SurfaceFormat.Color, DepthFormat.Depth16);
             carSettings.EnvironmentMap = refCubeMap;
+            //foreach (TerrainModel model in terrainSegments)
+            //{
+            //    model.Effect.Parameters["EnvironmentMap"].SetValue(refCubeMap);
+            //}
             //skyBoxEffect.Parameters["SkyboxTexture"].SetValue(refCubeMap);
             #endregion
 
@@ -940,8 +944,8 @@ namespace datx02_rally.Menus
                 if (cubeMapFace == CubeMapFace.NegativeX)
                     viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Left, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.NegativeY)
-                    continue;
-                //viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Down, Vector3.Forward);
+                    //continue;
+                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Down, Vector3.Forward);
                 else if (cubeMapFace == CubeMapFace.PositiveZ)
                     viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Backward, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.PositiveX)
@@ -988,6 +992,16 @@ namespace datx02_rally.Menus
                     var terrain = terrainSegments[x, z];
                     if (viewFrustum.Intersects(terrain.BoundingBox))
                     {
+                        if (environment) {
+                            Vector3 boxStart = Car.Position;
+                            boxStart.Y = -5000;
+                            Vector3 boxEnd = boxStart;
+                            boxEnd.Y = 5000;
+                            boxEnd.X += 50;
+                            boxEnd.Z += 50;
+                            if (terrain.BoundingBox.Intersects(new BoundingBox(boxStart, boxEnd)))
+                                continue;
+                        }
                         terrain.Draw(view, gameInstance.GetService<CameraComponent>().Position,
                             directionalLight, pointLights);
                     }

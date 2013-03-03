@@ -31,6 +31,17 @@ sampler2D lightSampler = sampler_state
 	mipfilter = point;
 };
 
+Texture EnvironmentMap;
+samplerCUBE EnvironmentSampler = sampler_state
+{
+	texture = <EnvironmentMap>;
+	magfilter = LINEAR;
+	minfilter = LINEAR;
+	mipfilter = LINEAR;
+	AddressU = Mirror;
+	AddressV = Mirror;
+};
+
 texture TextureMap0;
 sampler TextureMapSampler0 = sampler_state
 {
@@ -119,9 +130,15 @@ float ComputeFogFactor(float d)
 	return clamp((d - FogStart) / (FogEnd - FogStart), 0, .75) * FogEnabled;
 }
 
+float3 CalculateEnvironmentReflection(float3 normal, float3 directionFromEye) 
+{
+	return normalize(reflect(directionFromEye, normal));
+}
+
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
 	float3 normal = normalize(input.Normal);
+	float3 directionFromEye = -normalize(input.ViewDirection);
 
     float4 color = tex2D(TextureMapSampler0, input.TexCoord) * input.TexWeights.x;
 	color += tex2D(TextureMapSampler1, input.TexCoord) * input.TexWeights.y;
@@ -130,23 +147,6 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	
 	
 	float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
-	//float4 totalLight = color;
-/*
-	// point lights
-	for (int i = 0; i < NumLights; i++)
-	{
-		float3 L = LightPosition[i] - input.WorldPosition;
-		float3 directionToLight = normalize(L);
-
-		// point light
-		float attenuation = saturate(1 - dot(L / LightRange[i], L / LightRange[i])); 
-
-		// Frazier threshold self shadowing
-		float selfShadow = saturate(4.0 * dot(normal, directionToLight));
-
-		totalLight.rgb +=
-			attenuation * (LightDiffuse[i] * color.rgb * saturate(dot(normal, directionToLight)));
-	}*/
 	
 	float3 directionToLight = -normalize(DirectionalDirection);
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
@@ -155,6 +155,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
 	totalLight += tex2D(lightSampler, texCoord) * color;
+
+	totalLight += texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye) * 0.2 * input.TexWeights.x);
 
 	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
 
