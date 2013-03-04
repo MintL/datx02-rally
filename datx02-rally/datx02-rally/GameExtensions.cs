@@ -35,5 +35,10 @@ namespace datx02_rally
             }
             return Matrix.Identity;
         }
+
+        public static Vector3 XZPlane(this Vector3 source)
+        {
+            return new Vector3(source.X, 0, source.Z);
+        }
     }
 }

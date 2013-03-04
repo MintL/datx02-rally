@@ -588,7 +588,7 @@ namespace datx02_rally
 
                 treePositions[i] = treePos;// Vector3.Zero; //treePos;
                 //treeTransforms[i] = Matrix.CreateScale(20f); 
-                treeTransforms[i] = Matrix.CreateScale(1 + 8 * (float)UniversalRandom.GetInstance().NextDouble()) * 
+                treeTransforms[i] = Matrix.CreateScale(1 + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 
                     Matrix.CreateRotationY(MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()));
             }
 
@@ -964,13 +964,25 @@ namespace datx02_rally
             float near = 100, far = 20000; // whereever you are
             float camOffset = near + (far - near) / 2f;
             Vector3 focusPosition = Car.Position;
-            focusPosition /= 100;
-            focusPosition.X = (int)focusPosition.X;
-            focusPosition.Y = (int)focusPosition.Y;
-            focusPosition.Z = (int)focusPosition.Z;
-            focusPosition *= 100;
-            lightView = Matrix.CreateLookAt(focusPosition - camOffset * directionalLight.Direction, focusPosition, Vector3.Up); // Matrix.CreateLookAt(directionalLight.Position, Car.Position, Vector3.Up);
-            lightProjection = Matrix.CreateOrthographic(4000, 4000, near, far); // Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), 1, 1000f, 10000f);
+
+            //focusPosition += Vector3.Transform(800 * Vector3.Forward, Car.RotationMatrix);
+
+            //focusPosition /= 100;
+            //focusPosition.X = (int)focusPosition.X;
+            //focusPosition.Y = (int)focusPosition.Y;
+            //focusPosition.Z = (int)focusPosition.Z;
+            //focusPosition *= 100;
+
+
+
+            lightView =
+
+                //Matrix.CreateTranslation(-focusPosition) *
+                //Matrix.Invert(Car.RotationMatrix) * Vector3.Forward.GetRotationMatrix(directionalLight.Direction.XZPlane()) *
+                //Matrix.CreateTranslation(focusPosition) *
+
+                Matrix.CreateLookAt(focusPosition - camOffset * directionalLight.Direction, focusPosition, Vector3.Up); // Matrix.CreateLookAt(directionalLight.Position, Car.Position, Vector3.Up);
+            lightProjection = Matrix.CreateOrthographic(1500, 2000, near, far); // Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), 1, 1000f, 10000f);
             RenderShadowCasters(lightView, lightProjection);
             GraphicsDevice.SetRenderTarget(null);
 
@@ -1001,6 +1013,10 @@ namespace datx02_rally
                 //stream.Dispose();
 
             RenderPostProcess();
+
+            spriteBatch.Begin();
+            spriteBatch.Draw(shadowMap, new Rectangle(0, 0, 512,512), new Color(1, 1, 1, .75f));
+            spriteBatch.End();
         }
 
         private void RenderPostProcess()
@@ -1025,71 +1041,71 @@ namespace datx02_rally
 
         private void RenderShadowCasters(Matrix lightView, Matrix lightProjection)
         {
-            List<Effect> oldEffects = new List<Effect>();
+            Matrix[] transforms = new Matrix[oakTree.Bones.Count];
+            oakTree.CopyAbsoluteBoneTransformsTo(transforms);
 
-            foreach (ModelMesh mesh in oakTree.Meshes)
+            // Only one mesh
+            var mesh = oakTree.Meshes[0];
+
+            // Backup
+            List<Effect> oldEffects = new List<Effect>();
+            BlendState oldBlendState = GraphicsDevice.BlendState;
+
+            var blendState = BlendState.AlphaBlend;
+            GraphicsDevice.BlendState = blendState;
+
+            for (int i = 0; i < mesh.MeshParts.Count; i++)
             {
-                for (int i = 0; i < mesh.MeshParts.Count; i++)
-                {
-                    oldEffects.Add(mesh.MeshParts[i].Effect);
-                    mesh.MeshParts[i].Effect = shadowMapEffect;
-                    //shadowMapEffect.Parameters["alphaEnabled"].SetValue(i == 1);
-                }
+                oldEffects.Add(mesh.MeshParts[i].Effect);
+                mesh.MeshParts[i].Effect = shadowMapEffect;
             }
+            
+            shadowMapEffect.Parameters["View"].SetValue(lightView);
+            shadowMapEffect.Parameters["Projection"].SetValue(lightProjection);
+            shadowMapEffect.Parameters["AlphaEnabled"].SetValue(true);
+            shadowMapEffect.Parameters["AlphaMap"].SetValue(oldEffects[1].Parameters["AlphaMap"].GetValueTexture2D());
 
             for (int i = 0; i < treePositions.Length; i++)
             {
-                //BoundingSphere sourceSphere = new BoundingSphere(treePositions[i], oakTree.Meshes[0].BoundingSphere.Radius);
-                //if (viewFrustum.Intersects(sourceSphere))
+                shadowMapEffect.Parameters["World"].SetValue(transforms[mesh.ParentBone.Index] * treeTransforms[i] *
+                        Matrix.CreateTranslation(treePositions[i]));
 
-                //DrawModel(oakTree, lightView, lightProjection, , treeTransforms[i]);
-
+                for (int p = mesh.MeshParts.Count - 1; p >= 0 ; p--) // Need reversed draw order!
                 {
-                    Matrix[] transforms = new Matrix[oakTree.Bones.Count];
-                    oakTree.CopyAbsoluteBoneTransformsTo(transforms);
+                    var part = mesh.MeshParts[p];
 
-                    foreach (var mesh in oakTree.Meshes)
+                    if (p == 0)
                     {
-                        foreach (Effect effect in mesh.Effects)
-                        {
-                            Matrix world = transforms[mesh.ParentBone.Index] * treeTransforms[i] *
-                                Matrix.CreateTranslation(treePositions[i]);
+                        GraphicsDevice.BlendState = BlendState.Opaque;
+                        shadowMapEffect.Parameters["AlphaEnabled"].SetValue(false);
+                        shadowMapEffect.Parameters["AlphaMap"].SetValue(null as Texture2D);
+                    }
+                    else
+                    {
+                        GraphicsDevice.BlendState = BlendState.AlphaBlend;
+                        shadowMapEffect.Parameters["AlphaEnabled"].SetValue(true);
+                        shadowMapEffect.Parameters["AlphaMap"].SetValue(oldEffects[1].Parameters["AlphaMap"].GetValueTexture2D());
+                    }
 
-                            effect.Parameters["World"].SetValue(world);
-                            effect.Parameters["View"].SetValue(lightView);
-                            effect.Parameters["Projection"].SetValue(lightProjection);
-                        }
-
-                        for (int p = 0; p < mesh.MeshParts.Count; p++)
-                        {
-                            var part = mesh.MeshParts[p];
-                            part.Effect.Parameters["AlphaEnabled"].SetValue(p != 0);
-
-                            foreach (EffectPass pass in part.Effect.CurrentTechnique.Passes)
-                            {
-                                pass.Apply();
-                                GraphicsDevice.Indices = part.IndexBuffer;
-                                GraphicsDevice.SetVertexBuffer(part.VertexBuffer);
-                                GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList,
-                                    part.VertexOffset,
-                                    0,
-                                   part.NumVertices,
-                                   part.StartIndex,
-                                   part.PrimitiveCount);
-                            }
-                        }
+                    foreach (EffectPass pass in part.Effect.CurrentTechnique.Passes)
+                    {
+                        pass.Apply();
+                        GraphicsDevice.Indices = part.IndexBuffer;
+                        GraphicsDevice.SetVertexBuffer(part.VertexBuffer);
+                        GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList,
+                            part.VertexOffset,
+                            0,
+                            part.NumVertices,
+                            part.StartIndex,
+                            part.PrimitiveCount);
                     }
                 }
-
             }
 
             // Reset effects
-            foreach (ModelMesh mesh in oakTree.Meshes)
+            for (int i = 0; i < mesh.MeshParts.Count; i++)
             {
-                for (int i = 0; i < mesh.MeshParts.Count; i++)
-                {
-                    mesh.MeshParts[i].Effect = oldEffects[i];
-                }
+                mesh.MeshParts[i].Effect = oldEffects[i];
             }
         }
 

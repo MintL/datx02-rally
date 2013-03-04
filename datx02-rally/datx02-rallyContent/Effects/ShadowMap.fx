@@ -50,7 +50,12 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float alpha = 1;
 	
 	if (AlphaEnabled)
+	{
 		alpha = 1 - tex2D(AlphaMapSampler, input.TexCoord).r;
+
+		if (alpha < 0.001)
+			return 0;
+	}
 
 	depth.r = (1 - (input.Depth.x / input.Depth.y)) * alpha;
 
