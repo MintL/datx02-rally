@@ -33,8 +33,7 @@ namespace datx02_rally.Menus
             Transparency = 1f; //no transparency
             MenuItemOffset = new Vector2(0.005f, 0.005f);
             
-            Vector2 size = GetScreenPosition(new Vector2(0.6f, 0.6f));
-            RenderBounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
+            
 
             Rotation = 0;
             
@@ -42,13 +41,15 @@ namespace datx02_rally.Menus
 
         protected override void LoadContent()
         {
+            base.LoadContent();
+            
             MenuFont = Game.Content.Load<SpriteFont>(@"Menu/MenuFont");
             Background = Game.Content.Load<Texture2D>(@"Menu/Menu-BG");
             ButtonBackground = Game.Content.Load<Texture2D>(@"Menu/Menu-button");
 
-            
+            Vector2 size = GetScreenPosition(new Vector2(0.6f, 0.6f));
+            RenderBounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
-            base.LoadContent();
         }
 
         public override void ChangeResolution()
@@ -95,12 +96,12 @@ namespace datx02_rally.Menus
                 Color color = i == selectedIndex ? ItemColorSelected : ItemColor;
                 menuItem.FontColor = color;
 
-                Vector2 textPosition = renderOffset;
+                Vector2 position = renderOffset;
                 Vector2 offset = GetScreenPosition(MenuItemOffset);
-                textPosition.X += Bounds.Width / 2 - menuItem.Background.Bounds.Width / 2;
-                textPosition.Y += Bounds.Height / 2 - menuItems.Count / 2 * (menuItem.Background.Bounds.Height + offset.Y) +
-                    noInOrder * (menuItem.Background.Bounds.Height + offset.Y);
-                menuItem.Draw(spriteBatch, textPosition); 
+
+                position.Y += Bounds.Height / 2 - menuItems.Count / 2 * (menuItem.Bounds.Height + offset.Y) +
+                    noInOrder * (menuItem.Bounds.Height + offset.Y);
+                menuItem.Draw(spriteBatch, position); 
             }
 
             spriteBatch.End();
