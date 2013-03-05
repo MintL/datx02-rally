@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.Input;
 using datx02_rally.DebugConsole.Commands;
 using datx02_rally.DebugConsole;
 using System.Collections;
+using datx02_rally.Menus;
 
 namespace datx02_rally
 {
@@ -102,60 +103,49 @@ namespace datx02_rally
                 Game1.spriteBatch.DrawString(Font, ">" + EnteredCommand.ToString(), commandPosition, Color.White);
                 Game1.spriteBatch.End();
             }
-
             base.Draw(gameTime);
         }
 
         private void AddKey(Keys key, bool modifier)
         {
-            String sKey = key.ToString();
-            if (key == Keys.Space)
-            {
-                EnteredCommand.Append(" ");
-            }
-            else if (sKey.Length == 1 && Char.IsLetter(sKey[0]))
+            string text = Game.GetService<InputComponent>().GetKeyText(key);
+            if (!string.IsNullOrEmpty(text))
             {
                 if (modifier)
-                    EnteredCommand.Append(Char.ToUpper(sKey[0]));
-                else
-                    EnteredCommand.Append(Char.ToLower(sKey[0]));
+                    text = new String(text.Select(c => Char.ToUpper(c)).ToArray());
+                EnteredCommand.Append(text);
             }
-            else if (key == Keys.OemPeriod)
+            else
             {
-                EnteredCommand.Append(".");
-            }
-            else if (key >= Keys.D0 && key <= Keys.D9)
-            {
-                EnteredCommand.Append(sKey[1]);
-            }
-            else if (key == Keys.Back && EnteredCommand.Length > 0)
-            {
-                EnteredCommand.Remove(EnteredCommand.Length - 1, 1);
-            }
-            else if (key == Keys.Enter)
-            {
-                ParseCommand();
-            }
-            else if (key == Keys.Tab)
-            {
-                AutoComplete();
-            }
-            else if (key == Keys.Up)
-            {
-                if (CommandIndexIterator > 0)
+                if (key == Keys.Back && EnteredCommand.Length > 0)
                 {
-                    string prevCommand = CommandHistory[--CommandIndexIterator];
-                    EnteredCommand.Clear();
-                    EnteredCommand.Append(prevCommand);
+                    EnteredCommand.Remove(EnteredCommand.Length - 1, 1);
                 }
-            }
-            else if (key == Keys.Down)
-            {
-                if (CommandIndexIterator < CommandHistory.Count - 1)
+                else if (key == Keys.Enter)
                 {
-                    string nextCommand = CommandHistory[++CommandIndexIterator];
-                    EnteredCommand.Clear();
-                    EnteredCommand.Append(nextCommand);
+                    ParseCommand();
+                }
+                else if (key == Keys.Tab)
+                {
+                    AutoComplete();
+                }
+                else if (key == Keys.Up)
+                {
+                    if (CommandIndexIterator > 0)
+                    {
+                        string prevCommand = CommandHistory[--CommandIndexIterator];
+                        EnteredCommand.Clear();
+                        EnteredCommand.Append(prevCommand);
+                    }
+                }
+                else if (key == Keys.Down)
+                {
+                    if (CommandIndexIterator < CommandHistory.Count - 1)
+                    {
+                        string nextCommand = CommandHistory[++CommandIndexIterator];
+                        EnteredCommand.Clear();
+                        EnteredCommand.Append(nextCommand);
+                    }
                 }
             }
         }

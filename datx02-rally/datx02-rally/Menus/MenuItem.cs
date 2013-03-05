@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace datx02_rally.Menus
 {
@@ -36,6 +37,46 @@ namespace datx02_rally.Menus
         public abstract string SelectedOption();
 
     }
+
+    public class TextInputMenuItem : MenuItem
+    {
+        KeyboardState PrevKeyState;
+        private StringBuilder enteredText;
+
+        public TextInputMenuItem(string text) : this(text, null) {}
+
+        public TextInputMenuItem(string text, string identifier)
+        {
+            Text = text;
+            Identifier = identifier;
+            enteredText = new StringBuilder();
+
+            MenuPositionX = ItemPositionX.CENTER;
+            MenuPositionY = ItemPositionY.CENTER;
+
+            PrevKeyState = Keyboard.GetState();
+        }
+
+        public override void Draw(SpriteBatch spriteBatch, Vector2 position)
+        {
+            KeyboardState keyState = Keyboard.GetState();
+            foreach (var key in keyState.GetPressedKeys())
+            {
+                if (PrevKeyState.IsKeyUp(key)) 
+                {
+                    if (keyState.IsKeyDown(Keys.Back) && enteredText.Length > 0)
+                        enteredText.Remove(enteredText.Length - 1, 1);
+                    else 
+                        enteredText.Append(Game1.GetInstance().GetService<InputComponent>().GetKeyText(key));
+                }
+            }
+            PrevKeyState = keyState;
+
+            spriteBatch.DrawString(Font, Text + ": " + enteredText.ToString(), position, Color.White);
+
+        }
+    }
+ 
 
     public class StateActionMenuItem : MenuItem
     {

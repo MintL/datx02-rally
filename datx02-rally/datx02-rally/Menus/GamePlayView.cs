@@ -14,6 +14,7 @@ using Microsoft.Xna.Framework.Content;
 using datx02_rally.Particles.Systems;
 using datx02_rally.MapGeneration;
 using datx02_rally.EventTrigger;
+using Microsoft.Xna.Framework.Input;
 
 namespace datx02_rally.Menus
 {
@@ -23,6 +24,8 @@ namespace datx02_rally.Menus
         #region Field
 
         GamePlayMode mode;
+        public bool Paused { get; private set; }
+        PauseMenu pauseMenu;
         public SpriteBatch spriteBatch;
         Matrix projectionMatrix;
 
@@ -150,6 +153,7 @@ namespace datx02_rally.Menus
             int usedSeed = seed.HasValue ? seed.Value : 0;
             UniversalRandom.ResetInstance(usedSeed);
             this.mode = mode;
+            this.Paused = false;
         }
 
         public override void ChangeResolution()
@@ -209,6 +213,8 @@ namespace datx02_rally.Menus
             components.Add(rainSystem);
             particleSystems.Add(rainSystem);
 
+            pauseMenu = new PauseMenu(gameInstance);
+            pauseMenu.ChangeResolution();
             base.Initialize();
         }
 
@@ -666,110 +672,121 @@ namespace datx02_rally.Menus
         public override GameState UpdateState(GameTime gameTime)
         {
             InputComponent input = gameInstance.GetService<InputComponent>();
-
-            if (input.GetPressed(Input.ChangeController))
-            {
-                if (input.CurrentController == Controller.Keyboard)
-                {
-                    input.CurrentController = Controller.GamePad;
-                    Console.WriteLine("CurrentController equals GamePad");
-                }
-                else
-                {
-                    input.CurrentController = Controller.Keyboard;
-                    Console.WriteLine("CurrentController equals Keyboard");
-                }
-            }
-            // Allows the game to exit
             if (input.GetPressed(Input.Exit))
-                gameInstance.Exit();
-
-            if (input.GetPressed(Input.Console))
-                gameInstance.GetService<HUDConsoleComponent>().Toggle();
-
-            //Apply changes to car
-            Car.Update();
-
-            #region Ray
-
-            bool onTrack = false;
-
-            for (int i = 0; i < navMesh.triangles.Length; i++)
             {
-                var triangle = navMesh.triangles[i];
-
-                if (CollisionCheck(triangle))
-                {
-                    lastTriangle = i;
-                    onTrack = true;
-                    //break;
-                }
+                Paused = !Paused;
             }
-
-            if (!onTrack)
+            if (!Paused)
             {
-                // Project car.Pos on lastTriangle.
-                var t = navMesh.triangles[lastTriangle];
 
-                float coord = Vector3.Dot(Car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared();
-                bool trans = false;
-
-                if (coord < 0)
+                if (input.GetPressed(Input.ChangeController))
                 {
-                    trans = true;
-                    lastTriangle += (lastTriangle % 2 == 0 ? -2 : 2);
-                }
-                else if (coord > 1)
-                {
-                    trans = true;
-                    lastTriangle += (lastTriangle % 2 == 0 ? 2 : -2);
+                    if (input.CurrentController == Controller.Keyboard)
+                    {
+                        input.CurrentController = Controller.GamePad;
+                        Console.WriteLine("CurrentController equals GamePad");
+                    }
+                    else
+                    {
+                        input.CurrentController = Controller.Keyboard;
+                        Console.WriteLine("CurrentController equals Keyboard");
+                    }
                 }
 
-                if (lastTriangle < 0)
-                    lastTriangle += navMesh.triangles.Length;
-                if (lastTriangle >= navMesh.triangles.Length)
-                    lastTriangle -= navMesh.triangles.Length;
+                if (input.GetPressed(Input.Console))
+                    gameInstance.GetService<HUDConsoleComponent>().Toggle();
 
-                if (!trans)
+                //Apply changes to car
+                Car.Update();
+
+                #region Ray
+
+                bool onTrack = false;
+
+                for (int i = 0; i < navMesh.triangles.Length; i++)
                 {
-                    Car.Position = coord * t.ac + t.vertices[0];
+                    var triangle = navMesh.triangles[i];
+
+                    if (CollisionCheck(triangle))
+                    {
+                        lastTriangle = i;
+                        onTrack = true;
+                        //break;
+                    }
                 }
-                else if (!CollisionCheck(navMesh.triangles[lastTriangle]))
+
+                if (!onTrack)
                 {
-                    t = navMesh.triangles[lastTriangle];
-                    coord = MathHelper.Clamp(Vector3.Dot(Car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared(), 0, 1);
-                    Car.Position = coord * t.ac + t.vertices[0];
-                    Car.Normal = t.normal;
+                    // Project car.Pos on lastTriangle.
+                    var t = navMesh.triangles[lastTriangle];
+
+                    float coord = Vector3.Dot(Car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared();
+                    bool trans = false;
+
+                    if (coord < 0)
+                    {
+                        trans = true;
+                        lastTriangle += (lastTriangle % 2 == 0 ? -2 : 2);
+                    }
+                    else if (coord > 1)
+                    {
+                        trans = true;
+                        lastTriangle += (lastTriangle % 2 == 0 ? 2 : -2);
+                    }
+
+                    if (lastTriangle < 0)
+                        lastTriangle += navMesh.triangles.Length;
+                    if (lastTriangle >= navMesh.triangles.Length)
+                        lastTriangle -= navMesh.triangles.Length;
+
+                    if (!trans)
+                    {
+                        Car.Position = coord * t.ac + t.vertices[0];
+                    }
+                    else if (!CollisionCheck(navMesh.triangles[lastTriangle]))
+                    {
+                        t = navMesh.triangles[lastTriangle];
+                        coord = MathHelper.Clamp(Vector3.Dot(Car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared(), 0, 1);
+                        Car.Position = coord * t.ac + t.vertices[0];
+                        Car.Normal = t.normal;
+                    }
                 }
+
+                #endregion
+
+                //for (int x = -6; x < 6; x++)
+                //{
+                //    for (int z = -6; z < 6; z++)
+                //    {
+                //        rainSystem.AddParticle(Car.Position + new Vector3(
+                //            (float)UniversalRandom.GetInstance().NextDouble() * x * 200,
+                //            500 * (float)UniversalRandom.GetInstance().NextDouble(),
+                //            (float)UniversalRandom.GetInstance().NextDouble() * z * 200), 
+                //            Vector3.Down);
+                //    }
+                //}
+
+
+                //Vector3 carDirection = Vector3.Transform(Vector3.Forward,
+                //    Matrix.CreateRotationY(Car.Rotation));
+                //Vector3 carPosition = Car.Position + carDirection * 1000;
+                //pointLights.Sort(
+                //    delegate(PointLight x, PointLight y)
+                //    {
+                //        return (int)(Vector3.DistanceSquared(x.Position, carPosition) - Vector3.DistanceSquared(y.Position, carPosition));
+                //    }
+                //);
+                TriggerManager.GetInstance().Update(gameTime, Car.Position);
+
             }
-
-            #endregion
-
-            //for (int x = -6; x < 6; x++)
-            //{
-            //    for (int z = -6; z < 6; z++)
-            //    {
-            //        rainSystem.AddParticle(Car.Position + new Vector3(
-            //            (float)UniversalRandom.GetInstance().NextDouble() * x * 200,
-            //            500 * (float)UniversalRandom.GetInstance().NextDouble(),
-            //            (float)UniversalRandom.GetInstance().NextDouble() * z * 200), 
-            //            Vector3.Down);
-            //    }
-            //}
-
-
-            //Vector3 carDirection = Vector3.Transform(Vector3.Forward,
-            //    Matrix.CreateRotationY(Car.Rotation));
-            //Vector3 carPosition = Car.Position + carDirection * 1000;
-            //pointLights.Sort(
-            //    delegate(PointLight x, PointLight y)
-            //    {
-            //        return (int)(Vector3.DistanceSquared(x.Position, carPosition) - Vector3.DistanceSquared(y.Position, carPosition));
-            //    }
-            //);
-            TriggerManager.GetInstance().Update(gameTime, Car.Position);
-
-
+            else
+            {
+                GameState state = pauseMenu.UpdateState(gameTime);
+                if (state == GameState.Gameplay)
+                    Paused = false;
+                else if (state != GameState.PausedGameplay)
+                    return state;
+            }
             return GameState.Gameplay;
         }
 
@@ -843,7 +860,12 @@ namespace datx02_rally.Menus
 
         public override void Draw(GameTime gameTime)
         {
+            Texture2D pauseOverlay = null;
+            if (Paused)
+                pauseOverlay = pauseMenu.Render();
+
             gameInstance.GraphicsDevice.Clear(Color.Honeydew);
+
             skyBoxEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
 
             Matrix view = gameInstance.GetService<CameraComponent>().View;
@@ -863,7 +885,6 @@ namespace datx02_rally.Menus
             GraphicsDevice.Clear(Color.White);
 
             RenderScene(gameTime, view, projectionMatrix, false);
-            base.Draw(gameTime);
 
             GraphicsDevice.SetRenderTarget(null);
 
@@ -872,9 +893,24 @@ namespace datx02_rally.Menus
                 //stream.Dispose();
 
             RenderPostProcess();
+
+            RenderPauseMenu(pauseOverlay);
+
             base.Draw(gameTime);
         }
 
+        public void RenderPauseMenu(Texture2D overlay)
+        {
+            if (Paused)
+            {
+                spriteBatch.Begin();
+                Rectangle position = new Rectangle(GraphicsDevice.Viewport.Width / 2 - pauseMenu.RenderBounds.Width / 2,
+                                                   GraphicsDevice.Viewport.Height / 2 - pauseMenu.RenderBounds.Height / 2,
+                                                   pauseMenu.RenderBounds.Width, pauseMenu.RenderBounds.Height);
+                spriteBatch.Draw(overlay, position, Color.White);
+                spriteBatch.End();
+            }
+        }
         private void RenderPostProcess()
         {
             // Apply bloom effect
@@ -892,6 +928,7 @@ namespace datx02_rally.Menus
                 spriteBatch.Draw(finalTexture, Vector2.Zero, Color.White);
 
             }
+
             spriteBatch.End();
 
         }

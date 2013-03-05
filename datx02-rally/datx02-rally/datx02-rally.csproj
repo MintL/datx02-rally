@@ -129,6 +129,7 @@
     <Compile Include="Menus\MenuView.cs" />
     <Compile Include="Menus\MultiplayerMenu.cs" />
     <Compile Include="Menus\OverlayView.cs" />
+    <Compile Include="Menus\PauseMenu.cs" />
     <Compile Include="SpotLight.cs" />
     <Compile Include="DebugConsole\Commands\ConnectCommand.cs" />
     <Compile Include="DebugConsole\Commands\ClearCommand.cs" />
