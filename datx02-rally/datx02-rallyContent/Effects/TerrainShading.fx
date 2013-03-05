@@ -1,4 +1,5 @@
 #define MaxLights 10
+#include "SoftShadow.vsi"
 
 float4x4 World;
 float4x4 View;
@@ -29,6 +30,20 @@ sampler2D lightSampler = sampler_state
 	minfilter = point;
 	magfilter = point;
 	mipfilter = point;
+};
+
+float4x4 LightView;
+float4x4 LightProjection;
+
+texture2D ShadowMap;
+sampler2D shadowMapSampler = sampler_state
+{
+	texture = <ShadowMap>;
+	minfilter = point;
+	magfilter = point;
+	mipfilter = point;
+	AddressU = Clamp;
+	AddressV = Clamp;
 };
 
 texture TextureMap0;
@@ -94,6 +109,7 @@ struct VertexShaderOutput
 	float3 WorldPosition : TEXCOORD3;
 	float4 TexWeights : TEXCOORD4;
 	float4 PositionCopy : TEXCOORD5;
+	float4 OriginalPosition : TEXCOORD6;
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
@@ -110,6 +126,7 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 	output.WorldPosition = worldPosition.xyz;
 	output.TexWeights = input.TexWeights;
 	output.PositionCopy = mul(viewPosition, PrelightProjection);
+	output.OriginalPosition = input.Position;
 
     return output;
 }
@@ -119,10 +136,16 @@ float ComputeFogFactor(float d)
 	return clamp((d - FogStart) / (FogEnd - FogStart), 0, .75) * FogEnabled;
 }
 
+float4 GetPositionFromLight(float4 position)
+{
+	float4x4 wvp = mul(mul(World, LightView), LightProjection);
+	return mul(position, wvp);
+}
+
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
 	float3 normal = normalize(input.Normal);
-
+	
     float4 color = tex2D(TextureMapSampler0, input.TexCoord) * input.TexWeights.x;
 	color += tex2D(TextureMapSampler1, input.TexCoord) * input.TexWeights.y;
 	color += tex2D(TextureMapSampler2, input.TexCoord) * input.TexWeights.z;
@@ -155,6 +178,32 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
 	totalLight += tex2D(lightSampler, texCoord) * color;
+
+	float4 lightingPosition = GetPositionFromLight(input.OriginalPosition);
+	float2 shadowCoord = 0.5 * lightingPosition.xy / lightingPosition.w;
+	
+	shadowCoord += 0.5f;
+	shadowCoord.y = 1.0f - shadowCoord.y;
+	
+	float dotProduct = dot(normal, directionToLight) / directionToLight;
+	dotProduct += 1;
+	dotProduct /= 2.0;
+
+	//totalLight.rgb *= clamp(dotProduct, 0, 1);
+	
+	if (shadowCoord.x > 0 && shadowCoord.x < 1 && shadowCoord.y > 0 && shadowCoord.y < 1)
+	{
+		float ourDepth = 1 - (lightingPosition.z / lightingPosition.w);
+		totalLight.rgb *= CalcShadowTermPCF(shadowMapSampler, ourDepth, shadowCoord);
+		
+		/*
+		float shadowDepth = tex2D(shadowMapSampler, shadowCoord).r;
+		if (shadowDepth + .003 > ourDepth)
+		{
+			totalLight.rgb *= .4;
+		}
+		*/
+	}
 
 	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
 

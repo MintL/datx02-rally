@@ -23,7 +23,7 @@ namespace datx02_rally
 
         public DirectionalLight(Vector3 direction, Vector3 ambient, Vector3 diffuse)
         {
-            Direction = direction;
+            Direction = Vector3.Normalize(direction);
             defaultAmbient = ambient;
             defaultDiffuse = diffuse;
         }

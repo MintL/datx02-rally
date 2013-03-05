@@ -21,17 +21,17 @@ namespace datx02_rally.GameLogic
             });
             nodes.Add(new CurveNode()
             {
-                Position = new Vector3(nodecenter, .15f, 0),
+                Position = new Vector3(nodecenter, .2f, 0),
                 Tangent = Vector3.Transform(new Vector3(0, 0, variation * nodecenter), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
             });
             nodes.Add(new CurveNode()
             {
-                Position = new Vector3(0, .18f, nodecenter),
+                Position = new Vector3(0, .2f, nodecenter),
                 Tangent = Vector3.Transform(new Vector3(variation * -nodecenter, 0, 0), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
             });
             nodes.Add(new CurveNode()
             {
-                Position = new Vector3(-nodecenter, .25f, 0),
+                Position = new Vector3(-nodecenter, .2f, 0),
                 Tangent = Vector3.Transform(new Vector3(0, 0, variation * -nodecenter), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
             });
         }

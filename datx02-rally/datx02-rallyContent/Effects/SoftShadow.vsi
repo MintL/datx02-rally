@@ -1,0 +1,29 @@
+
+// Calculates the shadow occlusion using bilinear PCF
+float CalcShadowTermPCF(sampler2D shadowMapSampler, float fLightDepth, float2 vTexCoord)
+{
+	float fShadowTerm = 0.0f;
+	float2 g_vShadowMapSize = float2(2048.0, 2048.0);
+	float BIAS = 0.003;
+
+    // transform to texel space
+    float2 vShadowMapCoord =  g_vShadowMapSize * vTexCoord;
+    
+    // Determine the lerp amounts           
+    float2 vLerps = frac(vShadowMapCoord);
+
+    // read in bilerp stamp, doing the shadow checks
+    float fSamples[4];
+    
+    fSamples[0] = (tex2D(shadowMapSampler, vTexCoord).x + BIAS < fLightDepth) ? 1.0f: 0.0f;
+    fSamples[1] = (tex2D(shadowMapSampler, vTexCoord + float2(1.0/g_vShadowMapSize.x, 0)).x + BIAS < fLightDepth) ? 1.0f: 0.0f;
+    fSamples[2] = (tex2D(shadowMapSampler, vTexCoord + float2(0, 1.0/g_vShadowMapSize.y)).x + BIAS < fLightDepth) ? 1.0f: 0.0f;
+    fSamples[3] = (tex2D(shadowMapSampler, vTexCoord + float2(1.0/g_vShadowMapSize.x, 1.0/g_vShadowMapSize.y)).x + BIAS < fLightDepth) ? 1.0f: 0.0f;
+    
+    // lerp between the shadow values to calculate our light amount
+    fShadowTerm = lerp( lerp( fSamples[0], fSamples[1], vLerps.x ),
+                              lerp( fSamples[2], fSamples[3], vLerps.x ),
+                              vLerps.y );                              
+                                
+    return fShadowTerm;
+}

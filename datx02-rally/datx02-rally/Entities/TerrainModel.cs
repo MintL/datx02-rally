@@ -185,14 +185,20 @@ namespace datx02_rally
             vertexBuffer.SetData(vertices);
         }
 
-        
-        public void Draw(Matrix view, Vector3 cameraPosition, DirectionalLight directionalLight, List<PointLight> pointLights)
+
+        public void Draw(Matrix view, Matrix projection, Vector3 cameraPosition, DirectionalLight directionalLight,
+            Matrix lightView, Matrix lightProjection, Texture2D shadowMap)
         {
             Effect.Parameters["EyePosition"].SetValue(cameraPosition);
             Effect.Parameters["View"].SetValue(view);
             Effect.Parameters["World"].SetValue(Matrix.Identity);
+            Effect.Parameters["Projection"].SetValue(projection);
 
-            //Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
+            Effect.Parameters["LightView"].SetValue(lightView);
+            Effect.Parameters["LightProjection"].SetValue(lightProjection);
+            Effect.Parameters["ShadowMap"].SetValue(shadowMap);
+
+            Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
 
             if (Effect.CurrentTechnique.Name == "TerrainShading")
             {
@@ -221,7 +227,6 @@ namespace datx02_rally
                 pass.Apply();
                 device.Indices = indexBuffer;
                 device.SetVertexBuffer(vertexBuffer);
-
                 device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, indexBuffer.IndexCount / 3);
             }
         }
