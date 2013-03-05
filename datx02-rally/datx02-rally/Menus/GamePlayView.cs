@@ -168,11 +168,11 @@ namespace datx02_rally.Menus
 
             var cameraComponent = new CameraComponent(gameInstance);
             components.Add(cameraComponent);
-            services.AddService(typeof(CameraComponent), cameraComponent);
+            gameInstance.SetService(typeof(CameraComponent), cameraComponent);
 
             var carControlComponent = new CarControlComponent(gameInstance);
             components.Add(carControlComponent);
-            services.AddService(typeof(CarControlComponent), carControlComponent);
+            gameInstance.SetService(typeof(CarControlComponent), carControlComponent);
 
             // Particle systems
 
@@ -378,7 +378,7 @@ namespace datx02_rally.Menus
             //directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.2f);
             directionalLight = new DirectionalLight(new Vector3(-1.0f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.2f, Color.White.ToVector3() * 0.4f);
 
-            gameInstance.Services.AddService(typeof(DirectionalLight), directionalLight);
+            gameInstance.SetService(typeof(DirectionalLight), directionalLight);
 
             int numlights = 50;
             Vector3 pointLightOffset = new Vector3(0, 50, 0);
@@ -784,10 +784,32 @@ namespace datx02_rally.Menus
                 GameState state = pauseMenu.UpdateState(gameTime);
                 if (state == GameState.Gameplay)
                     Paused = false;
-                else if (state != GameState.PausedGameplay)
+                else if (state == GameState.MainMenu)
+                    this.ExitGame();
+                if (state != GameState.PausedGameplay)
                     return state;
             }
             return GameState.Gameplay;
+        }
+
+        private void ExitGame()
+        {
+            // Unload components
+            var components = gameInstance.Components;
+            var services = gameInstance.Services;
+
+            foreach (var component in components) 
+            {
+                services.RemoveService(component.GetType());
+            }
+            components.Clear();
+            foreach (var component in gameInstance.BaseComponents)
+            {
+                components.Add(component);
+                gameInstance.SetService(component.GetType(), component);
+            }
+            this.UnloadContent();
+            
         }
 
         private bool CollisionCheck(NavMeshVisualizer.NavMeshTriangle triangle)
