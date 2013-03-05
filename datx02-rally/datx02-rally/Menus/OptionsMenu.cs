@@ -20,13 +20,15 @@ namespace datx02_rally.Menus
         public OptionsMenu(Game game)
             : base(game, GameState.OptionsMenu)
         {
-            Vector2 size = GetScreenPosition(new Vector2(0.6f, 0.6f));
-            Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
+            
         }
 
         protected override void LoadContent()
         {
             base.LoadContent();
+
+            Vector2 size = GetScreenPosition(new Vector2(0.6f, 0.6f));
+            Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
             OptionMenuItem<int> displayMode = new OptionMenuItem<int>("Display Mode");
             displayMode.AddOption("Fullscreen", 1);
@@ -34,22 +36,31 @@ namespace datx02_rally.Menus
             displayMode.SetStartOption(1);
             displayMode.Bounds = Bounds;
             displayMode.Font = MenuFont;
+            displayMode.ArrowLeft = ArrowLeft;
+            displayMode.ArrowRight = ArrowRight;
+            displayMode.Background = OptionSelected;
+            displayMode.FontColor = ItemColor;
+            displayMode.FontColorSelected = Color.Black;
             AddMenuItem(displayMode);
 
-            OptionMenuItem<int> shadows = new OptionMenuItem<int>("Shadows");
-            shadows.AddOption("On", 1);
-            shadows.AddOption("Off", 2);
-            shadows.SetStartOption(1);
+            BoolOptionMenuItem shadows = new BoolOptionMenuItem("Shadows");
             shadows.Bounds = Bounds;
             shadows.Font = MenuFont;
+            shadows.ArrowLeft = ArrowLeft;
+            shadows.ArrowRight = ArrowRight;
+            shadows.Background = OptionSelected;
+            shadows.FontColor = ItemColor;
+            shadows.FontColorSelected = Color.Black;
             AddMenuItem(shadows);
 
-            OptionMenuItem<int> bloom = new OptionMenuItem<int>("Bloom");
-            bloom.AddOption("On", 1);
-            bloom.AddOption("Off", 2);
-            bloom.SetStartOption(1);
+            BoolOptionMenuItem bloom = new BoolOptionMenuItem("Bloom");
             bloom.Bounds = Bounds;
             bloom.Font = MenuFont;
+            bloom.ArrowLeft = ArrowLeft;
+            bloom.ArrowRight = ArrowRight;
+            bloom.Background = OptionSelected;
+            bloom.FontColor = ItemColor;
+            bloom.FontColorSelected = Color.Black;
             AddMenuItem(bloom);
 
             //OptionMenuItem<DisplayMode> resolution = new OptionMenuItem<DisplayMode>("Resolution", "Resolution");

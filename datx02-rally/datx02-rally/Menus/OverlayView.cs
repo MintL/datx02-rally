@@ -15,6 +15,9 @@ namespace datx02_rally.Menus
         public SpriteFont MenuFont { get; set; }
         public Texture2D Background { get; set; }
         public Texture2D ButtonBackground { get; set; }
+        public Texture2D ArrowLeft { get; set; }
+        public Texture2D ArrowRight { get; set; }
+        public Texture2D OptionSelected { get; set; }
         public Vector2 MenuItemOffset { get; set; }
         public Color ItemColor { get; set; }
         public Color ItemColorSelected { get; set; }
@@ -28,8 +31,7 @@ namespace datx02_rally.Menus
         public OverlayView(Game game, GameState gameState)
             : base(game, gameState)
         {
-            ItemColor = Color.White;
-            ItemColorSelected = Color.Red;
+            
             Transparency = 1f; //no transparency
             MenuItemOffset = new Vector2(0.005f, 0.005f);
             
@@ -42,10 +44,16 @@ namespace datx02_rally.Menus
         protected override void LoadContent()
         {
             base.LoadContent();
-            
+
+            ItemColor = Color.White;
+            ItemColorSelected = Color.Red;
+
             MenuFont = Game.Content.Load<SpriteFont>(@"Menu/MenuFont");
             Background = Game.Content.Load<Texture2D>(@"Menu/Menu-BG");
             ButtonBackground = Game.Content.Load<Texture2D>(@"Menu/Menu-button");
+            ArrowLeft = Game.Content.Load<Texture2D>(@"Menu/Menu-Left-Arrow");
+            ArrowRight = Game.Content.Load<Texture2D>(@"Menu/Menu-Right-Arrow");
+            OptionSelected = Game.Content.Load<Texture2D>(@"Menu/Menu-Option-Selected");
 
             Vector2 size = GetScreenPosition(new Vector2(0.6f, 0.6f));
             RenderBounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
@@ -93,15 +101,15 @@ namespace datx02_rally.Menus
                 else
                     noInOrder = noOfItemsCenter++;
 
-                Color color = i == selectedIndex ? ItemColorSelected : ItemColor;
-                menuItem.FontColor = color;
+                //Color color = i == selectedIndex ? ItemColorSelected : ItemColor;
+                //menuItem.FontColor = ItemColor;
 
                 Vector2 position = renderOffset;
                 Vector2 offset = GetScreenPosition(MenuItemOffset);
 
                 position.Y += Bounds.Height / 2 - menuItems.Count / 2 * (menuItem.Bounds.Height + offset.Y) +
                     noInOrder * (menuItem.Bounds.Height + offset.Y);
-                menuItem.Draw(spriteBatch, position); 
+                menuItem.Draw(spriteBatch, position, i == selectedIndex); 
             }
 
             spriteBatch.End();
