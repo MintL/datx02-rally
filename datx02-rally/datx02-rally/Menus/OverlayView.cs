@@ -101,9 +101,6 @@ namespace datx02_rally.Menus
                 else
                     noInOrder = noOfItemsCenter++;
 
-                //Color color = i == selectedIndex ? ItemColorSelected : ItemColor;
-                //menuItem.FontColor = ItemColor;
-
                 Vector2 position = renderOffset;
                 Vector2 offset = GetScreenPosition(MenuItemOffset);
 

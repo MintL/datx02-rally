@@ -264,7 +264,8 @@ namespace datx02_rally.Menus
         public override void Draw(SpriteBatch spriteBatch, Vector2 position, bool selected)
         {
             Rectangle b = Bounds;
-            b.X = (int)position.X;
+            b.X = (int)position.X + 5;
+            b.Width -= 10;
             b.Y = (int)position.Y;
             if (selected)
             {

@@ -63,6 +63,22 @@ namespace datx02_rally.Menus
             bloom.FontColorSelected = Color.Black;
             AddMenuItem(bloom);
 
+            MenuItem item = new StateActionMenuItem("Cancel", GameState.MainMenu);
+            item.Background = ButtonBackground;
+            item.Font = MenuFont;
+            item.FontColor = ItemColor;
+            item.FontColorSelected = ItemColorSelected;
+            item.SetWidth(Bounds.Width);
+            AddMenuItem(item);
+
+            item = new StateActionMenuItem("Apply", GameState.MainMenu);
+            item.Background = ButtonBackground;
+            item.Font = MenuFont;
+            item.FontColor = ItemColor;
+            item.FontColorSelected = ItemColorSelected;
+            item.SetWidth(Bounds.Width);
+            AddMenuItem(item);
+
             //OptionMenuItem<DisplayMode> resolution = new OptionMenuItem<DisplayMode>("Resolution", "Resolution");
             //foreach (DisplayMode mode in GraphicsAdapter.DefaultAdapter.SupportedDisplayModes)
             //    resolution.AddOption(mode.Width + "x" + mode.Height, mode);
