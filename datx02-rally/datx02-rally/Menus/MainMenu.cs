@@ -40,6 +40,8 @@ namespace datx02_rally.Menus
                 MenuItem item = new StateActionMenuItem(info.Item1, info.Item2);
                 item.Background = ButtonBackground;
                 item.Font = MenuFont;
+                //item.FontColor = ItemColor;
+                item.FontColorSelected = ItemColorSelected;
                 item.SetWidth(Bounds.Width);
                 AddMenuItem(item);
             }
