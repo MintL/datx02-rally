@@ -26,24 +26,49 @@ namespace datx02_rally.Menus
 
         protected override void LoadContent()
         {
-            /*OptionMenuItem<DisplayMode> resolution = new OptionMenuItem<DisplayMode>("Resolution", "Resolution");
-            foreach (DisplayMode mode in GraphicsAdapter.DefaultAdapter.SupportedDisplayModes)
-                resolution.AddOption(mode.Width + "x" + mode.Height, mode);
-            resolution.SetStartOption(Game1.GetInstance().GraphicsDevice.Viewport.Width + "x" + GraphicsDevice.Viewport.Height);
-
-            BoolOptionMenuItem fullscreen = new BoolOptionMenuItem("Fullscreen").SetStartOption(graphics.IsFullScreen) as BoolOptionMenuItem;
-            BoolOptionMenuItem performanceMode = new BoolOptionMenuItem("Performance mode", "PerfMode").SetStartOption(GameSettings.Default.PerformanceMode) as BoolOptionMenuItem;
-            ActionMenuItem applyButton = new ActionMenuItem("Apply", new ActionMenuItem.Action(ApplySettings));
-            StateActionMenuItem backButton = new StateActionMenuItem("Back", GameState.MainMenu);
-
-            AddMenuItem(resolution);
-            AddMenuItem(fullscreen);
-            AddMenuItem(performanceMode);
-            AddMenuItem(applyButton);
-            AddMenuItem(backButton);*/
-
             base.LoadContent();
 
+            OptionMenuItem<int> displayMode = new OptionMenuItem<int>("Display Mode");
+            displayMode.AddOption("Fullscreen", 1);
+            displayMode.AddOption("Windowed", 2);
+            displayMode.SetStartOption(1);
+            displayMode.Bounds = Bounds;
+            displayMode.Font = MenuFont;
+            AddMenuItem(displayMode);
+
+            OptionMenuItem<int> shadows = new OptionMenuItem<int>("Shadows");
+            shadows.AddOption("On", 1);
+            shadows.AddOption("Off", 2);
+            shadows.SetStartOption(1);
+            shadows.Bounds = Bounds;
+            shadows.Font = MenuFont;
+            AddMenuItem(shadows);
+
+            OptionMenuItem<int> bloom = new OptionMenuItem<int>("Bloom");
+            bloom.AddOption("On", 1);
+            bloom.AddOption("Off", 2);
+            bloom.SetStartOption(1);
+            bloom.Bounds = Bounds;
+            bloom.Font = MenuFont;
+            AddMenuItem(bloom);
+
+            //OptionMenuItem<DisplayMode> resolution = new OptionMenuItem<DisplayMode>("Resolution", "Resolution");
+            //foreach (DisplayMode mode in GraphicsAdapter.DefaultAdapter.SupportedDisplayModes)
+            //    resolution.AddOption(mode.Width + "x" + mode.Height, mode);
+            //resolution.SetStartOption(Game1.GetInstance().GraphicsDevice.Viewport.Width + "x" + GraphicsDevice.Viewport.Height);
+
+            //BoolOptionMenuItem fullscreen = new BoolOptionMenuItem("Fullscreen").SetStartOption(graphics.IsFullScreen) as BoolOptionMenuItem;
+            //BoolOptionMenuItem performanceMode = new BoolOptionMenuItem("Performance mode", "PerfMode").SetStartOption(GameSettings.Default.PerformanceMode) as BoolOptionMenuItem;
+            //ActionMenuItem applyButton = new ActionMenuItem("Apply", new ActionMenuItem.Action(ApplySettings));
+            //StateActionMenuItem backButton = new StateActionMenuItem("Back", GameState.MainMenu);
+
+            //AddMenuItem(resolution);
+            //AddMenuItem(fullscreen);
+            //AddMenuItem(performanceMode);
+            //AddMenuItem(applyButton);
+            //AddMenuItem(backButton);
+            
+            /*
             List<Tuple<String, GameState>> itemInfo = new List<Tuple<string, GameState>>();
             itemInfo.Add(new Tuple<String, GameState>("MainMenu", GameState.MainMenu));
             itemInfo.Add(new Tuple<String, GameState>("OptionsMenu", GameState.OptionsMenu));
@@ -55,7 +80,7 @@ namespace datx02_rally.Menus
                 item.Font = MenuFont;
                 AddMenuItem(item);
             }
-
+            */
             
         }
 

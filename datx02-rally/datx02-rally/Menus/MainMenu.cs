@@ -19,13 +19,15 @@ namespace datx02_rally.Menus
     {
         public MainMenu(Game game) : base(game, GameState.MainMenu) 
         { 
-            Vector2 size = GetScreenPosition(new Vector2(0.3f, 0.6f));
-            Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
+            
         }
 
         protected override void LoadContent()
         {
             base.LoadContent();
+
+            Vector2 size = GetScreenPosition(new Vector2(0.3f, 0.6f));
+            Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
             List<Tuple<String, GameState>> itemInfo = new List<Tuple<string,GameState>>();
             itemInfo.Add(new Tuple<String, GameState>("Start", GameState.Gameplay));
@@ -38,6 +40,7 @@ namespace datx02_rally.Menus
                 MenuItem item = new StateActionMenuItem(info.Item1, info.Item2);
                 item.Background = ButtonBackground;
                 item.Font = MenuFont;
+                item.SetWidth(Bounds.Width);
                 AddMenuItem(item);
             }
 

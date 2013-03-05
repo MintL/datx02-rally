@@ -31,9 +31,9 @@ namespace datx02_rally.Menus
 
         protected override void LoadContent()
         {
-            Bounds = graphics.GraphicsDevice.Viewport.Bounds;
-            
             base.LoadContent();
+
+            Bounds = graphics.GraphicsDevice.Viewport.Bounds;
         }
 
         /// <summary>

@@ -21,6 +21,22 @@ namespace datx02_rally.Menus
         public Color FontColor { get; set; }
 
         public abstract void Draw(SpriteBatch spriteBatch, Vector2 position);
+
+        private Rectangle bounds;
+        public Rectangle Bounds 
+        {
+            get { 
+                return new Rectangle(0, 0, bounds.Width, 
+                    (Background != null) ? Background.Bounds.Height : (int)Font.MeasureString(Text).Y); 
+            }
+            set { bounds = value; } 
+        }
+        public void SetWidth(int width)
+        {
+            var b = Bounds;
+            b.Width = width;
+            Bounds = b;
+        }
     }
 
     public abstract class OptionMenuItem : MenuItem
@@ -59,6 +75,7 @@ namespace datx02_rally.Menus
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 position)
         {
+            position.X += Bounds.Width / 2 - Background.Bounds.Width / 2;
             spriteBatch.Draw(Background, position, Color.White);
 
             Vector2 textOffset = Font.MeasureString(Text);
@@ -113,15 +130,6 @@ namespace datx02_rally.Menus
 
     public class OptionMenuItem<T> : OptionMenuItem
     {
-        public string text;
-        public string Text {
-            set { text = value; }
-            get { return text + ": " + SelectedOption(); }
-        }
-        public string Identifier { get; set; }
-        public ItemPositionX MenuPositionX { get; set; }
-        public ItemPositionY MenuPositionY { get; set; }
-
         public List<Tuple<string,T>> options = new List<Tuple<string, T>>();
         public int selectedOptionIndex = 0;
 
@@ -129,7 +137,7 @@ namespace datx02_rally.Menus
 
         public OptionMenuItem(string text, string identifier)
         {
-            this.text = text;
+            this.Text = text;
             this.Identifier = identifier != null ? identifier : text;
 
             MenuPositionX = ItemPositionX.CENTER;
@@ -215,7 +223,17 @@ namespace datx02_rally.Menus
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 position)
         {
-            spriteBatch.DrawString(Font, Text, position, FontColor);
+            // Title string
+            Vector2 textOffset = Font.MeasureString(Text);
+            textOffset.X = Bounds.Width / 6;
+            textOffset /= 2;
+            spriteBatch.DrawString(Font, Text, position + textOffset, FontColor);
+
+            // Option string
+            textOffset = Font.MeasureString(Text);
+            textOffset.X = Bounds.Width - Bounds.Width / 6;
+            textOffset /= 2;
+            spriteBatch.DrawString(Font, SelectedOption(), position + textOffset, FontColor);
         }
 
     }
