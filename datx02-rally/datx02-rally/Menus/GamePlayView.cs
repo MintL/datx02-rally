@@ -91,7 +91,7 @@ namespace datx02_rally.Menus
         Effect carEffect;
         CarShadingSettings carSettings = new CarShadingSettings()
         {
-            MaterialReflection = .7f,
+            MaterialReflection = .9f,
             MaterialShininess = 10
         };
 
@@ -947,13 +947,13 @@ namespace datx02_rally.Menus
                     //continue;
                     viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Down, Vector3.Forward);
                 else if (cubeMapFace == CubeMapFace.PositiveZ)
-                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Backward, Vector3.Up);
+                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Forward, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.PositiveX)
                     viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Right, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.PositiveY)
                     viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Up, Vector3.Backward);
                 else if (cubeMapFace == CubeMapFace.NegativeZ)
-                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Forward, Vector3.Up);
+                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Backward, Vector3.Up);
                 else
                     viewMatrix = Matrix.Identity;
 
@@ -962,7 +962,7 @@ namespace datx02_rally.Menus
 
                 Matrix projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
                     1.0f, 100f, 5000f);
-                RenderScene(gameTime, viewMatrix, projection, true);
+                RenderScene(gameTime, viewMatrix, projectionMatrix, true);
             }
 
             // Default target

@@ -135,28 +135,42 @@ float3 CalculateEnvironmentReflection(float3 normal, float3 directionFromEye)
 	return normalize(reflect(directionFromEye, normal));
 }
 
+float3 CalculateSpecularBlinn(float3 normal, float3 directionToLight, float3 directionFromEye, float shininess)
+{
+	float3 h = normalize(directionToLight - directionFromEye);
+	return pow(saturate(dot(h, normal)), shininess);
+}
+
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
 	float3 normal = normalize(input.Normal);
 	float3 directionFromEye = -normalize(input.ViewDirection);
+	float MaterialShininess = 10;
+	float normalizationFactor = normalizationFactor = ((MaterialShininess + 2.0) / 8.0);
 
     float4 color = tex2D(TextureMapSampler0, input.TexCoord) * input.TexWeights.x;
 	color += tex2D(TextureMapSampler1, input.TexCoord) * input.TexWeights.y;
 	color += tex2D(TextureMapSampler2, input.TexCoord) * input.TexWeights.z;
 	color += tex2D(TextureMapSampler3, input.TexCoord) * input.TexWeights.w;
 	
-	
 	float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
 	
 	float3 directionToLight = -normalize(DirectionalDirection);
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 	
-	totalLight.rgb += selfShadow * (DirectionalDiffuse * color.rgb * saturate(dot(normal, directionToLight)));
+	float specular = input.TexWeights.x * 0.2;
+	float materialSpecular = float4(0.3, 0.3, 0.3, 1.0);
+	float3 fresnel = materialSpecular + (float3(1.0, 1.0, 1.0) - materialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
+			0.0, 1.0), 5.0);
+
+	totalLight.rgb += selfShadow * (DirectionalDiffuse * color.rgb * saturate(dot(normal, directionToLight))) +
+			specular * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor;
+	
 
 	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
 	totalLight += tex2D(lightSampler, texCoord) * color;
 
-	totalLight += texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye) * 0.2 * input.TexWeights.x);
+	totalLight += texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye) * fresnel * specular);
 
 	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
 
