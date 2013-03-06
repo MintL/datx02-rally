@@ -576,10 +576,10 @@ namespace datx02_rally.Menus
             #region DynamicEnvironment
             refCubeMap = new RenderTargetCube(this.GraphicsDevice, 256, true, SurfaceFormat.Color, DepthFormat.Depth16);
             carSettings.EnvironmentMap = refCubeMap;
-            //foreach (TerrainModel model in terrainSegments)
-            //{
-            //    model.Effect.Parameters["EnvironmentMap"].SetValue(refCubeMap);
-            //}
+            foreach (TerrainModel model in terrainSegments)
+            {
+                model.Effect.Parameters["EnvironmentMap"].SetValue(refCubeMap);
+            }
             //skyBoxEffect.Parameters["SkyboxTexture"].SetValue(refCubeMap);
             #endregion
 
@@ -960,8 +960,8 @@ namespace datx02_rally.Menus
                 GraphicsDevice.SetRenderTarget(refCubeMap, cubeMapFace);
                 GraphicsDevice.Clear(Color.White);
 
-                Matrix projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
-                    1.0f, 100f, 5000f);
+                //Matrix projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
+                    //1.0f, 100f, 5000f);
                 RenderScene(gameTime, viewMatrix, projectionMatrix, true);
             }
 

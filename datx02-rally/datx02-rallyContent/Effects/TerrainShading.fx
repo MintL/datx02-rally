@@ -132,7 +132,7 @@ float ComputeFogFactor(float d)
 
 float3 CalculateEnvironmentReflection(float3 normal, float3 directionFromEye) 
 {
-	return normalize(reflect(directionFromEye, normal));
+	return normalize(directionFromEye + 2 * normal * saturate(dot(-directionFromEye, normal)));
 }
 
 float3 CalculateSpecularBlinn(float3 normal, float3 directionToLight, float3 directionFromEye, float shininess)
@@ -170,7 +170,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
 	totalLight += tex2D(lightSampler, texCoord) * color;
 
-	totalLight += texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye) * fresnel * specular);
+	//totalLight.rgb += texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye) * float3(1,1,-1)) * fresnel * specular * 0.2;
 
 	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
 
