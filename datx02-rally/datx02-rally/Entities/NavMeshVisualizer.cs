@@ -44,7 +44,7 @@ namespace datx02_rally.Entities
             }
         }
 
-        public NavMeshVisualizer(GraphicsDevice device, datx02_rally.GameLogic.Curve curve, int resolution, float width, float triangleSize, float heightScale)
+        public NavMeshVisualizer(GraphicsDevice device, datx02_rally.GameLogic.Curve curve, int resolution, float width, Vector3 terrainScale)
         {
             this.device = device;
 
@@ -56,10 +56,9 @@ namespace datx02_rally.Entities
                 float t = i / (float)vertices.Length;
                 var position = curve.GetPoint(t);
                 var side = Vector3.Normalize(Vector3.Cross((curve.GetPoint(t + .0001f) - position), Vector3.Up));
-                position.Y *= triangleSize * heightScale;
 
-                vertices[i] = new VertexPositionColor(position - width * side, Color.White);
-                vertices[i + 1] = new VertexPositionColor(position + width * side, Color.Red);
+                vertices[i] = new VertexPositionColor(terrainScale * (position - width * side), Color.White);
+                vertices[i + 1] = new VertexPositionColor(terrainScale * (position + width * side), Color.Red);
             }
 
             #endregion
@@ -81,7 +80,7 @@ namespace datx02_rally.Entities
 
             #region Triangles
 
-            triangles = new NavMeshTriangle[2 * resolution]; // 200
+            triangles = new NavMeshTriangle[2 * resolution];
 
             for (int i = 0; i < indices.Length; i += 3)
             {
@@ -90,6 +89,8 @@ namespace datx02_rally.Entities
                     vertices[indices[i + 2]].Position);
             }
 
+
+            // Smoothen out normals
             for (int i = 1; i < triangles.Length; i += 2)
             {
                 int j = i - 1, c = i - 2, d = j - 2;

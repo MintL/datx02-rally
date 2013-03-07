@@ -40,7 +40,7 @@ namespace datx02_rally
             this.spotLightModel = spotLightModel;
             
             lightProjection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
-                device.Viewport.AspectRatio, 100f, 15000f);
+                device.Viewport.AspectRatio, 0.1f, 50000f);
 
             viewWidth = device.Viewport.Width;
             viewHeight = device.Viewport.Height;

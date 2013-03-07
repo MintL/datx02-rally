@@ -191,8 +191,6 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 			specular * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor;
 	
 
-	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
-	totalLight += tex2D(lightSampler, texCoord) * color;
 
 	float4 lightingPosition = GetPositionFromLight(input.OriginalPosition);
 	float2 shadowCoord = 0.5 * lightingPosition.xy / lightingPosition.w;
@@ -221,6 +219,9 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	}
 	
 	//totalLight.rgb += texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye) * float3(1,1,-1)) * fresnel * specular * 0.2;
+	
+	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
+	totalLight += tex2D(lightSampler, texCoord) * color;
 
 	totalLight.rgb = lerp(totalLight.rgb, FogColor, ComputeFogFactor(length(input.ViewDirection)));
 

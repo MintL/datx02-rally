@@ -71,8 +71,7 @@ namespace datx02_rally.Menus
         int terrainSegmentsCount = 8;
 
         // XZ- & Y scaling.
-        float terrainXZScale = 50;
-        float terrainYScale = 50 * 150;  //33;
+        Vector3 terrainScale = new Vector3(50, 7500, 50);
 
         float roadWidth = 6; // #Quads
         float roadFalloff = 35; // #Quads
@@ -238,35 +237,35 @@ namespace datx02_rally.Menus
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
-                GraphicsDevice.Viewport.AspectRatio, 0.1f, 50000f);
+                GraphicsDevice.Viewport.AspectRatio, 0.1f, 50000);
 
             #region Level terrain generation
 
-            int heightmapSize = terrainSegmentsCount * terrainSegmentSize + 1;
-            HeightMap heightmapGenerator = new HeightMap(heightmapSize);
+            int heightMapSize = terrainSegmentsCount * terrainSegmentSize + 1;
+            float halfHeightMapSize = heightMapSize / 2f;
+            HeightMap heightmapGenerator = new HeightMap(heightMapSize);
             var heightMap = heightmapGenerator.Generate();
 
-            var roadMap = new float[heightmapSize, heightmapSize];
-            raceTrack = new RaceTrack(((heightmapSize / 2) * terrainXZScale));
+            var roadMap = new float[heightMapSize, heightMapSize];
+            raceTrack = new RaceTrack(heightMapSize);
 
-            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 1500, roadWidth * terrainXZScale, terrainXZScale, terrainYScale / terrainXZScale);
+            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 1500, roadWidth, terrainScale);
 
             Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f);
-            lastPosition /= terrainXZScale;
-            lastPosition += new Vector3(.5f, 0, .5f) * heightmapSize;
+
             for (float t = 0; t < 1; t += .0002f)
             {
                 var e = raceTrack.Curve.GetPoint(t);
-                var height = e.Y;
-                e /= terrainXZScale;
-                e += new Vector3(heightmapSize) / 2f;
 
                 for (float j = -roadFalloff; j <= roadFalloff; j++)
                 {
                     var pos = e + j * Vector3.Normalize(Vector3.Cross(lastPosition - e, Vector3.Up));
 
                     // Indices
-                    int x = (int)pos.X, z = (int)pos.Z;
+                    int x = (int)(pos.X + halfHeightMapSize),
+                        z = (int)(pos.Z + halfHeightMapSize);
+
+                    float height = e.Y;
 
                     if (Math.Abs(j) <= roadWidth)
                     {
@@ -297,7 +296,7 @@ namespace datx02_rally.Menus
             // Creates a terrainmodel around Vector3.Zero
             terrainSegments = new TerrainModel[terrainSegmentsCount, terrainSegmentsCount];
 
-            float terrainStart = -.5f * heightmapSize;
+            float terrainStart = -.5f * heightMapSize;
 
             for (int z = 0; z < terrainSegmentsCount; z++)
             {
@@ -306,8 +305,7 @@ namespace datx02_rally.Menus
                     terrainSegments[x, z] = new TerrainModel(GraphicsDevice,
                         terrainSegmentSize, terrainSegmentsCount, terrainStart,
                         x * terrainSegmentSize, z * terrainSegmentSize,
-                        terrainXZScale, terrainYScale,
-                        heightMap, roadMap);
+                        terrainScale, heightMap, roadMap);
                     terrainSegments[x, z].Effect = terrainEffect;
                 }
             }
@@ -340,31 +338,31 @@ namespace datx02_rally.Menus
             gameInstance.Services.AddService(typeof(DirectionalLight), directionalLight);
 
             int numlights = 50;
-            Vector3 pointLightOffset = new Vector3(0, 50, 0);
+            Vector3 pointLightOffset = new Vector3(0, 250, 0);
             for (int i = 0; i < numlights; i++)
             {
                 float t = i / (float)numlights;
-                Vector3 point = raceTrack.Curve.GetPoint(t);
+                Vector3 point = terrainScale * raceTrack.Curve.GetPoint(t);
                 //Vector3 point2 = raceTrack.Curve.GetPoint(t + .01f * (t > .5f ? -1 : 1));
                 //var heading = (point2 - point1);
                 //var side = triangleSize * roadWidth * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
                 //point1.Y *= heightScale * triangleSize;
 
-                point.Y *= terrainYScale;
                 Random random = UniversalRandom.GetInstance();
 
                 Vector3 color = new Vector3(
                     .6f + .4f * (float)random.NextDouble(),
                     .6f + .4f * (float)random.NextDouble(),
                     .6f + .4f * (float)random.NextDouble());
-                pointLights.Add(new PointLight(point + pointLightOffset, color, 500.0f));
+                pointLights.Add(new PointLight(point + pointLightOffset, color, 450));
 
             }
 
             Vector3 forward = Vector3.Transform(Vector3.Backward,
                 Matrix.CreateRotationY(Car.Rotation));
+            
             Vector3 position = Car.Position;
-            position.Y *= terrainYScale;
+
             spotLights.Add(new SpotLight(position + new Vector3(0, 50, 0), forward, Color.White.ToVector3(), 45, 45, 500));
             #endregion
 
@@ -446,17 +444,11 @@ namespace datx02_rally.Menus
                 mesh.Effects[1].Parameters["AlphaMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-a"));
             }
 
-            int numTrees = 75;
+            int numTrees = 0;
             treePositions = new Vector3[numTrees];
             treeTransforms = new Matrix[numTrees];
             for (int i = 0; i < numTrees; i++)
             {
-                //treePositions[i] = new Vector3(
-                //    MathHelper.Lerp(300, 800, (float)random.NextDouble()),
-                //    0,
-                //    MathHelper.Lerp(-200, 400, (float)random.NextDouble())
-                //);
-
                 var t = navMesh.triangles[UniversalRandom.GetInstance().Next(navMesh.triangles.Length)];
                 float v = (float)UniversalRandom.GetInstance().NextDouble();
                 float u = ((float)UniversalRandom.GetInstance().NextDouble() - .5f);
@@ -465,10 +457,10 @@ namespace datx02_rally.Menus
                 else
                     u += 1.5f;
 
-                var treePos = t.vertices[0] + u * t.ab + v * t.ac;
+                var treePos = (t.vertices[0] + u * t.ab + v * t.ac) / terrainScale;
 
-                float X = treePos.X / terrainXZScale + heightmapSize / 2f,
-                    Z = treePos.Z / terrainXZScale + heightmapSize / 2f;
+                float X = treePos.X + heightMapSize / 2f,
+                    Z = treePos.Z + heightMapSize / 2f;
 
                 float Xlerp = X % 1f,
                     Zlerp = Z % 1f;
@@ -494,10 +486,8 @@ namespace datx02_rally.Menus
                         .5f);
                 }
 
-                treePos.Y = height * terrainYScale; // *terrainXZScale;
-
-                treePositions[i] = treePos;
-                treeTransforms[i] = Matrix.CreateScale(1 + 2 * (float)UniversalRandom.GetInstance().NextDouble()) *
+                treePositions[i] = terrainScale * treePos;
+                treeTransforms[i] = Matrix.CreateScale(1 + 4 * (float)UniversalRandom.GetInstance().NextDouble()) *
                     Matrix.CreateRotationY(MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()));
             }
 
@@ -524,7 +514,7 @@ namespace datx02_rally.Menus
             #region Cameras
 
             var input = gameInstance.GetService<InputComponent>();
-            gameInstance.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(Car, 75 * Vector3.Up, input));
+            gameInstance.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(Car, input));
             gameInstance.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100), input));
 
             #endregion
@@ -560,7 +550,7 @@ namespace datx02_rally.Menus
 
             int shadowMapResoulution = 2048; //2048;
             shadowMap = new RenderTarget2D(GraphicsDevice, shadowMapResoulution, shadowMapResoulution, //GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height,
-                 false, SurfaceFormat.Color, DepthFormat.Depth24);
+                 true, SurfaceFormat.Color, DepthFormat.Depth24);
             shadowMapEffect = content.Load<Effect>(@"Effects\Shadowmap");
 
             #endregion
@@ -856,9 +846,9 @@ namespace datx02_rally.Menus
             GraphicsDevice.SetRenderTarget(shadowMap);
             GraphicsDevice.Clear(Color.Black);
 
-            float near = 20000, far = 75000; // whereever you are
+            float near = 20000, far = 50000; // whereever you are
             float camOffset = near + (far - near) / 2f;
-            Vector3 focusPosition = Car.Position;
+            Vector3 focusPosition = Vector3.Zero; // Car.Position;
 
             //focusPosition += Vector3.Transform(800 * Vector3.Forward, Car.RotationMatrix);
 
@@ -875,7 +865,7 @@ namespace datx02_rally.Menus
                 //Matrix.CreateTranslation(focusPosition) *
 
                 Matrix.CreateLookAt(focusPosition - camOffset * directionalLight.Direction, focusPosition, Vector3.Up); // Matrix.CreateLookAt(directionalLight.Position, Car.Position, Vector3.Up);
-            lightProjection = Matrix.CreateOrthographic(2000, 2000, near, far); // Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), 1, 1000f, 10000f);
+            lightProjection = Matrix.CreateOrthographic(10000, 10000, near, far); // Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), 1, 1000f, 10000f);
             
             RenderShadowCasters(lightView, lightProjection);
             GraphicsDevice.SetRenderTarget(null);
@@ -886,9 +876,6 @@ namespace datx02_rally.Menus
 
             if (!GameSettings.Default.PerformanceMode)
                 RenderEnvironmentMap(gameTime);
-
-
-            
 
             GraphicsDevice.SetRenderTarget(postProcessTexture);
 
@@ -925,7 +912,8 @@ namespace datx02_rally.Menus
 
             if (TriggerManager.GetInstance().IsActive("goalTest"))
             {
-                Game.GetService<CameraComponent>().CurrentCamera.Shake();
+                // TODO: 
+                //Game.GetService<CameraComponent>().CurrentCamera.Shake();
             }
 
             spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
@@ -972,7 +960,7 @@ namespace datx02_rally.Menus
                 {
                     var part = mesh.MeshParts[p];
 
-                    shadowMapEffect.Parameters["AlphaEnabled"].SetValue(p != 0);
+                    shadowMapEffect.Parameters["AlphaEnabled"].SetValue(false); //p != 0);
 
                     if (p == 0)
                     {
@@ -1285,8 +1273,6 @@ namespace datx02_rally.Menus
                 heading.Normalize();
 
                 Vector3 normal = Vector3.Up;
-
-                position.Y *= terrainYScale;
 
                 foreach (var triangle in navMesh.triangles)
                 {

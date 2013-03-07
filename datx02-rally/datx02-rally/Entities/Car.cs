@@ -17,7 +17,7 @@ namespace datx02_rally
         public float Rotation { get; set; }
 
         public Vector3 Normal { get; set; }
-        private Matrix normalMatrix;
+        private Matrix normalMatrix = Matrix.Identity;
         
         /// <summary>
         /// Set only for repositioning, not driving
@@ -65,8 +65,8 @@ namespace datx02_rally
             this.Position = Vector3.Zero;
 
             // Constants
-            Acceleration = .1f;
-            MaxSpeed = 50;
+            Acceleration = .15f;
+            MaxSpeed = 20;
             MaxWheelTurn = MathHelper.PiOver4 / 0.7f;
             TurnSpeed = .005f;
 

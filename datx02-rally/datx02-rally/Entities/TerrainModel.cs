@@ -68,8 +68,7 @@ namespace datx02_rally
         /// <param name="heightMap"></param>
         /// <param name="roadMap"></param>
         public TerrainModel(GraphicsDevice device, int terrainSize, int terrainSegments, float terrainStart,
-            int xOffset, int zOffset,
-            float terrainXZScale, float terrainYScale, 
+            int xOffset, int zOffset, Vector3 terrainScale, 
             float[,] heightMap, float[,] roadMap)
         {
             this.device = device;
@@ -94,10 +93,10 @@ namespace datx02_rally
                     textureWeights.Normalize();
 
                     vertices[z * terrainSize + x] = new MultitexturedVertex(
-                        new Vector3(
-                            (terrainStart + xOffset + x) * terrainXZScale, // X
-                            terrainYScale * heightMap[xOffset + x, zOffset + z], // Y
-                            (terrainStart + zOffset + z) * terrainXZScale), // Z
+                        terrainScale * new Vector3(
+                            (terrainStart + xOffset + x), // X
+                            heightMap[xOffset + x, zOffset + z], // Y
+                            (terrainStart + zOffset + z)), // Z
                         Vector3.Zero, // Normal
                         new Vector2(x / 21f, z / 21f),
                         textureWeights);

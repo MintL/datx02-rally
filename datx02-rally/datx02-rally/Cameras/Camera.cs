@@ -9,9 +9,8 @@ namespace datx02_rally
 {
     abstract class Camera : IUpdateable
     {
-        public abstract Matrix View { get; protected set; }
-
         public abstract Vector3 Position { get; protected set; }
+        public abstract Matrix View { get; protected set; }
 
         protected bool ShakeEnabled { get; private set; }
         protected Matrix ShakeTransfomation { get; private set; }
