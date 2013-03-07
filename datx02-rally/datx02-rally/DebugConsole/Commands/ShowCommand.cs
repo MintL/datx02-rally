@@ -32,6 +32,7 @@ namespace datx02_rally.DebugConsole.Commands
             List<string> output = new List<string>();
             if (arguments.Length > 1)
             {
+                Game1 game = Game1.GetInstance();
                 switch (arguments[1].ToLower())
                 {
                     case "players":
@@ -85,8 +86,10 @@ namespace datx02_rally.DebugConsole.Commands
                         output.Add("Name: " + client.LocalPlayer.PlayerName);
                         break;
                     case "fps":
-                        Game1 game = Game1.GetInstance();
-                        game.Components.Add(new FPSComponent(game));
+                        game.GetService<HUDComponent>().ConsoleEnabled = true;
+                        break;
+                    case "speed":
+                        game.GetService<HUDComponent>().SpeedEnabled = true;
                         break;
                     default:
                         output.Add("Unknown show command: "+String.Join(" ",arguments, 1, arguments.Length-1));

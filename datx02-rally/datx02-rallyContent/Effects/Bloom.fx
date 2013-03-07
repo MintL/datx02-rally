@@ -14,7 +14,7 @@ float Threshold = 0.8;
 float BloomIntensity = 1.4;
 float OriginalIntensity = 1.0;
 float BloomSaturation = 1.0;
-float OriginalSaturation = 1.5;
+float OriginalSaturation = 1.0;
 
 float4 BloomFunction(float2 texCoord : TEXCOORD0) : COLOR0
 {

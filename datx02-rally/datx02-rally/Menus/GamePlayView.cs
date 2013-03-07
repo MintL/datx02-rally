@@ -13,6 +13,8 @@ using datx02_rally.Particles.WeatherSystems;
 using Microsoft.Xna.Framework.Content;
 using datx02_rally.Particles.Systems;
 using datx02_rally.MapGeneration;
+using datx02_rally.EventTrigger;
+using datx02_rally.Components;
 
 namespace datx02_rally.Menus
 {
@@ -154,8 +156,9 @@ namespace datx02_rally.Menus
         #region Initialization
 
         public GamePlayView(Game game, int? seed, GamePlayMode mode)
-            : base(game)
+            : base(game, GameState.Gameplay)
         {
+            game.GetService<ServerClient>().GamePlay = this;
             int usedSeed = seed.HasValue ? seed.Value : 0;
             UniversalRandom.ResetInstance(usedSeed);
             UniversalRandom.ResetInstance(0);
@@ -172,13 +175,13 @@ namespace datx02_rally.Menus
             components.Add(cameraComponent);
             services.AddService(typeof(CameraComponent), cameraComponent);
 
+            var hudComponent = new HUDComponent(gameInstance);
+            components.Add(hudComponent);
+            services.AddService(typeof(HUDComponent), hudComponent);
+            
             var carControlComponent = new CarControlComponent(gameInstance);
             components.Add(carControlComponent);
             services.AddService(typeof(CarControlComponent), carControlComponent);
-
-            var serverComponent = new ServerClient(gameInstance, this);
-            components.Add(serverComponent);
-            services.AddService(typeof(ServerClient), serverComponent);
 
             // Particle systems
 
@@ -340,7 +343,7 @@ namespace datx02_rally.Menus
                 //var side = triangleSize * roadWidth * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
                 //point1.Y *= heightScale * triangleSize;
 
-                point.Y *= terrainYScale * terrainXZScale;
+                point.Y *= terrainYScale;
                 Random random = UniversalRandom.GetInstance();
 
                 Vector3 color = new Vector3(
@@ -354,7 +357,7 @@ namespace datx02_rally.Menus
             Vector3 forward = Vector3.Transform(Vector3.Backward,
                 Matrix.CreateRotationY(Car.Rotation));
             Vector3 position = Car.Position;
-            position.Y *= terrainYScale * terrainXZScale;
+            position.Y *= terrainYScale;
             spotLights.Add(new SpotLight(position + new Vector3(0, 50, 0), forward, Color.White.ToVector3(), 45, 45, 500));
             #endregion
 
@@ -550,6 +553,12 @@ namespace datx02_rally.Menus
             shadowMapEffect = content.Load<Effect>(@"Effects\Shadowmap");
 
             #endregion
+
+            TriggerManager.GetInstance().CreatePositionTrigger("test", new Vector3(0, 1500, -3200), 3000f, new TimeSpan(0, 0, 5));
+            TriggerManager.GetInstance().CreateRectangleTrigger("goalTest", new Vector3(-200, 1500, 2000), new Vector3(1500, 1500, 2000),
+                                                                            new Vector3(-200, 1500, 4000), new Vector3(1500, 1500, 4000),
+                                                                            new TimeSpan(0, 0, 5));
+
         }
 
         public Car MakeCar()
@@ -730,10 +739,17 @@ namespace datx02_rally.Menus
             //    }
             //);
 
-            directionalLight.Direction = Vector3.Transform(
-                directionalLight.Direction, 
-                Matrix.CreateRotationY(
-                (float)gameTime.ElapsedGameTime.TotalSeconds));
+            //directionalLight.Direction = Vector3.Transform(
+            //    directionalLight.Direction, 
+            //    Matrix.CreateRotationY(
+            //    (float)gameTime.ElapsedGameTime.TotalSeconds));
+
+            yellowSystem.AddParticle(new Vector3(-200, 1500, 2000), Vector3.Up);
+            redSystem.AddParticle(new Vector3(1500, 1500, 2000), Vector3.Up);
+            plasmaSystem.AddParticle(new Vector3(-200, 1500, 4000), Vector3.Up);
+            greenSystem.AddParticle(new Vector3(1500, 1500, 4000), Vector3.Up);
+
+            TriggerManager.GetInstance().Update(gameTime, Car.Position);
 
             return GameState.Gameplay;
         }
@@ -844,10 +860,13 @@ namespace datx02_rally.Menus
 
             #endregion
 
+            prelightingRenderer.Render(view, directionalLight, terrainSegments, terrainSegmentsCount, pointLights, spotLights);
+
             if (!GameSettings.Default.PerformanceMode)
                 RenderEnvironmentMap(gameTime);
 
-            //prelightingRenderer.Render(view, directionalLight, terrain, pointLights, spotLights);
+
+            
 
             GraphicsDevice.SetRenderTarget(postProcessTexture);
 
@@ -878,8 +897,14 @@ namespace datx02_rally.Menus
         private void RenderPostProcess()
         {
             // Apply bloom effect
-            Texture2D finalTexture;
+            Texture2D finalTexture = postProcessTexture;
+
             finalTexture = bloom.PerformBloom(postProcessTexture);
+
+            if (TriggerManager.GetInstance().IsActive("goalTest"))
+            {
+                Game.GetService<CameraComponent>().CurrentCamera.Shake();
+            }
 
             spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
             foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
@@ -1032,18 +1057,18 @@ namespace datx02_rally.Menus
             foreach (ParticleSystem pSystem in particleSystems)
                 pSystem.SetCamera(view, projection);
 
-            //for (int i = 0; i < 10; i++)
-            //  pointLights[i].Draw(lightModel, view, projection);
-            foreach (SpotLight spot in spotLights)
-            {
-                spot.Draw(spotLightModel, view, projection);
-            }
+            for (int i = 0; i < pointLights.Count; i++)
+                pointLights[i].Draw(pointLightModel, view, projection);
+            //foreach (SpotLight spot in spotLights)
+            //{
+            //    spot.Draw(spotLightModel, view, projection);
+            //}
 
             #region Foliage
 
             for (int i = 0; i < treePositions.Length; i++)
             {
-                BoundingSphere sourceSphere = new BoundingSphere(treePositions[i], oakTree.Meshes[0].BoundingSphere.Radius);
+                BoundingSphere sourceSphere = new BoundingSphere(treePositions[i], oakTree.Meshes[0].BoundingSphere.Radius * 1000);
                 if (viewFrustum.Intersects(sourceSphere))
                     DrawModel(oakTree, view, projection, treePositions[i], treeTransforms[i]);
             }
@@ -1154,7 +1179,7 @@ namespace datx02_rally.Menus
             Vector3[] positions = new Vector3[pointLights.Count];
             Vector3[] diffuses = new Vector3[pointLights.Count];
             float[] ranges = new float[pointLights.Count];
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 4; i++)
             {
                 positions[i] = pointLights[i].Position;
                 diffuses[i] = pointLights[i].Diffuse;
@@ -1232,7 +1257,7 @@ namespace datx02_rally.Menus
 
                 Vector3 normal = Vector3.Up;
 
-                position.Y *= terrainYScale * terrainXZScale;
+                position.Y *= terrainYScale;
 
                 foreach (var triangle in navMesh.triangles)
                 {

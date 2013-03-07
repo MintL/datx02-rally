@@ -120,10 +120,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Components\FPSComponent.cs" />
+    <Compile Include="Components\HUDComponent.cs" />
     <Compile Include="Components\HUDConsoleComponent.cs" />
+    <Compile Include="EventTrigger\AbstractTrigger.cs" />
+    <Compile Include="EventTrigger\PositionTrigger.cs" />
+    <Compile Include="EventTrigger\RectangleTrigger.cs" />
+    <Compile Include="EventTrigger\TriggerManager.cs" />
     <Compile Include="Menus\GamePlayView.cs" />
     <Compile Include="Menus\MenuView.cs" />
+    <Compile Include="Menus\MultiplayerMenu.cs" />
+    <Compile Include="Menus\OverlayView.cs" />
     <Compile Include="SpotLight.cs" />
     <Compile Include="DebugConsole\Commands\ConnectCommand.cs" />
     <Compile Include="DebugConsole\Commands\ClearCommand.cs" />

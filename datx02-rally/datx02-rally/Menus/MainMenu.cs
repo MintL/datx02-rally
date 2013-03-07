@@ -22,7 +22,7 @@ namespace datx02_rally.Menus
         protected override void LoadContent()
         {
             AddMenuItem(new StateActionMenuItem("Singleplayer", GameState.Gameplay));
-            AddMenuItem(new StateActionMenuItem("Multiplayer", GameState.Gameplay));
+            AddMenuItem(new StateActionMenuItem("Multiplayer", GameState.MultiplayerMenu));
             AddMenuItem(new StateActionMenuItem("Options", GameState.OptionsMenu));
             AddMenuItem(new StateActionMenuItem("Exit", GameState.Exiting));
 

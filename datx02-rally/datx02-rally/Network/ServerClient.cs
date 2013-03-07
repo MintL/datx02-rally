@@ -19,7 +19,7 @@ namespace datx02_rally
         ServerSender Sender;
         ServerReceiver Receiver;
         Game1 Game;
-        GamePlayView GamePlay;
+        public GamePlayView GamePlay { set; get; }
         public readonly Player LocalPlayer;
         public LinkedList<Tuple<string, string, DateTime>> ChatHistory = new LinkedList<Tuple<string, string, DateTime>>();
         public Dictionary<byte,Player> Players = new Dictionary<byte, Player>();
@@ -31,12 +31,7 @@ namespace datx02_rally
         public int ConnectTryCount = 0;
         private int MAX_CONNECT_TRIES = 5;
 
-        public ServerClient(Game1 game, GamePlayView gamePlay) : this(game)
-        {
-            GamePlay = gamePlay;
-        }
-
-        private ServerClient(Game1 game) : base(game)
+        public ServerClient(Game1 game) : base(game)
         {
             NetPeerConfiguration config = new NetPeerConfiguration("DATX02");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);

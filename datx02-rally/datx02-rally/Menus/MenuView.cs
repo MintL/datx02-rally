@@ -11,21 +11,21 @@ namespace datx02_rally.Menus
     public abstract class MenuView : GameStateView
     {
         public SpriteFont MenuFont { get; set; }
+        public Texture2D Background { get; set; }
         public Color ItemColor { get; set; }
         public Color ItemColorSelected { get; set; }
-        public readonly GameState gameState;
+        public float Transparency { get; set; }
         private List<IMenuItem> menuItems = new List<IMenuItem>();
-        protected SpriteBatch spriteBatch;
         private int selectedIndex = 0;
 
-        public MenuView(Game game, GameState gameState) : base(game)
+        public MenuView(Game game, GameState gameState) : base(game, gameState)
         {
             ItemColor = Color.Black;
             ItemColorSelected = Color.Red;
-            this.gameState = gameState;
+            Transparency = 1f; //no transparency
 
             MenuFont = game.Content.Load<SpriteFont>(@"Menu/MenuFont");
-            spriteBatch = new SpriteBatch(game.GraphicsDevice);
+            Background = game.Content.Load<Texture2D>(@"Menu/Menu_bg");
         }
 
         public override void Draw(GameTime gameTime)
@@ -35,6 +35,7 @@ namespace datx02_rally.Menus
                 noOfItemsCenter = 0;
 
             spriteBatch.Begin();
+            spriteBatch.Draw(Background, Bounds, new Color(1f, 1f, 1f, Transparency));
 
             for (int i = 0; i < menuItems.Count; i++)
             {
@@ -93,10 +94,10 @@ namespace datx02_rally.Menus
                     posX = 0;
                     break;
                 case ItemPositionX.CENTER:
-                    posX = (gameInstance.GraphicsDevice.Viewport.Width / 2) - (textSize.X / 2);
+                    posX = (Bounds.Width / 2) - (textSize.X / 2);
                     break;
                 case ItemPositionX.RIGHT:
-                    posX = (gameInstance.GraphicsDevice.Viewport.Width) - textSize.X;
+                    posX = (Bounds.Width) - textSize.X;
                     break;
             }
 
@@ -107,10 +108,10 @@ namespace datx02_rally.Menus
                     posY = 0 + (numberInOrder * textSize.Y);
                     break;
                 case ItemPositionY.CENTER:
-                    posY = (gameInstance.GraphicsDevice.Viewport.Height / 2) + (numberInOrder * textSize.Y);
+                    posY = (Bounds.Height / 2) + (numberInOrder * textSize.Y);
                     break;
                 case ItemPositionY.BOTTOM:
-                    posY = (gameInstance.GraphicsDevice.Viewport.Height) - (numberInOrder * textSize.Y);
+                    posY = (Bounds.Height) - (numberInOrder * textSize.Y);
                     break;
             }
 
