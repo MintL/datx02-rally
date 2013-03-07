@@ -108,7 +108,8 @@ float3 CalculateSpecularBlinn(float3 normal, float3 directionToLight, float3 dir
 float3 CalculateEnvironmentReflection(float3 normal, float3 directionFromEye) 
 {
 	//return reflect(directionFromEye, normal);
-	return normalize(reflect(directionFromEye, normal));
+	//return normalize(reflect(directionFromEye, normal));
+	return normalize(directionFromEye + 2 * normal * saturate(dot(-directionFromEye, normal)));
 }
 
 float4 GetPositionFromLight(float4 position)
@@ -155,12 +156,11 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 	float3 fresnel = MaterialSpecular + (float3(1.0, 1.0, 1.0) - MaterialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
 			0.0, 1.0), 5.0);
-			
-	
-	//float3 reflection = normalize(2 * saturate(dot(directionFromEye, normal)) * normal - directionFromEye);
+
+	float3 reflection = CalculateEnvironmentReflection(normal, directionFromEye);
 	totalLight += float4(selfShadow * (DirectionalLightDiffuse * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) +
 					DirectionalLightDiffuse * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor +
-					texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye)) * fresnel * MaterialReflection), 1);
+					texCUBE(EnvironmentSampler, reflection * float3(1,1,-1)) * fresnel * MaterialReflection), 1);
 	
 	totalLight = saturate(totalLight);
 

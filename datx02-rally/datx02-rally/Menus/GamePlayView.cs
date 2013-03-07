@@ -93,7 +93,7 @@ namespace datx02_rally.Menus
         Effect carEffect;
         CarShadingSettings carSettings = new CarShadingSettings()
         {
-            MaterialReflection = .3f,
+            MaterialReflection = .9f,
             MaterialShininess = 10
         };
 
@@ -114,6 +114,9 @@ namespace datx02_rally.Menus
 
         ParticleEmitter[] dustEmitter;
         ParticleSystem[] dustParticles;
+
+        ParticleSystem smokeSystem;
+        float smokeTime;
 
         #endregion
 
@@ -221,6 +224,10 @@ namespace datx02_rally.Menus
             rainSystem = new RainParticleSystem(gameInstance, content);
             components.Add(rainSystem);
             particleSystems.Add(rainSystem);
+
+            smokeSystem = new SmokeCloudParticleSystem(gameInstance, content);
+            components.Add(smokeSystem);
+            particleSystems.Add(smokeSystem);
 
             base.Initialize();
         }
@@ -525,6 +532,10 @@ namespace datx02_rally.Menus
             #region DynamicEnvironment
             refCubeMap = new RenderTargetCube(this.GraphicsDevice, 256, true, SurfaceFormat.Color, DepthFormat.Depth16);
             carSettings.EnvironmentMap = refCubeMap;
+            foreach (TerrainModel model in terrainSegments)
+            {
+                model.Effect.Parameters["EnvironmentMap"].SetValue(refCubeMap);
+            }
             //skyBoxEffect.Parameters["SkyboxTexture"].SetValue(refCubeMap);
             #endregion
 
@@ -716,18 +727,29 @@ namespace datx02_rally.Menus
 
             #endregion
 
-            //for (int x = -6; x < 6; x++)
-            //{
-            //    for (int z = -6; z < 6; z++)
-            //    {
-            //        rainSystem.AddParticle(Car.Position + new Vector3(
-            //            (float)UniversalRandom.GetInstance().NextDouble() * x * 200,
-            //            500 * (float)UniversalRandom.GetInstance().NextDouble(),
-            //            (float)UniversalRandom.GetInstance().NextDouble() * z * 200), 
-            //            Vector3.Down);
-            //    }
-            //}
+            for (int x = -3; x < 3; x++)
+            {
+                for (int z = -3; z < 3; z++)
+                {
+                    rainSystem.AddParticle(Car.Position + new Vector3(
+                        (float)UniversalRandom.GetInstance().NextDouble() * x * 200,
+                        500 * (float)UniversalRandom.GetInstance().NextDouble(),
+                        (float)UniversalRandom.GetInstance().NextDouble() * z * 200),
+                        new Vector3(-1, -1, -1));//Vector3.Down);
+                }
+            }
 
+            smokeTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (smokeTime > 0.2)
+            {
+                smokeSystem.AddParticle(Car.Position + Car.Forward * 500 +
+                    new Vector3(
+                        (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 500,
+                        500 * (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()),
+                        (float)UniversalRandom.GetInstance().NextDouble() * 500),
+                        Vector3.Up);
+                smokeTime = 0;
+            }
 
             //Vector3 carDirection = Vector3.Transform(Vector3.Forward,
             //    Matrix.CreateRotationY(Car.Rotation));
@@ -994,25 +1016,25 @@ namespace datx02_rally.Menus
                 if (cubeMapFace == CubeMapFace.NegativeX)
                     viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Left, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.NegativeY)
-                    continue;
-                //viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Down, Vector3.Forward);
+                    //continue;
+                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Down, Vector3.Forward);
                 else if (cubeMapFace == CubeMapFace.PositiveZ)
-                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Backward, Vector3.Up);
+                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Forward, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.PositiveX)
                     viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Right, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.PositiveY)
                     viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Up, Vector3.Backward);
                 else if (cubeMapFace == CubeMapFace.NegativeZ)
-                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Forward, Vector3.Up);
+                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Backward, Vector3.Up);
                 else
                     viewMatrix = Matrix.Identity;
 
                 GraphicsDevice.SetRenderTarget(refCubeMap, cubeMapFace);
                 GraphicsDevice.Clear(Color.White);
 
-                Matrix projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
-                    1.0f, 100f, 5000f);
-                RenderScene(gameTime, viewMatrix, projection, true);
+                //Matrix projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
+                    //1.0f, 100f, 5000f);
+                RenderScene(gameTime, viewMatrix, projectionMatrix, true);
             }
 
             // Default target
@@ -1042,11 +1064,18 @@ namespace datx02_rally.Menus
                     var terrain = terrainSegments[x, z];
                     if (viewFrustum.Intersects(terrain.BoundingBox))
                     {
+                        if (environment) {
+                            Vector3 boxStart = Car.Position;
+                            boxStart.Y = -5000;
+                            Vector3 boxEnd = boxStart;
+                            boxEnd.Y = 5000;
+                            boxEnd.X += 50;
+                            boxEnd.Z += 50;
+                            if (terrain.BoundingBox.Intersects(new BoundingBox(boxStart, boxEnd)))
+                                continue;
+                        }
                         terrain.Draw(view, projection, gameInstance.GetService<CameraComponent>().Position,
                             directionalLight, lightView, lightProjection, shadowMap);
-
-                        //terrain.Draw(view, gameInstance.GetService<CameraComponent>().Position,
-                        //    directionalLight, pointLights);
                     }
                 }
 

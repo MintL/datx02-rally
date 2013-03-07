@@ -52,8 +52,10 @@ namespace datx02_rally
         // Distance between wheelaxis.
         private float L = 40.197f;
 
-        // Constructor
+        // Forward direction calculated to know where the car is heading. Not for set outside.
+        public Vector3 Forward { get; protected set; }
 
+        // Constructor
         public Car(Model model, float wheelRadius)
         {
             this.Model = model;
@@ -115,16 +117,16 @@ namespace datx02_rally
             previousPos = Position;
             previousRotation = Rotation;
 
-            Vector3 forward = Vector3.Transform(Vector3.Forward,
+            Forward = Vector3.Transform(Vector3.Forward,
                 Matrix.CreateRotationY(Rotation));
-            Vector3 axisOffset = L * forward;
+            Vector3 axisOffset = L * Forward;
 
             Vector3 front = Position + axisOffset;
             Vector3 back = Position - axisOffset;
 
             front += Speed * Vector3.Transform(Vector3.Forward,
                 Matrix.CreateRotationY(Rotation + WheelRotationY));
-            back += Speed * forward;
+            back += Speed * Forward;
 
             Vector3 oldPos = Position;
             Position = (front + back) / 2;

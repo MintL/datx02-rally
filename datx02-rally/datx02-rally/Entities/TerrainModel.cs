@@ -200,12 +200,10 @@ namespace datx02_rally
 
             Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
 
-            if (Effect.CurrentTechnique.Name == "TerrainShading")
-            {
-                Effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
-                Effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
-                Effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
-            }
+            Effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
+            Effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
+            Effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
+            
 
             foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
             {
