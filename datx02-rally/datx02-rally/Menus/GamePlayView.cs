@@ -33,6 +33,8 @@ namespace datx02_rally.Menus
         Effect postEffect;
         Bloom bloom;
         GaussianBlur gaussianBlur;
+        MotionBlur motionBlur;
+        Matrix previousViewProjection;
 
         #endregion
 
@@ -537,6 +539,7 @@ namespace datx02_rally.Menus
 
             gaussianBlur = new GaussianBlur(gameInstance);
             bloom = new Bloom(gameInstance, gaussianBlur);
+            motionBlur = new MotionBlur(gameInstance);
 
             #endregion
 
@@ -894,7 +897,10 @@ namespace datx02_rally.Menus
             //renderTarget.SaveAsJpeg(stream, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
             //stream.Dispose();
 
+
             RenderPostProcess();
+
+            
 
             //spriteBatch.Begin();
             //spriteBatch.Draw(shadowMap, new Rectangle(0, 0, 512, 512), Color.White);
@@ -909,6 +915,12 @@ namespace datx02_rally.Menus
             Texture2D finalTexture = postProcessTexture;
 
             finalTexture = bloom.PerformBloom(postProcessTexture);
+
+            Matrix view = gameInstance.GetService<CameraComponent>().View;
+
+            Matrix viewProjectionInverse = Matrix.Invert(view * prelightingRenderer.LightProjection);
+            finalTexture = motionBlur.PerformMotionBlur(finalTexture, prelightingRenderer.DepthTarget, viewProjectionInverse, previousViewProjection);
+            previousViewProjection = view * prelightingRenderer.LightProjection;
 
             if (TriggerManager.GetInstance().IsActive("goalTest"))
             {

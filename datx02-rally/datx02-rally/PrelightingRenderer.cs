@@ -27,7 +27,7 @@ namespace datx02_rally
         GraphicsDevice device;
         ContentManager content;
 
-        Matrix lightProjection;
+        public Matrix LightProjection { get; set; }
 
         int viewWidth;
         int viewHeight;
@@ -38,9 +38,9 @@ namespace datx02_rally
             this.content = content;
             this.pointLightModel = pointLightModel;
             this.spotLightModel = spotLightModel;
-            
-            lightProjection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
-                device.Viewport.AspectRatio, 0.1f, 50000f);
+
+            LightProjection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
+                device.Viewport.AspectRatio, 100f, 15000f);
 
             viewWidth = device.Viewport.Width;
             viewHeight = device.Viewport.Height;
@@ -64,14 +64,14 @@ namespace datx02_rally
             this.spotLights = spotLights;
             
             RenderDepthNormal(view);
-            RenderLight(view * lightProjection);
+            RenderLight(view * LightProjection);
 
             for (int z = 0; z < terrainSegmentsCount; z++)
                 for (int x = 0; x < terrainSegmentsCount; x++)
                 {
                     var terrain = terrainSegments[x, z];
                     terrain.Effect.Parameters["LightTexture"].SetValue(LightTarget);
-                    terrain.Effect.Parameters["PrelightProjection"].SetValue(lightProjection);
+                    terrain.Effect.Parameters["PrelightProjection"].SetValue(LightProjection);
                     terrain.Effect.Parameters["viewportWidth"].SetValue(device.Viewport.Width);
                     terrain.Effect.Parameters["viewportHeight"].SetValue(device.Viewport.Height);
 
@@ -93,7 +93,7 @@ namespace datx02_rally
                     var terrain = terrainSegments[x, z];
                     Effect current = terrain.Effect;
                     terrain.Effect = depthNormalEffect;
-                    terrain.Draw(view, lightProjection);
+                    terrain.Draw(view, LightProjection);
                     //terrain.Draw(view, Vector3.Zero, null, null);
                     terrain.Effect = current;
                 }
