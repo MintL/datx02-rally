@@ -25,7 +25,7 @@ namespace datx02_rally
         private Vector3 lookUpOffset = Vector3.Zero;
         protected Vector3 translationOffset;
 
-        private Matrix cameraRotation = Matrix.Identity, 
+        private Matrix cameraRotation = Matrix.Identity,
             cameraTranslation = Matrix.Identity,
             localOffset = Matrix.Identity;
 

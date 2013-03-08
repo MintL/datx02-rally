@@ -24,13 +24,14 @@ namespace datx02_rally.Menus
         #region Field
 
         GamePlayMode mode;
-        public SpriteBatch spriteBatch;
+
         Matrix projectionMatrix;
 
         #region PostProcess
 
         RenderTarget2D postProcessTexture;
         Effect postEffect;
+
         Bloom bloom;
         GaussianBlur gaussianBlur;
 
@@ -77,7 +78,7 @@ namespace datx02_rally.Menus
         float roadFalloff = 35; // #Quads
 
         RaceTrack raceTrack;
-        NavMeshVisualizer navMesh;
+        NavMesh navMesh;
 
         //TerrainModel terrain;
         TerrainModel[,] terrainSegments;
@@ -249,7 +250,7 @@ namespace datx02_rally.Menus
             var roadMap = new float[heightMapSize, heightMapSize];
             raceTrack = new RaceTrack(heightMapSize);
 
-            navMesh = new NavMeshVisualizer(GraphicsDevice, raceTrack.Curve, 1500, roadWidth, terrainScale);
+            navMesh = new NavMesh(GraphicsDevice, raceTrack.Curve, 1500, roadWidth, terrainScale);
 
             Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f);
 
@@ -329,41 +330,33 @@ namespace datx02_rally.Menus
             // Load model to represent our lightsources
             pointLightModel = content.Load<Model>(@"Models/light");
             spotLightModel = content.Load<Model>(@"Models\Cone");
-            //directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.2f);
+
             directionalLight = new DirectionalLight(
-                new Vector3(-1.25f, -2f, 5.0f),
-                new Vector3(.1f, .099f, .1f), // new Vector3(1.0f, 0.8f, 1.0f), 
-                .6f * Color.White.ToVector3());
+                new Vector3(-1.25f, -2f, 5.0f), // Direction
+                new Vector3(.1f, .099f, .1f), // Ambient
+                .6f * Color.White.ToVector3()); // Diffuse
 
             gameInstance.Services.AddService(typeof(DirectionalLight), directionalLight);
 
-            int numlights = 50;
             Vector3 pointLightOffset = new Vector3(0, 250, 0);
-            for (int i = 0; i < numlights; i++)
+            foreach (var point in raceTrack.CurveRasterization.Points)
             {
-                float t = i / (float)numlights;
-                Vector3 point = terrainScale * raceTrack.Curve.GetPoint(t);
-                //Vector3 point2 = raceTrack.Curve.GetPoint(t + .01f * (t > .5f ? -1 : 1));
-                //var heading = (point2 - point1);
-                //var side = triangleSize * roadWidth * Vector3.Normalize(Vector3.Cross(Vector3.Up, heading));
-                //point1.Y *= heightScale * triangleSize;
-
-                Random random = UniversalRandom.GetInstance();
+                Random r = UniversalRandom.GetInstance();
 
                 Vector3 color = new Vector3(
-                    .6f + .4f * (float)random.NextDouble(),
-                    .6f + .4f * (float)random.NextDouble(),
-                    .6f + .4f * (float)random.NextDouble());
-                pointLights.Add(new PointLight(point + pointLightOffset, color, 450));
-
+                    .6f + .4f * (float)r.NextDouble(),
+                    .6f + .4f * (float)r.NextDouble(),
+                    .6f + .4f * (float)r.NextDouble());
+                pointLights.Add(new PointLight(terrainScale * point.Position + pointLightOffset, color, 450));
             }
 
-            Vector3 forward = Vector3.Transform(Vector3.Backward,
-                Matrix.CreateRotationY(Car.Rotation));
+            //Vector3 forward = Vector3.Transform(Vector3.Backward,
+            //    Matrix.CreateRotationY(Car.Rotation));
             
-            Vector3 position = Car.Position;
+            //Vector3 position = Car.Position;
 
-            spotLights.Add(new SpotLight(position + new Vector3(0, 50, 0), forward, Color.White.ToVector3(), 45, 45, 500));
+            //spotLights.Add(new SpotLight(position + new Vector3(0, 50, 0), forward, Color.White.ToVector3(), 45, 45, 500));
+
             #endregion
 
             dustEmitter = new ParticleEmitter[]{
@@ -613,7 +606,7 @@ namespace datx02_rally.Menus
         {
             Vector3 carPosition = raceTrack.Curve.GetPoint(0);
             Vector3 carHeading = (raceTrack.Curve.GetPoint(.001f) - carPosition);
-            car.Position = carPosition;
+            car.Position = terrainScale * carPosition;
             car.Rotation = (float)Math.Atan2(carHeading.X, carHeading.Z) - (float)Math.Atan2(0, -1);
         }
 
@@ -766,7 +759,7 @@ namespace datx02_rally.Menus
             return GameState.Gameplay;
         }
 
-        private bool CollisionCheck(NavMeshVisualizer.NavMeshTriangle triangle)
+        private bool CollisionCheck(NavMeshTriangle triangle)
         {
             var downray = new Ray(Car.Position, Vector3.Down);
             var upray = new Ray(Car.Position, Vector3.Up);
@@ -1067,8 +1060,11 @@ namespace datx02_rally.Menus
                     }
                 }
 
+            //navMesh.Draw(view, projection);
 
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+            GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
 
             // Set view to particlesystems
             foreach (ParticleSystem pSystem in particleSystems)
@@ -1227,14 +1223,15 @@ namespace datx02_rally.Menus
                 world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
 
                 // World
+                
                 world *= car.RotationMatrix * car.TranslationMatrix;
 
                 carSettings.World = world;
                 carSettings.NormalMatrix = Matrix.Invert(Matrix.Transpose(world));
 
 
-                foreach (Effect effect in mesh.Effects)
-                {// 5 effects for main, 1 for each wheel
+                foreach (Effect effect in mesh.Effects) // 5 effects for main, 1 for each wheel
+                {
                     effect.SetCarShadingParameters(carSettings);
 
                     effect.Parameters["LightView"].SetValue(lightView);

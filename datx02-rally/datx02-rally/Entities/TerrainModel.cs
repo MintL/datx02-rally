@@ -63,8 +63,7 @@ namespace datx02_rally
         /// <param name="terrainStart"></param>
         /// <param name="xOffset"></param>
         /// <param name="zOffset"></param>
-        /// <param name="terrainXZScale"></param>
-        /// <param name="terrainYScale"></param>
+        /// <param name="terrainScale"></param>
         /// <param name="heightMap"></param>
         /// <param name="roadMap"></param>
         public TerrainModel(GraphicsDevice device, int terrainSize, int terrainSegments, float terrainStart,

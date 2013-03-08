@@ -12,10 +12,16 @@ namespace datx02_rally
     /// </summary>
     static class GameExtensions
     {
+        #region GameServices
+
         public static T GetService<T>(this Game game)
         {
             return (T)game.Services.GetService(typeof(T));
         }
+
+        #endregion
+
+        #region Vectors and Matrices
 
         public static Matrix GetRotationMatrix(this Vector3 source, Vector3 target)
         {
@@ -35,5 +41,16 @@ namespace datx02_rally
             }
             return Matrix.Identity;
         }
+
+        #endregion
+
+        #region Bounding Volumes
+
+        public static BoundingBox Translate(this BoundingBox box, Matrix translationMatrix)
+        {
+            return new BoundingBox(Vector3.Transform(box.Min, translationMatrix), Vector3.Transform(box.Max, translationMatrix));
+        }
+
+        #endregion
     }
 }
