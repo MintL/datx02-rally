@@ -1,6 +1,8 @@
 #define MaxLights 10
 #include "SoftShadow.vsi"
 
+float3 tint;
+
 float4x4 World;
 float4x4 View;
 float4x4 Projection;
@@ -179,6 +181,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	
 	float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
 	
+	totalLight.rgb *= tint;
+	
 	float3 directionToLight = -normalize(DirectionalDirection);
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 	
@@ -201,6 +205,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float dotProduct = dot(normal, directionToLight) / directionToLight;
 	dotProduct += 1;
 	dotProduct /= 2.0;
+	
 
 	//totalLight.rgb *= clamp(dotProduct, 0, 1);
 	
@@ -217,6 +222,10 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		}
 		*/
 	}
+	else
+	{
+		totalLight.g = totalLight.b = totalLight.r;
+	}
 	
 	//totalLight.rgb += texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye) * float3(1,1,-1)) * fresnel * specular * 0.2;
 	
@@ -227,6 +236,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	return totalLight;
 }
+
 
 technique TerrainShading
 {

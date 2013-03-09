@@ -42,6 +42,7 @@ namespace datx02_rally.Menus
         Model oakTree;
         Vector3[] treePositions;
         Matrix[] treeTransforms;
+        BoundingSphere[] treeSpheres;
 
         //Model mushroomGroup;
 
@@ -247,6 +248,14 @@ namespace datx02_rally.Menus
             HeightMap heightmapGenerator = new HeightMap(heightMapSize);
             var heightMap = heightmapGenerator.Generate();
 
+            for (int x = 0; x < heightMapSize; x++)
+            {
+                for (int z = 0; z < heightMapSize; z++)
+                {
+                    heightMap[x, z] = 0;
+                }
+            }
+
             var roadMap = new float[heightMapSize, heightMapSize];
             raceTrack = new RaceTrack(heightMapSize);
 
@@ -289,7 +298,23 @@ namespace datx02_rally.Menus
 
             terrainEffect = content.Load<Effect>(@"Effects\TerrainShading");
             terrainEffect.Parameters["TextureMap0"].SetValue(content.Load<Texture2D>(@"Terrain\sand"));
+
+            // TEXTURE RENDERING
+
+            //var unprocessedGrassTexture = content.Load<Texture2D>(@"Terrain\grass");
+            //var grassTexture = new RenderTarget2D(GraphicsDevice, unprocessedGrassTexture.Width, unprocessedGrassTexture.Height);
+            
+            //GraphicsDevice.SetRenderTarget(grassTexture);
+            //spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
+            //spriteBatch.Draw(unprocessedGrassTexture, new Rectangle(0, 0, unprocessedGrassTexture.Width, unprocessedGrassTexture.Height), Color.White);
+            //spriteBatch.Draw(content.Load<Texture2D>(@"Particles\fire"), new Rectangle(0, 0, unprocessedGrassTexture.Width, unprocessedGrassTexture.Height), Color.White);
+            //spriteBatch.End();
+            //GraphicsDevice.SetRenderTarget(null);
+
+            //terrainEffect.Parameters["TextureMap1"].SetValue(grassTexture);
+
             terrainEffect.Parameters["TextureMap1"].SetValue(content.Load<Texture2D>(@"Terrain\grass"));
+
             terrainEffect.Parameters["TextureMap2"].SetValue(content.Load<Texture2D>(@"Terrain\rock"));
             terrainEffect.Parameters["TextureMap3"].SetValue(content.Load<Texture2D>(@"Terrain\snow"));
             terrainEffect.Parameters["Projection"].SetValue(projectionMatrix);
@@ -331,9 +356,14 @@ namespace datx02_rally.Menus
             pointLightModel = content.Load<Model>(@"Models/light");
             spotLightModel = content.Load<Model>(@"Models\Cone");
 
+            //directionalLight = new DirectionalLight(
+            //    new Vector3(-1.25f, -2f, 5.0f), // Direction
+            //    new Vector3(.1f, .099f, .1f), // Ambient
+            //    .6f * Color.White.ToVector3()); // Diffuse
+
             directionalLight = new DirectionalLight(
                 new Vector3(-1.25f, -2f, 5.0f), // Direction
-                new Vector3(.1f, .099f, .1f), // Ambient
+                10 * new Vector3(.1f, .099f, .1f), // Ambient
                 .6f * Color.White.ToVector3()); // Diffuse
 
             gameInstance.Services.AddService(typeof(DirectionalLight), directionalLight);
@@ -437,9 +467,17 @@ namespace datx02_rally.Menus
                 mesh.Effects[1].Parameters["AlphaMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-a"));
             }
 
-            int numTrees = 0;
+            BoundingSphere treeSphere = new BoundingSphere();
+            foreach (ModelMesh mesh in oakTree.Meshes)
+                treeSphere = BoundingSphere.CreateMerged(treeSphere, mesh.BoundingSphere);
+
+            Vector3 treeOriginOffset = treeSphere.Center;
+            float treeBoundingSpehereRadius = treeSphere.Radius;
+
+            int numTrees = 40;
             treePositions = new Vector3[numTrees];
             treeTransforms = new Matrix[numTrees];
+            treeSpheres = new BoundingSphere[numTrees];
             for (int i = 0; i < numTrees; i++)
             {
                 var t = navMesh.triangles[UniversalRandom.GetInstance().Next(navMesh.triangles.Length)];
@@ -480,8 +518,10 @@ namespace datx02_rally.Menus
                 }
 
                 treePositions[i] = terrainScale * treePos;
-                treeTransforms[i] = Matrix.CreateScale(1 + 4 * (float)UniversalRandom.GetInstance().NextDouble()) *
+                float scale = 1 + 4 * (float)UniversalRandom.GetInstance().NextDouble();
+                treeTransforms[i] = Matrix.CreateScale(scale) *
                     Matrix.CreateRotationY(MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()));
+                treeSpheres[i] = new BoundingSphere(treePositions[i] + treeOriginOffset, scale * treeBoundingSpehereRadius);
             }
 
             // {
@@ -748,6 +788,14 @@ namespace datx02_rally.Menus
             //    directionalLight.Direction, 
             //    Matrix.CreateRotationY(
             //    (float)gameTime.ElapsedGameTime.TotalSeconds));
+            
+            Vector3 pointLightOffset = new Vector3(0, 250, 0), rotationAxis = new Vector3(0,-100,0);
+            int index = 0;
+            foreach (var point in raceTrack.CurveRasterization.Points)
+            {
+                pointLights[index++].Position = terrainScale * point.Position + pointLightOffset +
+                    Vector3.Transform(rotationAxis, Matrix.CreateFromAxisAngle(point.Heading, 7 * (float)gameTime.TotalGameTime.TotalSeconds));
+            }
 
             yellowSystem.AddParticle(new Vector3(-200, 1500, 2000), Vector3.Up);
             redSystem.AddParticle(new Vector3(1500, 1500, 2000), Vector3.Up);
@@ -835,7 +883,6 @@ namespace datx02_rally.Menus
             Matrix view = gameInstance.GetService<CameraComponent>().View;
 
             #region ShadowMap
-
             GraphicsDevice.SetRenderTarget(shadowMap);
             GraphicsDevice.Clear(Color.Black);
 
@@ -859,7 +906,7 @@ namespace datx02_rally.Menus
 
                 Matrix.CreateLookAt(focusPosition - camOffset * directionalLight.Direction, focusPosition, Vector3.Up); // Matrix.CreateLookAt(directionalLight.Position, Car.Position, Vector3.Up);
             lightProjection = Matrix.CreateOrthographic(10000, 10000, near, far); // Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), 1, 1000f, 10000f);
-            
+
             RenderShadowCasters(lightView, lightProjection);
             GraphicsDevice.SetRenderTarget(null);
 
@@ -922,6 +969,7 @@ namespace datx02_rally.Menus
 
         private void RenderShadowCasters(Matrix lightView, Matrix lightProjection)
         {
+
             Matrix[] transforms = new Matrix[oakTree.Bones.Count];
             oakTree.CopyAbsoluteBoneTransformsTo(transforms);
 
@@ -1022,8 +1070,25 @@ namespace datx02_rally.Menus
             GraphicsDevice.SetRenderTarget(null);
         }
 
+        Vector3[,] tints;
+
         private void RenderScene(GameTime gameTime, Matrix view, Matrix projection, bool environment)
         {
+            if (tints == null)
+            {
+                tints = new Vector3[terrainSegmentsCount, terrainSegmentsCount];
+                for (int x = 0; x < terrainSegmentsCount; x++)
+                {
+                    for (int z = 0; z < terrainSegmentsCount; z++)
+                    {
+                        tints[x, z] = new Vector3(
+                            .2f + .8f * (float)UniversalRandom.GetInstance().NextDouble(),
+                            .2f + .8f * (float)UniversalRandom.GetInstance().NextDouble(),
+                            .2f + .8f * (float)UniversalRandom.GetInstance().NextDouble());
+                    }
+                }
+            }
+
             BoundingFrustum viewFrustum = new BoundingFrustum(view * projection);
 
             Matrix[] transforms = new Matrix[Car.Model.Bones.Count];
@@ -1055,6 +1120,9 @@ namespace datx02_rally.Menus
                             if (terrain.BoundingBox.Intersects(new BoundingBox(boxStart, boxEnd)))
                                 continue;
                         }
+
+                        terrainEffect.Parameters["tint"].SetValue(tints[x, z]);
+
                         terrain.Draw(view, projection, gameInstance.GetService<CameraComponent>().Position,
                             directionalLight, lightView, lightProjection, shadowMap);
                     }
@@ -1081,8 +1149,7 @@ namespace datx02_rally.Menus
 
             for (int i = 0; i < treePositions.Length; i++)
             {
-                BoundingSphere sourceSphere = new BoundingSphere(treePositions[i], oakTree.Meshes[0].BoundingSphere.Radius * 1000);
-                if (viewFrustum.Intersects(sourceSphere))
+                if (viewFrustum.Intersects(treeSpheres[i]))
                     DrawModel(oakTree, view, projection, treePositions[i], treeTransforms[i]);
             }
 
