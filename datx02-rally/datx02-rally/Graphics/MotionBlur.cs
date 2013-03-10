@@ -21,6 +21,11 @@ namespace datx02_rally.Graphics
         /// The number of samples to blur with
         /// </summary>
         public int NumSamples { get; set; }
+
+        /// <summary>
+        /// The scalar to size the blur
+        /// </summary>
+        public float Size { get; set; }
         #endregion
 
         public MotionBlur(Game1 game)
@@ -34,11 +39,13 @@ namespace datx02_rally.Graphics
                 false, SurfaceFormat.Color, DepthFormat.Depth24);
 
             NumSamples = 4;
+            Size = 30.0f;
         }
 
         public Texture2D PerformMotionBlur(Texture2D srcTexture, Texture2D depthTexture, Matrix viewProjectionInverse, Matrix previousViewProjection)
         {
             effect.Parameters["NumSamples"].SetValue(NumSamples);
+            effect.Parameters["Size"].SetValue(Size);
             effect.Parameters["DepthTexture"].SetValue(depthTexture);
             effect.Parameters["ViewProjectionInverse"].SetValue(viewProjectionInverse);
             effect.Parameters["PreviousViewProjection"].SetValue(previousViewProjection);

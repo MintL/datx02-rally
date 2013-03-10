@@ -1,11 +1,12 @@
 // This idea is fetched from chapter 27 in the book GPUGems3
 // http://http.developer.nvidia.com/GPUGems3/gpugems3_ch27.html
-#define MaxSamples 8
+#define MaxSamples 4
 
 float4x4 PreviousViewProjection;
 float4x4 ViewProjectionInverse;
 
 int NumSamples = 4;
+float Size = 50.0f;
 
 sampler2D sceneSampler : register(s0);
 texture2D DepthTexture;
@@ -27,19 +28,23 @@ float4 PixelShaderFunction(float2 texCoord : TEXCOORD0) : COLOR0
 	float4 currentPos = H;
 	float4 previousPos = mul(worldPos, PreviousViewProjection);
 	previousPos /= previousPos.w;
-	float2 velocity = (currentPos - previousPos) / 50.f;
+	float2 velocity = (currentPos - previousPos) / Size;
 
 	// Blur
 	float4 color = tex2D(sceneSampler, texCoord);
+	float4 blur = color;
+
 	texCoord += velocity;
 
 	[unroll(MaxSamples)]
 	for (int i = 1; i < NumSamples; i++, texCoord += velocity)
 	{
-		color += tex2D(sceneSampler, texCoord);
+		blur += tex2D(sceneSampler, texCoord);
 	}
+	blur /= NumSamples;
+	
+	return lerp(color, blur, abs(cos(texCoord.x * 3.14)) * 0.5);
 
-	return color / NumSamples;
 }
 
 technique Technique1
