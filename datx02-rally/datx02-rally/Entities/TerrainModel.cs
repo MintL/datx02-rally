@@ -54,6 +54,8 @@ namespace datx02_rally
         public Vector3 StartPoint { get; set; }
         public Vector3 EndPoint { get; set; }
 
+        public RenderTarget2D ShadowMap { get; set; }
+
         /// <summary>
         /// 
         /// </summary>
@@ -68,7 +70,7 @@ namespace datx02_rally
         /// <param name="roadMap"></param>
         public TerrainModel(GraphicsDevice device, int terrainSize, int terrainSegments, float terrainStart,
             int xOffset, int zOffset, Vector3 terrainScale, 
-            float[,] heightMap, float[,] roadMap)
+            float[,] heightMap, float[,] roadMap, Effect effect)
         {
             this.device = device;
 
@@ -181,20 +183,29 @@ namespace datx02_rally
                     typeof(MultitexturedVertex), vertices.Length,
                     BufferUsage.None);
             vertexBuffer.SetData(vertices);
+
+            #region Effect
+
+            this.Effect = effect;
+            this.ShadowMap = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Color, DepthFormat.Depth24);
+
+            #endregion
+
+
         }
 
 
         public void Draw(Matrix view, Matrix projection, Vector3 cameraPosition, DirectionalLight directionalLight,
-            Matrix lightView, Matrix lightProjection, Texture2D shadowMap)
+            Matrix shadowMapView, Matrix shadowMapProjection)
         {
             Effect.Parameters["EyePosition"].SetValue(cameraPosition);
             Effect.Parameters["View"].SetValue(view);
             Effect.Parameters["World"].SetValue(Matrix.Identity);
             Effect.Parameters["Projection"].SetValue(projection);
 
-            Effect.Parameters["LightView"].SetValue(lightView);
-            Effect.Parameters["LightProjection"].SetValue(lightProjection);
-            Effect.Parameters["ShadowMap"].SetValue(shadowMap);
+            Effect.Parameters["ShadowMapView"].SetValue(shadowMapView);
+            Effect.Parameters["ShadowMapProjection"].SetValue(shadowMapProjection);
+            Effect.Parameters["ShadowMap"].SetValue(ShadowMap);
 
             Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
 

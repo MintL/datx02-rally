@@ -34,8 +34,8 @@ sampler2D lightSampler = sampler_state
 	mipfilter = point;
 };
 
-float4x4 LightView;
-float4x4 LightProjection;
+float4x4 ShadowMapView;
+float4x4 ShadowMapProjection;
 
 texture2D ShadowMap;
 sampler2D shadowMapSampler = sampler_state
@@ -151,7 +151,7 @@ float ComputeFogFactor(float d)
 
 float4 GetPositionFromLight(float4 position)
 {
-	float4x4 wvp = mul(mul(World, LightView), LightProjection);
+	float4x4 wvp = mul(mul(World, ShadowMapView), ShadowMapProjection);
 	return mul(position, wvp);
 }
 

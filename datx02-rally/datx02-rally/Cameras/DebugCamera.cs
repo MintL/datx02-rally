@@ -10,7 +10,7 @@ namespace datx02_rally
     class DebugCamera : Camera
     {
         private float speed;
-        private Vector3 lookAt = Vector3.Forward;
+        private Vector3 lookAt = new Vector3(0,-1,-1);
 
         private ButtonState oldButtonState = ButtonState.Released;
         private int oldX, oldY;

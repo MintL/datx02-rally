@@ -15,12 +15,19 @@ using datx02_rally.Particles.Systems;
 using datx02_rally.MapGeneration;
 using datx02_rally.EventTrigger;
 using datx02_rally.Components;
+using Microsoft.Xna.Framework.Input;
 
 namespace datx02_rally.Menus
 {
     public enum GamePlayMode { Singleplayer, Multiplayer }
     class GamePlayView : GameStateView
     {
+        
+        Effect lterrainEffect;
+        Vector3 lshadowmMapLookAt;
+        Matrix lshadowMapView, lshadowMapProjection, ltreeWorld;
+
+
         #region Field
 
         GamePlayMode mode;
@@ -146,7 +153,7 @@ namespace datx02_rally.Menus
 
         #region ShadowMap
 
-        RenderTarget2D shadowMap;
+        //RenderTarget2D shadowMap;
         Effect shadowMapEffect;
         Matrix lightView;
         Matrix lightProjection;
@@ -298,8 +305,7 @@ namespace datx02_rally.Menus
 
             terrainEffect = content.Load<Effect>(@"Effects\TerrainShading");
             terrainEffect.Parameters["TextureMap0"].SetValue(content.Load<Texture2D>(@"Terrain\sand"));
-
-            // TEXTURE RENDERING
+            #region TEXTURE RENDERING
 
             //var unprocessedGrassTexture = content.Load<Texture2D>(@"Terrain\grass");
             //var grassTexture = new RenderTarget2D(GraphicsDevice, unprocessedGrassTexture.Width, unprocessedGrassTexture.Height);
@@ -313,8 +319,8 @@ namespace datx02_rally.Menus
 
             //terrainEffect.Parameters["TextureMap1"].SetValue(grassTexture);
 
+            #endregion
             terrainEffect.Parameters["TextureMap1"].SetValue(content.Load<Texture2D>(@"Terrain\grass"));
-
             terrainEffect.Parameters["TextureMap2"].SetValue(content.Load<Texture2D>(@"Terrain\rock"));
             terrainEffect.Parameters["TextureMap3"].SetValue(content.Load<Texture2D>(@"Terrain\snow"));
             terrainEffect.Parameters["Projection"].SetValue(projectionMatrix);
@@ -331,8 +337,7 @@ namespace datx02_rally.Menus
                     terrainSegments[x, z] = new TerrainModel(GraphicsDevice,
                         terrainSegmentSize, terrainSegmentsCount, terrainStart,
                         x * terrainSegmentSize, z * terrainSegmentSize,
-                        terrainScale, heightMap, roadMap);
-                    terrainSegments[x, z].Effect = terrainEffect;
+                        terrainScale, heightMap, roadMap, terrainEffect);
                 }
             }
 
@@ -362,7 +367,7 @@ namespace datx02_rally.Menus
             //    .6f * Color.White.ToVector3()); // Diffuse
 
             directionalLight = new DirectionalLight(
-                new Vector3(-1.25f, -2f, 5.0f), // Direction
+                new Vector3(1, -.5f, 1), // Direction
                 10 * new Vector3(.1f, .099f, .1f), // Ambient
                 .6f * Color.White.ToVector3()); // Diffuse
 
@@ -547,8 +552,9 @@ namespace datx02_rally.Menus
             #region Cameras
 
             var input = gameInstance.GetService<InputComponent>();
+            gameInstance.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(-11800, 3000, -8200), input));
             gameInstance.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(Car, input));
-            gameInstance.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(0, 200, 100), input));
+            
 
             #endregion
 
@@ -582,11 +588,20 @@ namespace datx02_rally.Menus
             #region ShadowMap
 
             int shadowMapResoulution = 2048; //2048;
-            shadowMap = new RenderTarget2D(GraphicsDevice, shadowMapResoulution, shadowMapResoulution, //GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height,
-                 true, SurfaceFormat.Color, DepthFormat.Depth24);
-            shadowMapEffect = content.Load<Effect>(@"Effects\Shadowmap");
+            //shadowMap = new RenderTarget2D(GraphicsDevice, shadowMapResoulution, shadowMapResoulution, //GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height,
+            //     true, SurfaceFormat.Color, DepthFormat.Depth24);
+            shadowMapEffect = content.Load<Effect>(@"Effects\ShadowMap");
 
             #endregion
+
+
+            lterrainEffect = content.Load<Effect>(@"Effects\TerrainShadingLShadow");
+            lterrainEffect.Parameters["TextureMap"].SetValue(content.Load<Texture2D>(@"Terrain\grass"));
+            ltreeWorld = Matrix.CreateTranslation(terrainScale * 
+                new Vector3(-terrainSegmentSize * (terrainSegmentsCount / 2 - .5f), 0, 
+                            -terrainSegmentSize * (terrainSegmentsCount / 2 - .5f)));
+
+
 
             TriggerManager.GetInstance().CreatePositionTrigger("test", new Vector3(0, 1500, -3200), 3000f, new TimeSpan(0, 0, 5));
             TriggerManager.GetInstance().CreateRectangleTrigger("goalTest", new Vector3(-200, 1500, 2000), new Vector3(1500, 1500, 2000),
@@ -789,13 +804,13 @@ namespace datx02_rally.Menus
             //    Matrix.CreateRotationY(
             //    (float)gameTime.ElapsedGameTime.TotalSeconds));
             
-            Vector3 pointLightOffset = new Vector3(0, 250, 0), rotationAxis = new Vector3(0,-100,0);
-            int index = 0;
-            foreach (var point in raceTrack.CurveRasterization.Points)
-            {
-                pointLights[index++].Position = terrainScale * point.Position + pointLightOffset +
-                    Vector3.Transform(rotationAxis, Matrix.CreateFromAxisAngle(point.Heading, 7 * (float)gameTime.TotalGameTime.TotalSeconds));
-            }
+            //Vector3 pointLightOffset = new Vector3(0, 250, 0), rotationAxis = new Vector3(0,-100,0);
+            //int index = 0;
+            //foreach (var point in raceTrack.CurveRasterization.Points)
+            //{
+            //    pointLights[index++].Position = terrainScale * point.Position + pointLightOffset +
+            //        Vector3.Transform(rotationAxis, Matrix.CreateFromAxisAngle(point.Heading, 7 * (float)gameTime.TotalGameTime.TotalSeconds));
+            //}
 
             yellowSystem.AddParticle(new Vector3(-200, 1500, 2000), Vector3.Up);
             redSystem.AddParticle(new Vector3(1500, 1500, 2000), Vector3.Up);
@@ -880,10 +895,11 @@ namespace datx02_rally.Menus
             gameInstance.GraphicsDevice.Clear(Color.Honeydew);
             skyBoxEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
 
-            Matrix view = gameInstance.GetService<CameraComponent>().View;
+            Matrix view = //lshadowMapView; projectionMatrix = lshadowMapProjection; 
+                gameInstance.GetService<CameraComponent>().View;
 
             #region ShadowMap
-            GraphicsDevice.SetRenderTarget(shadowMap);
+            GraphicsDevice.SetRenderTarget(terrainSegments[4,4].ShadowMap);
             GraphicsDevice.Clear(Color.Black);
 
             float near = 20000, far = 50000; // whereever you are
@@ -905,9 +921,57 @@ namespace datx02_rally.Menus
                 //Matrix.CreateTranslation(focusPosition) *
 
                 Matrix.CreateLookAt(focusPosition - camOffset * directionalLight.Direction, focusPosition, Vector3.Up); // Matrix.CreateLookAt(directionalLight.Position, Car.Position, Vector3.Up);
-            lightProjection = Matrix.CreateOrthographic(10000, 10000, near, far); // Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), 1, 1000f, 10000f);
+            lightProjection = Matrix.CreateOrthographic(3000, 3000, near, far); // Matrix.CreatePerspectiveFieldOfView(MathHelper.ToRadians(45), 1, 1000f, 10000f);
 
             RenderShadowCasters(lightView, lightProjection);
+
+            {
+                Matrix[] transforms = new Matrix[oakTree.Bones.Count];
+                oakTree.CopyAbsoluteBoneTransformsTo(transforms);
+
+                GraphicsDevice.SetRenderTarget(terrainSegments[0,0].ShadowMap);
+                GraphicsDevice.Clear(Color.Black);
+                var mesh = oakTree.Meshes[0];
+                var oe = new Effect[mesh.MeshParts.Count];
+                for (int i = 0; i < mesh.MeshParts.Count; i++)
+                {
+                    oe[i] = mesh.MeshParts[i].Effect;
+                    mesh.MeshParts[i].Effect = shadowMapEffect;
+                }
+
+                shadowMapEffect.Parameters["World"].SetValue(transforms[mesh.ParentBone.Index] * ltreeWorld);
+
+                float width = terrainScale.X * terrainSegmentSize, lheight = terrainScale.Z * terrainSegmentSize;
+                width -= 100; lheight -= 100;
+                near = 1f;
+                far = 5000;
+
+                float amount = (1 + (float)Math.Sin(1.5 * gameTime.TotalGameTime.TotalSeconds)) / 2f;
+
+                directionalLight.Direction = Vector3.Transform(directionalLight.Direction, Matrix.CreateRotationY((float)gameTime.ElapsedGameTime.TotalSeconds)); // Vector3.Normalize(new Vector3(1, -1f - 2 * amount, 1));
+
+                var xzlight = Vector3.Normalize(directionalLight.Direction * new Vector3(1, 0, 1));
+                float dot = Vector3.Dot(directionalLight.Direction, xzlight);
+                float sw = 1 / (float)Math.Sin(Math.Acos(dot));
+                var projectionTranform = Matrix.CreateScale(new Vector3(1, sw, 1));
+                projectionTranform *= Matrix.CreateRotationZ((float)(Math.Atan2(0, 1) - Math.Atan2(xzlight.Z, xzlight.X)));
+
+                lshadowMapProjection = projectionTranform * Matrix.CreateOrthographic(width, lheight, near, far);
+
+                shadowMapEffect.Parameters["Projection"].SetValue(lshadowMapProjection);
+
+                var ts = terrainSegments[0, 0];
+                camOffset = near + (far - near) / 2f;
+                lshadowmMapLookAt = Vector3.Lerp(ts.StartPoint, ts.EndPoint, .5f);
+                lshadowMapView = Matrix.CreateLookAt(lshadowmMapLookAt - camOffset * directionalLight.Direction,
+                    lshadowmMapLookAt, Vector3.Up);
+                shadowMapEffect.Parameters["View"].SetValue(lshadowMapView);
+                
+                mesh.Draw();
+                for (int i = 0; i < mesh.MeshParts.Count; i++)
+                    mesh.MeshParts[i].Effect = oe[i];
+            }
+
             GraphicsDevice.SetRenderTarget(null);
 
             #endregion
@@ -936,9 +1000,9 @@ namespace datx02_rally.Menus
 
             RenderPostProcess();
 
-            //spriteBatch.Begin();
-            //spriteBatch.Draw(shadowMap, new Rectangle(0, 0, 512, 512), Color.White);
-            //spriteBatch.End();
+            spriteBatch.Begin();
+            spriteBatch.Draw(terrainSegments[0,0].ShadowMap, new Rectangle(0, 0, 256, 256), Color.White);
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
@@ -1110,6 +1174,17 @@ namespace datx02_rally.Menus
                     var terrain = terrainSegments[x, z];
                     if (viewFrustum.Intersects(terrain.BoundingBox))
                     {
+                        if (x == 0 && z == 0)
+                        {
+                            terrain.Effect = terrainEffect;
+                            
+                            terrain.Draw(view, projection, gameInstance.GetService<CameraComponent>().Position,
+                                directionalLight, lshadowMapView, lshadowMapProjection);
+                            continue;
+                        }
+
+
+
                         if (environment) {
                             Vector3 boxStart = Car.Position;
                             boxStart.Y = -5000;
@@ -1124,7 +1199,7 @@ namespace datx02_rally.Menus
                         terrainEffect.Parameters["tint"].SetValue(tints[x, z]);
 
                         terrain.Draw(view, projection, gameInstance.GetService<CameraComponent>().Position,
-                            directionalLight, lightView, lightProjection, shadowMap);
+                            directionalLight, lightView, lightProjection);
                     }
                 }
 
@@ -1144,6 +1219,8 @@ namespace datx02_rally.Menus
             //{
             //    spot.Draw(spotLightModel, view, projection);
             //}
+
+            DrawModel(oakTree, view, projectionMatrix, Vector3.Zero, ltreeWorld);
 
             #region Foliage
 
@@ -1303,7 +1380,7 @@ namespace datx02_rally.Menus
 
                     effect.Parameters["LightView"].SetValue(lightView);
                     effect.Parameters["LightProjection"].SetValue(lightProjection);
-                    effect.Parameters["ShadowMap"].SetValue(shadowMap);
+                    effect.Parameters["ShadowMap"].SetValue(terrainSegments[0,0].ShadowMap);
                 }
 
                 mesh.Draw();
