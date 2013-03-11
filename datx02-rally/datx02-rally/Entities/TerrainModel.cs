@@ -54,23 +54,14 @@ namespace datx02_rally
         public Vector3 StartPoint { get; set; }
         public Vector3 EndPoint { get; set; }
 
+        public Matrix ShadowMapView, ShadowMapProjection;
         public RenderTarget2D ShadowMap { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="device"></param>
-        /// <param name="terrainSize"></param>
-        /// <param name="terrainSegments"></param>
-        /// <param name="terrainStart"></param>
-        /// <param name="xOffset"></param>
-        /// <param name="zOffset"></param>
-        /// <param name="terrainScale"></param>
-        /// <param name="heightMap"></param>
-        /// <param name="roadMap"></param>
-        public TerrainModel(GraphicsDevice device, int terrainSize, int terrainSegments, float terrainStart,
+        public TerrainModel(GraphicsDevice device, 
+            int terrainSize, int terrainSegments, float terrainStart,
             int xOffset, int zOffset, Vector3 terrainScale, 
-            float[,] heightMap, float[,] roadMap, Effect effect)
+            float[,] heightMap, float[,] roadMap,
+            Effect effect, DirectionalLight directionalLight)
         {
             this.device = device;
 
@@ -106,6 +97,10 @@ namespace datx02_rally
             }
 
             BoundingBox = BoundingBox.CreateFromPoints(vertices.Select(vert => vert.Position));
+
+            //var zeroPlane = new Plane(Vector3.Up, 0);
+            //StartPoint = vertices.First().Position + directionalLight.Direction * new Ray(vertices.First().Position, directionalLight.Direction).Intersects(zeroPlane).Value;
+            //EndPoint = vertices.Last().Position + directionalLight.Direction * new Ray(vertices.Last().Position, directionalLight.Direction).Intersects(zeroPlane).Value;
 
             StartPoint = vertices.First().Position;
             EndPoint = vertices.Last().Position;
@@ -195,16 +190,15 @@ namespace datx02_rally
         }
 
 
-        public void Draw(Matrix view, Matrix projection, Vector3 cameraPosition, DirectionalLight directionalLight,
-            Matrix shadowMapView, Matrix shadowMapProjection)
+        public void Draw(Matrix view, Matrix projection, Vector3 cameraPosition, DirectionalLight directionalLight)
         {
             Effect.Parameters["EyePosition"].SetValue(cameraPosition);
             Effect.Parameters["View"].SetValue(view);
             Effect.Parameters["World"].SetValue(Matrix.Identity);
             Effect.Parameters["Projection"].SetValue(projection);
 
-            Effect.Parameters["ShadowMapView"].SetValue(shadowMapView);
-            Effect.Parameters["ShadowMapProjection"].SetValue(shadowMapProjection);
+            Effect.Parameters["ShadowMapView"].SetValue(ShadowMapView);
+            Effect.Parameters["ShadowMapProjection"].SetValue(ShadowMapProjection);
             Effect.Parameters["ShadowMap"].SetValue(ShadowMap);
 
             Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
