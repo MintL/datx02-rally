@@ -50,9 +50,9 @@ namespace datx02_rally
         public Effect Effect { get; set; }
 
         public BoundingBox BoundingBox { get; set; }
+        public BoundingBox MinBox { get; set; }
 
-        public Vector3 StartPoint { get; set; }
-        public Vector3 EndPoint { get; set; }
+        //public Vector3[] Corner { get; set; }
 
         public Matrix ShadowMapView, ShadowMapProjection;
         public RenderTarget2D ShadowMap { get; set; }
@@ -98,12 +98,7 @@ namespace datx02_rally
 
             BoundingBox = BoundingBox.CreateFromPoints(vertices.Select(vert => vert.Position));
 
-            //var zeroPlane = new Plane(Vector3.Up, 0);
-            //StartPoint = vertices.First().Position + directionalLight.Direction * new Ray(vertices.First().Position, directionalLight.Direction).Intersects(zeroPlane).Value;
-            //EndPoint = vertices.Last().Position + directionalLight.Direction * new Ray(vertices.Last().Position, directionalLight.Direction).Intersects(zeroPlane).Value;
-
-            StartPoint = vertices.First().Position;
-            EndPoint = vertices.Last().Position;
+            //MinBox = BoundingBox.CreateFromPoints(new Vector3[] { BoundingBox.Min.GetXZProjection(false), BoundingBox.Max.GetXZProjection(false) });
 
             #region Indicies & Vertex normals setup
 
@@ -182,7 +177,7 @@ namespace datx02_rally
             #region Effect
 
             this.Effect = effect;
-            this.ShadowMap = new RenderTarget2D(device, 2048, 2048, false, SurfaceFormat.Color, DepthFormat.Depth24);
+            this.ShadowMap = new RenderTarget2D(device, 1024, 1024, false, SurfaceFormat.Single, DepthFormat.Depth24);
 
             #endregion
 

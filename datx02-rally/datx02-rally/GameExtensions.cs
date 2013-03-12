@@ -43,9 +43,9 @@ namespace datx02_rally
             return Matrix.Identity;
         }
 
-        public static Vector3 GetXZProjection(this Vector3 source)
+        public static Vector3 GetXZProjection(this Vector3 source, bool normalized)
         {
-            float length = (float)Math.Sqrt(source.X * source.X + source.Z * source.Z);
+            float length = normalized ? (float)Math.Sqrt(source.X * source.X + source.Z * source.Z) : 1;
             return new Vector3(source.X / length, 0, source.Z / length);
         }
 

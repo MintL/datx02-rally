@@ -55,8 +55,14 @@ namespace datx02_rally.Menus
             private BoundingSphere bsphere;
             public BoundingSphere BoundingSphere { get { return bsphere; } }
 
+            private Vector3 highestPoint;
+            public Vector3 HighestPoint { get { return highestPoint; } }
+
             public Tree(Model model, Vector3 position, float scale, float rotation)
             {
+                Matrix[] transforms = new Matrix[model.Bones.Count];
+                model.CopyAbsoluteBoneTransformsTo(transforms);
+
                 this.model = model;
                 this.transform = Matrix.CreateScale(scale) * 
                     Matrix.CreateRotationY(rotation) * 
@@ -66,6 +72,7 @@ namespace datx02_rally.Menus
                     bsphere = BoundingSphere.CreateMerged(
                         bsphere, mesh.BoundingSphere.Transform(transform));
 
+                this.highestPoint = bsphere.Center + Vector3.Up * bsphere.Radius;
             }
         }
 
@@ -347,7 +354,7 @@ namespace datx02_rally.Menus
             float terrainStart = -.5f * heightMapSize;
 
             directionalLight = new DirectionalLight(
-                new Vector3(-1.25f, -2f, 5.0f), // Direction
+                new Vector3(1.25f, -2, -5), // Direction
                 new Vector3(.3f, .27f, .3f), // Ambient
                 .6f * Color.White.ToVector3()); // Diffuse
 
@@ -541,7 +548,7 @@ namespace datx02_rally.Menus
                 }
 
 
-                trees[i] = new Tree(oakTree, terrainScale * treePos, 3, 0);
+                trees[i] = new Tree(oakTree, terrainScale * treePos, 5, 0);
 
                 //treePositions[i] = terrainScale * treePos;
                 //float scale = 1 + 4 * (float)UniversalRandom.GetInstance().NextDouble();
@@ -816,10 +823,10 @@ namespace datx02_rally.Menus
             //    }
             //);
 
-            //directionalLight.Direction = Vector3.Transform(
-            //    directionalLight.Direction, 
-            //    Matrix.CreateRotationY(
-            //    (float)gameTime.ElapsedGameTime.TotalSeconds));
+            directionalLight.Direction = Vector3.Transform(
+                directionalLight.Direction,
+                Matrix.CreateRotationY(
+                (float)gameTime.ElapsedGameTime.TotalSeconds));
             
             //Vector3 pointLightOffset = new Vector3(0, 250, 0), rotationAxis = new Vector3(0,-100,0);
             //int index = 0;
@@ -829,10 +836,10 @@ namespace datx02_rally.Menus
             //        Vector3.Transform(rotationAxis, Matrix.CreateFromAxisAngle(point.Heading, 7 * (float)gameTime.TotalGameTime.TotalSeconds));
             //}
 
-            yellowSystem.AddParticle(new Vector3(-200, 1500, 2000), Vector3.Up);
-            redSystem.AddParticle(new Vector3(1500, 1500, 2000), Vector3.Up);
-            plasmaSystem.AddParticle(new Vector3(-200, 1500, 4000), Vector3.Up);
-            greenSystem.AddParticle(new Vector3(1500, 1500, 4000), Vector3.Up);
+            //yellowSystem.AddParticle(new Vector3(-200, 1500, 2000), Vector3.Up);
+            //redSystem.AddParticle(new Vector3(1500, 1500, 2000), Vector3.Up);
+            //plasmaSystem.AddParticle(new Vector3(-200, 1500, 4000), Vector3.Up);
+            //greenSystem.AddParticle(new Vector3(1500, 1500, 4000), Vector3.Up);
 
             TriggerManager.GetInstance().Update(gameTime, Car.Position);
 
@@ -922,39 +929,44 @@ namespace datx02_rally.Menus
 
             #region ShadowMap
 
-            int z = 2; //for (int z = 0; z < terrainSegmentsCount; z++)
+            for (int z = 0; z < terrainSegmentsCount; z++)
             {
-                int x = 2; //for (int x = 0; x < terrainSegmentsCount; x++)
+                for (int x = 0; x < terrainSegmentsCount; x++)
                 {
                     var terrain = terrainSegments[x, z];
 
                     if (!viewFrustum.Intersects(terrain.BoundingBox))
-                        ; //continue;
+                        continue;
 
                     GraphicsDevice.SetRenderTarget(terrain.ShadowMap);
                     GraphicsDevice.Clear(Color.Black);
 
+                    var shadowBox = BoundingBox.CreateFromPoints(
+                        terrain.BoundingBox.GetCorners().Select(corner =>
+                            corner + new Ray(corner,
+                                directionalLight.Direction).Intersects(zeroPlane).Value *
+                                directionalLight.Direction));
 
-                    float projectionWidth  = terrainScale.X * terrainSegmentSize - 100,
-                          projectionHeight = terrainScale.Z * terrainSegmentSize - 100,
-                          projectionNear = 1f,
-                          projectionFar = 5000;
+                    var startpoint = shadowBox.Min;
+                    var endpoint = shadowBox.Max;
+
+                    float projectionWidth = endpoint.Z - startpoint.Z,
+                          projectionHeight = endpoint.X - startpoint.X,
+                          projectionNear = 50f,
+                          projectionFar = 15000;
                     var lookAtOffset = projectionNear + (projectionFar - projectionNear) / 2f;
-                    var shadowmMapLookAtTarget = Vector3.Lerp(terrain.StartPoint, terrain.EndPoint, .5f);
 
-                    plasmaSystem.AddParticle(terrain.StartPoint, Vector3.Zero);
-                    plasmaSystem.AddParticle(terrain.EndPoint, Vector3.Zero);
-
-                    yellowSystem.AddParticle(shadowmMapLookAtTarget, Vector3.Zero);
+                    var shadowmMapLookAtTarget = Vector3.Lerp(startpoint, endpoint, .5f);
 
                     terrain.ShadowMapView = Matrix.CreateLookAt(
                         shadowmMapLookAtTarget - lookAtOffset * directionalLight.Direction, 
                         shadowmMapLookAtTarget, Vector3.Up);
 
-                    var xzlight = directionalLight.Direction.GetXZProjection();
+                    var xzlight = directionalLight.Direction.GetXZProjection(true);
                     float dot = Vector3.Dot(directionalLight.Direction, xzlight);
                     float sw = 1 / (float)Math.Sin(Math.Acos(dot));
                     var projectionTranform = Matrix.CreateScale(new Vector3(1, sw, 1));
+                    
                     projectionTranform *= Matrix.CreateRotationZ((float)(-Math.Atan2(xzlight.Z, xzlight.X)));
 
                     terrain.ShadowMapProjection = projectionTranform * Matrix.CreateOrthographic(
@@ -992,10 +1004,6 @@ namespace datx02_rally.Menus
 
             RenderPostProcess();
 
-            spriteBatch.Begin();
-            spriteBatch.Draw(terrainSegments[2,2].ShadowMap, new Rectangle(0, 0, 256, 256), Color.White);
-            spriteBatch.End();
-
             base.Draw(gameTime);
         }
 
@@ -1031,7 +1039,6 @@ namespace datx02_rally.Menus
         /// <param name="shadowMapProjection"></param>
         private void RenderShadowCasters(BoundingBox boundingBox, Matrix shadowMapView, Matrix shadowMapProjection)
         {
-
             Matrix[] transforms = new Matrix[oakTree.Bones.Count];
             oakTree.CopyAbsoluteBoneTransformsTo(transforms);
 
@@ -1053,11 +1060,17 @@ namespace datx02_rally.Menus
             shadowMapEffect.Parameters["AlphaMap"].SetValue(oldEffects[1].Parameters["AlphaMap"].GetValueTexture2D());
             shadowMapEffect.Parameters["AlphaEnabled"].SetValue(false);
 
-            GraphicsDevice.BlendState = BlendState.AlphaBlend;
+            GraphicsDevice.BlendState = BlendState.Opaque;
 
             foreach (var tree in trees)
             {
-                if (!tree.BoundingSphere.Intersects(boundingBox))
+                
+
+                var shadowPoint = tree.HighestPoint + new Ray(
+                    tree.HighestPoint, directionalLight.Direction).
+                    Intersects(zeroPlane).Value * directionalLight.Direction;
+
+                if (!BoundingSphere.CreateMerged(tree.BoundingSphere, new BoundingSphere(shadowPoint, .1f)).Intersects(boundingBox))
                     continue;
 
                 shadowMapEffect.Parameters["World"].SetValue(transforms[mesh.ParentBone.Index] * tree.Transform);
