@@ -15,6 +15,7 @@ using datx02_rally.Particles.Systems;
 using datx02_rally.MapGeneration;
 using datx02_rally.EventTrigger;
 using datx02_rally.Components;
+using Microsoft.Xna.Framework.Input;
 
 namespace datx02_rally.Menus
 {
@@ -24,7 +25,6 @@ namespace datx02_rally.Menus
         #region Field
 
         GamePlayMode mode;
-        public SpriteBatch spriteBatch;
         Matrix projectionMatrix;
 
         #region PostProcess
@@ -35,6 +35,7 @@ namespace datx02_rally.Menus
         GaussianBlur gaussianBlur;
         MotionBlur motionBlur;
         Matrix previousViewProjection;
+        private bool motionBlurEnabled = true;
 
         #endregion
 
@@ -888,27 +889,14 @@ namespace datx02_rally.Menus
             GraphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
 
             GraphicsDevice.Clear(Color.White);
-
             RenderScene(gameTime, view, projectionMatrix, false);
-            
             GraphicsDevice.SetRenderTarget(null);
-
-            //System.IO.Stream stream = System.IO.File.OpenWrite(@"C:\Development\tex.jpg");
-            //renderTarget.SaveAsJpeg(stream, GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-            //stream.Dispose();
-
 
             RenderPostProcess();
 
-            
-
-            //spriteBatch.Begin();
-            //spriteBatch.Draw(shadowMap, new Rectangle(0, 0, 512, 512), Color.White);
-            //spriteBatch.End();
-
             base.Draw(gameTime);
         }
-
+        
         private void RenderPostProcess()
         {
             // Apply bloom effect
@@ -918,9 +906,15 @@ namespace datx02_rally.Menus
 
             Matrix view = gameInstance.GetService<CameraComponent>().View;
 
-            Matrix viewProjectionInverse = Matrix.Invert(view * prelightingRenderer.LightProjection);
-            finalTexture = motionBlur.PerformMotionBlur(finalTexture, prelightingRenderer.DepthTarget, viewProjectionInverse, previousViewProjection);
-            previousViewProjection = view * prelightingRenderer.LightProjection;
+            if (gameInstance.GetService<InputComponent>().GetKey(Keys.M)) {
+                motionBlurEnabled = !motionBlurEnabled;
+            }
+
+            if (motionBlurEnabled) {
+                Matrix viewProjectionInverse = Matrix.Invert(view * prelightingRenderer.LightProjection);
+                finalTexture = motionBlur.PerformMotionBlur(finalTexture, prelightingRenderer.DepthTarget, viewProjectionInverse, previousViewProjection);
+                previousViewProjection = view * prelightingRenderer.LightProjection;
+            }
 
             if (TriggerManager.GetInstance().IsActive("goalTest"))
             {
