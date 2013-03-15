@@ -168,7 +168,7 @@ namespace datx02_rally.MapGeneration
             AddPerlinNoise(6.0f);
             Perturb(35.0f);
 
-            float[,] additional = new HeightMap(Size / 4).Generate(9, 50);
+            float[,] additional = new HeightMap(Size / 4).Generate(9, 20);
 
             int quadSize = Size / 4;
             for (int z = 0; z < Size; z++)

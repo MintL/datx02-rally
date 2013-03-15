@@ -70,14 +70,14 @@ namespace datx02_rally.Menus
 
         #region Level terrain
 
-        int terrainSegmentSize = 64;
-        int terrainSegmentsCount = 8;
+        int terrainSegmentSize = 50;
+        int terrainSegmentsCount = 12;
 
         // XZ- & Y scaling.
-        Vector3 terrainScale = new Vector3(50, 7500, 50);
+        Vector3 terrainScale = new Vector3(75, 10000, 75);
 
-        float roadWidth = 6; // #Quads
-        float roadFalloff = 35; // #Quads
+        float roadWidth = 10; // #Quads
+        float roadFalloff = 30; // #Quads
 
         RaceTrack raceTrack;
         NavMeshVisualizer navMesh;
