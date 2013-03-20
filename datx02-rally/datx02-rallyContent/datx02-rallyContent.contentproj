@@ -432,7 +432,9 @@
   <ItemGroup>
     <Compile Include="Particles\rain.png">
       <Name>rain</Name>
-	</Compile>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
     <Compile Include="Models\background.png">
       <Name>background</Name>
       <Importer>TextureImporter</Importer>
@@ -444,7 +446,7 @@
       <Name>MotionBlur</Name>
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
-	</Compile>
+    </Compile>
     <Compile Include="Menu\background.png">
       <Name>background</Name>
       <Importer>TextureImporter</Importer>
