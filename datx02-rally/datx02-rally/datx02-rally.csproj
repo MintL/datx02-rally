@@ -122,6 +122,8 @@
   <ItemGroup>
     <Compile Include="Components\HUDComponent.cs" />
     <Compile Include="Components\HUDConsoleComponent.cs" />
+    <Compile Include="Entities\GameObject.cs" />
+    <Compile Include="Entities\OakTree.cs" />
     <Compile Include="EventTrigger\AbstractTrigger.cs" />
     <Compile Include="EventTrigger\PositionTrigger.cs" />
     <Compile Include="EventTrigger\RectangleTrigger.cs" />
