@@ -40,7 +40,7 @@ namespace datx02_rally.Menus
         GaussianBlur gaussianBlur;
         MotionBlur motionBlur;
         Matrix previousViewProjection;
-        private bool motionBlurEnabled = true;
+        private bool motionBlurEnabled = false;
 
         #endregion
 
@@ -951,12 +951,6 @@ namespace datx02_rally.Menus
                 Matrix viewProjectionInverse = Matrix.Invert(view * prelightingRenderer.LightProjection);
                 finalTexture = motionBlur.PerformMotionBlur(finalTexture, prelightingRenderer.DepthTarget, viewProjectionInverse, previousViewProjection);
                 previousViewProjection = view * prelightingRenderer.LightProjection;
-            }
-
-            if (TriggerManager.GetInstance().IsActive("goalTest"))
-            {
-                // TODO: 
-                //Game.GetService<CameraComponent>().CurrentCamera.Shake();
             }
 
             spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
