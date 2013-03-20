@@ -373,9 +373,11 @@ namespace datx02_rally.Menus
                     .6f + .4f * (float)random.NextDouble(),
                     .6f + .4f * (float)random.NextDouble(),
                     .6f + .4f * (float)random.NextDouble());
-                pointLights.Add(new PointLight(point + pointLightOffset, color, 450));
+                pointLights.Add(new PointLight(content, point + pointLightOffset, color, 450));
 
             }
+
+            GraphicalObjects.AddRange(pointLights);
 
             Vector3 forward = Vector3.Transform(Vector3.Backward,
                 Matrix.CreateRotationY(Car.Rotation));
@@ -445,7 +447,6 @@ namespace datx02_rally.Menus
 
             #region Foliage
 
-            //oakTree = content.Load<Model>(@"Foliage\Oak_tree");
             Model oakTree = content.Load<Model>(@"Foliage\Oak_tree");
             Effect alphaMapEffect = content.Load<Effect>(@"Effects\AlphaMap");
 
@@ -465,8 +466,6 @@ namespace datx02_rally.Menus
             }
 
             int numTrees = 100;
-            //treePositions = new Vector3[numTrees];
-            //treeTransforms = new Matrix[numTrees];
             for (int i = 0; i < numTrees; i++)
             {
                 var t = navMesh.triangles[UniversalRandom.GetInstance().Next(navMesh.triangles.Length)];
@@ -514,9 +513,6 @@ namespace datx02_rally.Menus
 
                 GraphicalObjects.Add(tree);
 
-                //treePositions[i] = terrainScale * treePos;
-                //treeTransforms[i] = Matrix.CreateScale(1 + 4 * (float)UniversalRandom.GetInstance().NextDouble()) *
-                //    Matrix.CreateRotationY(MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()));
             }
 
             // {
@@ -754,6 +750,15 @@ namespace datx02_rally.Menus
                 {
                     obj.Update(gameTime);
                 }
+
+                // Lights
+                //foreach (PointLight light in pointLights)
+                //{
+                //    light.Update(gameTime);
+
+
+                //}
+
 
                 TriggerManager.GetInstance().Update(gameTime, Car.Position);
 
@@ -1128,25 +1133,12 @@ namespace datx02_rally.Menus
             foreach (ParticleSystem pSystem in particleSystems)
                 pSystem.SetCamera(view, projection);
 
-            for (int i = 0; i < pointLights.Count; i++)
-                pointLights[i].Draw(pointLightModel, view, projection);
-            //foreach (SpotLight spot in spotLights)
-            //{
-            //    spot.Draw(spotLightModel, view, projection);
-            //}
-
             #region RenderObjects
 
             foreach (GameObject obj in GraphicalObjects)
             {
-
-                //    DrawModel(oakTree, view, projection, treePositions[i], treeTransforms[i]);
-                BoundingSphere sourceSphere = new BoundingSphere(obj.Position, obj.Scale * 18);
-                if (viewFrustum.Intersects(sourceSphere))
-                    obj.Draw(view, projection);
+                obj.Draw(view, projection);
             }
-
-            //DrawModel(mushroomGroup, new Vector3(100, 0, 100), 0.0f);
 
             #endregion
 

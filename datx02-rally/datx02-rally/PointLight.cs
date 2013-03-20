@@ -8,40 +8,60 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using datx02_rally.Entities;
 
 namespace datx02_rally
 {
-    public class PointLight
+    public class PointLight : GameObject
     {
-        public Vector3 Position { get; set; }
         public Vector3 Diffuse { get; set; }
         public float Range { get; set; }
 
-        public PointLight(Vector3 lightPosition, Vector3 diffuse, float range)
+        private Vector3 colorDir = Vector3.One;
+        private Vector3 dir;
+
+        public PointLight(ContentManager content, Vector3 lightPosition, Vector3 diffuse, float range)
+            : base(@"Models\light", content)
         {
             Position = lightPosition;
             Diffuse = diffuse;
             Range = range;
+
+            dir = new Vector3(-1 + 2 * (float)UniversalRandom.GetInstance().NextDouble(),
+                        -1 + 2 * (float)UniversalRandom.GetInstance().NextDouble(),
+                        -1 + 2 * (float)UniversalRandom.GetInstance().NextDouble());
+            dir.Normalize();
         }
 
-        public PointLight(Vector3 lightPosition)
-            : this(lightPosition, Color.White.ToVector3(), 400.0f)
+        public PointLight(ContentManager content, Vector3 lightPosition)
+            : this(content, lightPosition, Color.White.ToVector3(), 400.0f)
         {   
         }
 
-        public void Draw(Model model, Matrix view, Matrix projection)
+        public override void Update(GameTime gameTime)
         {
-            foreach (ModelMesh mesh in model.Meshes)
-            {
-                foreach (BasicEffect currentEffect in mesh.Effects)
-                {
-                    currentEffect.DiffuseColor = Diffuse;
-                    currentEffect.World = Matrix.CreateTranslation(Position);
-                    currentEffect.View = view;
-                    currentEffect.Projection = projection;
-                }
-                mesh.Draw();
-            }
+            Vector3 color = Diffuse;
+            color += colorDir * 0.01f;
+
+            if (color.X < 0.4f || color.X > 0.99f) colorDir.X *= -1f;
+            if (color.Y < 0.4f || color.Y > 0.99f) colorDir.Y *= -1f;
+            if (color.Z < 0.4f || color.Z > 0.99f) colorDir.Z *= -1f;
+
+            Diffuse = color;
+
+            // position
+            dir += colorDir * 0.05f;
+            dir.Normalize();
+            Position += dir * 10f;
+
+            BoundingSphere = new BoundingSphere(Position, 1);
+
         }
+
+        protected override void SetEffectParameters(Effect effect)
+        {
+            (effect as BasicEffect).DiffuseColor = Diffuse;
+        }
+
     }
 }

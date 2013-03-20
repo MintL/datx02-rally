@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework;
 
 namespace datx02_rally.Entities
 {
@@ -17,8 +18,12 @@ namespace datx02_rally.Entities
             this.game = game;
         }
 
+        public override void Update(GameTime gameTime)
+        {
+            BoundingSphere = new BoundingSphere(Position, Scale * 18);
+        }
 
-        public override void SetEffectParameters(Effect effect)
+        protected override void SetEffectParameters(Effect effect)
         {
             DirectionalLight directionalLight = game.GetService<DirectionalLight>();
             effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
