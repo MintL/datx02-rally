@@ -16,6 +16,7 @@ namespace datx02_rally.Menus
         public readonly GameState gameState;
         protected SpriteBatch spriteBatch;
         public Rectangle Bounds { get; set; }
+        public Vector2 Position { get; set; }
 
         public GameStateView(Game game, GameState gameState)
             : base(game)
@@ -30,8 +31,9 @@ namespace datx02_rally.Menus
 
         protected override void LoadContent()
         {
-            Bounds = graphics.GraphicsDevice.Viewport.Bounds;
             base.LoadContent();
+
+            Bounds = graphics.GraphicsDevice.Viewport.Bounds;
         }
 
         /// <summary>
@@ -39,5 +41,12 @@ namespace datx02_rally.Menus
         /// </summary>
         /// <returns>Next game state</returns>
         public abstract GameState UpdateState(GameTime gameTime);
+
+        public abstract void ChangeResolution();
+
+        public Vector2 GetScreenPosition(Vector2 position)
+        {
+            return position * new Vector2(Bounds.Width, Bounds.Height);
+        }
     }
 }

@@ -8,119 +8,190 @@ using Microsoft.Xna.Framework.Input;
 
 namespace datx02_rally.Menus
 {
-    public abstract class MenuView : GameStateView
+    public class MenuView : GameStateView
     {
-        public SpriteFont MenuFont { get; set; }
         public Texture2D Background { get; set; }
-        public Color ItemColor { get; set; }
-        public Color ItemColorSelected { get; set; }
-        public float Transparency { get; set; }
-        private List<IMenuItem> menuItems = new List<IMenuItem>();
-        private int selectedIndex = 0;
+        public Texture2D Logo { get; set; }
+
+        public float Speed { get; set; }
+        public Vector2 TargetPosition { get; set; }
+        public float TargetRotation { get; set; }
+
+        public List<OverlayView> Overlays = new List<OverlayView>();
+        public Dictionary<OverlayView, Texture2D> OverlayTextures = new Dictionary<OverlayView, Texture2D>();
+        public OverlayView CurrentOverlay;
+
+        private GameState oldState;
+
+        #region Plane
+        VertexPositionTexture[] verts;
+        VertexBuffer vertexBuffer;
+        BasicEffect basicEffect;
+        #endregion
 
         public MenuView(Game game, GameState gameState) : base(game, gameState)
         {
-            ItemColor = Color.Black;
-            ItemColorSelected = Color.Red;
-            Transparency = 1f; //no transparency
+            Overlays.Add(new MainMenu(game));
+            CurrentOverlay = Overlays.First<OverlayView>();
+            oldState = GameState.MainMenu;
 
-            MenuFont = game.Content.Load<SpriteFont>(@"Menu/MenuFont");
-            Background = game.Content.Load<Texture2D>(@"Menu/Menu_bg");
+            ChangeResolution();
+
+            Speed = 10f;
+            TargetRotation = -65;
+        }
+
+        protected override void LoadContent()
+        {
+            base.LoadContent();
+
+            Background = Game.Content.Load<Texture2D>(@"Menu\Background");
+            Logo = Game.Content.Load<Texture2D>(@"Menu\Menu-Title");
+
+            // Initialize vertices
+            verts = new VertexPositionTexture[4];
+            verts[0] = new VertexPositionTexture(
+                new Vector3(-1, 1, 0), new Vector2(0, 0));
+            verts[1] = new VertexPositionTexture(
+                new Vector3(1, 1, 0), new Vector2(1, 0));
+            verts[2] = new VertexPositionTexture(
+                new Vector3(-1, -1, 0), new Vector2(0, 1));
+            verts[3] = new VertexPositionTexture(
+                new Vector3(1, -1, 0), new Vector2(1, 1));
+
+            // Set vertex data in VertexBuffer
+            vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionTexture), verts.Length, BufferUsage.None);
+            vertexBuffer.SetData(verts);
+            vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionTexture), verts.Length, BufferUsage.None);
+            vertexBuffer.SetData(verts);
+            basicEffect = new BasicEffect(GraphicsDevice);
+            basicEffect.View = Matrix.CreateLookAt(Vector3.UnitZ * 25, Vector3.Zero, Vector3.Up);
+            basicEffect.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.1f, 100f);
+        }
+
+        private void ResetMenu()
+        {
+            CurrentOverlay.Position = new Vector2(Bounds.Width/4, 0);
+        }
+
+        public override void ChangeResolution()
+        {
+            TargetPosition = Vector2.Zero;
+
+            CurrentOverlay.ChangeResolution();
+
+            //UpdateRenders();
+        }
+
+        public void UpdateRenders()
+        {
+            OverlayTextures.Clear();
+            foreach (OverlayView overlay in Overlays)
+            {
+                OverlayTextures.Add(overlay, overlay.Render());
+            }
         }
 
         public override void Draw(GameTime gameTime)
         {
-            int noOfItemsBottom = 0,
-                noOfItemsTop = 0,
-                noOfItemsCenter = 0;
+            GraphicsDevice.Clear(Color.White);
+
+            Vector2 position = new Vector2(0.5f, 0.15f);
 
             spriteBatch.Begin();
-            spriteBatch.Draw(Background, Bounds, new Color(1f, 1f, 1f, Transparency));
-
-            for (int i = 0; i < menuItems.Count; i++)
-            {
-                IMenuItem menuItem = menuItems[i];
-                int noInOrder;
-                if (menuItem.MenuPositionY == ItemPositionY.TOP)
-                    noInOrder = noOfItemsTop++;
-                else if (menuItem.MenuPositionY == ItemPositionY.BOTTOM)
-                    noInOrder = noOfItemsBottom++;
-                else
-                    noInOrder = noOfItemsCenter++;
-
-                Color color = i == selectedIndex ? ItemColorSelected : ItemColor;
-
-                spriteBatch.DrawString(MenuFont, menuItem.Text, CalculateMenuItemPosition(menuItem, noInOrder), color);
-            }
-
+            spriteBatch.Draw(Background, Bounds, Color.White);
+            spriteBatch.Draw(Logo, GetScreenPosition(position) - new Vector2(Logo.Bounds.Width, Logo.Bounds.Height) / 2, Color.White);
             spriteBatch.End();
+
+            foreach (var overlayTexture in OverlayTextures)
+            {
+                OverlayView overlay = overlayTexture.Key;
+                basicEffect.World =
+                    Matrix.CreateTranslation(overlay.Position.X * 0.01f, -overlay.Position.Y * 0.01f, 1.8f) *
+                    Matrix.CreateRotationY(MathHelper.ToRadians(overlay.Rotation)) *
+                    Matrix.CreateScale(overlay.RenderBounds.Width * 0.01f, overlay.RenderBounds.Height * 0.01f, 1f);
+
+                basicEffect.Texture = overlayTexture.Value;
+                basicEffect.TextureEnabled = true;
+                EffectPass pass = basicEffect.CurrentTechnique.Passes[0];
+                pass.Apply();
+
+                GraphicsDevice.SetVertexBuffer(vertexBuffer);
+                GraphicsDevice.DrawPrimitives(PrimitiveType.TriangleStrip, 0, 2);
+            }
 
             base.Draw(gameTime);
         }
 
-        public override GameState UpdateState(Microsoft.Xna.Framework.GameTime gameTime)
+        // TEMP
+        int rotationOffset = 0;
+
+        public override GameState UpdateState(GameTime gameTime)
         {
+            Vector2 direction = TargetPosition - CurrentOverlay.Position;
+            if (direction.Length() > 5f)
+            {
+                //direction.Normalize();
+                Vector2 d = direction * Speed * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                CurrentOverlay.OffsetPosition(d);
+            }
+
+            for (int i=0; i<Overlays.Count; i++)
+            {
+                OverlayView overlay = Overlays[i];
+                float rotationDir = TargetRotation * (i+rotationOffset) - overlay.Rotation;
+                if (Math.Abs(rotationDir) > 0.01f)
+                {
+                    overlay.Rotation += rotationDir * 10 * (float)gameTime.ElapsedGameTime.TotalSeconds; 
+                }
+            }
+
             InputComponent input = gameInstance.GetService<InputComponent>();
-            GameState nextGameState = GameState.None;
-            if (input.GetKey(Keys.Down))
-                selectedIndex = Math.Min(menuItems.Count - 1, selectedIndex + 1);
-            else if (input.GetKey(Keys.Up))
-                selectedIndex = Math.Max(0, selectedIndex - 1);
-            else if (input.GetKey(Keys.Right) && menuItems[selectedIndex] is IOptionMenuItem)
-                (menuItems[selectedIndex] as IOptionMenuItem).NextOption();
-            else if (input.GetKey(Keys.Left) && menuItems[selectedIndex] is IOptionMenuItem)
-                (menuItems[selectedIndex] as IOptionMenuItem).PreviousOption();
-            else if (input.GetKey(Keys.Enter) && menuItems[selectedIndex] is StateActionMenuItem)
-                nextGameState = (menuItems[selectedIndex] as StateActionMenuItem).NextState;
-            else if (input.GetKey(Keys.Enter) && menuItems[selectedIndex] is ActionMenuItem)
-                (menuItems[selectedIndex] as ActionMenuItem).PerformAction();
-            return nextGameState != GameState.None ? nextGameState : this.gameState;
-        }
+            if (input.GetKey(Keys.PageUp)) rotationOffset += 1;
+            if (input.GetKey(Keys.PageDown)) rotationOffset -= 1;
 
-        public void AddMenuItem(IMenuItem menuItem)
-        {
-            menuItems.Add(menuItem);
-        }
-
-        // TODO: Only works if all menuitems have equal height
-        private Vector2 CalculateMenuItemPosition(IMenuItem menuItem, int numberInOrder)
-        {
-            Vector2 textSize = MenuFont.MeasureString(menuItem.Text);
-
-            float posX = 0;
-            switch (menuItem.MenuPositionX)
+            GameState state = CurrentOverlay.UpdateState(gameTime);
+            
+            
+            if (state != oldState)
             {
-                case ItemPositionX.LEFT:
-                    posX = 0;
-                    break;
-                case ItemPositionX.CENTER:
-                    posX = (Bounds.Width / 2) - (textSize.X / 2);
-                    break;
-                case ItemPositionX.RIGHT:
-                    posX = (Bounds.Width) - textSize.X;
-                    break;
+                // If the new game state is the previous one
+                if (Overlays.Count > 1 && Overlays[1].gameState == state)
+                {
+                    Overlays.RemoveAt(0);
+                    CurrentOverlay = Overlays.First<OverlayView>();
+                    ChangeResolution();
+                }
+                else
+                {
+                    if (state == GameState.MainMenu)
+                    {
+                        Overlays.Insert(0, new MainMenu(Game));
+                        CurrentOverlay = Overlays.First<OverlayView>();
+                        ChangeResolution();
+                        ResetMenu();
+                    }
+                    else if (state == GameState.OptionsMenu)
+                    {
+                        Overlays.Insert(0, new OptionsMenu(Game));
+                        CurrentOverlay = Overlays.First<OverlayView>();
+                        ChangeResolution();
+                        ResetMenu();
+                    }
+                    else
+                    {
+                        return state;
+                    }
+                }
             }
+            oldState = state;
 
-            float posY = 0;
-            switch (menuItem.MenuPositionY)
-            {
-                case ItemPositionY.TOP:
-                    posY = 0 + (numberInOrder * textSize.Y);
-                    break;
-                case ItemPositionY.CENTER:
-                    posY = (Bounds.Height / 2) + (numberInOrder * textSize.Y);
-                    break;
-                case ItemPositionY.BOTTOM:
-                    posY = (Bounds.Height) - (numberInOrder * textSize.Y);
-                    break;
-            }
 
-            return new Vector2(posX, posY);
+            UpdateRenders();
+                    
+
+            return GameState.MainMenu;
         }
 
-        public IMenuItem GetMenuItem(string identifier)
-        {
-            return menuItems.Find(item => item.Identifier == identifier);
-        }
     }
 }

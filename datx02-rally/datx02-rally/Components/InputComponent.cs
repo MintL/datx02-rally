@@ -76,7 +76,7 @@ namespace datx02_rally
                     case Input.ChangeCamera:
                         return GetKey(Keys.C);
                     case Input.Exit:
-                        return keyboard.IsKeyDown(Keys.Escape);
+                        return keyboard.IsKeyDown(Keys.Escape) && previousKeyboard.IsKeyUp(Keys.Escape);
                     case Input.Console:
                         if (previousKeyboard.IsKeyUp(Keys.F2) && keyboard.IsKeyDown(Keys.F2))
                             enabled = !enabled;
@@ -102,6 +102,34 @@ namespace datx02_rally
                 return previousKeyboard.IsKeyUp(Keys.F2) && keyboard.IsKeyDown(Keys.F2);
             }
             return false;
+        }
+
+        /// <summary>
+        /// Returns the text a key represents in lower case, or empty if not applicable.
+        /// I.e. Keys.A would return "a", Keys.OemPeriod returns "."
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public string GetKeyText(Keys key)
+        {
+            String sKey = key.ToString();
+            if (key == Keys.Space)
+            {
+                return " ";
+            }
+            else if (sKey.Length == 1 && Char.IsLetter(sKey[0]))
+            {
+                return Char.ToLower(sKey[0]).ToString();
+            }
+            else if (key == Keys.OemPeriod)
+            {
+                return ".";
+            }
+            else if (key >= Keys.D0 && key <= Keys.D9)
+            {
+                return sKey[1].ToString();
+            }
+            return "";
         }
 
         public bool GetKey(Keys key)
