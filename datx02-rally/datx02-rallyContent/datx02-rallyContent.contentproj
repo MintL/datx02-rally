@@ -331,13 +331,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Effects\PostProcess.fx">
-      <Name>PostProcess</Name>
-      <Importer>EffectImporter</Importer>
-      <Processor>EffectProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Particles\rainDrop.png">
       <Name>rainDrop</Name>
       <Importer>TextureImporter</Importer>

@@ -1,5 +1,5 @@
-#define MaxLights 10
 #include "SoftShadow.vsi"
+#include "Prelight/Shared.vsi"
 
 float4x4 World;
 float4x4 View;
@@ -8,18 +8,15 @@ float4x4 PrelightProjection;
 float3 EyePosition;
 float4x4 NormalMatrix;
 
-float3 LightPosition[MaxLights];
-//float3 LightAmbient[MaxLights];
-float3 LightDiffuse[MaxLights];
-float LightRange[MaxLights];
-int NumLights;
-
 float3 DirectionalDirection;
 float3 DirectionalAmbient;
 float3 DirectionalDiffuse;
 
+float TerrainAmbientFactor = 5;
+float MaterialShininess = 10;
+
 int FogEnabled = 1;
-float3 FogColor = float3(0.05, 0.045, 0.04);
+float3 FogColor = float3(0.1, 0.1, 0.1);
 float FogStart = -1000;
 float FogEnd = 8000;
 
@@ -109,7 +106,7 @@ struct VertexShaderInput
 	float4 TexWeights : TEXCOORD1;
 };
 
-#include "Prelight/Shared.vsi"
+
 
 struct VertexShaderOutput
 {
@@ -153,11 +150,6 @@ float4 GetPositionFromLight(float4 position)
 	return mul(position, wvp);
 }
 
-float3 CalculateEnvironmentReflection(float3 normal, float3 directionFromEye) 
-{
-	return normalize(directionFromEye + 2 * normal * saturate(dot(-directionFromEye, normal)));
-}
-
 float3 CalculateSpecularBlinn(float3 normal, float3 directionToLight, float3 directionFromEye, float shininess)
 {
 	float3 h = normalize(directionToLight - directionFromEye);
@@ -169,7 +161,6 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float3 normal = normalize(input.Normal);
 
 	float3 directionFromEye = -normalize(input.ViewDirection);
-	float MaterialShininess = 10;
 	float normalizationFactor = normalizationFactor = ((MaterialShininess + 2.0) / 8.0);
 
     float4 color = tex2D(TextureMapSampler0, input.TexCoord) * input.TexWeights.x;
@@ -177,7 +168,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	color += tex2D(TextureMapSampler2, input.TexCoord) * input.TexWeights.z;
 	color += tex2D(TextureMapSampler3, input.TexCoord) * input.TexWeights.w;
 	
-	float4 totalLight = float4(DirectionalAmbient, 1.0) * color;
+	
+	float4 totalLight = float4(DirectionalAmbient, 1.0) * color * TerrainAmbientFactor;
 	
 	float3 directionToLight = -normalize(DirectionalDirection);
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
@@ -189,8 +181,6 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	totalLight.rgb += selfShadow * (DirectionalDiffuse * color.rgb * saturate(dot(normal, directionToLight))) +
 			specular * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor;
-	
-
 
 	float4 lightingPosition = GetPositionFromLight(input.OriginalPosition);
 	float2 shadowCoord = 0.5 * lightingPosition.xy / lightingPosition.w;
@@ -202,23 +192,11 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	dotProduct += 1;
 	dotProduct /= 2.0;
 
-	//totalLight.rgb *= clamp(dotProduct, 0, 1);
-	
 	if (shadowCoord.x > 0 && shadowCoord.x < 1 && shadowCoord.y > 0 && shadowCoord.y < 1)
 	{
 		float ourDepth = 1 - (lightingPosition.z / lightingPosition.w);
 		totalLight.rgb *= CalcShadowTermPCF(shadowMapSampler, ourDepth, shadowCoord);
-		
-		/*
-		float shadowDepth = tex2D(shadowMapSampler, shadowCoord).r;
-		if (shadowDepth + .003 > ourDepth)
-		{
-			totalLight.rgb *= .4;
-		}
-		*/
 	}
-	
-	//totalLight.rgb += texCUBE(EnvironmentSampler, CalculateEnvironmentReflection(normal, directionFromEye) * float3(1,1,-1)) * fresnel * specular * 0.2;
 	
 	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
 	totalLight += tex2D(lightSampler, texCoord) * color;

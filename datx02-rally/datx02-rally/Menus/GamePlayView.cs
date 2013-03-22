@@ -35,7 +35,6 @@ namespace datx02_rally.Menus
         #region PostProcess
 
         RenderTarget2D postProcessTexture;
-        Effect postEffect;
         Bloom bloom;
         GaussianBlur gaussianBlur;
         MotionBlur motionBlur;
@@ -44,16 +43,7 @@ namespace datx02_rally.Menus
 
         #endregion
 
-        #region Foliage
-
         List<GameObject> GraphicalObjects = new List<GameObject>(); 
-        //Model oakTree;
-        //Vector3[] treePositions;
-        //Matrix[] treeTransforms;
-
-        //Model mushroomGroup;
-
-        #endregion
 
         #region Animals
 
@@ -555,10 +545,11 @@ namespace datx02_rally.Menus
             #endregion
 
             #region PostProcess
+
             postProcessTexture = new RenderTarget2D(GraphicsDevice,
                 GraphicsDevice.Viewport.Width,
-                GraphicsDevice.Viewport.Height, false, SurfaceFormat.Color, GraphicsDevice.PresentationParameters.DepthStencilFormat);
-            postEffect = content.Load<Effect>(@"Effects\PostProcess");
+                GraphicsDevice.Viewport.Height,
+                true, SurfaceFormat.Color, DepthFormat.Depth24);
 
             gaussianBlur = new GaussianBlur(gameInstance);
             bloom = new Bloom(gameInstance, gaussianBlur);
@@ -566,11 +557,9 @@ namespace datx02_rally.Menus
 
             #endregion
 
-            #region Prelighting
 
             prelightingRenderer = new PrelightingRenderer(GraphicsDevice, content, pointLightModel, spotLightModel);
 
-            #endregion
 
             #region ShadowMap
 
@@ -751,15 +740,6 @@ namespace datx02_rally.Menus
                     obj.Update(gameTime);
                 }
 
-                // Lights
-                //foreach (PointLight light in pointLights)
-                //{
-                //    light.Update(gameTime);
-
-
-                //}
-
-
                 TriggerManager.GetInstance().Update(gameTime, Car.Position);
 
             }
@@ -799,10 +779,17 @@ namespace datx02_rally.Menus
                 smokeTime = 0;
             }
 
-            yellowSystem.AddParticle(new Vector3(-200, 1500, 2000), Vector3.Up);
-            redSystem.AddParticle(new Vector3(1500, 1500, 2000), Vector3.Up);
-            plasmaSystem.AddParticle(new Vector3(-200, 1500, 4000), Vector3.Up);
-            greenSystem.AddParticle(new Vector3(1500, 1500, 4000), Vector3.Up);
+            //yellowSystem.AddParticle(new Vector3(-200, 1500, 2000), Vector3.Up);
+            //redSystem.AddParticle(new Vector3(1500, 1500, 2000), Vector3.Up);
+            //plasmaSystem.AddParticle(new Vector3(-200, 1500, 4000), Vector3.Up);
+            //greenSystem.AddParticle(new Vector3(1500, 1500, 4000), Vector3.Up);
+
+            //airParticles.AddParticle(Car.Position + Car.Forward * (float)UniversalRandom.GetInstance().NextDouble() * 5000 +
+            //    new Vector3(
+            //        (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 500,
+            //        500 * (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()),
+            //        (float)UniversalRandom.GetInstance().NextDouble() * 500),
+            //        Vector3.Up);
 
             return GameState.Gameplay;
         }
@@ -974,13 +961,14 @@ namespace datx02_rally.Menus
                 previousViewProjection = view * prelightingRenderer.LightProjection;
             }
 
-            spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
-            foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
+            spriteBatch.Begin();
+            //spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
+            //foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
+            //{
+            //    pass.Apply();
                 spriteBatch.Draw(finalTexture, Vector2.Zero, Color.White);
 
-            }
+            //}
 
             spriteBatch.End();
 
