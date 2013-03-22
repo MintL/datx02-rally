@@ -367,7 +367,7 @@ namespace datx02_rally.Menus
 
             }
 
-            GraphicalObjects.AddRange(pointLights);
+            
 
             Vector3 forward = Vector3.Transform(Vector3.Backward,
                 Matrix.CreateRotationY(Car.Rotation));
@@ -517,6 +517,12 @@ namespace datx02_rally.Menus
             // }
 
             #endregion
+
+            foreach (GameObject obj in GraphicalObjects)
+            {
+                pointLights.Add(new PointLight(content, obj.Position + Vector3.Up * 500, new Vector3(0.7f, 0.7f, 0.7f), 450));
+            }
+            GraphicalObjects.AddRange(pointLights);
 
             #region Animals
 
@@ -905,7 +911,7 @@ namespace datx02_rally.Menus
 
             #endregion
 
-            prelightingRenderer.Render(view, directionalLight, terrainSegments, terrainSegmentsCount, pointLights, spotLights);
+            prelightingRenderer.Render(view, directionalLight, terrainSegments, terrainSegmentsCount, pointLights, Car, GraphicalObjects);
 
             if (!GameSettings.Default.PerformanceMode)
                 RenderEnvironmentMap(gameTime);

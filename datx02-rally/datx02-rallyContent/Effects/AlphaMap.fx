@@ -1,3 +1,5 @@
+#include "Prelight/Shared.vsi"
+
 float4x4 World;
 float4x4 View;
 float4x4 Projection;
@@ -6,6 +8,15 @@ float3 EyePosition;
 float3 DirectionalDirection;
 float3 DirectionalAmbient;
 float3 DirectionalDiffuse;
+
+texture2D LightTexture;
+sampler2D lightSampler = sampler_state
+{
+	texture = <LightTexture>;
+	minfilter = point;
+	magfilter = point;
+	mipfilter = point;
+};
 
 texture ColorMap;
 sampler ColorMapSampler = sampler_state
@@ -53,7 +64,9 @@ struct VertexShaderOutput
 {
     float4 Position : POSITION0;
 	float2 TexCoord : TEXCOORD0;
+	float4 PositionCopy : TEXCOORD1;
 	float3x3 WorldToTangentSpace : TEXCOORD2;
+	
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
@@ -68,6 +81,8 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 	output.WorldToTangentSpace[0] = mul(normalize(input.Tangent), World);
 	output.WorldToTangentSpace[1] = mul(normalize(input.Binormal), World);
 	output.WorldToTangentSpace[2] = mul(normalize(input.Normal), World);
+
+	output.PositionCopy = mul(viewPosition, PrelightProjection);
 
     return output;
 }
@@ -86,6 +101,9 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	totalLight.rgb += selfShadow * (DirectionalDiffuse * color.rgb * saturate(dot(normal, directionToLight)));
 	
+	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
+	totalLight += tex2D(lightSampler, texCoord) * color;
+
 	return totalLight;
 }
 

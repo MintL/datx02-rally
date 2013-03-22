@@ -26,9 +26,12 @@ namespace datx02_rally.Entities
         protected override void SetEffectParameters(Effect effect)
         {
             DirectionalLight directionalLight = game.GetService<DirectionalLight>();
-            effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
-            effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
-            effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
+            if (effect.Parameters["DirectionalDirection"] != null) 
+                effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
+            if (effect.Parameters["DirectionalDiffuse"] != null)
+                effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
+            if (effect.Parameters["DirectionalAmbient"] != null) 
+                effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
         }
     }
 }

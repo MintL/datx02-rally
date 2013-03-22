@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
+using datx02_rally.Entities;
 
 namespace datx02_rally
 {
@@ -16,6 +17,9 @@ namespace datx02_rally
 
         TerrainModel[,] terrainSegments;
         int terrainSegmentsCount;
+        Car car;
+        List<GameObject> objects;
+
         List<PointLight> pointLights;
         List<SpotLight> spotLights;
         Model pointLightModel;
@@ -56,17 +60,21 @@ namespace datx02_rally
             lightingEffect.Parameters["viewportHeight"].SetValue(viewHeight);
         }
 
-        public void Render(Matrix view, DirectionalLight directionalLight, TerrainModel[,] terrainSegments, int terrainSegmentsCount, List<PointLight> pointLights, List<SpotLight> spotLights)
+        public void Render(Matrix view, DirectionalLight directionalLight, TerrainModel[,] terrainSegments, int terrainSegmentsCount, List<PointLight> pointLights, Car car, List<GameObject> objects)
         {
             this.terrainSegments = terrainSegments;
             this.terrainSegmentsCount = terrainSegmentsCount;
             this.pointLights = pointLights;
-            this.spotLights = spotLights;
+            //this.spotLights = spotLights;
+
+            this.car = car;
+            this.objects = objects;
             
             RenderDepthNormal(view);
             RenderLight(view * LightProjection);
 
             for (int z = 0; z < terrainSegmentsCount; z++)
+            {
                 for (int x = 0; x < terrainSegmentsCount; x++)
                 {
                     var terrain = terrainSegments[x, z];
@@ -76,7 +84,22 @@ namespace datx02_rally
                     terrain.Effect.Parameters["viewportHeight"].SetValue(device.Viewport.Height);
 
                 }
-            
+            }
+
+            foreach (GameObject obj in objects.FindAll(x => !(x is PointLight)))
+            {
+                foreach (ModelMesh mesh in obj.Model.Meshes)
+                {
+                    foreach (ModelMeshPart part in mesh.MeshParts)
+                    {
+                        part.Effect.Parameters["LightTexture"].SetValue(LightTarget);
+                        part.Effect.Parameters["PrelightProjection"].SetValue(LightProjection);
+                        part.Effect.Parameters["viewportWidth"].SetValue(device.Viewport.Width);
+                        part.Effect.Parameters["viewportHeight"].SetValue(device.Viewport.Height);
+                    }
+                }
+                
+            }
         }
 
         public void RenderDepthNormal(Matrix view)
@@ -87,7 +110,9 @@ namespace datx02_rally
             device.SetRenderTargets(NormalTarget, DepthTarget);
             device.Clear(new Color(0, 255, 255));
 
+            // Terrain
             for (int z = 0; z < terrainSegmentsCount; z++)
+            {
                 for (int x = 0; x < terrainSegmentsCount; x++)
                 {
                     var terrain = terrainSegments[x, z];
@@ -97,6 +122,30 @@ namespace datx02_rally
                     //terrain.Draw(view, Vector3.Zero, null, null);
                     terrain.Effect = current;
                 }
+            }
+            // Car and objects
+            foreach (GameObject obj in objects.FindAll(x => !(x is PointLight)))
+            {
+                Model model = obj.Model;
+                Dictionary<ModelMeshPart, Effect> oldEffects = new Dictionary<ModelMeshPart, Effect>();
+                foreach (ModelMesh mesh in model.Meshes)
+                {
+                    foreach (ModelMeshPart part in mesh.MeshParts)
+                    {
+                        oldEffects.Add(part, part.Effect);
+                        part.Effect = depthNormalEffect;
+                    }
+                }
+                obj.Draw(view, LightProjection);
+
+                foreach (ModelMesh mesh in model.Meshes)
+                {
+                    foreach (ModelMeshPart part in mesh.MeshParts)
+                    {
+                        part.Effect = oldEffects[part];
+                    }
+                }
+            }
 
             device.SetRenderTargets(null);
         }

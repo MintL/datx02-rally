@@ -20,18 +20,20 @@ namespace datx02_rally.Entities
 
         public BoundingSphere BoundingSphere { get; set; }
 
+        public Model Model { get; set; }
+
         protected Matrix world;
-        protected Model model;
+        
         protected ContentManager content;
         protected Matrix[] baseTransforms;
 
         public GameObject(string modelName, ContentManager content)
         {
             this.content = content;
-            this.model = content.Load<Model>(modelName);
+            this.Model = content.Load<Model>(modelName);
 
-            baseTransforms = new Matrix[this.model.Bones.Count];
-            this.model.CopyAbsoluteBoneTransformsTo(baseTransforms);
+            baseTransforms = new Matrix[this.Model.Bones.Count];
+            this.Model.CopyAbsoluteBoneTransformsTo(baseTransforms);
 
             Scale = 1;
             Rotation = Vector3.Zero;
@@ -55,7 +57,7 @@ namespace datx02_rally.Entities
             {
                 world = Matrix.CreateScale(Scale) * Matrix.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, Rotation.Z) * Matrix.CreateTranslation(Position);
 
-                foreach (ModelMesh mesh in model.Meshes)
+                foreach (ModelMesh mesh in Model.Meshes)
                 {
                     foreach (Effect currentEffect in mesh.Effects)
                     {

@@ -4,7 +4,6 @@
 float4x4 World;
 float4x4 View;
 float4x4 Projection;
-float4x4 PrelightProjection;
 float3 EyePosition;
 float4x4 NormalMatrix;
 

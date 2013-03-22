@@ -52,7 +52,7 @@ namespace datx02_rally
             // position
             dir += colorDir * 0.05f;
             dir.Normalize();
-            Position += dir * 10f;
+            //Position += new Vector3(dir.X * 10f, 0, dir.Y * 10f);
 
             BoundingSphere = new BoundingSphere(Position, 1);
 
@@ -60,7 +60,7 @@ namespace datx02_rally
 
         protected override void SetEffectParameters(Effect effect)
         {
-            (effect as BasicEffect).DiffuseColor = Diffuse;
+            ((BasicEffect)effect).DiffuseColor = Diffuse;
         }
 
     }
