@@ -442,7 +442,7 @@ namespace datx02_rally.Menus
             OakTree.LoadMaterial(content);
             BirchTree.LoadMaterial(content);
 
-            int numTrees = 100;
+            int numTrees = 200;
             for (int i = 0; i < numTrees; i++)
             {
                 var t = navMesh.triangles[UniversalRandom.GetInstance().Next(navMesh.triangles.Length)];
@@ -454,9 +454,11 @@ namespace datx02_rally.Menus
                     u += 1.5f;
 
                 var treePos = (t.vertices[0] + u * t.ab + v * t.ac) / terrainScale;
+                //var treePos = new Vector3(-halfHeightMapSize + (float)UniversalRandom.GetInstance().NextDouble() * (heightMapSize-50), 0,
+                //    -halfHeightMapSize + (float)UniversalRandom.GetInstance().NextDouble() * (heightMapSize-50));
 
                 float X = treePos.X + heightMapSize / 2f,
-                    Z = treePos.Z + heightMapSize / 2f;
+                    Z = treePos.Z +heightMapSize / 2f;
 
                 float Xlerp = X % 1f,
                     Zlerp = Z % 1f;
@@ -490,23 +492,12 @@ namespace datx02_rally.Menus
                     tree = new BirchTree(gameInstance);
 
                 tree.Position = terrainScale * treePos;
-                tree.Scale = 1 + 5 * (float)UniversalRandom.GetInstance().NextDouble();
+                tree.Scale = 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
                 tree.Rotation = new Vector3(0, MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()), 0);
 
                 GraphicalObjects.Add(tree);
 
             }
-
-            // {
-            //     mushroomGroup = Content.Load<Model>(@"Foliage\MushroomGroup");
-            //     ModelMesh mesh = mushroomGroup.Meshes.First<ModelMesh>();
-            //     foreach (ModelMeshPart part in mesh.MeshParts)
-            //     {
-            //         part.Effect = alphaMapEffect.Clone();
-            //         part.Effect.Parameters["ColorMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-c"));
-            //         part.Effect.Parameters["NormalMap"].SetValue(Content.Load<Texture2D>(@"Foliage\Textures\mushrooms-n"));
-            //     }
-            // }
 
             #endregion
 
@@ -905,8 +896,8 @@ namespace datx02_rally.Menus
 
             prelightingRenderer.Render(view, directionalLight, terrainSegments, terrainSegmentsCount, pointLights, Car, GraphicalObjects);
 
-            if (!GameSettings.Default.PerformanceMode)
-                RenderEnvironmentMap(gameTime);
+            //if (!GameSettings.Default.PerformanceMode)
+            //    RenderEnvironmentMap(gameTime);
 
             GraphicsDevice.SetRenderTarget(postProcessTexture);
 
@@ -1049,8 +1040,8 @@ namespace datx02_rally.Menus
                 if (cubeMapFace == CubeMapFace.NegativeX)
                     viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Left, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.NegativeY)
-                    //continue;
-                    viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Down, Vector3.Forward);
+                    continue;
+                    //viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Down, Vector3.Forward);
                 else if (cubeMapFace == CubeMapFace.PositiveZ)
                     viewMatrix = Matrix.CreateLookAt(Car.Position, Car.Position + Vector3.Forward, Vector3.Up);
                 else if (cubeMapFace == CubeMapFace.PositiveX)
