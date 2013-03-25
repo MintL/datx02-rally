@@ -20,12 +20,16 @@ namespace datx02_rally
         private Vector3 colorDir = Vector3.One;
         private Vector3 dir;
 
-        public PointLight(ContentManager content, Vector3 lightPosition, Vector3 diffuse, float range)
-            : base(@"Models\light", content)
+        private static Model pointLight;
+
+        public PointLight(Vector3 lightPosition, Vector3 diffuse, float range)
+            : base()
         {
             Position = lightPosition;
             Diffuse = diffuse;
             Range = range;
+
+            Model = pointLight;
 
             dir = new Vector3(-1 + 2 * (float)UniversalRandom.GetInstance().NextDouble(),
                         -1 + 2 * (float)UniversalRandom.GetInstance().NextDouble(),
@@ -33,8 +37,8 @@ namespace datx02_rally
             dir.Normalize();
         }
 
-        public PointLight(ContentManager content, Vector3 lightPosition)
-            : this(content, lightPosition, Color.White.ToVector3(), 400.0f)
+        public PointLight(Vector3 lightPosition)
+            : this(lightPosition, Color.White.ToVector3(), 400.0f)
         {   
         }
 
@@ -61,6 +65,11 @@ namespace datx02_rally
         protected override void SetEffectParameters(Effect effect)
         {
             ((BasicEffect)effect).DiffuseColor = Diffuse;
+        }
+
+        public static void LoadMaterial(ContentManager content)
+        {
+            pointLight = content.Load<Model>(@"Models/light");
         }
 
     }

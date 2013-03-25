@@ -23,18 +23,12 @@ namespace datx02_rally.Entities
         public Model Model { get; set; }
 
         protected Matrix world;
-        
-        protected ContentManager content;
         protected Matrix[] baseTransforms;
 
-        public GameObject(string modelName, ContentManager content)
+        
+
+        public GameObject()
         {
-            this.content = content;
-            this.Model = content.Load<Model>(modelName);
-
-            baseTransforms = new Matrix[this.Model.Bones.Count];
-            this.Model.CopyAbsoluteBoneTransformsTo(baseTransforms);
-
             Scale = 1;
             Rotation = Vector3.Zero;
         }
@@ -51,6 +45,9 @@ namespace datx02_rally.Entities
 
         public void Draw(Matrix view, Matrix projection)
         {
+            baseTransforms = new Matrix[this.Model.Bones.Count];
+            this.Model.CopyAbsoluteBoneTransformsTo(baseTransforms);
+
             // Do nothing if the object is outside the view frustum
             BoundingFrustum viewFrustum = new BoundingFrustum(view * projection);
             if (viewFrustum.Intersects(BoundingSphere))

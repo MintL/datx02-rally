@@ -2,22 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Content;
 
 namespace datx02_rally.Entities
 {
-    public class OakTree : GameObject
+    public class BirchTree : GameObject
     {
         Game1 game;
-        private static Model oakTree;
+        private static Model birchTree;
 
-        public OakTree(Game1 game)
+        public BirchTree(Game1 game)
             : base()
         {
             this.game = game;
-            Model = oakTree;
+            Model = birchTree;
         }
 
         public override void Update(GameTime gameTime)
@@ -28,11 +28,11 @@ namespace datx02_rally.Entities
         protected override void SetEffectParameters(Effect effect)
         {
             DirectionalLight directionalLight = game.GetService<DirectionalLight>();
-            if (effect.Parameters["DirectionalDirection"] != null) 
+            if (effect.Parameters["DirectionalDirection"] != null)
                 effect.Parameters["DirectionalDirection"].SetValue(directionalLight.Direction);
             if (effect.Parameters["DirectionalDiffuse"] != null)
                 effect.Parameters["DirectionalDiffuse"].SetValue(directionalLight.Diffuse);
-            if (effect.Parameters["DirectionalAmbient"] != null) 
+            if (effect.Parameters["DirectionalAmbient"] != null)
                 effect.Parameters["DirectionalAmbient"].SetValue(directionalLight.Ambient);
         }
 
@@ -43,22 +43,20 @@ namespace datx02_rally.Entities
         /// <param name="content"></param>
         public static void LoadMaterial(ContentManager content)
         {
-            oakTree = content.Load<Model>(@"Foliage\Oak_tree");
             Effect alphaMapEffect = content.Load<Effect>(@"Effects\AlphaMap");
-
-            // Initialize the material settings
-            foreach (ModelMesh mesh in oakTree.Meshes)
+            birchTree = content.Load<Model>(@"Foliage\Birch_04");
+            foreach (ModelMesh mesh in birchTree.Meshes)
             {
                 foreach (ModelMeshPart part in mesh.MeshParts)
                 {
-                    BasicEffect basicEffect = (BasicEffect)part.Effect;
                     part.Effect = alphaMapEffect.Clone();
-                    part.Effect.Parameters["ColorMap"].SetValue(basicEffect.Texture);
                 }
-                mesh.Effects[0].Parameters["NormalMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\BarkMossy-tiled-n"));
+                mesh.Effects[0].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches"));
+                //mesh.Effects[0].Parameters["NormalMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\BarkMossy-tiled-n"));
 
-                mesh.Effects[1].Parameters["NormalMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-ni"));
-                mesh.Effects[1].Parameters["AlphaMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-a"));
+                //mesh.Effects[1].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches"));
+                mesh.Effects[0].Parameters["AlphaMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches_Alpha"));
+                mesh.Effects[1].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\bark"));
             }
         }
     }

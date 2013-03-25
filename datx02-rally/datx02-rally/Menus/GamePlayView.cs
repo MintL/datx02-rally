@@ -335,8 +335,10 @@ namespace datx02_rally.Menus
 
             #region Lights
 
+            PointLight.LoadMaterial(content);
+
             // Load model to represent our lightsources
-            pointLightModel = content.Load<Model>(@"Models/light");
+            pointLightModel = content.Load<Model>(@"Models\light");
             spotLightModel = content.Load<Model>(@"Models\Cone");
             //directionalLight = new DirectionalLight(new Vector3(-0.6f, -1.0f, 1.0f), new Vector3(1.0f, 0.8f, 1.0f) * 0.4f, Color.White.ToVector3() * 0.2f);
             directionalLight = new DirectionalLight(
@@ -363,7 +365,7 @@ namespace datx02_rally.Menus
                     .6f + .4f * (float)random.NextDouble(),
                     .6f + .4f * (float)random.NextDouble(),
                     .6f + .4f * (float)random.NextDouble());
-                pointLights.Add(new PointLight(content, point + pointLightOffset, color, 450));
+                pointLights.Add(new PointLight(point + pointLightOffset, color, 450));
 
             }
 
@@ -437,23 +439,8 @@ namespace datx02_rally.Menus
 
             #region Foliage
 
-            Model oakTree = content.Load<Model>(@"Foliage\Oak_tree");
-            Effect alphaMapEffect = content.Load<Effect>(@"Effects\AlphaMap");
-
-            // Initialize the material settings
-            foreach (ModelMesh mesh in oakTree.Meshes)
-            {
-                foreach (ModelMeshPart part in mesh.MeshParts)
-                {
-                    BasicEffect basicEffect = (BasicEffect)part.Effect;
-                    part.Effect = alphaMapEffect.Clone();
-                    part.Effect.Parameters["ColorMap"].SetValue(basicEffect.Texture);
-                }
-                mesh.Effects[0].Parameters["NormalMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\BarkMossy-tiled-n"));
-
-                mesh.Effects[1].Parameters["NormalMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-ni"));
-                mesh.Effects[1].Parameters["AlphaMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\leaf-mapple-yellow-a"));
-            }
+            OakTree.LoadMaterial(content);
+            BirchTree.LoadMaterial(content);
 
             int numTrees = 100;
             for (int i = 0; i < numTrees; i++)
@@ -494,9 +481,14 @@ namespace datx02_rally.Menus
                         MathHelper.Lerp(heightMap[x0, z0], heightMap[x0, z1], Zlerp),
                         .5f);
                 }
-                treePos.Y = height;
+                treePos.Y = height - 0.002f;
                 
-                OakTree tree = new OakTree(gameInstance, content);
+                GameObject tree;
+                if (UniversalRandom.GetInstance().Next(0, 2) == 0)
+                    tree = new OakTree(gameInstance);
+                else
+                    tree = new BirchTree(gameInstance);
+
                 tree.Position = terrainScale * treePos;
                 tree.Scale = 1 + 4 * (float)UniversalRandom.GetInstance().NextDouble();
                 tree.Rotation = new Vector3(0, MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()), 0);
@@ -520,7 +512,7 @@ namespace datx02_rally.Menus
 
             foreach (GameObject obj in GraphicalObjects)
             {
-                pointLights.Add(new PointLight(content, obj.Position + Vector3.Up * 500, new Vector3(0.7f, 0.7f, 0.7f), 450));
+                pointLights.Add(new PointLight(obj.Position + Vector3.Up * 500, new Vector3(0.7f, 0.7f, 0.7f), 450));
             }
             GraphicalObjects.AddRange(pointLights);
 
