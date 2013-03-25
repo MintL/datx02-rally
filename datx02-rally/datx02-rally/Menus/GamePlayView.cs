@@ -490,7 +490,7 @@ namespace datx02_rally.Menus
                     tree = new BirchTree(gameInstance);
 
                 tree.Position = terrainScale * treePos;
-                tree.Scale = 1 + 4 * (float)UniversalRandom.GetInstance().NextDouble();
+                tree.Scale = 1 + 5 * (float)UniversalRandom.GetInstance().NextDouble();
                 tree.Rotation = new Vector3(0, MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()), 0);
 
                 GraphicalObjects.Add(tree);

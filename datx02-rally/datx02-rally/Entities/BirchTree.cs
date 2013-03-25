@@ -11,13 +11,13 @@ namespace datx02_rally.Entities
     public class BirchTree : GameObject
     {
         Game1 game;
-        private static Model birchTree;
+        private static List<Model> birchTreesVariants = new List<Model>();
 
         public BirchTree(Game1 game)
             : base()
         {
             this.game = game;
-            Model = birchTree;
+            Model = birchTreesVariants[UniversalRandom.GetInstance().Next(birchTreesVariants.Count)];
         }
 
         public override void Update(GameTime gameTime)
@@ -44,20 +44,42 @@ namespace datx02_rally.Entities
         public static void LoadMaterial(ContentManager content)
         {
             Effect alphaMapEffect = content.Load<Effect>(@"Effects\AlphaMap");
-            birchTree = content.Load<Model>(@"Foliage\Birch_04");
-            foreach (ModelMesh mesh in birchTree.Meshes)
-            {
-                foreach (ModelMeshPart part in mesh.MeshParts)
-                {
-                    part.Effect = alphaMapEffect.Clone();
-                }
-                mesh.Effects[0].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches"));
-                //mesh.Effects[0].Parameters["NormalMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\BarkMossy-tiled-n"));
+            birchTreesVariants.Add(content.Load<Model>(@"Foliage\Birch_01"));
+            birchTreesVariants.Add(content.Load<Model>(@"Foliage\Birch_02"));
+            birchTreesVariants.Add(content.Load<Model>(@"Foliage\Birch_03"));
+            birchTreesVariants.Add(content.Load<Model>(@"Foliage\Birch_04"));
 
-                //mesh.Effects[1].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches"));
-                mesh.Effects[0].Parameters["AlphaMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches_Alpha"));
-                mesh.Effects[1].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\bark"));
+            foreach (Model birchTree in birchTreesVariants)
+            {
+                foreach (ModelMesh mesh in birchTree.Meshes)
+                {
+                    foreach (ModelMeshPart part in mesh.MeshParts)
+                    {
+                        part.Effect = alphaMapEffect.Clone();
+                    }
+                }
             }
+
+            // Different models need their textures in different order, possibly ordered by the 3d modeling application
+            Model model = birchTreesVariants[0];
+            model.Meshes[0].Effects[0].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches"));
+            model.Meshes[0].Effects[0].Parameters["AlphaMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches_Alpha"));
+            model.Meshes[0].Effects[1].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\bark"));
+
+            model = birchTreesVariants[1];
+            model.Meshes[0].Effects[1].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches"));
+            model.Meshes[0].Effects[1].Parameters["AlphaMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches_Alpha"));
+            model.Meshes[0].Effects[0].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\bark"));
+
+            model = birchTreesVariants[2];
+            model.Meshes[0].Effects[1].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches"));
+            model.Meshes[0].Effects[1].Parameters["AlphaMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches_Alpha"));
+            model.Meshes[0].Effects[0].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\bark"));
+
+            model = birchTreesVariants[3];
+            model.Meshes[0].Effects[0].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches"));
+            model.Meshes[0].Effects[0].Parameters["AlphaMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\branches_Alpha"));
+            model.Meshes[0].Effects[1].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\bark"));
         }
     }
 }
