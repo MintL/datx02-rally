@@ -45,7 +45,7 @@ namespace datx02_rally.Entities
         {
             Effect alphaMapEffect = content.Load<Effect>(@"Effects\AlphaMap");
             stoneVariants.Add(content.Load<Model>(@"Foliage\Stone_01"));
-            //stoneVariants.Add(content.Load<Model>(@"Foliage\Birch_02"));
+            stoneVariants.Add(content.Load<Model>(@"Foliage\Stone_02"));
 
             foreach (Model birchTree in stoneVariants)
             {
@@ -56,6 +56,7 @@ namespace datx02_rally.Entities
                         part.Effect = alphaMapEffect.Clone();
                     }
                     mesh.Effects[0].Parameters["ColorMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\stone_c"));
+                    mesh.Effects[0].Parameters["NormalMap"].SetValue(content.Load<Texture2D>(@"Foliage\Textures\stone_n"));
                 }
 
             }

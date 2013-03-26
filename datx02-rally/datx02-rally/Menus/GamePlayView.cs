@@ -470,22 +470,25 @@ namespace datx02_rally.Menus
                     z1 = z0 + 1;
 
                 float height;
+                float k;
                 if (Xlerp + Zlerp > 1)
                 {
-                    height = MathHelper.Lerp(
-                        MathHelper.Lerp(heightMap[x0, z1], heightMap[x1, z1], Xlerp),
-                        MathHelper.Lerp(heightMap[x1, z0], heightMap[x1, z1], Zlerp),
-                        .5f);
+                    float h1 = MathHelper.Lerp(heightMap[x0, z1], heightMap[x1, z1], Xlerp);
+                    float h2 = MathHelper.Lerp(heightMap[x1, z0], heightMap[x1, z1], Zlerp);
+                    k = h2 / h1;
+                    height = MathHelper.Lerp(h1, h2, .5f);
                 }
                 else
                 {
-                    height = MathHelper.Lerp(
-                        MathHelper.Lerp(heightMap[x0, z0], heightMap[x1, z0], Xlerp),
-                        MathHelper.Lerp(heightMap[x0, z0], heightMap[x0, z1], Zlerp),
-                        .5f);
+                    float h1 = MathHelper.Lerp(heightMap[x0, z0], heightMap[x1, z0], Xlerp),
+                        h2 = MathHelper.Lerp(heightMap[x0, z0], heightMap[x0, z1], Zlerp);
+                    k = h2 / h1;
+                    height = MathHelper.Lerp(h1, h2, .5f);
                 }
                 pos.Y = height - 0.002f;
-                
+
+                if (k > 1.02 ) continue;
+
                 GameObject obj;
                 switch(UniversalRandom.GetInstance().Next(0, 3)) 
                 {
