@@ -437,13 +437,14 @@ namespace datx02_rally.Menus
 
             #endregion
 
-            #region Foliage
+            #region Objects
 
             OakTree.LoadMaterial(content);
             BirchTree.LoadMaterial(content);
+            Stone.LoadMaterial(content);
 
-            int numTrees = 200;
-            for (int i = 0; i < numTrees; i++)
+            int numObjects = 200;
+            for (int i = 0; i < numObjects; i++)
             {
                 var t = navMesh.triangles[UniversalRandom.GetInstance().Next(navMesh.triangles.Length)];
                 float v = (float)UniversalRandom.GetInstance().NextDouble();
@@ -453,12 +454,12 @@ namespace datx02_rally.Menus
                 else
                     u += 1.5f;
 
-                var treePos = (t.vertices[0] + u * t.ab + v * t.ac) / terrainScale;
+                var pos = (t.vertices[0] + u * t.ab + v * t.ac) / terrainScale;
                 //var treePos = new Vector3(-halfHeightMapSize + (float)UniversalRandom.GetInstance().NextDouble() * (heightMapSize-50), 0,
                 //    -halfHeightMapSize + (float)UniversalRandom.GetInstance().NextDouble() * (heightMapSize-50));
 
-                float X = treePos.X + heightMapSize / 2f,
-                    Z = treePos.Z +heightMapSize / 2f;
+                float X = pos.X + heightMapSize / 2f,
+                    Z = pos.Z +heightMapSize / 2f;
 
                 float Xlerp = X % 1f,
                     Zlerp = Z % 1f;
@@ -483,19 +484,29 @@ namespace datx02_rally.Menus
                         MathHelper.Lerp(heightMap[x0, z0], heightMap[x0, z1], Zlerp),
                         .5f);
                 }
-                treePos.Y = height - 0.002f;
+                pos.Y = height - 0.002f;
                 
-                GameObject tree;
-                if (UniversalRandom.GetInstance().Next(0, 2) == 0)
-                    tree = new OakTree(gameInstance);
-                else
-                    tree = new BirchTree(gameInstance);
+                GameObject obj;
+                switch(UniversalRandom.GetInstance().Next(0, 3)) 
+                {
+                case 0:
+                    obj = new OakTree(gameInstance);
+                    obj.Scale = 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
+                    break;
+                case 1:
+                    obj = new BirchTree(gameInstance);
+                    obj.Scale = 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
+                    break;
+                default:
+                    obj = new Stone(gameInstance);
+                    obj.Scale = 0.5f + 2 * (float)UniversalRandom.GetInstance().NextDouble();
+                    break;
+                }
 
-                tree.Position = terrainScale * treePos;
-                tree.Scale = 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
-                tree.Rotation = new Vector3(0, MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()), 0);
+                obj.Position = terrainScale * pos;
+                obj.Rotation = new Vector3(0, MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()), 0);
 
-                GraphicalObjects.Add(tree);
+                GraphicalObjects.Add(obj);
 
             }
 
