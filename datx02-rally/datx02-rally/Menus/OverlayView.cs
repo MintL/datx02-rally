@@ -59,7 +59,7 @@ namespace datx02_rally.Menus
             ArrowRight = Game.Content.Load<Texture2D>(@"Menu/Menu-Right-Arrow");
             OptionSelected = Game.Content.Load<Texture2D>(@"Menu/Menu-Option-Selected");
 
-            Vector2 size = GetScreenPosition(new Vector2(0.6f, 0.6f));
+            Vector2 size = GetScreenPosition(new Vector2(0.7f, 0.7f));
             RenderBounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
         }
