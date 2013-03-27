@@ -7,52 +7,52 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace datx02_rally.Menus
 {
-    class MultiplayerMenu : GameStateView
+    class MultiplayerMenu : OverlayView
     {
         bool connected = false;
-        OverlayView connectOverlay;
 
         public MultiplayerMenu(Game game) : base(game, GameState.MultiplayerMenu) { }
 
         protected override void LoadContent()
         {
-            /*connectOverlay = new OverlayView(gameInstance);
-            connectOverlay.AddMenuItem(new ActionMenuItem("Connect", new ActionMenuItem.Action(ConnectToServer)));
-            connectOverlay.Transparency = 0.2f;
-            connectOverlay.Background = gameInstance.Content.Load<Texture2D>(@"Menu\Overlay_bg");
-            connectOverlay.Bounds = new Rectangle(graphics.GraphicsDevice.Viewport.Bounds.Center.X - 250, graphics.GraphicsDevice.Viewport.Bounds.Center.Y - 250, 500, 500);
-            */
             base.LoadContent();
-        }
 
-        public override void ChangeResolution()
-        {
-        }
+            Vector2 size = GetScreenPosition(new Vector2(0.5f, 0.5f));
+            Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
-        public override GameState UpdateState(GameTime gameTime)
-        {
-            if (!connected)
-                connectOverlay.Draw(gameTime);
-            return this.gameState;
-        }
+            TextInputMenuItem playerName = new TextInputMenuItem("Server", "server");
+            playerName.Bounds = Bounds;
+            playerName.Font = MenuFont;
+            playerName.Background = OptionSelected;
+            playerName.FontColor = ItemColor;
+            playerName.FontColorSelected = Color.Black;
+            AddMenuItem(playerName);
 
-        public override void Draw(GameTime gameTime)
-        {
-            if (!connected)
-                connectOverlay.Draw(gameTime);
+            MenuItem item = new ActionMenuItem("Connect", ConnectToServer);
+            item.Background = ButtonBackground;
+            item.Font = MenuFont;
+            item.FontColor = ItemColor;
+            item.FontColorSelected = ItemColorSelected;
+            item.SetWidth(Bounds.Width);
+            AddMenuItem(item);
 
-            spriteBatch.Begin();
-            string poo = string.Empty;
-            for (int i = 0; i < 50; i++)
-                 poo += "blalbalsdlsajdosajdoisajdoisajdiosajdoisajdoisajdoisajoisajdiosajdiosajoidjsaoidjsoaijdiosajdoisajdiosajdiosajdoisajdoisajoidjoisa\n";
-            spriteBatch.DrawString(connectOverlay.MenuFont, poo, new Vector2(0, 0), Color.Blue);
-            spriteBatch.End();
-            base.Draw(gameTime);
+            item = new StateActionMenuItem("Cancel", GameState.MainMenu);
+            item.Background = ButtonBackground;
+            item.Font = MenuFont;
+            item.FontColor = ItemColor;
+            item.FontColorSelected = ItemColorSelected;
+            item.SetWidth(Bounds.Width);
+            AddMenuItem(item);
+
         }
 
         private void ConnectToServer()
         {
-            Console.WriteLine("CONNECTTTTT");
+            string server = (GetMenuItem("server") as TextInputMenuItem).GetEnteredText();
+            gameInstance.GetService<ServerClient>().Connect(System.Net.IPAddress.Parse(server));
+
+            Vector2 size = GetScreenPosition(new Vector2(1.4f, 1.4f));
+            Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
         }
     }
 }

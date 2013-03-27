@@ -10,9 +10,10 @@ using datx02_rally.Menus;
 namespace datx02_rally
 {
     public enum MessageType { 
-        PlayerPos, Chat, Debug, // game info exchange stuff
+        PlayerPos, Chat, Debug, StateChange, // game info exchange stuff
         LobbyUpdate, PlayerInfo, OK // handshake-y stuff    
     }
+    public enum ServerState { Lobby, Gameplay, Ended }
     class ServerClient : GameComponent
     {
         NetClient ServerThread;
@@ -25,10 +26,11 @@ namespace datx02_rally
         public Dictionary<byte,Player> Players = new Dictionary<byte, Player>();
         readonly int PORT = 19283;
         public bool connected = false;
+        public ServerState State { get; set; } 
 
         private DateTime TryConnectedTime = DateTime.MinValue;
         private TimeSpan WaitConnect = new TimeSpan(0, 0, 1); // 3 second wait
-        public int ConnectTryCount = 0;
+        private int ConnectTryCount = 0;
         private int MAX_CONNECT_TRIES = 5;
 
         public ServerClient(Game1 game) : base(game)
@@ -43,6 +45,7 @@ namespace datx02_rally
             Receiver = new ServerReceiver(ServerThread, this);
             Game = game;
             LocalPlayer = new Player(game);
+            State = ServerState.Lobby;
         }
 
         public void Connect(IPAddress IP) {

@@ -187,7 +187,15 @@ namespace datx02_rally.Menus
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 position, bool selected)
         {
-            spriteBatch.DrawString(Font, Text, position, FontColor);
+
+            position.X += Bounds.Width / 2 - Background.Bounds.Width / 2;
+            spriteBatch.Draw(Background, position, Color.White);
+
+            Vector2 textOffset = Font.MeasureString(Text);
+            textOffset /= 2;
+            textOffset.X = Background.Bounds.Width / 2 - textOffset.X;
+            textOffset.Y = Background.Bounds.Height / 2 - textOffset.Y + 3;
+            spriteBatch.DrawString(Font, Text, position + textOffset, (selected) ? FontColorSelected : FontColor);
         }
     }
 

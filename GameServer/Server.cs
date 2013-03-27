@@ -16,15 +16,17 @@ namespace GameServer
         readonly int Port;
         NetServer serverThread;
         Boolean running;
+        ServerState state:
         
         //Debug stuff
         Boolean DbgPlayerPos = false;
 
         public enum MessageType
         {
-            PlayerPos, Chat, Debug, // game info exchange stuff
+            PlayerPos, Chat, Debug, StateChange, // game info exchange stuff
             LobbyUpdate, PlayerInfo, OK // handshake-y stuff    
         }
+        public enum ServerState { Lobby, Gameplay, Ended }
 
         public Server()
         {
@@ -32,6 +34,7 @@ namespace GameServer
             MaxPlayers = 4;
             Players = new Dictionary<IPAddress, ServerPlayer>();
             Port = 19283;
+            state = ServerState.Lobby;
 
             Start();
         }

@@ -171,6 +171,13 @@ namespace datx02_rally.Menus
                         ChangeResolution();
                         ResetMenu();
                     }
+                    else if (state == GameState.MultiplayerMenu)
+                    {
+                        Overlays.Insert(0, new MultiplayerMenu(Game));
+                        CurrentOverlay = Overlays.First<OverlayView>();
+                        ChangeResolution();
+                        ResetMenu();
+                    }
                     else if (state == GameState.OptionsMenu)
                     {
                         Overlays.Insert(0, new OptionsMenu(Game));
