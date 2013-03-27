@@ -14,6 +14,8 @@ namespace datx02_rally.Menus
 
         public SpriteFont MenuFont { get; set; }
         public Texture2D Background { get; set; }
+        public Texture2D RightBorder { get; set; }
+        public Texture2D LeftBorder { get; set; }
         public Texture2D ButtonBackground { get; set; }
         public Texture2D ArrowLeft { get; set; }
         public Texture2D ArrowRight { get; set; }
@@ -50,6 +52,8 @@ namespace datx02_rally.Menus
 
             MenuFont = Game.Content.Load<SpriteFont>(@"Menu/MenuFont");
             Background = Game.Content.Load<Texture2D>(@"Menu/Menu-BG");
+            RightBorder = Game.Content.Load<Texture2D>(@"Menu/Menu-Right-Border");
+            LeftBorder = Game.Content.Load<Texture2D>(@"Menu/Menu-Left-Border");
             ButtonBackground = Game.Content.Load<Texture2D>(@"Menu/Menu-button");
             ArrowLeft = Game.Content.Load<Texture2D>(@"Menu/Menu-Left-Arrow");
             ArrowRight = Game.Content.Load<Texture2D>(@"Menu/Menu-Right-Arrow");
@@ -84,11 +88,19 @@ namespace datx02_rally.Menus
 
             Vector2 renderOffset = new Vector2((RenderBounds.Width - Bounds.Width) / 2,
                     (RenderBounds.Height - Bounds.Height) / 2);
+            Console.WriteLine(this.GetType() + ": " + Bounds + " ;;; " + RenderBounds);
 
             spriteBatch.Begin();
-            spriteBatch.Draw(Background,
-                new Rectangle((int)renderOffset.X, (int)renderOffset.Y, Bounds.Width, Bounds.Height),
+            spriteBatch.Draw(Background, 
+                new Rectangle((int)renderOffset.X, (int)renderOffset.Y, Bounds.Width, Bounds.Height), 
                 Color.White);
+            spriteBatch.Draw(LeftBorder,
+                new Rectangle((int)renderOffset.X - LeftBorder.Width, (int)renderOffset.Y, LeftBorder.Width, Bounds.Height),
+                Color.White);
+            spriteBatch.Draw(RightBorder,
+                new Rectangle((int)renderOffset.X+Bounds.Width, (int)renderOffset.Y, LeftBorder.Width, Bounds.Height),
+                Color.White);
+
 
             for (int i = 0; i < menuItems.Count; i++)
             {
@@ -180,5 +192,6 @@ namespace datx02_rally.Menus
         {
             return menuItems.Find(item => item.Identifier == identifier);
         }
+
     }
 }
