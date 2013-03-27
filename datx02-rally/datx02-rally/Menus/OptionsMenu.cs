@@ -43,6 +43,14 @@ namespace datx02_rally.Menus
             displayMode.FontColorSelected = Color.Black;
             AddMenuItem(displayMode);
 
+            TextInputMenuItem playerName = new TextInputMenuItem("Default Player Name");
+            playerName.Bounds = Bounds;
+            playerName.Font = MenuFont;
+            playerName.Background = OptionSelected;
+            playerName.FontColor = ItemColor;
+            playerName.FontColorSelected = Color.Black;
+            AddMenuItem(playerName);
+
             BoolOptionMenuItem shadows = new BoolOptionMenuItem("Shadows");
             shadows.Bounds = Bounds;
             shadows.Font = MenuFont;

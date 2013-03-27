@@ -79,21 +79,56 @@ namespace datx02_rally.Menus
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 position, bool selected)
         {
-            KeyboardState keyState = Keyboard.GetState();
-            foreach (var key in keyState.GetPressedKeys())
+            if (selected)
             {
-                if (PrevKeyState.IsKeyUp(key)) 
+                KeyboardState keyState = Keyboard.GetState();
+                foreach (var key in keyState.GetPressedKeys())
                 {
-                    if (keyState.IsKeyDown(Keys.Back) && enteredText.Length > 0)
-                        enteredText.Remove(enteredText.Length - 1, 1);
-                    else 
-                        enteredText.Append(Game1.GetInstance().GetService<InputComponent>().GetKeyText(key));
+                    if (PrevKeyState.IsKeyUp(key))
+                    {
+                        if (keyState.IsKeyDown(Keys.Back) && enteredText.Length > 0)
+                            enteredText.Remove(enteredText.Length - 1, 1);
+                        else if (!keyState.IsKeyDown(Keys.Space) && enteredText.Length <= 15)
+                        {
+                            string inputText = Game1.GetInstance().GetService<InputComponent>().GetKeyText(key);
+                            if (keyState.IsKeyDown(Keys.LeftShift) || keyState.IsKeyDown(Keys.RightShift))
+                                inputText = inputText.ToUpper();
+                            enteredText.Append(inputText);
+                        }
+                    }
                 }
+                PrevKeyState = keyState;
             }
-            PrevKeyState = keyState;
 
-            spriteBatch.DrawString(Font, Text + ": " + enteredText.ToString(), position, Color.White);
+            Rectangle b = Bounds;
+            b.X = (int)position.X + 5;
+            b.Width -= 10;
+            b.Y = (int)position.Y;
+            if (selected)
+            {
+                spriteBatch.Draw(Background, b, Color.White);
+            }
 
+            // Title string
+            Vector2 textOffset = Font.MeasureString(Text);
+            textOffset /= 2;
+            textOffset.X = Bounds.Width / 6;
+            textOffset.Y = Bounds.Height / 2 - textOffset.Y;
+
+            spriteBatch.DrawString(Font, Text, position + textOffset, (selected) ? FontColorSelected : FontColor);
+
+            // Entered string
+            textOffset = Font.MeasureString(enteredText);
+            textOffset /= 2;
+            textOffset.X = Bounds.Width - Bounds.Width * 3 / 12 - textOffset.X;
+            textOffset.Y = Bounds.Height / 2 - textOffset.Y;
+            spriteBatch.DrawString(Font, enteredText, position + textOffset, (selected) ? FontColorSelected : FontColor);
+
+        }
+
+        public string GetEnteredText()
+        {
+            return enteredText.ToString();
         }
     }
  
