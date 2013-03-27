@@ -41,8 +41,10 @@ namespace Particle3DSample
 
         ParticleSystem particleSystem;
         float timeBetweenParticles;
-        Vector3 previousPosition;
+        public Vector3 previousPosition;
         float timeLeftOver;
+
+        public Vector3 Origin { get; set; }
 
         #endregion
 
@@ -100,6 +102,7 @@ namespace Particle3DSample
 
                     // Create the particle.
                     particleSystem.AddParticle(position, Vector3.Backward); // velocity);
+
                 }
 
                 // Store any time we didn't use, so it can be part of the next update.

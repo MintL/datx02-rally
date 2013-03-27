@@ -187,7 +187,6 @@ namespace Particle3DSample
         /// </summary>
         protected abstract void InitializeSettings(ParticleSettings settings);
 
-
         /// <summary>
         /// Loads graphics for the particle system.
         /// </summary>

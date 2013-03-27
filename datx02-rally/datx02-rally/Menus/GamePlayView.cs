@@ -116,6 +116,9 @@ namespace datx02_rally.Menus
         ParticleSystem smokeSystem;
         float smokeTime;
 
+        List<ParticleSystem> fireflySystem = new List<ParticleSystem>();
+        List<ParticleEmitter> fireflyEmitter = new List<ParticleEmitter>();
+
         #endregion
 
         #region SkyBox
@@ -234,6 +237,14 @@ namespace datx02_rally.Menus
             components.Add(smokeSystem);
             particleSystems.Add(smokeSystem);
 
+            for (int i = 0; i < 200; i++)
+            {
+                FireflySystem system = new FireflySystem(gameInstance, content);
+                fireflySystem.Add(system);
+                system.Initialize();
+                particleSystems.Add(system);
+            }
+            
             pauseMenu = new PauseMenu(gameInstance);
             pauseMenu.ChangeResolution();
 
@@ -511,6 +522,16 @@ namespace datx02_rally.Menus
 
                 GraphicalObjects.Add(obj);
 
+                
+
+            }
+
+            for (int i = 0; i < GraphicalObjects.Count / 5; i++)
+            {
+                if (GraphicalObjects[i] is Stone) continue;
+                ParticleEmitter emitter = new ParticleEmitter(fireflySystem[i], 80, GraphicalObjects[i].Position);
+                emitter.Origin = GraphicalObjects[i].Position + Vector3.Up * 500;
+                fireflyEmitter.Add(emitter);
             }
 
             #endregion
@@ -780,6 +801,20 @@ namespace datx02_rally.Menus
                         (float)UniversalRandom.GetInstance().NextDouble() * 500),
                         Vector3.Up);
                 smokeTime = 0;
+            }
+
+            foreach (ParticleEmitter emitter in fireflyEmitter)
+            {
+                emitter.Update(gameTime, emitter.Origin +
+                    new Vector3(
+                        (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 200,
+                        (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 200,
+                        (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 200));
+            }
+
+            foreach (FireflySystem system in fireflySystem)
+            {
+                system.Update(gameTime);
             }
 
             //yellowSystem.AddParticle(new Vector3(-200, 1500, 2000), Vector3.Up);
@@ -1123,6 +1158,11 @@ namespace datx02_rally.Menus
             // Set view to particlesystems
             foreach (ParticleSystem pSystem in particleSystems)
                 pSystem.SetCamera(view, projection);
+
+            foreach (FireflySystem system in fireflySystem)
+            {
+                system.Draw(gameTime);
+            }
 
             #region RenderObjects
 
