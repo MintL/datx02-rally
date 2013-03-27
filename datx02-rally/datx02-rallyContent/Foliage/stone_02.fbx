@@ -39,12 +39,6 @@ Definitions:  {
 	ObjectType: "Material" {
 		Count: 1
 	}
-	ObjectType: "Texture" {
-		Count: 1
-	}
-	ObjectType: "Video" {
-		Count: 1
-	}
 	ObjectType: "Pose" {
 		Count: 1
 	}
