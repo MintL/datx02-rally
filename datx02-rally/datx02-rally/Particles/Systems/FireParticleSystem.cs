@@ -28,7 +28,7 @@ namespace Particle3DSample
 
         protected override void InitializeSettings(ParticleSettings settings)
         {
-            settings.TextureName = @"Particles/fire";
+            settings.TextureName = @"Particles/plasma";
 
             settings.MaxParticles = 2400;
 
@@ -43,16 +43,19 @@ namespace Particle3DSample
             settings.MaxVerticalVelocity = 10;
 
             // Set gravity upside down, so the flames will 'fall' upward.
-            settings.Gravity = new Vector3(0, 15, 0);
+            settings.Gravity = new Vector3(0, 30, 0);
 
-            settings.MinColor = new Color(255, 255, 255, 10);
-            settings.MaxColor = new Color(255, 255, 255, 40);
+            settings.MinColor = new Color(250, 200, 0, 100);
+            settings.MaxColor = new Color(220, 20, 60, 100);//new Color(255, 165, 0);
 
-            settings.MinStartSize = 5;
-            settings.MaxStartSize = 10;
+            //, new Color(250, 140, 140),
+            //, 
 
-            settings.MinEndSize = 10;
-            settings.MaxEndSize = 40;
+            settings.MinStartSize = 10;
+            settings.MaxStartSize = 20;
+
+            settings.MinEndSize = 20;
+            settings.MaxEndSize = 50;
 
             // Use additive blending.
             settings.BlendState = BlendState.Additive;

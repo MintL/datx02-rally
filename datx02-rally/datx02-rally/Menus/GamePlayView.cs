@@ -119,6 +119,9 @@ namespace datx02_rally.Menus
         List<ParticleSystem> fireflySystem = new List<ParticleSystem>();
         List<ParticleEmitter> fireflyEmitter = new List<ParticleEmitter>();
 
+        FireParticleSystem fireSystem;
+        ParticleEmitter fireEmitter;
+
         #endregion
 
         #region SkyBox
@@ -244,6 +247,10 @@ namespace datx02_rally.Menus
                 system.Initialize();
                 particleSystems.Add(system);
             }
+
+            fireSystem = new FireParticleSystem(gameInstance, content);
+            particleSystems.Add(fireSystem);
+            fireSystem.Initialize();
             
             pauseMenu = new PauseMenu(gameInstance);
             pauseMenu.ChangeResolution();
@@ -342,6 +349,8 @@ namespace datx02_rally.Menus
             Player localPlayer = gameInstance.GetService<ServerClient>().LocalPlayer;
             gameInstance.GetService<CarControlComponent>().Cars[localPlayer] = Car;
 
+            Car.Position *= terrainScale;
+
             #endregion
 
             #region Lights
@@ -394,6 +403,9 @@ namespace datx02_rally.Menus
                 new ParticleEmitter(dustParticles[0], 150, Car.Position),
                 new ParticleEmitter(dustParticles[1], 150, Car.Position)
             };
+
+            fireEmitter = new ParticleEmitter(fireSystem, 100, Car.Position + Vector3.Up * 200);
+            fireEmitter.Origin = Car.Position + Vector3.Up * 100;
 
             #region SkySphere
 
@@ -817,6 +829,9 @@ namespace datx02_rally.Menus
                 system.Update(gameTime);
             }
 
+            fireEmitter.Update(gameTime, fireEmitter.Origin);
+            fireSystem.Update(gameTime);
+
             //yellowSystem.AddParticle(new Vector3(-200, 1500, 2000), Vector3.Up);
             //redSystem.AddParticle(new Vector3(1500, 1500, 2000), Vector3.Up);
             //plasmaSystem.AddParticle(new Vector3(-200, 1500, 4000), Vector3.Up);
@@ -1159,11 +1174,6 @@ namespace datx02_rally.Menus
             foreach (ParticleSystem pSystem in particleSystems)
                 pSystem.SetCamera(view, projection);
 
-            foreach (FireflySystem system in fireflySystem)
-            {
-                system.Draw(gameTime);
-            }
-
             #region RenderObjects
 
             foreach (GameObject obj in GraphicalObjects)
@@ -1190,6 +1200,13 @@ namespace datx02_rally.Menus
 
             #endregion
 
+
+            foreach (FireflySystem system in fireflySystem)
+            {
+                system.Draw(gameTime);
+            }
+
+            fireSystem.Draw(gameTime);
 
             if (!environment)
             {
