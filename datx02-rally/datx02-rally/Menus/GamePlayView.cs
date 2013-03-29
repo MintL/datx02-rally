@@ -121,6 +121,8 @@ namespace datx02_rally.Menus
 
         FireParticleSystem fireSystem;
         ParticleEmitter fireEmitter;
+        SmokePlumeParticleSystem fireSmokeSystem;
+        ParticleEmitter fireSmokeEmitter;
 
         #endregion
 
@@ -251,6 +253,10 @@ namespace datx02_rally.Menus
             fireSystem = new FireParticleSystem(gameInstance, content);
             particleSystems.Add(fireSystem);
             fireSystem.Initialize();
+
+            fireSmokeSystem = new SmokePlumeParticleSystem(gameInstance, content);
+            particleSystems.Add(fireSmokeSystem);
+            fireSmokeSystem.Initialize();
             
             pauseMenu = new PauseMenu(gameInstance);
             pauseMenu.ChangeResolution();
@@ -404,8 +410,11 @@ namespace datx02_rally.Menus
                 new ParticleEmitter(dustParticles[1], 150, Car.Position)
             };
 
-            fireEmitter = new ParticleEmitter(fireSystem, 100, Car.Position + Vector3.Up * 200);
+            fireEmitter = new ParticleEmitter(fireSystem, 100, Car.Position + Vector3.Up * 100);
             fireEmitter.Origin = Car.Position + Vector3.Up * 100;
+
+            fireSmokeEmitter = new ParticleEmitter(fireSmokeSystem, 100, Car.Position + Vector3.Up * 110);
+            fireSmokeEmitter.Origin = Car.Position + Vector3.Up * 110;
 
             #region SkySphere
 
@@ -832,6 +841,9 @@ namespace datx02_rally.Menus
             fireEmitter.Update(gameTime, fireEmitter.Origin);
             fireSystem.Update(gameTime);
 
+            fireSmokeEmitter.Update(gameTime, fireSmokeEmitter.Origin);
+            fireSmokeSystem.Update(gameTime);
+
             //yellowSystem.AddParticle(new Vector3(-200, 1500, 2000), Vector3.Up);
             //redSystem.AddParticle(new Vector3(1500, 1500, 2000), Vector3.Up);
             //plasmaSystem.AddParticle(new Vector3(-200, 1500, 4000), Vector3.Up);
@@ -1206,7 +1218,9 @@ namespace datx02_rally.Menus
                 system.Draw(gameTime);
             }
 
+            fireSmokeSystem.Draw(gameTime);
             fireSystem.Draw(gameTime);
+            
 
             if (!environment)
             {

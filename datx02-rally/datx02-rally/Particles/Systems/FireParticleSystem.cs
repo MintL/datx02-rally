@@ -28,7 +28,7 @@ namespace Particle3DSample
 
         protected override void InitializeSettings(ParticleSettings settings)
         {
-            settings.TextureName = @"Particles/plasma";
+            settings.TextureName = @"Particles/smoke_2";
 
             settings.MaxParticles = 2400;
 
