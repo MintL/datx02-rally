@@ -50,13 +50,20 @@ namespace Particle3DSample
             settings.MinStartSize = 4;
             settings.MaxStartSize = 7;
 
-            settings.MinEndSize = 30;
+            settings.MinEndSize = 60;
             settings.MaxEndSize = 100;
 
-            settings.MinColor = new Color(250, 250, 250, 250);
-            settings.MaxColor = new Color(250, 250, 250, 250);
+            settings.MinColor = settings.MaxColor = new Color(80, 80, 80, 250);
 
-            settings.BlendState = BlendState.AlphaBlend;
+            BlendState bs = new BlendState();
+
+            bs.AlphaDestinationBlend = Blend.One; //BlendState.Additive.AlphaDestinationBlend;
+            bs.AlphaSourceBlend = Blend.One;// BlendState.Additive.AlphaSourceBlend;
+
+            bs.ColorDestinationBlend = Blend.InverseSourceAlpha;
+            bs.ColorSourceBlend = Blend.SourceAlpha; // BlendState.Additive.ColorSourceBlend;
+
+            settings.BlendState = bs;
         }
     }
 }
