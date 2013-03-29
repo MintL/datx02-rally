@@ -110,8 +110,8 @@ namespace datx02_rally.Menus
         ParticleSystem greenSystem;
         ParticleSystem airParticles;
 
-        ParticleEmitter[] dustEmitter;
-        ParticleSystem[] dustParticles;
+        ParticleEmitter dustEmitter;
+        ParticleSystem dustSystem;
 
         ParticleSystem smokeSystem;
         float smokeTime;
@@ -221,14 +221,14 @@ namespace datx02_rally.Menus
             components.Add(airParticles);
             particleSystems.Add(airParticles);
 
-            dustParticles = new ParticleSystem[2];
-            dustParticles[0] = new SmokePlumeParticleSystem(gameInstance, content);
-            dustParticles[1] = new SmokePlumeParticleSystem(gameInstance, content);
-            foreach (var dustSystem in dustParticles)
-            {
-                components.Add(dustSystem);
-                particleSystems.Add(dustSystem);
-            }
+            //dustParticles = new ParticleSystem[2];
+            //dustParticles[0] = new SmokePlumeParticleSystem(gameInstance, content);
+            //dustParticles[1] = new SmokePlumeParticleSystem(gameInstance, content);
+            //foreach (var dustSystem in dustParticles)
+            //{
+            //    components.Add(dustSystem);
+            //    particleSystems.Add(dustSystem);
+            //}
 
             thunderParticleSystem = new ThunderParticleSystem(gameInstance, content);
             components.Add(thunderParticleSystem);
@@ -257,7 +257,11 @@ namespace datx02_rally.Menus
             fireSmokeSystem = new SmokePlumeParticleSystem(gameInstance, content);
             particleSystems.Add(fireSmokeSystem);
             fireSmokeSystem.Initialize();
-            
+
+            dustSystem = new DustParticleSystem(gameInstance, content);
+            particleSystems.Add(dustSystem);
+            dustSystem.Initialize();
+
             pauseMenu = new PauseMenu(gameInstance);
             pauseMenu.ChangeResolution();
 
@@ -405,10 +409,7 @@ namespace datx02_rally.Menus
             spotLights.Add(new SpotLight(position + new Vector3(0, 50, 0), forward, Color.White.ToVector3(), 45, 45, 500));
             #endregion
 
-            dustEmitter = new ParticleEmitter[]{
-                new ParticleEmitter(dustParticles[0], 150, Car.Position),
-                new ParticleEmitter(dustParticles[1], 150, Car.Position)
-            };
+            dustEmitter = new ParticleEmitter(dustSystem, 150, Car.Position);
 
             fireEmitter = new ParticleEmitter(fireSystem, 100, Car.Position + Vector3.Up * 100);
             fireEmitter.Origin = Car.Position + Vector3.Up * 100;
@@ -844,6 +845,17 @@ namespace datx02_rally.Menus
             fireSmokeEmitter.Update(gameTime, fireSmokeEmitter.Origin);
             fireSmokeSystem.Update(gameTime);
 
+            if (Car.Speed > 10)
+            {
+                dustEmitter.Update(gameTime, dustEmitter.Origin +
+                    new Vector3(
+                            (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 40,
+                            0,
+                            (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 40));
+                dustEmitter.Origin = Car.Position;
+                dustSystem.Update(gameTime);
+            }
+
             //yellowSystem.AddParticle(new Vector3(-200, 1500, 2000), Vector3.Up);
             //redSystem.AddParticle(new Vector3(1500, 1500, 2000), Vector3.Up);
             //plasmaSystem.AddParticle(new Vector3(-200, 1500, 4000), Vector3.Up);
@@ -1182,6 +1194,7 @@ namespace datx02_rally.Menus
 
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
 
+            
             // Set view to particlesystems
             foreach (ParticleSystem pSystem in particleSystems)
                 pSystem.SetCamera(view, projection);
@@ -1218,9 +1231,10 @@ namespace datx02_rally.Menus
                 system.Draw(gameTime);
             }
 
+            
             fireSmokeSystem.Draw(gameTime);
             fireSystem.Draw(gameTime);
-            
+            dustSystem.Draw(gameTime);
 
             if (!environment)
             {

@@ -40,7 +40,6 @@ namespace Particle3DSample
             settings.MinVerticalVelocity = -10;
             settings.MaxVerticalVelocity = 10;
             
-            // Create a wind effect by tilting the gravity vector sideways.
             settings.Gravity = new Vector3(0, 50, 0);
 
             settings.EndVelocity = 0.75f;

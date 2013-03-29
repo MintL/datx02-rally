@@ -5,6 +5,7 @@ using System.Text;
 using Particle3DSample;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace datx02_rally.Particles.Systems
 {
@@ -16,11 +17,11 @@ namespace datx02_rally.Particles.Systems
 
         protected override void InitializeSettings(ParticleSettings settings)
         {
-            settings.TextureName = @"Particles/smoke_2";
+            settings.TextureName = @"Particles/plasma";
 
-            settings.MaxParticles = 6000;
+            settings.MaxParticles = 4000;
 
-            settings.Duration = TimeSpan.FromSeconds(10);
+            settings.Duration = TimeSpan.FromSeconds(2);
 
             settings.MinHorizontalVelocity = 0;
             settings.MaxHorizontalVelocity = 15;
@@ -28,19 +29,23 @@ namespace datx02_rally.Particles.Systems
             settings.MinVerticalVelocity = 10;
             settings.MaxVerticalVelocity = 20;
 
-            // Create a wind effect by tilting the gravity vector sideways.
-            settings.Gravity = new Vector3(-20, -5, 0);
+            settings.Gravity = new Vector3(0, -5, 0);
 
             settings.EndVelocity = 0.75f;
 
-            settings.MinRotateSpeed = -1;
-            settings.MaxRotateSpeed = 1;
+            //settings.MinRotateSpeed = -1;
+            //settings.MaxRotateSpeed = 1;
 
-            settings.MinStartSize = 4;
-            settings.MaxStartSize = 7;
+            settings.MinStartSize = 15;
+            settings.MaxStartSize = 30;
 
-            settings.MinEndSize = 35;
-            settings.MaxEndSize = 140;
+            settings.MinEndSize = 30;
+            settings.MaxEndSize = 50;
+
+            settings.MinColor = settings.MaxColor = new Color(91, 79, 62, 150);
+            //settings.MinColor = settings.MaxColor = Color.Gray;
+
+            settings.BlendState = BlendState.AlphaBlend;
         }
     }
 }
