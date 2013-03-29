@@ -85,9 +85,9 @@ namespace datx02_rally
                 {
                     var textureWeights = new Vector4(
                         roadMap[xOffset + x, zOffset + z],
-                        (1 - roadMap[xOffset + x, zOffset + z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[xOffset + x, zOffset + z] - 0.2f) / 0.4f, 0, 1),
-                        (1 - roadMap[xOffset + x, zOffset + z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[xOffset + x, zOffset + z] - 0.7f) / 0.2f, 0, 1),
-                        (1 - roadMap[xOffset + x, zOffset + z]) * MathHelper.Clamp(1 - Math.Abs(heightMap[xOffset + x, zOffset + z] - 1) / 0.3f, 0, 1)
+                        MathHelper.Clamp(1 - Math.Abs(heightMap[xOffset + x, zOffset + z] - 0.2f) / 0.4f, 0, 1),
+                        MathHelper.Clamp(1 - Math.Abs(heightMap[xOffset + x, zOffset + z] - 0.7f) / 0.2f, 0, 1),
+                        MathHelper.Clamp(1 - Math.Abs(heightMap[xOffset + x, zOffset + z] - 1) / 0.3f, 0, 1)
                     );
 
                     textureWeights.Normalize();
@@ -98,7 +98,7 @@ namespace datx02_rally
                             heightMap[xOffset + x, zOffset + z], // Y
                             (terrainStart + zOffset + z)), // Z
                         Vector3.Zero, // Normal
-                        new Vector2(x / 21f, z / 21f),
+                        new Vector2(x / 10f, z / 10f),
                         textureWeights);
 
                 }

@@ -313,7 +313,7 @@ namespace datx02_rally.Menus
             heightmapGenerator.Perturb(30f);
 
             terrainEffect = content.Load<Effect>(@"Effects\TerrainShading");
-            terrainEffect.Parameters["TextureMap0"].SetValue(content.Load<Texture2D>(@"Terrain\sand"));
+            terrainEffect.Parameters["TextureMap0"].SetValue(content.Load<Texture2D>(@"Terrain\road"));
             terrainEffect.Parameters["TextureMap1"].SetValue(content.Load<Texture2D>(@"Terrain\grass"));
             terrainEffect.Parameters["TextureMap2"].SetValue(content.Load<Texture2D>(@"Terrain\rock"));
             terrainEffect.Parameters["TextureMap3"].SetValue(content.Load<Texture2D>(@"Terrain\snow"));
@@ -825,8 +825,6 @@ namespace datx02_rally.Menus
                 system.Update(gameTime);
             }
 
-            fire.Update(gameTime);
-
             if (Car.Speed > 10)
             {
                 dustEmitter.Update(gameTime, dustEmitter.Origin +
@@ -1213,8 +1211,6 @@ namespace datx02_rally.Menus
                 system.Draw(gameTime);
             }
 
-
-            fire.Draw(view, projection);
             dustSystem.Draw(gameTime);
 
             if (!environment)
