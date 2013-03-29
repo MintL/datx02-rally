@@ -119,10 +119,7 @@ namespace datx02_rally.Menus
         List<ParticleSystem> fireflySystem = new List<ParticleSystem>();
         List<ParticleEmitter> fireflyEmitter = new List<ParticleEmitter>();
 
-        FireParticleSystem fireSystem;
-        ParticleEmitter fireEmitter;
-        SmokePlumeParticleSystem fireSmokeSystem;
-        ParticleEmitter fireSmokeEmitter;
+        FireObject fire;
 
         #endregion
 
@@ -250,14 +247,6 @@ namespace datx02_rally.Menus
                 particleSystems.Add(system);
             }
 
-            fireSystem = new FireParticleSystem(gameInstance, content);
-            particleSystems.Add(fireSystem);
-            fireSystem.Initialize();
-
-            fireSmokeSystem = new SmokePlumeParticleSystem(gameInstance, content);
-            particleSystems.Add(fireSmokeSystem);
-            fireSmokeSystem.Initialize();
-
             dustSystem = new DustParticleSystem(gameInstance, content);
             particleSystems.Add(dustSystem);
             dustSystem.Initialize();
@@ -380,7 +369,7 @@ namespace datx02_rally.Menus
 
             int numlights = 50;
             Vector3 pointLightOffset = new Vector3(0, 250, 0);
-            for (int i = 0; i < numlights; i++)
+            for (int i = 1; i < numlights; i++)
             {
                 float t = i / (float)numlights;
                 Vector3 point = terrainScale * raceTrack.Curve.GetPoint(t);
@@ -411,11 +400,8 @@ namespace datx02_rally.Menus
 
             dustEmitter = new ParticleEmitter(dustSystem, 150, Car.Position);
 
-            fireEmitter = new ParticleEmitter(fireSystem, 100, Car.Position + Vector3.Up * 100);
-            fireEmitter.Origin = Car.Position + Vector3.Up * 100;
-
-            fireSmokeEmitter = new ParticleEmitter(fireSmokeSystem, 100, Car.Position + Vector3.Up * 110);
-            fireSmokeEmitter.Origin = Car.Position + Vector3.Up * 110;
+            fire = new FireObject(gameInstance, content, Car.Position + Vector3.Up * 100, Car.Position + Vector3.Up * 110);
+            pointLights.Add(fire);
 
             #region SkySphere
 
@@ -839,11 +825,7 @@ namespace datx02_rally.Menus
                 system.Update(gameTime);
             }
 
-            fireEmitter.Update(gameTime, fireEmitter.Origin);
-            fireSystem.Update(gameTime);
-
-            fireSmokeEmitter.Update(gameTime, fireSmokeEmitter.Origin);
-            fireSmokeSystem.Update(gameTime);
+            fire.Update(gameTime);
 
             if (Car.Speed > 10)
             {
@@ -1231,9 +1213,8 @@ namespace datx02_rally.Menus
                 system.Draw(gameTime);
             }
 
-            
-            fireSmokeSystem.Draw(gameTime);
-            fireSystem.Draw(gameTime);
+
+            fire.Draw(view, projection);
             dustSystem.Draw(gameTime);
 
             if (!environment)

@@ -43,7 +43,7 @@ namespace datx02_rally.Entities
         /// <param name="effect"></param>
         protected abstract void SetEffectParameters(Effect effect);
 
-        public void Draw(Matrix view, Matrix projection)
+        public virtual void Draw(Matrix view, Matrix projection)
         {
             baseTransforms = new Matrix[this.Model.Bones.Count];
             this.Model.CopyAbsoluteBoneTransformsTo(baseTransforms);
