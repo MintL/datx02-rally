@@ -9,7 +9,6 @@ namespace datx02_rally.Menus
 {
     class MultiplayerMenu : OverlayView
     {
-        bool connected = false;
 
         public MultiplayerMenu(Game game) : base(game, GameState.MultiplayerMenu) { }
 
@@ -17,16 +16,16 @@ namespace datx02_rally.Menus
         {
             base.LoadContent();
 
-            Vector2 size = GetScreenPosition(new Vector2(0.5f, 0.5f));
+            Vector2 size = GetScreenPosition(new Vector2(0.5f, 0.6f));
             Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
-            TextInputMenuItem playerName = new TextInputMenuItem("Server", "server");
-            playerName.Bounds = Bounds;
-            playerName.Font = MenuFont;
-            playerName.Background = OptionSelected;
-            playerName.FontColor = ItemColor;
-            playerName.FontColorSelected = Color.Black;
-            AddMenuItem(playerName);
+            TextInputMenuItem serverIP = new TextInputMenuItem("Server", "server");
+            serverIP.Bounds = Bounds;
+            serverIP.Font = MenuFont;
+            serverIP.Background = OptionSelected;
+            serverIP.FontColor = ItemColor;
+            serverIP.FontColorSelected = Color.Black;
+            AddMenuItem(serverIP);
 
             MenuItem item = new ActionMenuItem("Connect", ConnectToServer);
             item.Background = ButtonBackground;
@@ -36,7 +35,7 @@ namespace datx02_rally.Menus
             item.SetWidth(Bounds.Width);
             AddMenuItem(item);
 
-            item = new StateActionMenuItem("Cancel", GameState.OptionsMenu);
+            item = new StateActionMenuItem("Cancel", GameState.MainMenu);
             item.Background = ButtonBackground;
             item.Font = MenuFont;
             item.FontColor = ItemColor;
@@ -44,12 +43,13 @@ namespace datx02_rally.Menus
             item.SetWidth(Bounds.Width);
             AddMenuItem(item);
 
-            item = new StateActionMenuItem("Start", GameState.Gameplay);
+            item = new StateActionMenuItem("Not Connected...", GameState.Gameplay, "start");
             item.Background = ButtonBackground;
             item.Font = MenuFont;
             item.FontColor = ItemColor;
             item.FontColorSelected = ItemColorSelected;
             item.SetWidth(Bounds.Width);
+            item.Enabled = false;
             AddMenuItem(item);
         }
 
@@ -57,9 +57,17 @@ namespace datx02_rally.Menus
         {
             string server = (GetMenuItem("server") as TextInputMenuItem).GetEnteredText();
             gameInstance.GetService<ServerClient>().Connect(System.Net.IPAddress.Parse(server));
+        }
 
-            Vector2 size = GetScreenPosition(new Vector2(1.4f, 1.4f));
-            Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
+        public override GameState UpdateState(GameTime gameTime)
+        {
+            if (gameInstance.GetService<ServerClient>().connected)
+            {
+                MenuItem startButton = GetMenuItem("start");
+                startButton.Text = "Start Game!";
+                startButton.Enabled = true;
+            }
+            return base.UpdateState(gameTime);
         }
     }
 }
