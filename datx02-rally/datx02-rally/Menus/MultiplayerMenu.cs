@@ -36,7 +36,7 @@ namespace datx02_rally.Menus
             item.SetWidth(Bounds.Width);
             AddMenuItem(item);
 
-            item = new StateActionMenuItem("Cancel", GameState.MainMenu);
+            item = new StateActionMenuItem("Cancel", GameState.OptionsMenu);
             item.Background = ButtonBackground;
             item.Font = MenuFont;
             item.FontColor = ItemColor;
@@ -44,6 +44,13 @@ namespace datx02_rally.Menus
             item.SetWidth(Bounds.Width);
             AddMenuItem(item);
 
+            item = new StateActionMenuItem("Start", GameState.Gameplay);
+            item.Background = ButtonBackground;
+            item.Font = MenuFont;
+            item.FontColor = ItemColor;
+            item.FontColorSelected = ItemColorSelected;
+            item.SetWidth(Bounds.Width);
+            AddMenuItem(item);
         }
 
         private void ConnectToServer()

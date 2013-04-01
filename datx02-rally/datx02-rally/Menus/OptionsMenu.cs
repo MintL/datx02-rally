@@ -36,6 +36,7 @@ namespace datx02_rally.Menus
             displayMode.SetStartOption(1);
             displayMode.Bounds = Bounds;
             displayMode.Font = MenuFont;
+            displayMode.Enabled = false;
             displayMode.ArrowLeft = ArrowLeft;
             displayMode.ArrowRight = ArrowRight;
             displayMode.Background = OptionSelected;
@@ -84,6 +85,7 @@ namespace datx02_rally.Menus
             item.Font = MenuFont;
             item.FontColor = ItemColor;
             item.FontColorSelected = ItemColorSelected;
+            item.Enabled = false;
             item.SetWidth(Bounds.Width);
             AddMenuItem(item);
 

@@ -83,7 +83,9 @@ namespace datx02_rally
                 return;
             }
 
-            Sender.SendPlayerPosition(GamePlay.Car.Position, GamePlay.Car.Rotation, gameTime.TotalGameTime.TotalMilliseconds);
+            if (State == ServerState.Gameplay)
+                Sender.SendPlayerPosition(GamePlay.Car.Position, GamePlay.Car.Rotation, gameTime.TotalGameTime.TotalMilliseconds);
+
             base.Update(gameTime);
         }
 

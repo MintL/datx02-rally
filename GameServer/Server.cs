@@ -16,7 +16,7 @@ namespace GameServer
         readonly int Port;
         NetServer serverThread;
         Boolean running;
-        ServerState state:
+        ServerState state;
         
         //Debug stuff
         Boolean DbgPlayerPos = false;

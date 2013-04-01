@@ -21,6 +21,12 @@ namespace datx02_rally.Menus
         public Texture2D Background { get; set; }
         public Color FontColor { get; set; }
         public Color FontColorSelected { get; set; }
+        private bool enabled = true;
+        public bool Enabled
+        {
+            get { return enabled; }
+            set { enabled = value; }
+        }
 
         public abstract void Draw(SpriteBatch spriteBatch, Vector2 position, bool selected);
 
@@ -109,20 +115,26 @@ namespace datx02_rally.Menus
                 spriteBatch.Draw(Background, b, Color.White);
             }
 
+            Color textColor;
+            if (!Enabled)
+                textColor = Color.Gray;
+            else
+                textColor = (selected) ? FontColorSelected : FontColor;
+
             // Title string
             Vector2 textOffset = Font.MeasureString(Text);
             textOffset /= 2;
             textOffset.X = Bounds.Width / 6;
             textOffset.Y = Bounds.Height / 2 - textOffset.Y;
 
-            spriteBatch.DrawString(Font, Text, position + textOffset, (selected) ? FontColorSelected : FontColor);
+            spriteBatch.DrawString(Font, Text, position + textOffset, textColor);
 
             // Entered string
             textOffset = Font.MeasureString(enteredText);
             textOffset /= 2;
             textOffset.X = Bounds.Width - Bounds.Width * 3 / 12 - textOffset.X;
             textOffset.Y = Bounds.Height / 2 - textOffset.Y;
-            spriteBatch.DrawString(Font, enteredText, position + textOffset, (selected) ? FontColorSelected : FontColor);
+            spriteBatch.DrawString(Font, enteredText, position + textOffset, textColor);
 
         }
 
@@ -158,11 +170,17 @@ namespace datx02_rally.Menus
             position.X += Bounds.Width / 2 - Background.Bounds.Width / 2;
             spriteBatch.Draw(Background, position, Color.White);
 
+            Color textColor;
+            if (!Enabled)
+                textColor = Color.Gray;
+            else
+                textColor = (selected) ? FontColorSelected : FontColor;
+
             Vector2 textOffset = Font.MeasureString(Text);
             textOffset /= 2;
             textOffset.X = Background.Bounds.Width / 2 - textOffset.X;
             textOffset.Y = Background.Bounds.Height / 2 - textOffset.Y + 3;
-            spriteBatch.DrawString(Font, Text, position + textOffset, (selected) ? FontColorSelected : FontColor);
+            spriteBatch.DrawString(Font, Text, position + textOffset, textColor);
         }
     }
 
@@ -191,11 +209,17 @@ namespace datx02_rally.Menus
             position.X += Bounds.Width / 2 - Background.Bounds.Width / 2;
             spriteBatch.Draw(Background, position, Color.White);
 
+            Color textColor;
+            if (!Enabled)
+                textColor = Color.Gray;
+            else
+                textColor = (selected) ? FontColorSelected : FontColor;
+
             Vector2 textOffset = Font.MeasureString(Text);
             textOffset /= 2;
             textOffset.X = Background.Bounds.Width / 2 - textOffset.X;
             textOffset.Y = Background.Bounds.Height / 2 - textOffset.Y + 3;
-            spriteBatch.DrawString(Font, Text, position + textOffset, (selected) ? FontColorSelected : FontColor);
+            spriteBatch.DrawString(Font, Text, position + textOffset, textColor);
         }
     }
 
@@ -315,20 +339,26 @@ namespace datx02_rally.Menus
                 spriteBatch.Draw(Background, b, Color.White);
             }
 
+            Color textColor;
+            if (!Enabled)
+                textColor = Color.Gray;
+            else
+                textColor = (selected) ? FontColorSelected : FontColor;
+
             // Title string
             Vector2 textOffset = Font.MeasureString(Text);
             textOffset /= 2;
             textOffset.X = Bounds.Width / 6;
             textOffset.Y = Bounds.Height / 2 - textOffset.Y;
 
-            spriteBatch.DrawString(Font, Text, position + textOffset, (selected) ? FontColorSelected : FontColor);
+            spriteBatch.DrawString(Font, Text, position + textOffset, textColor);
 
             // Option string
             textOffset = Font.MeasureString(SelectedOption());
             textOffset /= 2;
             textOffset.X = Bounds.Width - Bounds.Width * 3 / 12 - textOffset.X;
             textOffset.Y = Bounds.Height / 2 - textOffset.Y;
-            spriteBatch.DrawString(Font, SelectedOption(), position + textOffset, (selected) ? FontColorSelected : FontColor);
+            spriteBatch.DrawString(Font, SelectedOption(), position + textOffset, textColor);
 
             // Arrows
             Vector2 offset = new Vector2(ArrowLeft.Bounds.Width, ArrowLeft.Bounds.Height);

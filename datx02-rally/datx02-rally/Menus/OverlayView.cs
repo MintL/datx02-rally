@@ -36,8 +36,12 @@ namespace datx02_rally.Menus
             
             Transparency = 1f; //no transparency
             MenuItemOffset = new Vector2(0.005f, 0.005f);
-            
-            
+
+            var index = selectedIndex;
+            while (selectedIndex < menuItems.Count && !menuItems[selectedIndex].Enabled)
+                selectedIndex++;
+            if (selectedIndex > menuItems.Count - 1)
+                selectedIndex = index;
 
             Rotation = 0;
             
@@ -132,9 +136,25 @@ namespace datx02_rally.Menus
             InputComponent input = gameInstance.GetService<InputComponent>();
             GameState nextGameState = GameState.None;
             if (input.GetKey(Keys.Down))
-                selectedIndex = Math.Min(menuItems.Count - 1, selectedIndex + 1);
+            {
+                var index = selectedIndex;
+                do
+                {
+                    selectedIndex++;
+                } while (selectedIndex < menuItems.Count && !menuItems[selectedIndex].Enabled);
+                if (selectedIndex > menuItems.Count - 1)
+                    selectedIndex = index;
+            }
             else if (input.GetKey(Keys.Up))
-                selectedIndex = Math.Max(0, selectedIndex - 1);
+            {
+                var index = selectedIndex;
+                do
+                {
+                    selectedIndex--;
+                } while (selectedIndex >= 0 && !menuItems[selectedIndex].Enabled);
+                if (selectedIndex < 0)
+                    selectedIndex = index;
+            }
             else if (input.GetKey(Keys.Right) && menuItems[selectedIndex] is OptionMenuItem)
                 (menuItems[selectedIndex] as OptionMenuItem).NextOption();
             else if (input.GetKey(Keys.Left) && menuItems[selectedIndex] is OptionMenuItem)
