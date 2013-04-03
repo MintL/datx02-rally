@@ -171,6 +171,20 @@ namespace datx02_rally.Menus
             menuItems.Add(menuItem);
         }
 
+        /// <summary>
+        /// Replaces the menu item with the given identifier with provided menu item.
+        /// If the menu item is not found, nothing will happen.
+        /// </summary>
+        /// <param name="identifier"></param>
+        public void SetMenuItem(string identifier, MenuItem menuItem)
+        {
+            int index = menuItems.FindIndex(item => item.Identifier == identifier);
+            if (index > -1)
+            {
+                menuItems[index] = menuItem;
+            }
+        }
+
         // TODO: Only works if all menuitems have equal height
         private Vector2 CalculateMenuItemPosition(MenuItem menuItem, int numberInOrder)
         {
