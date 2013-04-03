@@ -16,18 +16,18 @@ namespace datx02_rally.Menus
         {
             base.LoadContent();
 
-            Vector2 size = GetScreenPosition(new Vector2(0.5f, 0.6f));
+            Vector2 size = GetScreenPosition(new Vector2(0.5f, 0.5f));
             Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
-            TextInputMenuItem serverIP = new TextInputMenuItem("Server", "server");
-            serverIP.Bounds = Bounds;
-            serverIP.Font = MenuFont;
-            serverIP.Background = OptionSelected;
-            serverIP.FontColor = ItemColor;
-            serverIP.FontColorSelected = Color.Black;
-            AddMenuItem(serverIP);
+            TextInputMenuItem playerName = new TextInputMenuItem("Server IP", "server");
+            playerName.Bounds = Bounds;
+            playerName.Font = MenuFont;
+            playerName.Background = OptionSelected;
+            playerName.FontColor = ItemColor;
+            playerName.FontColorSelected = Color.Black;
+            AddMenuItem(playerName);
 
-            MenuItem item = new ActionMenuItem("Connect", ConnectToServer);
+            MenuItem item = new StateActionMenuItem("Cancel", GameState.MainMenu);
             item.Background = ButtonBackground;
             item.Font = MenuFont;
             item.FontColor = ItemColor;
@@ -35,21 +35,12 @@ namespace datx02_rally.Menus
             item.SetWidth(Bounds.Width);
             AddMenuItem(item);
 
-            item = new StateActionMenuItem("Cancel", GameState.MainMenu);
+            item = new StateActionMenuItem("Apply", GameState.MainMenu);
             item.Background = ButtonBackground;
             item.Font = MenuFont;
             item.FontColor = ItemColor;
             item.FontColorSelected = ItemColorSelected;
             item.SetWidth(Bounds.Width);
-            AddMenuItem(item);
-
-            item = new StateActionMenuItem("Not Connected...", GameState.Gameplay, "start");
-            item.Background = ButtonBackground;
-            item.Font = MenuFont;
-            item.FontColor = ItemColor;
-            item.FontColorSelected = ItemColorSelected;
-            item.SetWidth(Bounds.Width);
-            item.Enabled = false;
             AddMenuItem(item);
         }
 

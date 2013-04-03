@@ -68,6 +68,9 @@ namespace datx02_rally.Menus
     {
         KeyboardState PrevKeyState;
         private StringBuilder enteredText;
+        int FRAMES_PER_CARET_BLINK = 50;
+        int caretBlinkFrameCounter = 0;
+        bool blink = true;
 
         public TextInputMenuItem(string text) : this(text, null) {}
 
@@ -126,16 +129,24 @@ namespace datx02_rally.Menus
             textOffset /= 2;
             textOffset.X = Bounds.Width / 6;
             textOffset.Y = Bounds.Height / 2 - textOffset.Y;
-
             spriteBatch.DrawString(Font, Text, position + textOffset, textColor);
 
+            // Caret blinking
+            if (selected && ++caretBlinkFrameCounter > FRAMES_PER_CARET_BLINK)
+            {
+                blink = !blink;
+                caretBlinkFrameCounter = 0;
+            }
+
             // Entered string
-            textOffset = Font.MeasureString(enteredText);
+            string textWithCaret = enteredText.ToString() + "|";
+            string textToDraw = blink && selected ? textWithCaret : enteredText.ToString();
+            textOffset = Font.MeasureString(textWithCaret);
             textOffset /= 2;
             textOffset.X = Bounds.Width - Bounds.Width * 3 / 12 - textOffset.X;
             textOffset.Y = Bounds.Height / 2 - textOffset.Y;
-            spriteBatch.DrawString(Font, enteredText, position + textOffset, textColor);
-
+            spriteBatch.DrawString(Font, textToDraw, position + textOffset, textColor);
+            
         }
 
         public string GetEnteredText()
