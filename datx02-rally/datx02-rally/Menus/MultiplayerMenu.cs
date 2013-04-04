@@ -11,7 +11,10 @@ namespace datx02_rally.Menus
     {
         bool waitingForConnection = false;
 
-        public MultiplayerMenu(Game game) : base(game, GameState.MultiplayerMenu) { }
+        public MultiplayerMenu(Game game) : base(game, GameState.MultiplayerMenu) 
+        {
+            MenuTitle = "Multiplayer Game";
+        }
 
         protected override void LoadContent()
         {

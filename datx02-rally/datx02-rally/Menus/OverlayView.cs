@@ -12,7 +12,9 @@ namespace datx02_rally.Menus
     {
         public float Rotation { get; set; }
 
+        public string MenuTitle { get; set; }
         public SpriteFont MenuFont { get; set; }
+        public SpriteFont MenuHeaderFont { get; set; }
         public Texture2D Background { get; set; }
         public Texture2D RightBorder { get; set; }
         public Texture2D LeftBorder { get; set; }
@@ -55,6 +57,7 @@ namespace datx02_rally.Menus
             ItemColorSelected = Color.Red;
 
             MenuFont = Game.Content.Load<SpriteFont>(@"Menu/MenuFont");
+            MenuHeaderFont = Game.Content.Load<SpriteFont>(@"Menu/MenuHeaderFont");
             Background = Game.Content.Load<Texture2D>(@"Menu/Menu-BG");
             RightBorder = Game.Content.Load<Texture2D>(@"Menu/Menu-Right-Border");
             LeftBorder = Game.Content.Load<Texture2D>(@"Menu/Menu-Left-Border");
@@ -77,7 +80,6 @@ namespace datx02_rally.Menus
         public void OffsetPosition(Vector2 offset)
         {
             Position += offset;
-
         }
 
         public Texture2D Render()
@@ -92,7 +94,7 @@ namespace datx02_rally.Menus
 
             Vector2 renderOffset = new Vector2((RenderBounds.Width - Bounds.Width) / 2,
                     (RenderBounds.Height - Bounds.Height) / 2);
-
+            
             spriteBatch.Begin();
             spriteBatch.Draw(Background, 
                 new Rectangle((int)renderOffset.X, (int)renderOffset.Y, Bounds.Width, Bounds.Height), 
@@ -102,6 +104,9 @@ namespace datx02_rally.Menus
                 Color.White);
             spriteBatch.Draw(RightBorder,
                 new Rectangle((int)renderOffset.X+Bounds.Width, (int)renderOffset.Y, LeftBorder.Width, Bounds.Height),
+                Color.White);
+            spriteBatch.DrawString(MenuHeaderFont, MenuTitle,
+                new Vector2((int)(renderOffset.X + Bounds.Width * 0.03), (int)(renderOffset.Y + Bounds.Height * 0.14) - MenuHeaderFont.MeasureString(MenuTitle).Y), 
                 Color.White);
 
 

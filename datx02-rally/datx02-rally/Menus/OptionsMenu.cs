@@ -20,7 +20,7 @@ namespace datx02_rally.Menus
         public OptionsMenu(Game game)
             : base(game, GameState.OptionsMenu)
         {
-            
+            MenuTitle = "Options";
         }
 
         protected override void LoadContent()

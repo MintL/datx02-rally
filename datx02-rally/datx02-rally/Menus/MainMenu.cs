@@ -18,8 +18,8 @@ namespace datx02_rally.Menus
     public class MainMenu : OverlayView
     {
         public MainMenu(Game game) : base(game, GameState.MainMenu) 
-        { 
-            
+        {
+            MenuTitle = "Main Menu";
         }
 
         protected override void LoadContent()

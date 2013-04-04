@@ -397,6 +397,11 @@
       <Importer>EffectImporter</Importer>
       <Processor>EffectProcessor</Processor>
     </None>
+    <Compile Include="Menu\MenuHeaderFont.spritefont">
+      <Name>MenuHeaderFont</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Effects\Prelight\Light.fx">

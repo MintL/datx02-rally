@@ -10,6 +10,7 @@ namespace datx02_rally.Menus
     {
         public PauseMenu(Game game) : base(game, GameState.PausedGameplay) 
         {
+            MenuTitle = "Pause";
         }
 
         protected override void LoadContent()
