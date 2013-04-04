@@ -126,6 +126,9 @@
     <Compile Include="EventTrigger\PositionTrigger.cs" />
     <Compile Include="EventTrigger\RectangleTrigger.cs" />
     <Compile Include="EventTrigger\TriggerManager.cs" />
+    <Compile Include="GameplayModes\GameplayMode.cs" />
+    <Compile Include="GameplayModes\MultiplayerRaceMode.cs" />
+    <Compile Include="GameplayModes\TimeTrialMode.cs" />
     <Compile Include="Graphics\MotionBlur.cs" />
     <Compile Include="Menus\GamePlayView.cs" />
     <Compile Include="Menus\MenuView.cs" />
