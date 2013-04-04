@@ -67,10 +67,15 @@ namespace datx02_rally.Menus
     public class TextInputMenuItem : MenuItem
     {
         KeyboardState PrevKeyState;
-        private StringBuilder enteredText;
         int FRAMES_PER_CARET_BLINK = 50;
         int caretBlinkFrameCounter = 0;
         bool blink = true;
+        private StringBuilder enteredText;
+        public string EnteredText
+        {
+            get { return enteredText.ToString(); }
+            set { enteredText.Clear(); enteredText.Append(value); }
+        }
 
         public TextInputMenuItem(string text) : this(text, null) {}
 
@@ -147,11 +152,6 @@ namespace datx02_rally.Menus
             textOffset.Y = Bounds.Height / 2 - textOffset.Y;
             spriteBatch.DrawString(Font, textToDraw, position + textOffset, textColor);
             
-        }
-
-        public string GetEnteredText()
-        {
-            return enteredText.ToString();
         }
     }
  
@@ -330,13 +330,13 @@ namespace datx02_rally.Menus
             return options[selectedOptionIndex].Item2;
         }
 
-        // Hack to get equal to work for both reference and value types
+        // Hack to get equal to work for both reference and value types. Not needed anymore?
         private bool Equal(T o1, T o2)
         {
-            if (o1 is ValueType)
+            //if (o1 is ValueType)
                 return o1.Equals(o2);
-            else
-                return (Object)o1 == (Object)o2;
+            //else
+            // return (Object)o1 == (Object)o2;
         }
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 position, bool selected)

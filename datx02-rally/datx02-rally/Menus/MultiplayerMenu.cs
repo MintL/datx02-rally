@@ -50,7 +50,7 @@ namespace datx02_rally.Menus
 
         private void ConnectToServer()
         {
-            string server = (GetMenuItem("server") as TextInputMenuItem).GetEnteredText();
+            string server = (GetMenuItem("server") as TextInputMenuItem).EnteredText;
             gameInstance.GetService<ServerClient>().Connect(System.Net.IPAddress.Parse(server));
             waitingForConnection = true;
 
