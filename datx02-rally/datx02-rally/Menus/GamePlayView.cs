@@ -180,6 +180,7 @@ namespace datx02_rally.Menus
 
         Effect shadowMapEffect;
         Plane zeroPlane = new Plane(Vector3.Up, 0);
+        bool shadowMapNotRendered = true;
 
         #endregion
 
@@ -278,13 +279,13 @@ namespace datx02_rally.Menus
             HeightMap heightmapGenerator = new HeightMap(heightMapSize);
             var heightMap = heightmapGenerator.Generate();
 
-            for (int x = 0; x < heightMapSize; x++)
-            {
-                for (int z = 0; z < heightMapSize; z++)
-                {
-                    heightMap[x, z] = 0;
-                }
-            }
+            //for (int x = 0; x < heightMapSize; x++)
+            //{
+            //    for (int z = 0; z < heightMapSize; z++)
+            //    {
+            //        heightMap[x, z] = 0;
+            //    }
+            //}
 
             var roadMap = new float[heightMapSize, heightMapSize];
             raceTrack = new RaceTrack(heightMapSize);
@@ -929,54 +930,59 @@ namespace datx02_rally.Menus
 
             #region ShadowMap
 
-            for (int z = 0; z < terrainSegmentsCount; z++)
+            if (shadowMapNotRendered)
             {
-                for (int x = 0; x < terrainSegmentsCount; x++)
+                shadowMapNotRendered = false;
+
+                for (int z = 0; z < terrainSegmentsCount; z++)
                 {
-                    var terrain = terrainSegments[x, z];
+                    for (int x = 0; x < terrainSegmentsCount; x++)
+                    {
+                        var terrain = terrainSegments[x, z];
 
-                    if (!viewFrustum.Intersects(terrain.BoundingBox))
-                        continue;
+                        //if (!viewFrustum.Intersects(terrain.BoundingBox))
+                        //    continue;
 
-                    GraphicsDevice.SetRenderTarget(terrain.ShadowMap);
-                    GraphicsDevice.Clear(Color.Black);
+                        GraphicsDevice.SetRenderTarget(terrain.ShadowMap);
+                        GraphicsDevice.Clear(Color.Black);
 
-                    var shadowBox = BoundingBox.CreateFromPoints(
-                        terrain.BoundingBox.GetCorners().Select(corner =>
-                            corner + new Ray(corner,
-                                directionalLight.Direction).Intersects(zeroPlane).Value *
-                                directionalLight.Direction));
+                        var shadowBox = BoundingBox.CreateFromPoints(
+                            terrain.BoundingBox.GetCorners().Select(corner =>
+                                corner + new Ray(corner,
+                                    directionalLight.Direction).Intersects(zeroPlane).Value *
+                                    directionalLight.Direction));
 
-                    var startpoint = shadowBox.Min;
-                    var endpoint = shadowBox.Max;
+                        var startpoint = shadowBox.Min;
+                        var endpoint = shadowBox.Max;
 
-                    float projectionWidth = endpoint.Z - startpoint.Z,
-                          projectionHeight = endpoint.X - startpoint.X,
-                          projectionNear = 50f,
-                          projectionFar = 15000;
-                    var lookAtOffset = projectionNear + (projectionFar - projectionNear) / 2f;
+                        float projectionWidth = endpoint.Z - startpoint.Z,
+                              projectionHeight = endpoint.X - startpoint.X,
+                              projectionNear = 50f,
+                              projectionFar = 15000;
+                        var lookAtOffset = projectionNear + (projectionFar - projectionNear) / 2f;
 
-                    var shadowmMapLookAtTarget = Vector3.Lerp(startpoint, endpoint, .5f);
+                        var shadowmMapLookAtTarget = Vector3.Lerp(startpoint, endpoint, .5f);
 
-                    terrain.ShadowMapView = Matrix.CreateLookAt(
-                        shadowmMapLookAtTarget - lookAtOffset * directionalLight.Direction, 
-                        shadowmMapLookAtTarget, Vector3.Up);
+                        terrain.ShadowMapView = Matrix.CreateLookAt(
+                            shadowmMapLookAtTarget - lookAtOffset * directionalLight.Direction,
+                            shadowmMapLookAtTarget, Vector3.Up);
 
-                    var xzlight = directionalLight.Direction.GetXZProjection(true);
-                    float dot = Vector3.Dot(directionalLight.Direction, xzlight);
-                    float sw = 1 / (float)Math.Sin(Math.Acos(dot));
-                    var projectionTranform = Matrix.CreateScale(new Vector3(1, sw, 1));
-                    
-                    projectionTranform *= Matrix.CreateRotationZ((float)(-Math.Atan2(xzlight.Z, xzlight.X)));
+                        var xzlight = directionalLight.Direction.GetXZProjection(true);
+                        float dot = Vector3.Dot(directionalLight.Direction, xzlight);
+                        float sw = 1 / (float)Math.Sin(Math.Acos(dot));
+                        var projectionTranform = Matrix.CreateScale(new Vector3(1, sw, 1));
 
-                    terrain.ShadowMapProjection = projectionTranform * Matrix.CreateOrthographic(
-                        projectionWidth, projectionHeight, projectionNear, projectionFar);
+                        projectionTranform *= Matrix.CreateRotationZ((float)(-Math.Atan2(xzlight.Z, xzlight.X)));
 
-                    RenderShadowCasters(terrain.BoundingBox, terrain.ShadowMapView, terrain.ShadowMapProjection);
+                        terrain.ShadowMapProjection = projectionTranform * Matrix.CreateOrthographic(
+                            projectionWidth, projectionHeight, projectionNear, projectionFar);
+
+                        RenderShadowCasters(terrain.BoundingBox, terrain.ShadowMapView, terrain.ShadowMapProjection);
+                    }
                 }
-            }
 
-            GraphicsDevice.SetRenderTarget(null);
+                GraphicsDevice.SetRenderTarget(null); 
+            }
 
             #endregion
 
@@ -1003,6 +1009,10 @@ namespace datx02_rally.Menus
             //stream.Dispose();
 
             RenderPostProcess();
+
+            spriteBatch.Begin();
+            spriteBatch.Draw(terrainSegments[4, 5].ShadowMap, new Rectangle(0, 0, 256, 256), Color.White);
+            spriteBatch.End();
 
             base.Draw(gameTime);
         }
@@ -1062,39 +1072,52 @@ namespace datx02_rally.Menus
 
             GraphicsDevice.BlendState = BlendState.Opaque;
 
-            foreach (var tree in trees)
-            {
+
+            for (int z = 0; z < terrainSegmentsCount; z++)
+                for (int x = 0; x < terrainSegmentsCount; x++)
+                {
+                    var terrain = terrainSegments[x, z];
+                    terrain.Effect = shadowMapEffect;
+                    terrain.Draw(shadowMapView, shadowMapProjection);
+                    terrain.Effect = terrainEffect;
+                }
+
+            //foreach (var tree in trees)
+            //{
                 
 
-                var shadowPoint = tree.HighestPoint + new Ray(
-                    tree.HighestPoint, directionalLight.Direction).
-                    Intersects(zeroPlane).Value * directionalLight.Direction;
+            //    //var shadowPoint = tree.HighestPoint + new Ray(
+            //    //    tree.HighestPoint, directionalLight.Direction).
+            //    //    Intersects(zeroPlane).Value * directionalLight.Direction;
 
-                if (!BoundingSphere.CreateMerged(tree.BoundingSphere, new BoundingSphere(shadowPoint, .1f)).Intersects(boundingBox))
-                    continue;
+            //    //if (!BoundingSphere.CreateMerged(tree.BoundingSphere, new BoundingSphere(shadowPoint, .1f)).Intersects(boundingBox))
+            //    //    continue;
 
-                shadowMapEffect.Parameters["World"].SetValue(transforms[mesh.ParentBone.Index] * tree.Transform);
+            //    shadowMapEffect.Parameters["World"].SetValue(transforms[mesh.ParentBone.Index] * tree.Transform);
 
-                for (int p = mesh.MeshParts.Count - 1; p >= 0; p--) // Need reversed draw order!
-                {
-                    var part = mesh.MeshParts[p];
+            //    for (int p = mesh.MeshParts.Count - 1; p >= 0; p--) // Need reversed draw order!
+            //    {
+            //        var part = mesh.MeshParts[p];
 
-                    //shadowMapEffect.Parameters["AlphaEnabled"].SetValue(false); //p != 0);
+            //        //shadowMapEffect.Parameters["AlphaEnabled"].SetValue(false); //p != 0);
 
-                    foreach (EffectPass pass in part.Effect.CurrentTechnique.Passes)
-                    {
-                        pass.Apply();
-                        GraphicsDevice.Indices = part.IndexBuffer;
-                        GraphicsDevice.SetVertexBuffer(part.VertexBuffer);
-                        GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList,
-                            part.VertexOffset,
-                            0,
-                            part.NumVertices,
-                            part.StartIndex,
-                            part.PrimitiveCount);
-                    }
-                }
-            }
+            //        foreach (EffectPass pass in part.Effect.CurrentTechnique.Passes)
+            //        {
+            //            pass.Apply();
+            //            GraphicsDevice.Indices = part.IndexBuffer;
+            //            GraphicsDevice.SetVertexBuffer(part.VertexBuffer);
+            //            GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList,
+            //                part.VertexOffset,
+            //                0,
+            //                part.NumVertices,
+            //                part.StartIndex,
+            //                part.PrimitiveCount);
+            //        }
+            //    }
+            //}
+
+
+
 
             // Reset effects
             for (int i = 0; i < mesh.MeshParts.Count; i++)

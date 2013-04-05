@@ -208,15 +208,13 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	if (shadowCoord.x > 0 && shadowCoord.x < 1 && shadowCoord.y > 0 && shadowCoord.y < 1)
 	{
 		float ourDepth = 1 - (lightingPosition.z / lightingPosition.w);
-		totalLight.rgb *= CalcShadowTermPCF(shadowMapSampler, ourDepth, shadowCoord);
+		//totalLight.rgb *= CalcShadowTermPCF(shadowMapSampler, ourDepth, shadowCoord);
 		
-		/*
 		float shadowDepth = tex2D(shadowMapSampler, shadowCoord).r;
-		if (shadowDepth + .003 > ourDepth)
+		if (shadowDepth - 0.003 > ourDepth)
 		{
-			totalLight.rgb *= .4;
+			totalLight.rgb = 0;
 		}
-		*/
 	}
 	else
 	{
