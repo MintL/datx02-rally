@@ -213,7 +213,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		float shadowDepth = tex2D(shadowMapSampler, shadowCoord).r;
 		if (shadowDepth - 0.003 > ourDepth)
 		{
-			totalLight.rgb = 0;
+			totalLight.rgb *= .2;
 		}
 	}
 	else

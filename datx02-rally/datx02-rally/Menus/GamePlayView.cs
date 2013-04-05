@@ -279,13 +279,28 @@ namespace datx02_rally.Menus
             HeightMap heightmapGenerator = new HeightMap(heightMapSize);
             var heightMap = heightmapGenerator.Generate();
 
-            //for (int x = 0; x < heightMapSize; x++)
-            //{
-            //    for (int z = 0; z < heightMapSize; z++)
-            //    {
-            //        heightMap[x, z] = 0;
-            //    }
-            //}
+            for (int x = 0; x < heightMapSize; x++)
+            {
+                for (int z = 0; z < heightMapSize; z++)
+                {
+                    heightMap[x, z] = 0;
+                }
+            }
+
+            for (int x = -3; x < 3; x++)
+            {
+                for (int z = -3; z < 3; z++)
+                {
+                    var cx = terrainSegmentSize / 2 + x;
+                    var cz = terrainSegmentSize / 2 + z;
+
+                    heightMap[cx, cz] = (1 - (float)Math.Sqrt(x * x + z * z) / 50f) * .05f;
+                }
+            }
+
+            heightMap[32, 16] = .05f;
+            heightMap[32, 48] = .6f;
+
 
             var roadMap = new float[heightMapSize, heightMapSize];
             raceTrack = new RaceTrack(heightMapSize);
@@ -824,10 +839,10 @@ namespace datx02_rally.Menus
             //    }
             //);
 
-            directionalLight.Direction = Vector3.Transform(
-                directionalLight.Direction,
-                Matrix.CreateRotationY(
-                (float)gameTime.ElapsedGameTime.TotalSeconds));
+            //directionalLight.Direction = Vector3.Transform(
+            //    directionalLight.Direction,
+            //    Matrix.CreateRotationY(
+            //    (float)gameTime.ElapsedGameTime.TotalSeconds));
             
             //Vector3 pointLightOffset = new Vector3(0, 250, 0), rotationAxis = new Vector3(0,-100,0);
             //int index = 0;
@@ -955,10 +970,10 @@ namespace datx02_rally.Menus
                         var startpoint = shadowBox.Min;
                         var endpoint = shadowBox.Max;
 
-                        float projectionWidth = endpoint.Z - startpoint.Z,
-                              projectionHeight = endpoint.X - startpoint.X,
+                        float projectionWidth = endpoint.Z - startpoint.Z - 200,
+                              projectionHeight = endpoint.X - startpoint.X - 200,
                               projectionNear = 50f,
-                              projectionFar = 15000;
+                              projectionFar = 5000;
                         var lookAtOffset = projectionNear + (projectionFar - projectionNear) / 2f;
 
                         var shadowmMapLookAtTarget = Vector3.Lerp(startpoint, endpoint, .5f);
@@ -974,11 +989,16 @@ namespace datx02_rally.Menus
 
                         projectionTranform *= Matrix.CreateRotationZ((float)(-Math.Atan2(xzlight.Z, xzlight.X)));
 
+                        projectionTranform = Matrix.Identity;
+
                         terrain.ShadowMapProjection = projectionTranform * Matrix.CreateOrthographic(
                             projectionWidth, projectionHeight, projectionNear, projectionFar);
 
                         RenderShadowCasters(terrain.BoundingBox, terrain.ShadowMapView, terrain.ShadowMapProjection);
+
+                        break;
                     }
+                    break;
                 }
 
                 GraphicsDevice.SetRenderTarget(null); 
@@ -1001,6 +1021,7 @@ namespace datx02_rally.Menus
             GraphicsDevice.Clear(Color.White);
 
             RenderScene(gameTime, view, projectionMatrix, false);
+            //RenderScene(gameTime, terrainSegments[0, 0].ShadowMapView, terrainSegments[0, 0].ShadowMapProjection, false);
             
             GraphicsDevice.SetRenderTarget(null);
 
@@ -1011,7 +1032,7 @@ namespace datx02_rally.Menus
             RenderPostProcess();
 
             spriteBatch.Begin();
-            spriteBatch.Draw(terrainSegments[4, 5].ShadowMap, new Rectangle(0, 0, 256, 256), Color.White);
+            spriteBatch.Draw(terrainSegments[0, 0].ShadowMap, new Rectangle(0, 0, 512, 512), Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -1073,18 +1094,24 @@ namespace datx02_rally.Menus
             GraphicsDevice.BlendState = BlendState.Opaque;
 
 
-            for (int z = 0; z < terrainSegmentsCount; z++)
-                for (int x = 0; x < terrainSegmentsCount; x++)
-                {
-                    var terrain = terrainSegments[x, z];
-                    terrain.Effect = shadowMapEffect;
-                    terrain.Draw(shadowMapView, shadowMapProjection);
-                    terrain.Effect = terrainEffect;
-                }
+            //for (int z = 0; z < terrainSegmentsCount; z++)
+            //    for (int x = 0; x < terrainSegmentsCount; x++)
+            //    {
+            //        var terrain = terrainSegments[x, z];
+            //        terrain.Effect = shadowMapEffect;
+            //        terrain.Draw(shadowMapView, shadowMapProjection);
+            //        terrain.Effect = terrainEffect;
+            //    }
+
+
+            var terrain = terrainSegments[0, 0];
+            terrain.Effect = shadowMapEffect;
+            terrain.Draw(shadowMapView, shadowMapProjection);
+            terrain.Effect = terrainEffect;
 
             //foreach (var tree in trees)
             //{
-                
+
 
             //    //var shadowPoint = tree.HighestPoint + new Ray(
             //    //    tree.HighestPoint, directionalLight.Direction).
