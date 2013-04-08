@@ -1086,7 +1086,7 @@ namespace datx02_rally.Menus
             //foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
             //{
             //    pass.Apply();
-                spriteBatch.Draw(finalTexture, Vector2.Zero, Color.White);
+            spriteBatch.Draw(finalTexture, Vector2.Zero, Color.White);
 
             //}
 
