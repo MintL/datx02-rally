@@ -226,5 +226,16 @@ namespace datx02_rally
                 device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, indexBuffer.IndexCount / 3);
             }
         }
+
+        internal void Draw(BasicEffect btest)
+        {
+            foreach (EffectPass pass in btest.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                device.Indices = indexBuffer;
+                device.SetVertexBuffer(vertexBuffer);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, indexBuffer.IndexCount / 3);
+            }
+        }
     }
 }

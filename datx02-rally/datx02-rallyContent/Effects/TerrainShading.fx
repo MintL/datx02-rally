@@ -202,19 +202,19 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	dotProduct += 1;
 	dotProduct /= 2.0;
 	
-
+	// Normal-shadowing
 	//totalLight.rgb *= clamp(dotProduct, 0, 1);
-	
+
 	if (shadowCoord.x > 0 && shadowCoord.x < 1 && shadowCoord.y > 0 && shadowCoord.y < 1)
 	{
 		float ourDepth = 1 - (lightingPosition.z / lightingPosition.w);
-		//totalLight.rgb *= CalcShadowTermPCF(shadowMapSampler, ourDepth, shadowCoord);
+		totalLight.rgb *= CalcShadowTermPCF(shadowMapSampler, ourDepth, shadowCoord);
 		
-		float shadowDepth = tex2D(shadowMapSampler, shadowCoord).r;
-		if (shadowDepth - 0.003 > ourDepth)
-		{
-			totalLight.rgb *= .2;
-		}
+		//float shadowDepth = tex2D(shadowMapSampler, shadowCoord).r;
+		//if (shadowDepth - 0.01 > ourDepth || clamp(dotProduct, 0, 1) <= .5) //if (shadowDepth - 0.003 > ourDepth)
+		//{
+			//totalLight.rgb *= .2;
+		//}
 	}
 	else
 	{

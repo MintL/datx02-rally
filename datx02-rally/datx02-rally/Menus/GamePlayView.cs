@@ -23,6 +23,8 @@ namespace datx02_rally.Menus
     class GamePlayView : GameStateView
     {
 
+        BasicEffect btest;
+
         #region Field
 
         GamePlayMode mode;
@@ -271,6 +273,9 @@ namespace datx02_rally.Menus
 
             projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
                 GraphicsDevice.Viewport.AspectRatio, 0.1f, 50000);
+
+            btest = new BasicEffect(GraphicsDevice);
+            btest.EnableDefaultLighting();
 
             #region Level terrain generation
 
@@ -930,12 +935,17 @@ namespace datx02_rally.Menus
 
         #region Rendering
 
+        float pmod = 0;
+
         /// <summary>
         /// Renders this game!
         /// </summary>
         /// <param name="gameTime"></param>
         public override void Draw(GameTime gameTime)
         {
+            //
+            GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+
             gameInstance.GraphicsDevice.Clear(Color.CornflowerBlue);
             
             skyBoxEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
@@ -948,6 +958,7 @@ namespace datx02_rally.Menus
             if (shadowMapNotRendered)
             {
                 shadowMapNotRendered = false;
+
 
                 for (int z = 0; z < terrainSegmentsCount; z++)
                 {
@@ -970,16 +981,17 @@ namespace datx02_rally.Menus
                         var startpoint = shadowBox.Min;
                         var endpoint = shadowBox.Max;
 
-                        float projectionWidth = endpoint.Z - startpoint.Z - 200,
-                              projectionHeight = endpoint.X - startpoint.X - 200,
+                        float projectionWidth = endpoint.Z - startpoint.Z,
+                              projectionHeight = endpoint.X - startpoint.X,
                               projectionNear = 50f,
-                              projectionFar = 5000;
+                              projectionFar = 15000;
                         var lookAtOffset = projectionNear + (projectionFar - projectionNear) / 2f;
 
                         var shadowmMapLookAtTarget = Vector3.Lerp(startpoint, endpoint, .5f);
 
+
                         terrain.ShadowMapView = Matrix.CreateLookAt(
-                            shadowmMapLookAtTarget - lookAtOffset * directionalLight.Direction,
+                            shadowmMapLookAtTarget - Vector3.Transform(lookAtOffset * directionalLight.Direction, Matrix.CreateRotationX(pmod)),
                             shadowmMapLookAtTarget, Vector3.Up);
 
                         var xzlight = directionalLight.Direction.GetXZProjection(true);
@@ -989,16 +1001,13 @@ namespace datx02_rally.Menus
 
                         projectionTranform *= Matrix.CreateRotationZ((float)(-Math.Atan2(xzlight.Z, xzlight.X)));
 
-                        projectionTranform = Matrix.Identity;
+                        //projectionTranform = Matrix.Identity;
 
                         terrain.ShadowMapProjection = projectionTranform * Matrix.CreateOrthographic(
                             projectionWidth, projectionHeight, projectionNear, projectionFar);
 
                         RenderShadowCasters(terrain.BoundingBox, terrain.ShadowMapView, terrain.ShadowMapProjection);
-
-                        break;
                     }
-                    break;
                 }
 
                 GraphicsDevice.SetRenderTarget(null); 
@@ -1032,7 +1041,14 @@ namespace datx02_rally.Menus
             RenderPostProcess();
 
             spriteBatch.Begin();
-            spriteBatch.Draw(terrainSegments[0, 0].ShadowMap, new Rectangle(0, 0, 512, 512), Color.White);
+            int AAA = 64;
+            for (int x = 0; x < terrainSegmentsCount; x++)
+            {
+                for (int z = 0; z < terrainSegmentsCount; z++)
+                {
+                    spriteBatch.Draw(terrainSegments[x, z].ShadowMap, new Rectangle(x*AAA, z*AAA, AAA, AAA), Color.White);
+                }
+            }
             spriteBatch.End();
 
             base.Draw(gameTime);
@@ -1094,54 +1110,49 @@ namespace datx02_rally.Menus
             GraphicsDevice.BlendState = BlendState.Opaque;
 
 
-            //for (int z = 0; z < terrainSegmentsCount; z++)
-            //    for (int x = 0; x < terrainSegmentsCount; x++)
-            //    {
-            //        var terrain = terrainSegments[x, z];
-            //        terrain.Effect = shadowMapEffect;
-            //        terrain.Draw(shadowMapView, shadowMapProjection);
-            //        terrain.Effect = terrainEffect;
-            //    }
+            for (int z = 0; z < terrainSegmentsCount; z++)
+                for (int x = 0; x < terrainSegmentsCount; x++)
+                {
+                    var terrain = terrainSegments[x, z];
+                    terrain.Effect = shadowMapEffect;
+                    terrain.Draw(shadowMapView, shadowMapProjection);
+                    terrain.Effect = terrainEffect;
+                }
 
 
-            var terrain = terrainSegments[0, 0];
-            terrain.Effect = shadowMapEffect;
-            terrain.Draw(shadowMapView, shadowMapProjection);
-            terrain.Effect = terrainEffect;
-
-            //foreach (var tree in trees)
-            //{
+            foreach (var tree in trees)
+            {
 
 
-            //    //var shadowPoint = tree.HighestPoint + new Ray(
-            //    //    tree.HighestPoint, directionalLight.Direction).
-            //    //    Intersects(zeroPlane).Value * directionalLight.Direction;
+                //var shadowPoint = tree.HighestPoint + new Ray(
+                //    tree.HighestPoint, directionalLight.Direction).
+                //    Intersects(zeroPlane).Value * directionalLight.Direction;
 
-            //    //if (!BoundingSphere.CreateMerged(tree.BoundingSphere, new BoundingSphere(shadowPoint, .1f)).Intersects(boundingBox))
-            //    //    continue;
+                //if (!BoundingSphere.CreateMerged(tree.BoundingSphere, new BoundingSphere(shadowPoint, .1f)).Intersects(boundingBox))
+                //    continue;
 
-            //    shadowMapEffect.Parameters["World"].SetValue(transforms[mesh.ParentBone.Index] * tree.Transform);
+                shadowMapEffect.Parameters["World"].SetValue(transforms[mesh.ParentBone.Index] * tree.Transform);
 
-            //    for (int p = mesh.MeshParts.Count - 1; p >= 0; p--) // Need reversed draw order!
-            //    {
-            //        var part = mesh.MeshParts[p];
+                for (int p = mesh.MeshParts.Count - 1; p >= 0; p--) // Need reversed draw order!
+                {
+                    var part = mesh.MeshParts[p];
 
-            //        //shadowMapEffect.Parameters["AlphaEnabled"].SetValue(false); //p != 0);
+                    //shadowMapEffect.Parameters["AlphaEnabled"].SetValue(false); //p != 0);
 
-            //        foreach (EffectPass pass in part.Effect.CurrentTechnique.Passes)
-            //        {
-            //            pass.Apply();
-            //            GraphicsDevice.Indices = part.IndexBuffer;
-            //            GraphicsDevice.SetVertexBuffer(part.VertexBuffer);
-            //            GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList,
-            //                part.VertexOffset,
-            //                0,
-            //                part.NumVertices,
-            //                part.StartIndex,
-            //                part.PrimitiveCount);
-            //        }
-            //    }
-            //}
+                    foreach (EffectPass pass in part.Effect.CurrentTechnique.Passes)
+                    {
+                        pass.Apply();
+                        GraphicsDevice.Indices = part.IndexBuffer;
+                        GraphicsDevice.SetVertexBuffer(part.VertexBuffer);
+                        GraphicsDevice.DrawIndexedPrimitives(PrimitiveType.TriangleList,
+                            part.VertexOffset,
+                            0,
+                            part.NumVertices,
+                            part.StartIndex,
+                            part.PrimitiveCount);
+                    }
+                }
+            }
 
 
 
