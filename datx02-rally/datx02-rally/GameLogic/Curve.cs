@@ -24,8 +24,8 @@ namespace datx02_rally.GameLogic
         public Vector3 GetPoint(float t)
         {
             // t : [0..1]
-            float subT = t * 4; // t *4  : [0..4]
-            int pathIndex = (int)subT; // 0,1,2,3
+            float subT = t * nodes.Count; // t * N  : [0..N]
+            int pathIndex = (int)subT; // 0..N-1
             subT -= pathIndex; // subT : [0..1]
             return GetSubCurve(1 - subT, nodes[pathIndex], nodes[(pathIndex + 1) % nodes.Count]);
         }

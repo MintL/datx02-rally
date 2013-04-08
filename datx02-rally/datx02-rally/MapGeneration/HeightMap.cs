@@ -177,6 +177,14 @@ namespace datx02_rally.MapGeneration
 
             Smoothen();
 
+            for (int z = 0; z < Size; z++)
+            {
+                for (int x = 0; x < Size; x++)
+                {
+                    Heights[x, z] = Math.Max(0, Heights[x, z]);
+                }
+            }
+
             return Heights;
         }
 

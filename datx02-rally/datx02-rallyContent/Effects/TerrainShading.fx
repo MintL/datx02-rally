@@ -11,7 +11,7 @@ float3 DirectionalDirection;
 float3 DirectionalAmbient;
 float3 DirectionalDiffuse;
 
-float TerrainAmbientFactor = 5;
+float TerrainAmbientFactor = 3;
 float MaterialShininess = 10;
 
 int FogEnabled = 1;
@@ -28,8 +28,8 @@ sampler2D lightSampler = sampler_state
 	mipfilter = point;
 };
 
-float4x4 LightView;
-float4x4 LightProjection;
+float4x4 ShadowMapView;
+float4x4 ShadowMapProjection;
 
 texture2D ShadowMap;
 sampler2D shadowMapSampler = sampler_state
@@ -145,7 +145,7 @@ float ComputeFogFactor(float d)
 
 float4 GetPositionFromLight(float4 position)
 {
-	float4x4 wvp = mul(mul(World, LightView), LightProjection);
+	float4x4 wvp = mul(mul(World, ShadowMapView), ShadowMapProjection);
 	return mul(position, wvp);
 }
 
@@ -190,11 +190,24 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float dotProduct = dot(normal, directionToLight) / directionToLight;
 	dotProduct += 1;
 	dotProduct /= 2.0;
+	
+	// Normal-shadowing
+	//totalLight.rgb *= clamp(dotProduct, 0, 1);
 
 	if (shadowCoord.x > 0 && shadowCoord.x < 1 && shadowCoord.y > 0 && shadowCoord.y < 1)
 	{
 		float ourDepth = 1 - (lightingPosition.z / lightingPosition.w);
 		totalLight.rgb *= CalcShadowTermPCF(shadowMapSampler, ourDepth, shadowCoord);
+		
+		//float shadowDepth = tex2D(shadowMapSampler, shadowCoord).r;
+		//if (shadowDepth - 0.01 > ourDepth || clamp(dotProduct, 0, 1) <= .5) //if (shadowDepth - 0.003 > ourDepth)
+		//{
+			//totalLight.rgb *= .2;
+		//}
+	}
+	else
+	{
+		totalLight.r *= 5;
 	}
 	
 	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
@@ -204,6 +217,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	return totalLight;
 }
+
 
 technique TerrainShading
 {
