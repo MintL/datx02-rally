@@ -1092,6 +1092,10 @@ namespace datx02_rally.Menus
 
             //}
 
+            //spriteBatch.End();
+
+            //spriteBatch.Begin();
+            //spriteBatch.Draw(terrainSegments[7, 7].ShadowMap, new Rectangle(0, 0, 256, 256), Color.White);
             spriteBatch.End();
         }
         
@@ -1128,41 +1132,40 @@ namespace datx02_rally.Menus
             GraphicsDevice.BlendState = BlendState.Opaque;
 
 
-            for (int z = 0; z < terrainSegmentsCount; z++)
-                for (int x = 0; x < terrainSegmentsCount; x++)
-                {
-                    var terrain = terrainSegments[x, z];
-                    terrain.Effect = shadowMapEffect;
-                    terrain.Draw(shadowMapView, shadowMapProjection);
-                    terrain.Effect = terrainEffect;
-                }
+            //for (int z = 0; z < terrainSegmentsCount; z++)
+            //    for (int x = 0; x < terrainSegmentsCount; x++)
+            //    {
+            //        var terrain = terrainSegments[x, z];
+            //        terrain.Effect = shadowMapEffect;
+            //        terrain.Draw(shadowMapView, shadowMapProjection);
+            //        terrain.Effect = terrainEffect;
+            //    }
 
             foreach (var gameObject in ShadowCasterObjects)
             {
-                var oldEffects = new Dictionary<ModelMeshPart, Effect>();
+                //if (boundingBox.Intersects(gameObject.BoundingSphere))
+                //{
 
-                if (boundingBox.Intersects(gameObject.BoundingSphere))
-                {
 
-                    foreach (var mesh in gameObject.Model.Meshes)
-                        foreach (var meshpart in mesh.MeshParts)
-                        {
-                            Effect shadowMapEffectClone = shadowMapEffect.Clone();
-                            if (meshpart.Effect.Parameters["AlphaMap"].GetValueTexture2D() != null)
-                            {
-                                shadowMapEffectClone.Parameters["AlphaMap"].SetValue(meshpart.Effect.Parameters["AlphaMap"].GetValueTexture2D());
-                                shadowMapEffectClone.Parameters["AlphaEnabled"].SetValue(true);
-                            }
-                            oldEffects.Add(meshpart, meshpart.Effect);
-                            meshpart.Effect = shadowMapEffectClone;
-                        }
+                    //foreach (var meshpart in mesh.MeshParts)
+                    //{
+                    //    //Effect shadowMapEffectClone = shadowMapEffect.Clone();
+                    //    if (meshpart.Effect.Parameters["AlphaMap"].GetValueTexture2D() != null)
+                    //    {
+                    //        shadowMapEffect.Parameters["AlphaMap"].SetValue(meshpart.Effect.Parameters["AlphaMap"].GetValueTexture2D());
+                    //        shadowMapEffect.Parameters["AlphaEnabled"].SetValue(true);
+                    //    }
+                    //    else
+                    //        shadowMapEffect.Parameters["AlphaEnabled"].SetValue(false);
+
+                    //    oldEffects.Add(meshpart, meshpart.Effect);
+                    //    meshpart.Effect = shadowMapEffect;
+                    //}
+                
 
                 
-                    gameObject.Draw(shadowMapView, shadowMapProjection);
-                }
-
-                foreach (var meshpart in oldEffects.Keys)
-                    meshpart.Effect = oldEffects[meshpart];
+                    gameObject.DrawShadowCaster(GraphicsDevice, shadowMapEffect, shadowMapView, shadowMapProjection);
+                
             }
         }
 

@@ -81,5 +81,52 @@ namespace datx02_rally.Entities
                 }
             }
         }
+
+        public void DrawShadowCaster(GraphicsDevice device, Effect shadowMapEffect, Matrix view, Matrix projection)
+        {
+            baseTransforms = new Matrix[this.Model.Bones.Count];
+            this.Model.CopyAbsoluteBoneTransformsTo(baseTransforms);
+
+            world = Matrix.CreateScale(Scale) * Matrix.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, Rotation.Z) * Matrix.CreateTranslation(Position);
+
+            foreach (var mesh in Model.Meshes)
+            {
+                var orderedParts = mesh.MeshParts.OrderBy(part => part.Effect.Parameters["AlphaMap"].GetValueTexture2D() == null ? -1 : 1); 
+
+                //for (int p = mesh.MeshParts.Count - 1; p >= 0; p--) // Need reversed draw order!
+                foreach (var part in orderedParts)
+                {
+                    //var part = mesh.MeshParts[p];
+
+                    //shadowMapEffect.Parameters["AlphaEnabled"].SetValue(false); //p != 0);
+                    var hasAlpha = part.Effect.Parameters["AlphaMap"].GetValueTexture2D() != null;
+                    if (hasAlpha)
+                        shadowMapEffect.Parameters["AlphaMap"].SetValue(part.Effect.Parameters["AlphaMap"].GetValueTexture2D());
+                    shadowMapEffect.Parameters["AlphaEnabled"].SetValue(hasAlpha);
+
+                    EffectParameterCollection parameters = shadowMapEffect.Parameters;
+                    if (parameters["World"] != null)
+                        parameters["World"].SetValue(baseTransforms[mesh.ParentBone.Index] * world);
+                    if (parameters["View"] != null)
+                        parameters["View"].SetValue(view);
+                    if (parameters["Projection"] != null)
+                        parameters["Projection"].SetValue(projection);
+
+                    foreach (EffectPass pass in shadowMapEffect.CurrentTechnique.Passes)
+                    {
+                        pass.Apply();
+                        device.Indices = part.IndexBuffer;
+                        device.SetVertexBuffer(part.VertexBuffer);
+                        device.DrawIndexedPrimitives(PrimitiveType.TriangleList,
+                            part.VertexOffset,
+                            0,
+                            part.NumVertices,
+                            part.StartIndex,
+                            part.PrimitiveCount);
+                    }
+                }
+
+            }
+        }
     }
 }
