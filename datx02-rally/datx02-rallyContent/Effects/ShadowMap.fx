@@ -53,7 +53,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	{
 		alpha = 1 - tex2D(AlphaMapSampler, input.TexCoord).r;
 
-		if (alpha < .001)
+		if (alpha < .003)
 			return 0;
 	}
 

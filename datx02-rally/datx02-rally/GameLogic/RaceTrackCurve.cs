@@ -8,13 +8,12 @@ namespace datx02_rally.GameLogic
 {
     class RaceTrackCurve : Curve
     {
-
         public RaceTrackCurve(float terrainWidth)
         {
             float nodecenter = terrainWidth / 4f;
             float variation = 1.3f;
 
-            float height = .2f; // terrainWidth / 8f;
+            float height = .2f;
 
             nodes.Add(new CurveNode()
             {
@@ -38,5 +37,32 @@ namespace datx02_rally.GameLogic
                 Tangent = Vector3.Transform(new Vector3(0, 0, variation * -nodecenter), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
             });
         }
+
+        //public RaceTrackCurve(float terrainWidth)
+        //{
+        //    float nodecenter = terrainWidth;
+
+        //    float tangentLength = terrainWidth / 8f;
+        //    float height = .2f;
+
+        //    var r = UniversalRandom.GetInstance();
+
+        //    for (int i = 0; i < 3; i++)
+        //    {
+        //        nodes.Add(new CurveNode()
+        //        {
+        //            Position = new Vector3((float)(r.NextDouble() - .5) * terrainWidth * .5f, height, (float)(r.NextDouble() - .5) * terrainWidth * .5f)
+        //        });
+        //    }
+        //    nodes.Add(new CurveNode()
+        //    {
+        //        Position = nodes[0].Position
+        //    });
+
+        //    for (int i = 0; i < 3; i++)
+        //    {
+        //        nodes[i].Tangent = tangentLength * Vector3.Normalize(nodes[i + 1].Position - nodes[i].Position);
+        //    }
+        //}
     }
 }

@@ -8,36 +8,14 @@ namespace datx02_rally.GameLogic
 {
     class RaceTrack
     {
-        public Curve Curve { get; set; }
+        public Curve Curve { get; private set; }
 
-        private Dictionary<Vector3, float> mapSections = new Dictionary<Vector3, float>();
-
-        public float SectionLength = .1f;
+        public CurveRasterization CurveRasterization { get; private set; }
 
         public RaceTrack(float terrainWidth)
         {
             Curve = new RaceTrackCurve(terrainWidth);
-
-            for (float i = 0; i < 1; i += .1f)
-            {
-                mapSections.Add(Curve.GetPoint(i), i);
-            }
-        }
-
-        public float GetSection(Vector3 position)
-        {
-            float distanceSquared = float.MaxValue;
-            Vector3 closest = Vector3.Zero;
-            foreach (var key in mapSections.Keys)
-            {
-                float testDist = (key - position).LengthSquared();
-                if (testDist < distanceSquared)
-                {
-                    closest = key;
-                    distanceSquared = testDist;
-                }
-            }
-            return mapSections[closest];
+            CurveRasterization = new CurveRasterization(Curve, 100);
         }
     }
 }

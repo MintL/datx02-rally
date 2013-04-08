@@ -50,26 +50,18 @@ namespace datx02_rally
         public Effect Effect { get; set; }
 
         public BoundingBox BoundingBox { get; set; }
+        public BoundingBox MinBox { get; set; }
 
-        public Vector3 StartPoint { get; set; }
-        public Vector3 EndPoint { get; set; }
+        //public Vector3[] Corner { get; set; }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="device"></param>
-        /// <param name="terrainSize"></param>
-        /// <param name="terrainSegments"></param>
-        /// <param name="terrainStart"></param>
-        /// <param name="xOffset"></param>
-        /// <param name="zOffset"></param>
-        /// <param name="terrainXZScale"></param>
-        /// <param name="terrainYScale"></param>
-        /// <param name="heightMap"></param>
-        /// <param name="roadMap"></param>
-        public TerrainModel(GraphicsDevice device, int terrainSize, int terrainSegments, float terrainStart,
+        public Matrix ShadowMapView, ShadowMapProjection;
+        public RenderTarget2D ShadowMap { get; set; }
+
+        public TerrainModel(GraphicsDevice device, 
+            int terrainSize, int terrainSegments, float terrainStart,
             int xOffset, int zOffset, Vector3 terrainScale, 
-            float[,] heightMap, float[,] roadMap)
+            float[,] heightMap, float[,] roadMap,
+            Effect effect, DirectionalLight directionalLight)
         {
             this.device = device;
 
@@ -106,8 +98,7 @@ namespace datx02_rally
 
             BoundingBox = BoundingBox.CreateFromPoints(vertices.Select(vert => vert.Position));
 
-            StartPoint = vertices.First().Position;
-            EndPoint = vertices.Last().Position;
+            //MinBox = BoundingBox.CreateFromPoints(new Vector3[] { BoundingBox.Min.GetXZProjection(false), BoundingBox.Max.GetXZProjection(false) });
 
             #region Indicies & Vertex normals setup
 
@@ -182,20 +173,28 @@ namespace datx02_rally
                     typeof(MultitexturedVertex), vertices.Length,
                     BufferUsage.None);
             vertexBuffer.SetData(vertices);
+
+            #region Effect
+
+            this.Effect = effect;
+            this.ShadowMap = new RenderTarget2D(device, 1024, 1024, false, SurfaceFormat.Color, DepthFormat.Depth24);
+
+            #endregion
+
+
         }
 
 
-        public void Draw(Matrix view, Matrix projection, Vector3 cameraPosition, DirectionalLight directionalLight,
-            Matrix lightView, Matrix lightProjection, Texture2D shadowMap)
+        public void Draw(Matrix view, Matrix projection, Vector3 cameraPosition, DirectionalLight directionalLight)
         {
             Effect.Parameters["EyePosition"].SetValue(cameraPosition);
             Effect.Parameters["View"].SetValue(view);
             Effect.Parameters["World"].SetValue(Matrix.Identity);
             Effect.Parameters["Projection"].SetValue(projection);
 
-            Effect.Parameters["LightView"].SetValue(lightView);
-            Effect.Parameters["LightProjection"].SetValue(lightProjection);
-            Effect.Parameters["ShadowMap"].SetValue(shadowMap);
+            Effect.Parameters["ShadowMapView"].SetValue(ShadowMapView);
+            Effect.Parameters["ShadowMapProjection"].SetValue(ShadowMapProjection);
+            Effect.Parameters["ShadowMap"].SetValue(ShadowMap);
 
             Effect.Parameters["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(Matrix.Identity)));
 
@@ -220,6 +219,17 @@ namespace datx02_rally
             Effect.Parameters["Projection"].SetValue(projection);
 
             foreach (EffectPass pass in Effect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                device.Indices = indexBuffer;
+                device.SetVertexBuffer(vertexBuffer);
+                device.DrawIndexedPrimitives(PrimitiveType.TriangleList, 0, 0, vertexBuffer.VertexCount, 0, indexBuffer.IndexCount / 3);
+            }
+        }
+
+        internal void Draw(BasicEffect btest)
+        {
+            foreach (EffectPass pass in btest.CurrentTechnique.Passes)
             {
                 pass.Apply();
                 device.Indices = indexBuffer;

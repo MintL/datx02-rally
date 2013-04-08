@@ -4,7 +4,7 @@ float CalcShadowTermPCF(sampler2D shadowMapSampler, float fLightDepth, float2 vT
 {
 	float fShadowTerm = 0.0f;
 	float2 g_vShadowMapSize = float2(2048.0, 2048.0);
-	float BIAS = 0.003;
+	float BIAS = -0.003;
 
     // transform to texel space
     float2 vShadowMapCoord =  g_vShadowMapSize * vTexCoord;

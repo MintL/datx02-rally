@@ -13,7 +13,6 @@ namespace datx02_rally
     {
         private InputComponent input;
         public Dictionary<Player, Car> Cars = new Dictionary<Player, Car>();
-        //public Car Car { get; set; }
 
         public CarControlComponent(Game1 game)
             : base(game)
@@ -21,13 +20,11 @@ namespace datx02_rally
             this.input = game.GetService<InputComponent>();
         }
 
-        public void AddCar(Player player, Model model, float wheelRadius)
+        public void AddCar(Player player, Model model)
         {
-            if (model == null) 
-            {
+            if (model == null)
                 model = Game.Content.Load<Model>(@"Models/porsche");
-                wheelRadius = 10.4725f;
-            }
+
             if (Game1.GetInstance().currentState == GameState.Gameplay)
                 Cars[player] = (Game1.GetInstance().currentView as GamePlayView).MakeCar();
         }
@@ -69,15 +66,15 @@ namespace datx02_rally
                 // Turn Wheel
                 car.WheelRotationY += (input.GetState(Input.Steer) * car.TurnSpeed);
                 car.WheelRotationY = MathHelper.Clamp(car.WheelRotationY, -car.MaxWheelTurn, car.MaxWheelTurn);
-                if (Math.Abs(car.WheelRotationY) > MathHelper.Pi / 720)
+                if (Math.Abs(car.WheelRotationY) > .001f)
                     car.WheelRotationY *= .95f;
                 else
                     car.WheelRotationY = 0;
             }
 
             //Friction if is not driving
-            float friction = .97f; // 0.995f;
-            if (Math.Abs(input.GetState(Input.Thrust)) < 0.001f)
+            float friction = .97f;
+            if (Math.Abs(input.GetState(Input.Thrust)) < .001f)
             {
                 car.Speed *= friction;
             }

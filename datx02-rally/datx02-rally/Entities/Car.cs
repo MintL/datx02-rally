@@ -45,10 +45,6 @@ namespace datx02_rally
         public float MaxWheelTurn { get; protected set; }
         public float TurnSpeed { get; protected set; }
         
-        // Physics
-
-        public BoundingBox BBox { get; protected set; }
-
         // Distance between wheelaxis.
         private float L = 40.197f;
 
@@ -59,8 +55,6 @@ namespace datx02_rally
         public Car(Model model, float wheelRadius)
         {
             this.Model = model;
-
-            BBox = GetBoundingBox(model);
 
             this.Position = Vector3.Zero;
 
@@ -75,6 +69,7 @@ namespace datx02_rally
             this.wheelRadius = wheelRadius;
         }
 
+        /*
         protected BoundingBox GetBoundingBox(Model model)
         {
             // Initialize minimum and maximum corners of the bounding box to max and min values
@@ -108,6 +103,7 @@ namespace datx02_rally
             // Create and return bounding box
             return new BoundingBox(min, max);
         }
+        */
 
         public Vector3 previousPos;
         public float previousRotation;

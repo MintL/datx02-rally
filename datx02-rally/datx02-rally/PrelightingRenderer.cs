@@ -77,6 +77,9 @@ namespace datx02_rally
             {
                 for (int x = 0; x < terrainSegmentsCount; x++)
                 {
+                    if (x == 0 && z == 0)
+                        continue;
+
                     var terrain = terrainSegments[x, z];
                     terrain.Effect.Parameters["LightTexture"].SetValue(LightTarget);
                     terrain.Effect.Parameters["PrelightProjection"].SetValue(LightProjection);

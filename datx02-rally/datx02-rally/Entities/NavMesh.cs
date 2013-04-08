@@ -8,11 +8,55 @@ using datx02_rally.GameLogic;
 
 namespace datx02_rally.Entities
 {
-    class NavMeshVisualizer
+    class NavMeshTriangle
+    {
+        public Vector3[] vertices;
+        public Vector3 baryCenter;
+        public Vector3 normal;
+
+        public Vector3 ab, ac;
+
+        public Plane trianglePlane;
+
+        public NavMeshTriangle(params Vector3[] verts)
+        {
+            if (verts.Length != 3)
+                throw new ArgumentException("Not 3 vertices!");
+
+            vertices = verts;
+            normal = Vector3.Normalize(Vector3.Cross(ab = (vertices[1] - vertices[0]), ac = (vertices[2] - vertices[0])));
+            float oneThird = 1 / 3f;
+            baryCenter = vertices[0] + oneThird * ab + oneThird * ac;
+
+            trianglePlane = new Plane(verts[0], verts[1], verts[2]);
+        }
+    }
+
+    struct NavMeshTriangleVertex : IVertexType
+    {
+        public Vector3 Position;
+
+        public static VertexDeclaration VertexDeclaration =
+            new VertexDeclaration(new VertexElement(0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0));
+
+        public NavMeshTriangleVertex(Vector3 position)
+        {
+            Position = position;
+        }
+
+        VertexDeclaration IVertexType.VertexDeclaration
+        {
+            get { return VertexDeclaration; }
+        }
+    }
+
+    class NavMesh
     {
         private GraphicsDevice device;
 
+        // public NavMeshTriangleVertex[] vertices;
         public VertexPositionColor[] vertices;
+
         private VertexBuffer vertexbuffer;
 
         private IndexBuffer indexBuffer;
@@ -21,44 +65,21 @@ namespace datx02_rally.Entities
 
         public NavMeshTriangle[] triangles;
 
-        public class NavMeshTriangle
-        {
-            public Vector3[] vertices;
-            public Vector3 baryCenter;
-            public Vector3 normal;
-            
-            public Vector3 ab, ac;
-
-            public Plane trianglePlane;
-
-            public NavMeshTriangle(params Vector3[] verts)
-            {
-                if (verts.Length != 3)
-                    throw new ArgumentException("Not 3 vertices!");
-
-                vertices = verts;
-                normal = Vector3.Normalize(Vector3.Cross(ab = (vertices[1] - vertices[0]), ac = (vertices[2] - vertices[0])));
-                baryCenter = vertices[0] + 1 / 3f * ab + 1 / 3f * ac;
-
-                trianglePlane = new Plane(verts[0], verts[1], verts[2]);
-            }
-        }
-
-        public NavMeshVisualizer(GraphicsDevice device, datx02_rally.GameLogic.Curve curve, int resolution, float width, Vector3 terrainScale)
+        public NavMesh(GraphicsDevice device, datx02_rally.GameLogic.Curve curve, int resolution, float width, Vector3 terrainScale)
         {
             this.device = device;
 
             #region Vertices
 
+            //vertices = new NavMeshTriangleVertex[2 * resolution];
             vertices = new VertexPositionColor[2 * resolution];
-            for (int i = 0; i < vertices.Length; i += 2)
             {
-                float t = i / (float)vertices.Length;
-                var position = curve.GetPoint(t);
-                var side = Vector3.Normalize(Vector3.Cross((curve.GetPoint(t + .0001f) - position), Vector3.Up));
-
-                vertices[i] = new VertexPositionColor(terrainScale * (position - width * side), Color.White);
-                vertices[i + 1] = new VertexPositionColor(terrainScale * (position + width * side), Color.Red);
+                int i = 0;
+                foreach (var point in new CurveRasterization(curve, resolution).Points)
+                {
+                    vertices[i++] = new VertexPositionColor(terrainScale * (point.Position - width * point.Side), Color.White);
+                    vertices[i++] = new VertexPositionColor(terrainScale * (point.Position + width * point.Side), Color.White);
+                }
             }
 
             #endregion
@@ -67,7 +88,7 @@ namespace datx02_rally.Entities
 
             int[] indices = new int[6 * resolution];
 
-            int[] offsets = { 0, 1, 2, 2, 1, 0};
+            int[] offsets = { 0, 1, 2, 2, 1, 0 };
             for (int i = 0; i < indices.Length; i++)
             {
                 int v = i / 3 + offsets[i % 6];
@@ -127,7 +148,6 @@ namespace datx02_rally.Entities
 
         public void Draw(Matrix view, Matrix projection)
         {
-            //Effect.EnableDefaultLighting();
             Effect.VertexColorEnabled = true;
 
             Effect.World = Matrix.Identity;
@@ -146,7 +166,6 @@ namespace datx02_rally.Entities
                     0, 0, 
                     vertexbuffer.VertexCount, 0, 
                     vertexbuffer.VertexCount * 2);
-
             }
 
         }
