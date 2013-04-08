@@ -311,12 +311,11 @@ namespace datx02_rally.Menus
 
             heightmapGenerator.Smoothen();
             heightmapGenerator.Perturb(30f);
-            heightmapGenerator.Smoothen(); heightmapGenerator.Smoothen();
-            heightmapGenerator.Smoothen();
-            heightmapGenerator.Smoothen();
-            heightmapGenerator.Smoothen();
-            heightmapGenerator.Smoothen();
-            heightmapGenerator.Smoothen();
+
+            for (int i = 0; i < 5; i++)
+            {
+                heightmapGenerator.Smoothen();
+            }
 
             terrainEffect = content.Load<Effect>(@"Effects\TerrainShading");
 
@@ -543,6 +542,9 @@ namespace datx02_rally.Menus
 
                 obj.Position = terrainScale * pos;
                 obj.Rotation = new Vector3(0, MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()), 0);
+
+                // Update the BoundingSphere
+                obj.Update(null);
 
                 GraphicalObjects.Add(obj);
                 ShadowCasterObjects.Add(obj);
@@ -1119,9 +1121,8 @@ namespace datx02_rally.Menus
 
             
 
-            shadowMapEffect.Parameters["View"].SetValue(shadowMapView);
-            shadowMapEffect.Parameters["Projection"].SetValue(shadowMapProjection);
-            //shadowMapEffect.Parameters["AlphaMap"].SetValue(oldEffects[1].Parameters["AlphaMap"].GetValueTexture2D());
+            //shadowMapEffect.Parameters["View"].SetValue(shadowMapView);
+            //shadowMapEffect.Parameters["Projection"].SetValue(shadowMapProjection);
             shadowMapEffect.Parameters["AlphaEnabled"].SetValue(false);
 
             GraphicsDevice.BlendState = BlendState.Opaque;
@@ -1139,14 +1140,26 @@ namespace datx02_rally.Menus
             foreach (var gameObject in ShadowCasterObjects)
             {
                 var oldEffects = new Dictionary<ModelMeshPart, Effect>();
-                foreach (var mesh in gameObject.Model.Meshes)
-                    foreach (var meshpart in mesh.MeshParts)
-                    {
-                        oldEffects.Add(meshpart, meshpart.Effect);
-                        meshpart.Effect = shadowMapEffect;
-                    }
 
-                gameObject.Draw(shadowMapView, shadowMapProjection);
+                if (boundingBox.Intersects(gameObject.BoundingSphere))
+                {
+
+                    foreach (var mesh in gameObject.Model.Meshes)
+                        foreach (var meshpart in mesh.MeshParts)
+                        {
+                            Effect shadowMapEffectClone = shadowMapEffect.Clone();
+                            if (meshpart.Effect.Parameters["AlphaMap"].GetValueTexture2D() != null)
+                            {
+                                shadowMapEffectClone.Parameters["AlphaMap"].SetValue(meshpart.Effect.Parameters["AlphaMap"].GetValueTexture2D());
+                                shadowMapEffectClone.Parameters["AlphaEnabled"].SetValue(true);
+                            }
+                            oldEffects.Add(meshpart, meshpart.Effect);
+                            meshpart.Effect = shadowMapEffectClone;
+                        }
+
+                
+                    gameObject.Draw(shadowMapView, shadowMapProjection);
+                }
 
                 foreach (var meshpart in oldEffects.Keys)
                     meshpart.Effect = oldEffects[meshpart];

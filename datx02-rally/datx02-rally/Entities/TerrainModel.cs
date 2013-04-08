@@ -177,7 +177,7 @@ namespace datx02_rally
             #region Effect
 
             this.Effect = effect;
-            this.ShadowMap = new RenderTarget2D(device, 1024, 1024, false, SurfaceFormat.Color, DepthFormat.Depth24);
+            this.ShadowMap = new RenderTarget2D(device, 1024, 1024, false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
 
             #endregion
 

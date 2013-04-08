@@ -50,8 +50,8 @@ namespace datx02_rally.Entities
 
             // Do nothing if the object is outside the view frustum
             BoundingFrustum viewFrustum = new BoundingFrustum(view * projection);
-            //if (viewFrustum.Intersects(BoundingSphere))
-            //{
+            if (viewFrustum.Intersects(BoundingSphere))
+            {
                 world = Matrix.CreateScale(Scale) * Matrix.CreateFromYawPitchRoll(Rotation.Y, Rotation.X, Rotation.Z) * Matrix.CreateTranslation(Position);
 
                 foreach (ModelMesh mesh in Model.Meshes)
@@ -79,7 +79,7 @@ namespace datx02_rally.Entities
                     }
                     mesh.Draw();
                 }
-            //}
+            }
         }
     }
 }
