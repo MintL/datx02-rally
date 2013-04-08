@@ -3,47 +3,50 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using datx02_rally.GameLogic;
+using datx02_rally.Entities;
 
 namespace datx02_rally.EventTrigger
 {
     public abstract class AbstractTrigger
     {
-        public bool Active { get; protected set; }
-        public TimeSpan Duration { get; protected set; }
-        
-        private TimeSpan activeTime;
+        public bool Enabled { get; protected set; }
+        public CurveRasterization Curve { get; protected set; }
 
-        public AbstractTrigger(TimeSpan duration)
+        protected int currentPoint = 0;
+
+        public event EventHandler<EventArgs> Triggered;
+
+        //public TimeSpan Duration { get; protected set; }
+        //private TimeSpan activeTime;
+
+        public AbstractTrigger()
         {
-            Active = false;
-            Duration = duration;
+            Enabled = true;
         }
 
-        public abstract void Update(GameTime gameTime, Vector3 position);
-
-        public void Update(GameTime gameTime)
+        public AbstractTrigger(CurveRasterization curve) : this()
         {
-            activeTime += gameTime.ElapsedGameTime;
-            if (Active && activeTime > Duration)
-                Active = false;
+            Curve = curve;
         }
 
-        public void Trigger(TriggerData data)
+        public abstract void Update(IMovingObject movingObject) ;
+
+        protected void Trigger()
         {
-            Active = true;
-        }
-
-    }
-
-    public struct TriggerData
-    {
-        public Vector3 Position;
-        public TimeSpan Time;
-
-        public TriggerData (Vector3 position, TimeSpan time)
-        {
-            Position = position;
-            Time = time;
+            Triggered(this, EventArgs.Empty);
         }
     }
+
+    //public struct TriggerData
+    //{
+    //    public Vector3 Position;
+    //    public TimeSpan Time;
+
+    //    public TriggerData (Vector3 position, TimeSpan time)
+    //    {
+    //        Position = position;
+    //        Time = time;
+    //    }
+    //}
 }

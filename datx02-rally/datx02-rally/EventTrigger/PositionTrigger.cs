@@ -3,39 +3,50 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using datx02_rally.GameLogic;
+using datx02_rally.Entities;
 
 namespace datx02_rally.EventTrigger
 {
     public class PositionTrigger : AbstractTrigger
     {
-        public Vector3 TriggerPosition { get; set; }
-        public float TriggerDistance 
+        private int triggerPointIndex;
+
+        public PositionTrigger(CurveRasterization curve, int index)
+            : base(curve)
         {
-            get
+            triggerPointIndex = index;
+        }
+
+        public override void Update(IMovingObject movingObject)
+        {
+            float currentDistance = Vector3.DistanceSquared(movingObject.Position, Curve.Points[currentPoint].Position);
+            float distanceToNext = 0;
+            int direction;
+            if (Vector3.Dot(movingObject.Speed * movingObject.Heading, Curve.Points[currentPoint].Heading) >= .5f)
             {
-                return (float)Math.Sqrt(distanceSquared);
+                direction = 1;
             }
-            set
+            else
             {
-                distanceSquared = value * value;
-            } 
-        }
-
-        private float distanceSquared;
-
-        public PositionTrigger(Vector3 position, float distance, TimeSpan duration) : base(duration)
-        {
-            TriggerPosition = position;
-            TriggerDistance = distance;
-        }
-
-        public override void Update(GameTime gameTime, Vector3 position)
-        {
-            base.Update(gameTime);
-            if (!Active && Vector3.DistanceSquared(position, TriggerPosition) < distanceSquared)
-            {
-                Trigger(new TriggerData(position, gameTime.TotalGameTime));
+                direction = -1;
             }
+            int nextPoint = currentPoint + direction % Curve.Points.Count;
+            distanceToNext = Vector3.DistanceSquared(movingObject.Position, Curve.Points[nextPoint].Position);
+
+            if (distanceToNext < currentPoint)
+            {
+                currentPoint = nextPoint;
+                if (currentPoint == triggerPointIndex)
+                    Trigger();
+            }
+
+            //base.Update(gameTime);
+            //if (!Active && Vector3.DistanceSquared(position, TriggerPosition) < distanceSquared)
+            //{
+            //    Trigger(new TriggerData(position, gameTime.TotalGameTime));
+            //}
         }
+
     }
 }

@@ -196,6 +196,10 @@ namespace datx02_rally.Menus
             components.Add(carControlComponent);
             services.AddService(typeof(CarControlComponent), carControlComponent);
 
+            var triggerManager = new TriggerManager(gameInstance);
+            components.Add(triggerManager);
+            services.AddService(typeof(TriggerManager), triggerManager);
+
             // Particle systems
 
             plasmaSystem = new PlasmaParticleSystem(gameInstance, content);
@@ -614,10 +618,12 @@ namespace datx02_rally.Menus
 
             #endregion
 
-            TriggerManager.GetInstance().CreatePositionTrigger("test", new Vector3(0, 1500, -3200), 3000f, new TimeSpan(0, 0, 5));
-            TriggerManager.GetInstance().CreateRectangleTrigger("goalTest", new Vector3(-200, 1500, 2000), new Vector3(1500, 1500, 2000),
-                                                                            new Vector3(-200, 1500, 4000), new Vector3(1500, 1500, 4000),
-                                                                            new TimeSpan(0, 0, 5));
+            var triggerManager = gameInstance.GetService<TriggerManager>();
+            triggerManager.Triggers.Add("test", new PositionTrigger(raceTrack.CurveRasterization, 0));
+            //triggerManager.CreatePositionTrigger("test", new Vector3(0, 1500, -3200), 3000f, new TimeSpan(0, 0, 5));
+            //triggerManager.CreateRectangleTrigger("goalTest", new Vector3(-200, 1500, 2000), new Vector3(1500, 1500, 2000),
+            //                                                                new Vector3(-200, 1500, 4000), new Vector3(1500, 1500, 4000),
+            //                                                                new TimeSpan(0, 0, 5));
 
         }
 
@@ -783,9 +789,6 @@ namespace datx02_rally.Menus
                 {
                     obj.Update(gameTime);
                 }
-
-                TriggerManager.GetInstance().Update(gameTime, Car.Position);
-
             }
             else
             {
@@ -814,7 +817,7 @@ namespace datx02_rally.Menus
             smokeTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (smokeTime > 0.2)
             {
-                smokeSystem.AddParticle(Car.Position + Car.Forward * 500 +
+                smokeSystem.AddParticle(Car.Position + Car.Heading * 500 +
                     new Vector3(
                         (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 500,
                         500 * (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()),

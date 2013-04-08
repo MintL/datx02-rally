@@ -4,10 +4,11 @@ using System.Linq;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
+using datx02_rally.Entities;
 
 namespace datx02_rally
 {
-    public class Car : ITargetNode
+    public class Car : ITargetNode, IMovingObject
     {
         public Model Model { get; set; }
 
@@ -49,7 +50,7 @@ namespace datx02_rally
         private float L = 40.197f;
 
         // Forward direction calculated to know where the car is heading. Not for set outside.
-        public Vector3 Forward { get; protected set; }
+        public Vector3 Heading { get; set; }
 
         // Constructor
         public Car(Model model, float wheelRadius)
@@ -113,16 +114,16 @@ namespace datx02_rally
             previousPos = Position;
             previousRotation = Rotation;
 
-            Forward = Vector3.Transform(Vector3.Forward,
+            Heading = Vector3.Transform(Vector3.Forward,
                 Matrix.CreateRotationY(Rotation));
-            Vector3 axisOffset = L * Forward;
+            Vector3 axisOffset = L * Heading;
 
             Vector3 front = Position + axisOffset;
             Vector3 back = Position - axisOffset;
 
             front += Speed * Vector3.Transform(Vector3.Forward,
                 Matrix.CreateRotationY(Rotation + WheelRotationY));
-            back += Speed * Forward;
+            back += Speed * Heading;
 
             Vector3 oldPos = Position;
             Position = (front + back) / 2;
