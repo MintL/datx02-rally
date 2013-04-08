@@ -995,8 +995,8 @@ namespace datx02_rally.Menus
 
                         float projectionWidth = endpoint.Z - startpoint.Z,
                               projectionHeight = endpoint.X - startpoint.X,
-                              projectionNear = 50f,
-                              projectionFar = 25000;
+                              projectionNear = .50f,
+                              projectionFar = 50000;
                         var lookAtOffset = projectionNear + (projectionFar - projectionNear) / 2f;
 
                         var shadowmMapLookAtTarget = Vector3.Lerp(startpoint, endpoint, .5f);
@@ -1132,14 +1132,14 @@ namespace datx02_rally.Menus
             GraphicsDevice.BlendState = BlendState.Opaque;
 
 
-            //for (int z = 0; z < terrainSegmentsCount; z++)
-            //    for (int x = 0; x < terrainSegmentsCount; x++)
-            //    {
-            //        var terrain = terrainSegments[x, z];
-            //        terrain.Effect = shadowMapEffect;
-            //        terrain.Draw(shadowMapView, shadowMapProjection);
-            //        terrain.Effect = terrainEffect;
-            //    }
+            for (int z = 0; z < terrainSegmentsCount; z++)
+                for (int x = 0; x < terrainSegmentsCount; x++)
+                {
+                    var terrain = terrainSegments[x, z];
+                    terrain.Effect = shadowMapEffect;
+                    terrain.Draw(shadowMapView, shadowMapProjection);
+                    terrain.Effect = terrainEffect;
+                }
 
             foreach (var gameObject in ShadowCasterObjects)
             {
