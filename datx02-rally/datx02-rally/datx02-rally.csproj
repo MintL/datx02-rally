@@ -125,6 +125,7 @@
     <Compile Include="Entities\BirchTree.cs" />
     <Compile Include="Entities\FireObject.cs" />
     <Compile Include="Entities\GameObject.cs" />
+    <Compile Include="Entities\IMovingObject.cs" />
     <Compile Include="Entities\OakTree.cs" />
     <Compile Include="Entities\Stone.cs" />
     <Compile Include="EventTrigger\AbstractTrigger.cs" />

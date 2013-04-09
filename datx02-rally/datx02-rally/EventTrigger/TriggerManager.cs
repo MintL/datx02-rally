@@ -6,45 +6,47 @@ using Microsoft.Xna.Framework;
 
 namespace datx02_rally.EventTrigger
 {
-    public class TriggerManager
+    public class TriggerManager : GameComponent
     {
-        public Dictionary<string,AbstractTrigger> Triggers = new Dictionary<string,AbstractTrigger>();
-        private static TriggerManager instance;
-        public static TriggerManager GetInstance()
-        {
-            if (instance == null) instance = new TriggerManager();
-            return instance;
-        }
-
-        private TriggerManager()
+        public Dictionary<string, AbstractTrigger> Triggers = new Dictionary<string, AbstractTrigger>();
+        
+        public TriggerManager(Game game)
+            : base(game)
         {
         }
 
-        public void Update(GameTime gameTime, Vector3 position)
+        public override void Update(GameTime gameTime)
         {
-            foreach (AbstractTrigger trigger in Triggers.Values)
-            {
-                trigger.Update(gameTime, position);
-            }
+            foreach (var trigger in Triggers.Values)
+                foreach (var car in Game.GetService<CarControlComponent>().Cars.Values)
+                    trigger.Update(car);
         }
 
-        public void CreatePositionTrigger(string name, Vector3 position, float distance, TimeSpan duration)
-        {
-            Triggers.Add(name, new PositionTrigger(position, distance, duration));
-        }
+        //public void Update(GameTime gameTime, Vector3 position)
+        //{
+        //    foreach (AbstractTrigger trigger in Triggers.Values)
+        //    {
+        //        trigger.Update(gameTime, position);
+        //    }
+        //}
 
-        public void CreateRectangleTrigger(string name, Vector3 cornerOne, Vector3 cornerTwo, Vector3 cornerThree, Vector3 cornerFour, TimeSpan duration)
-        {
-            Triggers.Add(name, new RectangleTrigger(cornerOne, cornerTwo, cornerThree, cornerFour, duration));
-        }
+        //public void CreatePositionTrigger(string name, Vector3 position, float distance, TimeSpan duration)
+        //{
+        //    Triggers.Add(name, new PositionTrigger(position, distance, duration));
+        //}
 
-        public bool IsActive(string name)
-        {
-            if (Triggers.ContainsKey(name))
-            {
-                return Triggers[name].Active;
-            }
-            return false;
-        }
+        //public void CreateRectangleTrigger(string name, Vector3 cornerOne, Vector3 cornerTwo, Vector3 cornerThree, Vector3 cornerFour, TimeSpan duration)
+        //{
+        //    Triggers.Add(name, new RectangleTrigger(cornerOne, cornerTwo, cornerThree, cornerFour, duration));
+        //}
+
+        //public bool IsActive(string name)
+        //{
+        //    if (Triggers.ContainsKey(name))
+        //    {
+        //        return Triggers[name].Active;
+        //    }
+        //    return false;
+        //}
     }
 }

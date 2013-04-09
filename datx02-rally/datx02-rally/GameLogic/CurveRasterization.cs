@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace datx02_rally.GameLogic
 {
-    class CurveRasterization
+    public class CurveRasterization
     {
         public class CurvePoint
         {

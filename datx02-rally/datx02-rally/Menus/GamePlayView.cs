@@ -23,6 +23,8 @@ namespace datx02_rally.Menus
     class GamePlayView : GameStateView
     {
 
+        List<PointLight> wayLights = new List<PointLight>();
+
         #region Field
 
         GamePlayMode mode;
@@ -196,6 +198,10 @@ namespace datx02_rally.Menus
             components.Add(carControlComponent);
             services.AddService(typeof(CarControlComponent), carControlComponent);
 
+            var triggerManager = new TriggerManager(gameInstance);
+            components.Add(triggerManager);
+            services.AddService(typeof(TriggerManager), triggerManager);
+
             // Particle systems
 
             plasmaSystem = new PlasmaParticleSystem(gameInstance, content);
@@ -273,15 +279,15 @@ namespace datx02_rally.Menus
             var heightMap = heightmapGenerator.Generate();
 
             var roadMap = new float[heightMapSize, heightMapSize];
-            raceTrack = new RaceTrack(heightMapSize);
+            raceTrack = new RaceTrack(heightMapSize, terrainScale);
 
             navMesh = new NavMesh(GraphicsDevice, raceTrack.Curve, 1500, roadWidth, terrainScale);
 
-            Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f);
+            Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f) / terrainScale;
 
             for (float t = 0; t < 1; t += .0002f)
             {
-                var e = raceTrack.Curve.GetPoint(t);
+                var e = raceTrack.Curve.GetPoint(t) / terrainScale;
 
                 for (float j = -roadFalloff; j <= roadFalloff; j++)
                 {
@@ -386,7 +392,7 @@ namespace datx02_rally.Menus
 
             
 
-            Vector3 pointLightOffset = new Vector3(0, 250, 0);
+            Vector3 pointLightOffset = new Vector3(0, terrainScale.Y * 250, 0);
             foreach (var point in raceTrack.CurveRasterization.Points)
             {
                 Random r = UniversalRandom.GetInstance();
@@ -395,8 +401,13 @@ namespace datx02_rally.Menus
                     .6f + .4f * (float)r.NextDouble(),
                     .6f + .4f * (float)r.NextDouble(),
                     .6f + .4f * (float)r.NextDouble());
-                pointLights.Add(new PointLight(terrainScale * point.Position + pointLightOffset, color, 450));
+
+                pointLights.Add(new PointLight(point.Position + pointLightOffset, color, 450));
+
+                wayLights.Add(new PointLight(point.Position, new Vector3(2, 0, 0), 450));
             }
+
+            GraphicalObjects.AddRange(wayLights);
 
             //Vector3 forward = Vector3.Transform(Vector3.Backward,
             //    Matrix.CreateRotationY(Car.Rotation));
@@ -622,11 +633,15 @@ namespace datx02_rally.Menus
 
             #endregion
 
-            TriggerManager.GetInstance().CreatePositionTrigger("test", new Vector3(0, 1500, -3200), 3000f, new TimeSpan(0, 0, 5));
-            TriggerManager.GetInstance().CreateRectangleTrigger("goalTest", new Vector3(-200, 1500, 2000), new Vector3(1500, 1500, 2000),
-                                                                            new Vector3(-200, 1500, 4000), new Vector3(1500, 1500, 4000),
-                                                                            new TimeSpan(0, 0, 5));
+            var triggerManager = gameInstance.GetService<TriggerManager>();
 
+            var trigger = new PositionTrigger(raceTrack.CurveRasterization, 0, true, true);
+            trigger.Triggered += (sender, e) =>
+            {
+                thunderBoltGenerator.Flash();
+            };
+            triggerManager.Triggers.Add("start", trigger);
+            
         }
 
         public Car MakeCar()
@@ -791,9 +806,6 @@ namespace datx02_rally.Menus
                 {
                     obj.Update(gameTime);
                 }
-
-                TriggerManager.GetInstance().Update(gameTime, Car.Position);
-
             }
             else
             {
@@ -822,7 +834,7 @@ namespace datx02_rally.Menus
             smokeTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (smokeTime > 0.2)
             {
-                smokeSystem.AddParticle(Car.Position + Car.Forward * 500 +
+                smokeSystem.AddParticle(Car.Position + Car.Heading * 500 +
                     new Vector3(
                         (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 500,
                         500 * (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()),

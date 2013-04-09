@@ -3,47 +3,61 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using datx02_rally.GameLogic;
+using datx02_rally.Entities;
 
 namespace datx02_rally.EventTrigger
 {
     public abstract class AbstractTrigger
     {
-        public bool Active { get; protected set; }
-        public TimeSpan Duration { get; protected set; }
-        
-        private TimeSpan activeTime;
+        public bool Enabled { get; protected set; }
+        public CurveRasterization Curve { get; protected set; }
 
-        public AbstractTrigger(TimeSpan duration)
+        protected int currentPoint = -1;
+
+        public event EventHandler<TriggeredEventArgs> Triggered;
+
+        //public TimeSpan Duration { get; protected set; }
+        //private TimeSpan activeTime;
+
+        public AbstractTrigger()
         {
-            Active = false;
-            Duration = duration;
+            Enabled = true;
         }
 
-        public abstract void Update(GameTime gameTime, Vector3 position);
-
-        public void Update(GameTime gameTime)
+        public AbstractTrigger(CurveRasterization curve) : this()
         {
-            activeTime += gameTime.ElapsedGameTime;
-            if (Active && activeTime > Duration)
-                Active = false;
+            Curve = curve;
         }
 
-        public void Trigger(TriggerData data)
-        {
-            Active = true;
-        }
+        public abstract void Update(IMovingObject movingObject) ;
 
+        protected void Trigger(int index)
+        {
+            if (Triggered != null)
+                Triggered(this, new TriggeredEventArgs(index));
+        }
     }
 
-    public struct TriggerData
+    public class TriggeredEventArgs : EventArgs
     {
-        public Vector3 Position;
-        public TimeSpan Time;
+        public int Index { get; private set; }
 
-        public TriggerData (Vector3 position, TimeSpan time)
+        public TriggeredEventArgs(int index)
         {
-            Position = position;
-            Time = time;
+            Index = index;
         }
     }
+
+    //public struct TriggerData
+    //{
+    //    public Vector3 Position;
+    //    public TimeSpan Time;
+
+    //    public TriggerData (Vector3 position, TimeSpan time)
+    //    {
+    //        Position = position;
+    //        Time = time;
+    //    }
+    //}
 }
