@@ -22,9 +22,6 @@ namespace datx02_rally.Menus
     public enum GamePlayMode { Singleplayer, Multiplayer }
     class GamePlayView : GameStateView
     {
-
-        List<PointLight> wayLights = new List<PointLight>();
-
         #region Field
 
         GamePlayMode mode;
@@ -76,7 +73,8 @@ namespace datx02_rally.Menus
         int terrainSegmentsCount = 16;
 
         // XZ- & Y scaling.
-        Vector3 terrainScale = new Vector3(75, 10000, 75);
+        //Vector3 terrainScale = new Vector3(75, 10000, 75);
+        Vector3 terrainScale = new Vector3(75, 3500, 75);
 
         float roadWidth = 10; // #Quads
         float roadFalloff = 30; // #Quads
@@ -403,7 +401,6 @@ namespace datx02_rally.Menus
                     .6f + .4f * (float)r.NextDouble());
 
                 pointLights.Add(new PointLight(point.Position + pointLightOffset, color, 450));
-
                 //wayLights.Add(new PointLight(point.Position, new Vector3(2, 0, 0), 450));
 
                 fire = new FireObject(gameInstance, content, point.Position + point.Side * 600 + Vector3.Up * 30, Vector3.Up * 10);
@@ -411,8 +408,6 @@ namespace datx02_rally.Menus
                 //fire = new FireObject(gameInstance, content, point.Position + point.Side * -300 + Vector3.Up * 30, Vector3.Up * 10);
                 //pointLights.Add(fire);
             }
-
-            GraphicalObjects.AddRange(wayLights);
 
             //Vector3 forward = Vector3.Transform(Vector3.Backward,
             //    Matrix.CreateRotationY(Car.Rotation));
@@ -653,7 +648,7 @@ namespace datx02_rally.Menus
             // Load car effect (10p-light, env-map)
             carEffect = content.Load<Effect>(@"Effects/CarShading");
 
-            Car car = new Car(content.Load<Model>(@"Models/porsche"), 10.4725f);
+            Car car = new Car(content.Load<Model>(@"Models/Cars/porsche_new"), 13.4631138f);
 
             foreach (var mesh in car.Model.Meshes)
             {
@@ -684,10 +679,13 @@ namespace datx02_rally.Menus
                     }
                 }
             }
-            car.Model.Meshes[0].Effects[1].Parameters["MaterialUnshaded"].SetValue(true);
-            car.Model.Meshes[0].Effects[1].Parameters["MaterialAmbient"].SetValue(Color.Red.ToVector3() * 2.0f);
-            car.Model.Meshes[0].Effects[2].Parameters["MaterialUnshaded"].SetValue(true);
-            car.Model.Meshes[0].Effects[2].Parameters["MaterialAmbient"].SetValue(Color.Red.ToVector3() * 2.0f);
+
+            // CAR LIGHTS
+
+            //car.Model.Meshes[0].Effects[1].Parameters["MaterialUnshaded"].SetValue(true);
+            //car.Model.Meshes[0].Effects[1].Parameters["MaterialAmbient"].SetValue(Color.Red.ToVector3() * 2.0f);
+            //car.Model.Meshes[0].Effects[2].Parameters["MaterialUnshaded"].SetValue(true);
+            //car.Model.Meshes[0].Effects[2].Parameters["MaterialAmbient"].SetValue(Color.Red.ToVector3() * 2.0f);
 
             // Place car at start.
             SetCarAtStart(car);
@@ -699,7 +697,7 @@ namespace datx02_rally.Menus
         {
             Vector3 carPosition = raceTrack.Curve.GetPoint(0);
             Vector3 carHeading = (raceTrack.Curve.GetPoint(.001f) - carPosition);
-            car.Position = terrainScale * carPosition;
+            car.Position = carPosition;
             car.Rotation = (float)Math.Atan2(carHeading.X, carHeading.Z) - (float)Math.Atan2(0, -1);
         }
 
@@ -727,6 +725,7 @@ namespace datx02_rally.Menus
             if (input.GetPressed(Input.Exit))
             {
                 Paused = !Paused;
+                Game.GetService<CameraComponent>().Enabled = !Paused;
             }
             if (!Paused)
             {
@@ -1051,8 +1050,8 @@ namespace datx02_rally.Menus
 
             prelightingRenderer.Render(view, directionalLight, terrainSegments, terrainSegmentsCount, pointLights, Car, GraphicalObjects);
 
-            //if (!GameSettings.Default.PerformanceMode)
-            //    RenderEnvironmentMap(gameTime);
+            if (!GameSettings.Default.PerformanceMode)
+                RenderEnvironmentMap(gameTime);
 
             GraphicsDevice.SetRenderTarget(postProcessTexture);
 
@@ -1386,13 +1385,13 @@ namespace datx02_rally.Menus
                     world *= Matrix.CreateRotationX(car.WheelRotationX);
                     if ((int)mesh.Tag > 1)
                         world *= Matrix.CreateRotationY(car.WheelRotationY);
+
                 }
 
-                // Local modelspace, due to bad .X-file/exporter
-                world *= car.Model.Bones[1 + car.Model.Meshes.IndexOf(mesh) * 2].Transform;
+                // Local modelspace
+                world *= mesh.ParentBone.Transform;
 
                 // World
-                
                 world *= car.RotationMatrix * car.TranslationMatrix;
 
                 carSettings.World = world;
@@ -1418,7 +1417,7 @@ namespace datx02_rally.Menus
 
         private void DrawGhostCar(Matrix view, Matrix projection, GameTime gameTime)
         {
-            float t = ((float)gameTime.TotalGameTime.TotalSeconds / 1020f) % 1f;
+            float t = ((float)gameTime.TotalGameTime.TotalSeconds / 256f) % 1f;
 
             foreach (var mesh in Car.Model.Meshes) // 5 meshes
             {
@@ -1430,8 +1429,8 @@ namespace datx02_rally.Menus
                     world *= Matrix.CreateRotationX(ghostWheelRotation);
                 }
 
-                // Local modelspace, due to bad .X-file/exporter
-                world *= Car.Model.Bones[1 + Car.Model.Meshes.IndexOf(mesh) * 2].Transform;
+                // Local modelspace
+                world *= mesh.ParentBone.Transform;
 
                 // World
                 Vector3 position = raceTrack.Curve.GetPoint(t);

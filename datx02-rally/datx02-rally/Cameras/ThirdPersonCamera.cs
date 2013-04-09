@@ -44,12 +44,12 @@ namespace datx02_rally
             
             // Constants
 
-            Zoom = 300;
+            Zoom = 330;
             RotationSpeed = .05f;
             RotationMagnet = .075f;
             TranslationMagnet = .98f;
 
-            lookUpOffset = Zoom * new Vector3(0, .25f, 0);
+            lookUpOffset = Zoom * new Vector3(0, .275f, 0);
             translationOffset = Zoom * new Vector3(0, .2f, 1);
 
             cameraRotation = TargetNode.RotationMatrix;
@@ -65,7 +65,7 @@ namespace datx02_rally
             // Get X relative to lookAt.
             Vector3 localX = Vector3.Cross(translationOffset, Vector3.Up);
 
-            Vector2 movement = RotationSpeed * new Vector2(input.GetState(Input.CameraX), input.GetState(Input.CameraY));
+            Vector2 movement = RotationSpeed * new Vector2(input.GetState(Input.CameraX), .0025f * input.GetState(Input.CameraY));
 
             // Offset with user controlled camera
             localOffset *= Matrix.CreateFromAxisAngle(localX, movement.Y) * Matrix.CreateRotationY(movement.X);
