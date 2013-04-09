@@ -372,8 +372,6 @@ namespace datx02_rally.Menus
             Player localPlayer = gameInstance.GetService<ServerClient>().LocalPlayer;
             gameInstance.GetService<CarControlComponent>().Cars[localPlayer] = Car;
 
-            Car.Position *= terrainScale;
-
             #endregion
 
             #region Lights
@@ -548,8 +546,8 @@ namespace datx02_rally.Menus
 
                 GraphicalObjects.Add(obj);
                 ShadowCasterObjects.Add(obj);
-                
 
+                
             }
 
             for (int i = 0; i < GraphicalObjects.Count / 5; i++)
@@ -567,6 +565,17 @@ namespace datx02_rally.Menus
                 pointLights.Add(new PointLight(obj.Position + Vector3.Up * 500, new Vector3(0.7f, 0.7f, 0.7f), 450));
             }
             GraphicalObjects.AddRange(pointLights);
+
+            //List<FireObject> list = new List<FireObject>();
+            //foreach (PointLight p in pointLights)
+            //{
+            //    FireObject obj = new FireObject(gameInstance, content, p.Position, p.Position + Vector3.Up * 10);
+            //    list.Add(obj);
+                
+            //}
+            //pointLights.AddRange(list);
+            //GraphicalObjects.AddRange(list);
+
 
             #region Animals
 
