@@ -37,12 +37,12 @@ namespace datx02_rally
 
     class GameModeState 
     {
-        public Dictionary<PlayerWrapperTrigger, bool> Triggers = new Dictionary<PlayerWrapperTrigger, bool>();
+        public Dictionary<PlayerWrapperTrigger, TriggerStatistics> Triggers = new Dictionary<PlayerWrapperTrigger, TriggerStatistics>();
 
         public GameModeState(PlayerWrapperTrigger[] triggers) 
         {
             foreach (var trigger in triggers)
-		        Triggers.Add(trigger, false);
+		        Triggers.Add(trigger, null);
         }
 
         public void Update(GameTime gameTime) 
@@ -50,20 +50,29 @@ namespace datx02_rally
             foreach (var triggerPair in Triggers)
             {
                 triggerPair.Key.Update(gameTime);
-                if (!triggerPair.Value)
-                    Triggers[triggerPair.Key] = triggerPair.Key.Active;
+                if (triggerPair.Value == null && triggerPair.Key.Active)
+                    Triggers[triggerPair.Key] = new TriggerStatistics(gameTime);
             }
         }
 
         public bool IsStateFinished()
         {
-            foreach (bool wasTriggered in Triggers.Values)
+            foreach (var triggerStat in Triggers.Values)
             {
-                if (!wasTriggered) 
+                if (triggerStat == null) 
                     return false;
             }
             return true;
         }
+    }
 
+    class TriggerStatistics
+    {
+        private GameTime triggerTime;
+
+        public TriggerStatistics(GameTime triggerTime)
+        {
+            this.triggerTime = triggerTime;
+        }
     }
 }
