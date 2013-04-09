@@ -8,7 +8,7 @@ namespace datx02_rally.GameLogic
 {
     class RaceTrackCurve : Curve
     {
-        public RaceTrackCurve(float terrainWidth)
+        public RaceTrackCurve(float terrainWidth, Vector3 terrainScale)
         {
             float nodecenter = terrainWidth / 4f;
             float variation = 1.3f;
@@ -17,24 +17,24 @@ namespace datx02_rally.GameLogic
 
             nodes.Add(new CurveNode()
             {
-                Position = new Vector3(0, height, -nodecenter),
-                Tangent = Vector3.Transform(new Vector3(variation * nodecenter, 0, 0), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
+                Position = terrainScale * new Vector3(0, height, -nodecenter),
+                Tangent = Vector3.Transform(terrainScale * new Vector3(variation * nodecenter, 0, 0), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
             });
 
             nodes.Add(new CurveNode()
             {
-                Position = new Vector3(nodecenter, height, 0),
-                Tangent = Vector3.Transform(new Vector3(0, 0, variation * nodecenter), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
+                Position = terrainScale * new Vector3(nodecenter, height, 0),
+                Tangent = Vector3.Transform(terrainScale * new Vector3(0, 0, variation * nodecenter), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
             });
             nodes.Add(new CurveNode()
             {
-                Position = new Vector3(0, height, nodecenter),
-                Tangent = Vector3.Transform(new Vector3(variation * -nodecenter, 0, 0), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
+                Position = terrainScale * new Vector3(0, height, nodecenter),
+                Tangent = Vector3.Transform(terrainScale * new Vector3(variation * -nodecenter, 0, 0), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
             });
             nodes.Add(new CurveNode()
             {
-                Position = new Vector3(-nodecenter, height, 0),
-                Tangent = Vector3.Transform(new Vector3(0, 0, variation * -nodecenter), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
+                Position = terrainScale * new Vector3(-nodecenter, height, 0),
+                Tangent = Vector3.Transform(terrainScale * new Vector3(0, 0, variation * -nodecenter), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1)))
             });
         }
 

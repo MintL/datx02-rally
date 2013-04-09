@@ -9,7 +9,7 @@ namespace datx02_rally.GameLogic
     /// <summary>
     /// Implementation of Bezier-curve
     /// </summary>
-    abstract class Curve
+    public abstract class Curve
     {
         protected List<CurveNode> nodes = new List<CurveNode>();
         
@@ -48,7 +48,7 @@ namespace datx02_rally.GameLogic
         }
     }
 
-    class CurveNode
+    public class CurveNode
     {
         public Vector3 Position { get; set; }
 

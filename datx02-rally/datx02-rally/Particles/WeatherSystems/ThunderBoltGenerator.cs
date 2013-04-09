@@ -14,6 +14,8 @@ namespace datx02_rally.Particles.WeatherSystems
         private Vector3 startPosition = new Vector3(0, 10000, 0),
             endPosition = new Vector3(0);
 
+        private bool spawn;
+
         private float flash = 0;
         private Vector3 flashColor = new Vector3(4f, 3f, 5f); // new Vector3(.56f, .35f, .75f);
 
@@ -41,11 +43,16 @@ namespace datx02_rally.Particles.WeatherSystems
             }
         }
 
+        public void Flash()
+        {
+            spawn = true;
+        }
+
         public override void Update(GameTime gameTime)
         {
-            if (//UniversalRandom.GetInstance().NextDouble() < .002 || 
-                Game.GetService<InputComponent>().GetKey(Microsoft.Xna.Framework.Input.Keys.B))
+            if (spawn)
             {
+                spawn = false;
                 flash = 1;
                 Game.GetService<CameraComponent>().CurrentCamera.Shake();
 
