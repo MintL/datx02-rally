@@ -319,7 +319,7 @@ namespace datx02_rally.Menus
 
             terrainEffect = content.Load<Effect>(@"Effects\TerrainShading");
 
-            terrainEffect.Parameters["TextureMap0"].SetValue(content.Load<Texture2D>(@"Terrain\road"));
+            
 
             //terrainEffect.Parameters["TextureMap0"].SetValue(content.Load<Texture2D>(@"Terrain\sand"));
             #region TEXTURE RENDERING
@@ -336,8 +336,15 @@ namespace datx02_rally.Menus
 
             //terrainEffect.Parameters["TextureMap1"].SetValue(grassTexture);
 
-            #endregion
+            directionalLight = new DirectionalLight(
+                new Vector3(-1.25f, -2f, 5.0f), // Direction
+                new Vector3(.15f, .14f, .29f), // Ambient
+                new Vector3(.46f, .33f, .75f)); // Diffuse
 
+            gameInstance.Services.AddService(typeof(DirectionalLight), directionalLight);
+
+            #endregion
+            terrainEffect.Parameters["TextureMap0"].SetValue(content.Load<Texture2D>(@"Terrain\road"));
             terrainEffect.Parameters["TextureMap1"].SetValue(content.Load<Texture2D>(@"Terrain\grass"));
             terrainEffect.Parameters["TextureMap2"].SetValue(content.Load<Texture2D>(@"Terrain\rock"));
             terrainEffect.Parameters["TextureMap3"].SetValue(content.Load<Texture2D>(@"Terrain\snow"));
@@ -348,11 +355,6 @@ namespace datx02_rally.Menus
 
             float terrainStart = -.5f * heightMapSize;
 
-            directionalLight = new DirectionalLight(
-                new Vector3(1.25f, -2, -5), // Direction
-                new Vector3(.3f, .27f, .3f), // Ambient
-                .6f * Color.White.ToVector3()); // Diffuse
-
             for (int z = 0; z < terrainSegmentsCount; z++)
             {
                 for (int x = 0; x < terrainSegmentsCount; x++)
@@ -360,7 +362,7 @@ namespace datx02_rally.Menus
                     terrainSegments[x, z] = new TerrainModel(GraphicsDevice,
                         terrainSegmentSize, terrainSegmentsCount, terrainStart,
                         x * terrainSegmentSize, z * terrainSegmentSize,
-                        terrainScale, heightMap, roadMap, terrainEffect,directionalLight);
+                        terrainScale, heightMap, roadMap, terrainEffect, directionalLight);
                 }
             }
 
@@ -382,12 +384,7 @@ namespace datx02_rally.Menus
             pointLightModel = content.Load<Model>(@"Models\light");
             spotLightModel = content.Load<Model>(@"Models\Cone");
 
-            directionalLight = new DirectionalLight(
-                new Vector3(-1.25f, -2f, 5.0f), // Direction
-                new Vector3(.3f, .27f, .3f), // Ambient
-                .6f * Color.White.ToVector3()); // Diffuse
-
-            gameInstance.Services.AddService(typeof(DirectionalLight), directionalLight);
+            
 
             Vector3 pointLightOffset = new Vector3(0, 250, 0);
             foreach (var point in raceTrack.CurveRasterization.Points)
