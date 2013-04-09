@@ -7,7 +7,6 @@ using Microsoft.Xna.Framework.Graphics;
 using datx02_rally.Graphics;
 using datx02_rally.GameLogic;
 using datx02_rally.Entities;
-using datx02_rally.ModelPresenters;
 using Particle3DSample;
 using datx02_rally.Particles.WeatherSystems;
 using Microsoft.Xna.Framework.Content;
@@ -92,12 +91,7 @@ namespace datx02_rally.Menus
 
         public Car Car { get; private set; }
         Effect carEffect;
-        CarShadingSettings carSettings = new CarShadingSettings()
-        {
-            MaterialReflection = .9f,
-            MaterialShininess = 10
-        };
-
+        
         // Used for raycollision test.
         int lastTriangle;
 
@@ -420,8 +414,6 @@ namespace datx02_rally.Menus
 
             dustEmitter = new ParticleEmitter(dustSystem, 150, Car.Position);
 
-            
-
             #region SkySphere
 
             skyBoxModel = content.Load<Model>(@"Models/skybox");
@@ -600,13 +592,16 @@ namespace datx02_rally.Menus
             #endregion
 
             #region DynamicEnvironment
+
             refCubeMap = new RenderTargetCube(this.GraphicsDevice, 256, true, SurfaceFormat.Color, DepthFormat.Depth16);
-            carSettings.EnvironmentMap = refCubeMap;
             foreach (TerrainModel model in terrainSegments)
             {
                 model.Effect.Parameters["EnvironmentMap"].SetValue(refCubeMap);
             }
             //skyBoxEffect.Parameters["SkyboxTexture"].SetValue(refCubeMap);
+
+            carEffect.Parameters["EnvironmentMap"].SetValue(cubeMap);
+
             #endregion
 
             #region PostProcess
@@ -1120,12 +1115,6 @@ namespace datx02_rally.Menus
             spriteBatch.End();
         }
         
-        /// <summary>
-        /// Renders shadowcasters in the current bounding box.
-        /// </summary>
-        /// <param name="boundingBox"></param>
-        /// <param name="shadowMapView"></param>
-        /// <param name="shadowMapProjection"></param>
         private void RenderShadowCasters(BoundingBox boundingBox, Matrix shadowMapView, Matrix shadowMapProjection)
         {
             //Matrix[] transforms = new Matrix[oakTree.Bones.Count];
@@ -1189,7 +1178,6 @@ namespace datx02_rally.Menus
                 
             }
         }
-
 
         private void RenderEnvironmentMap(GameTime gameTime)
         {
@@ -1347,45 +1335,26 @@ namespace datx02_rally.Menus
 
         private void DrawCar(Matrix view, Matrix projection, Car car)
         {
-            carSettings.View = view;
-            carSettings.Projection = projection;
-
-            //carSettings.EyePosition = view.Translation;
-            carSettings.EyePosition = gameInstance.GetService<CameraComponent>().Position;
-
-            //Vector3 direction = car.Position - carSettings.EyePosition;
-            //direction.Y = 0;
-            //direction = Vector3.Normalize(direction);
-
-            Vector3[] positions = new Vector3[pointLights.Count];
-            Vector3[] diffuses = new Vector3[pointLights.Count];
-            float[] ranges = new float[pointLights.Count];
+            Vector3[] pointLightPositions = new Vector3[pointLights.Count];
+            Vector3[] pointLightDiffuses = new Vector3[pointLights.Count];
+            float[] pointLightRanges = new float[pointLights.Count];
             for (int i = 0; i < 4; i++)
             {
-                positions[i] = pointLights[i].Position;
-                diffuses[i] = pointLights[i].Diffuse;
-                ranges[i] = pointLights[i].Range;
+                pointLightPositions[i] = pointLights[i].Position;
+                pointLightDiffuses[i] = pointLights[i].Diffuse;
+                pointLightRanges[i] = pointLights[i].Range;
             }
-
-            carSettings.LightPosition = positions;
-            carSettings.LightDiffuse = diffuses;
-            carSettings.LightRange = ranges;
-            carSettings.NumLights = 2;
-
-            carSettings.DirectionalLightDirection = directionalLight.Direction;
-            carSettings.DirectionalLightDiffuse = directionalLight.Diffuse;
-            carSettings.DirectionalLightAmbient = directionalLight.Ambient;
 
             foreach (var mesh in car.Model.Meshes) // 5 meshes
             {
                 Matrix world = Matrix.Identity;
+
                 // Wheel transformation
                 if ((int)mesh.Tag > 0)
                 {
                     world *= Matrix.CreateRotationX(car.WheelRotationX);
                     if ((int)mesh.Tag > 1)
                         world *= Matrix.CreateRotationY(car.WheelRotationY);
-
                 }
 
                 // Local modelspace
@@ -1394,13 +1363,33 @@ namespace datx02_rally.Menus
                 // World
                 world *= car.RotationMatrix * car.TranslationMatrix;
 
-                carSettings.World = world;
-                carSettings.NormalMatrix = Matrix.Invert(Matrix.Transpose(world));
-
-
                 foreach (Effect effect in mesh.Effects) // 5 effects for main, 1 for each wheel
                 {
-                    effect.SetCarShadingParameters(carSettings);
+                    EffectParameterCollection param = effect.Parameters;
+
+                    param["MaterialDiffuse"].SetValue(Color.Red.ToVector3());
+                    //param["MaterialAmbient"].SetValue(settings.MaterialAmbient);
+                    //param["MaterialSpecular"].SetValue(settings.MaterialSpecular);
+
+                    param["MaterialReflection"].SetValue(.9f);
+                    param["MaterialShininess"].SetValue(10);
+
+                    param["World"].SetValue(world);
+                    param["View"].SetValue(view);
+                    param["Projection"].SetValue(projection);
+
+                    param["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(world)));
+
+                    param["EyePosition"].SetValue(view.Translation);
+
+                    param["LightPosition"].SetValue(pointLightPositions);
+                    param["LightDiffuse"].SetValue(pointLightDiffuses);
+                    param["LightRange"].SetValue(pointLightRanges);
+                    param["NumLights"].SetValue(2);
+
+                    param["DirectionalLightDirection"].SetValue(directionalLight.Direction);
+                    param["DirectionalLightDiffuse"].SetValue(directionalLight.Diffuse);
+                    param["DirectionalLightAmbient"].SetValue(directionalLight.Ambient);
 
                     //effect.Parameters["LightView"].SetValue( shadowMapView);
                     //effect.Parameters["LightProjection"].SetValue(shadowMapProjection);
@@ -1417,71 +1406,72 @@ namespace datx02_rally.Menus
 
         private void DrawGhostCar(Matrix view, Matrix projection, GameTime gameTime)
         {
-            float t = ((float)gameTime.TotalGameTime.TotalSeconds / 256f) % 1f;
+            //return;
+            //float t = ((float)gameTime.TotalGameTime.TotalSeconds / 256f) % 1f;
 
-            foreach (var mesh in Car.Model.Meshes) // 5 meshes
-            {
-                Matrix world = Matrix.Identity;
+            //foreach (var mesh in Car.Model.Meshes) // 5 meshes
+            //{
+            //    Matrix world = Matrix.Identity;
 
-                // Wheel transformation
-                if ((int)mesh.Tag > 0)
-                {
-                    world *= Matrix.CreateRotationX(ghostWheelRotation);
-                }
+            //    // Wheel transformation
+            //    if ((int)mesh.Tag > 0)
+            //    {
+            //        world *= Matrix.CreateRotationX(ghostWheelRotation);
+            //    }
 
-                // Local modelspace
-                world *= mesh.ParentBone.Transform;
+            //    // Local modelspace
+            //    world *= mesh.ParentBone.Transform;
 
-                // World
-                Vector3 position = raceTrack.Curve.GetPoint(t);
-                Vector3 heading = raceTrack.Curve.GetPoint((t + .01f) % 1f) - position;
-                heading.Normalize();
+            //    // World
+            //    Vector3 position = raceTrack.Curve.GetPoint(t);
+            //    Vector3 heading = raceTrack.Curve.GetPoint((t + .01f) % 1f) - position;
+            //    heading.Normalize();
 
-                Vector3 normal = Vector3.Up;
+            //    Vector3 normal = Vector3.Up;
 
-                foreach (var triangle in navMesh.triangles)
-                {
-                    var downray = new Ray(position, Vector3.Down);
-                    var upray = new Ray(position, Vector3.Up);
+            //    foreach (var triangle in navMesh.triangles)
+            //    {
+            //        var downray = new Ray(position, Vector3.Down);
+            //        var upray = new Ray(position, Vector3.Up);
 
-                    float? d1 = downray.Intersects(triangle.trianglePlane),
-                        d2 = upray.Intersects(triangle.trianglePlane);
+            //        float? d1 = downray.Intersects(triangle.trianglePlane),
+            //            d2 = upray.Intersects(triangle.trianglePlane);
 
-                    if (d1.HasValue || d2.HasValue)
-                    {
-                        float d = d1.HasValue ? d1.Value : d2.Value;
-                        Ray ray = d1.HasValue ? downray : upray;
+            //        if (d1.HasValue || d2.HasValue)
+            //        {
+            //            float d = d1.HasValue ? d1.Value : d2.Value;
+            //            Ray ray = d1.HasValue ? downray : upray;
 
-                        var point = ray.Position + d * ray.Direction;
+            //            var point = ray.Position + d * ray.Direction;
 
-                        bool onTriangle = PointInTriangle(triangle.vertices[0],
-                            triangle.vertices[1],
-                            triangle.vertices[2],
-                            point);
+            //            bool onTriangle = PointInTriangle(triangle.vertices[0],
+            //                triangle.vertices[1],
+            //                triangle.vertices[2],
+            //                point);
 
-                        if (onTriangle)
-                        {
-                            position = point;
-                            normal = triangle.normal;
-                            break;
-                        }
-                    }
-                }
+            //            if (onTriangle)
+            //            {
+            //                position = point;
+            //                normal = triangle.normal;
+            //                break;
+            //            }
+            //        }
+            //    }
 
-                ghostWheelRotation -= (position - ghostPosition).Length() / 10.4725f;
-                ghostPosition = position;
+            //    ghostWheelRotation -= (position - ghostPosition).Length() / 10.4725f;
+            //    ghostPosition = position;
 
-                world *= Vector3.Forward.GetRotationMatrix(heading) * Vector3.Up.GetRotationMatrix(normal) *
-                    Matrix.CreateTranslation(position);
+            //    world *= Vector3.Forward.GetRotationMatrix(heading) * Vector3.Up.GetRotationMatrix(normal) *
+            //        Matrix.CreateTranslation(position);
 
-                carSettings.World = world;
-                carSettings.NormalMatrix = Matrix.Invert(Matrix.Transpose(world));
+            //    carSettings.World = world;
+            //    carSettings.NormalMatrix = Matrix.Invert(Matrix.Transpose(world));
 
-                foreach (Effect effect in mesh.Effects) // 5 effects for main, 1 for each wheel
-                    effect.SetCarShadingParameters(carSettings);
+            //    foreach (Effect effect in mesh.Effects) // 5 effects for main, 1 for each wheel
+            //        effect.SetCarShadingParameters(carSettings);
 
-                mesh.Draw();
-            }
+            //    mesh.Draw();
+            //}
 
         }
 

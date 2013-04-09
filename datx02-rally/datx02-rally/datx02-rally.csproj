@@ -177,7 +177,6 @@
     <Compile Include="Entities\NavMesh.cs" />
     <Compile Include="GameLogic\Curve.cs" />
     <Compile Include="GameLogic\RaceTrack.cs" />
-    <Compile Include="ModelPresenters\BasicShadingPresenter.cs" />
     <Compile Include="Particles\ParticleEmitter.cs" />
     <Compile Include="Particles\ParticleSettings.cs" />
     <Compile Include="Particles\ParticleSystem.cs" />

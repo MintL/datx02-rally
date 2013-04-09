@@ -9,7 +9,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Particle3DSample;
-using datx02_rally.ModelPresenters;
 using datx02_rally.GameLogic;
 using datx02_rally.MapGeneration;
 using datx02_rally.Entities;
