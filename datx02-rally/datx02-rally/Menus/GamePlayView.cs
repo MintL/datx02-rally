@@ -392,7 +392,7 @@ namespace datx02_rally.Menus
 
             
 
-            Vector3 pointLightOffset = new Vector3(0, terrainScale.Y * 250, 0);
+            Vector3 pointLightOffset = new Vector3(0, 250, 0);
             foreach (var point in raceTrack.CurveRasterization.Points)
             {
                 Random r = UniversalRandom.GetInstance();
@@ -404,7 +404,12 @@ namespace datx02_rally.Menus
 
                 pointLights.Add(new PointLight(point.Position + pointLightOffset, color, 450));
 
-                wayLights.Add(new PointLight(point.Position, new Vector3(2, 0, 0), 450));
+                //wayLights.Add(new PointLight(point.Position, new Vector3(2, 0, 0), 450));
+
+                fire = new FireObject(gameInstance, content, point.Position + point.Side * 600 + Vector3.Up * 30, Vector3.Up * 10);
+                pointLights.Add(fire);
+                //fire = new FireObject(gameInstance, content, point.Position + point.Side * -300 + Vector3.Up * 30, Vector3.Up * 10);
+                //pointLights.Add(fire);
             }
 
             GraphicalObjects.AddRange(wayLights);
@@ -420,8 +425,7 @@ namespace datx02_rally.Menus
 
             dustEmitter = new ParticleEmitter(dustSystem, 150, Car.Position);
 
-            fire = new FireObject(gameInstance, content, Car.Position + Vector3.Up * 100, Car.Position + Vector3.Up * 110);
-            pointLights.Add(fire);
+            
 
             #region SkySphere
 

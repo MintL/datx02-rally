@@ -15,11 +15,13 @@ namespace datx02_rally.Entities
         SmokePlumeParticleSystem fireSmokeSystem;
         ParticleEmitter fireSmokeEmitter;
 
+        Vector3 smokeOffset;
+
         private TimeSpan colorTime = TimeSpan.Zero;
         private int colorIndex = 0;
         private static Color[] colors = new Color[] { new Color(255, 100, 50), new Color(255, 50, 25) };
 
-        public FireObject(Game1 gameInstance, ContentManager content, Vector3 firePosition, Vector3 smokePosition)
+        public FireObject(Game1 gameInstance, ContentManager content, Vector3 firePosition, Vector3 smokeOffset)
             : base(firePosition, Color.Red.ToVector3(), 400)
         {
             fireSystem = new FireParticleSystem(gameInstance, content);
@@ -31,8 +33,8 @@ namespace datx02_rally.Entities
             fireEmitter = new ParticleEmitter(fireSystem, 100, firePosition);
             fireEmitter.Origin = firePosition;
 
-            fireSmokeEmitter = new ParticleEmitter(fireSmokeSystem, 100, smokePosition);
-            fireSmokeEmitter.Origin = smokePosition;
+            fireSmokeEmitter = new ParticleEmitter(fireSmokeSystem, 100, firePosition + smokeOffset);
+            fireSmokeEmitter.Origin = firePosition + smokeOffset;
         }
         
         public override void Update(GameTime gameTime)
@@ -45,7 +47,7 @@ namespace datx02_rally.Entities
                 colorTime = TimeSpan.Zero;
             }
 
-            Position += Vector3.Right * (float)gameTime.ElapsedGameTime.TotalSeconds * 100f;
+            //Position += Vector3.Right * (float)gameTime.ElapsedGameTime.TotalSeconds * 100f;
 
             BoundingSphere = new BoundingSphere(Position, 1);
 
@@ -53,7 +55,7 @@ namespace datx02_rally.Entities
             fireEmitter.Update(gameTime, fireEmitter.Origin);
             fireSystem.Update(gameTime);
 
-            fireSmokeEmitter.Origin = Position + Vector3.Up * 10;
+            fireSmokeEmitter.Origin = Position + smokeOffset;
             fireSmokeEmitter.Update(gameTime, fireSmokeEmitter.Origin);
             fireSmokeSystem.Update(gameTime);
         }
