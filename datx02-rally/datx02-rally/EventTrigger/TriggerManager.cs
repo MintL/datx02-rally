@@ -17,7 +17,9 @@ namespace datx02_rally.EventTrigger
 
         public override void Update(GameTime gameTime)
         {
-
+            foreach (var trigger in Triggers.Values)
+                foreach (var car in Game.GetService<CarControlComponent>().Cars.Values)
+                    trigger.Update(car);
         }
 
         //public void Update(GameTime gameTime, Vector3 position)

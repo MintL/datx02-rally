@@ -13,9 +13,9 @@ namespace datx02_rally.EventTrigger
         public bool Enabled { get; protected set; }
         public CurveRasterization Curve { get; protected set; }
 
-        protected int currentPoint = 0;
+        protected int currentPoint = -1;
 
-        public event EventHandler<EventArgs> Triggered;
+        public event EventHandler<TriggeredEventArgs> Triggered;
 
         //public TimeSpan Duration { get; protected set; }
         //private TimeSpan activeTime;
@@ -32,9 +32,20 @@ namespace datx02_rally.EventTrigger
 
         public abstract void Update(IMovingObject movingObject) ;
 
-        protected void Trigger()
+        protected void Trigger(int index)
         {
-            Triggered(this, EventArgs.Empty);
+            if (Triggered != null)
+                Triggered(this, new TriggeredEventArgs(index));
+        }
+    }
+
+    public class TriggeredEventArgs : EventArgs
+    {
+        public int Index { get; private set; }
+
+        public TriggeredEventArgs(int index)
+        {
+            Index = index;
         }
     }
 
