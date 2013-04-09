@@ -1,17 +1,20 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using datx02_rally.EventTrigger;
+using datx02_rally.Menus;
 
 namespace datx02_rally
 {
     abstract class GameplayMode
     {
+        protected Game1 gameInstance;
         protected List<GameModeState> states;
         private int currentState;
         public bool GameOver { private set; get; }
 
-        public GameplayMode()
+        public GameplayMode(Game1 gameInstance)
         {
+            this.gameInstance = gameInstance;
             GameOver = false;
             currentState = 0;
             Initialize();
@@ -35,11 +38,11 @@ namespace datx02_rally
     }
 
 
-    class GameModeState 
+    public class GameModeState 
     {
         public Dictionary<PlayerWrapperTrigger, TriggerStatistics> Triggers = new Dictionary<PlayerWrapperTrigger, TriggerStatistics>();
 
-        public GameModeState(PlayerWrapperTrigger[] triggers) 
+        public GameModeState(List<PlayerWrapperTrigger> triggers) 
         {
             foreach (var trigger in triggers)
 		        Triggers.Add(trigger, null);
@@ -66,7 +69,7 @@ namespace datx02_rally
         }
     }
 
-    class TriggerStatistics
+    public class TriggerStatistics
     {
         private GameTime triggerTime;
 

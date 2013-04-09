@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace datx02_rally.EventTrigger
 {
-    class PlayerWrapperTrigger
+    public class PlayerWrapperTrigger
     {
         private AbstractTrigger trigger;
         private Car player;
