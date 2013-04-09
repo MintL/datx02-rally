@@ -601,6 +601,33 @@
   <ItemGroup>
     <Folder Include="Effects\Car\" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Models\Cars\Textures\996_BOD.JPG">
+      <Name>996_BOD</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Models\Cars\Textures\996_INT.JPG">
+      <Name>996_INT</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Models\Cars\Textures\996_LIGH.JPG">
+      <Name>996_LIGH</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Models\Cars\Textures\996_WH.JPG">
+      <Name>996_WH</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Models\Cars\Textures\PLAT_US.JPG">
+      <Name>PLAT_US</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />
   <!--  To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

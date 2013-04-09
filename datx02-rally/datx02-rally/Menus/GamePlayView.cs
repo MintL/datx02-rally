@@ -668,6 +668,10 @@ namespace datx02_rally.Menus
                     if (oldEffect != null)
                     {
                         part.Effect = carEffect.Clone();
+
+                        part.Effect.Parameters["DiffuseMap"].SetValue(oldEffect.Texture);
+                        //part.Effect.Parameters["DiffuseMap"].SetValue(content.Load<Texture2D>(@"Terrain\grass"));
+
                         part.Effect.Parameters["MaterialDiffuse"].SetValue(oldEffect.DiffuseColor);
                         part.Effect.Parameters["MaterialAmbient"].SetValue(oldEffect.DiffuseColor * .5f);
                         part.Effect.Parameters["MaterialSpecular"].SetValue(oldEffect.DiffuseColor * .3f);

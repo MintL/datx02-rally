@@ -26,6 +26,17 @@ float3 DirectionalLightDirection;
 float3 DirectionalLightAmbient;
 float3 DirectionalLightDiffuse;
 
+texture2D DiffuseMap;
+sampler2D diffuseMapSampler = sampler_state
+{
+	texture = <DiffuseMap>;
+	minfilter = linear;
+	magfilter = linear;
+	mipfilter = linear;
+	AddressU = Clamp;
+	AddressV = Clamp;
+};
+
 float MaterialReflection;
 Texture EnvironmentMap;
 samplerCUBE EnvironmentSampler = sampler_state
@@ -40,7 +51,6 @@ samplerCUBE EnvironmentSampler = sampler_state
 
 float4x4 LightView;
 float4x4 LightProjection;
-
 texture2D ShadowMap;
 sampler2D shadowMapSampler = sampler_state
 {
@@ -62,11 +72,12 @@ struct VertexShaderInput
 struct VertexShaderOutput
 {
     float4 Position : POSITION0;
-	float3 Normal : TEXCOORD0;
-	float3 ViewDirection : TEXCOORD1;
-	float3 WorldPosition : TEXCOORD2;
-	float4 PositionCopy : TEXCOORD3;
-	float4 OriginalPosition : TEXCOORD4;
+	float2 TexCoord : TEXCOORD0;
+	float3 Normal : TEXCOORD1;
+	float3 ViewDirection : TEXCOORD2;
+	float3 WorldPosition : TEXCOORD3;
+	float4 PositionCopy : TEXCOORD4;
+	float4 OriginalPosition : TEXCOORD5;
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
@@ -80,6 +91,8 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 	output.ViewDirection = EyePosition - worldPosition.xyz;
 	output.WorldPosition = worldPosition.xyz;
 	
+	output.TexCoord = input.TexCoord;
+
 	output.Normal = mul(input.Normal, NormalMatrix);
 	
 	output.PositionCopy = mul(viewPosition, PrelightProjection);
@@ -121,6 +134,7 @@ float4 GetPositionFromLight(float4 position)
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
 	float3 normal = normalize(input.Normal);
+
 	float3 directionFromEye = -normalize(input.ViewDirection);
 	float normalizationFactor = ((MaterialShininess + 2.0) / 8.0);
 	float4 totalLight = float4(MaterialAmbient * DirectionalLightAmbient, 1);
@@ -130,6 +144,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		return float4(MaterialAmbient, 1);
 	}
 
+	/*
 	for (int i = 0; i < NumLights; i++)
 	{
 		float3 L = LightPosition[i] - input.WorldPosition;
@@ -147,9 +162,10 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 		totalLight += float4(
 			attenuation * selfShadow *
-			(LightDiffuse[i] * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) + 
+			(LightDiffuse[i] * tex2D(diffuseMapSampler, input.TexCoord) * CalculateDiffuse(normal, directionToLight) + 
 			LightDiffuse[i] * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor), 1);
 	}
+	*/
 
 	// Directional light
 	float3 directionToLight = -normalize(DirectionalLightDirection);
@@ -158,7 +174,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 			0.0, 1.0), 5.0);
 
 	float3 reflection = CalculateEnvironmentReflection(normal, directionFromEye);
-	totalLight += float4(selfShadow * (DirectionalLightDiffuse * MaterialDiffuse * CalculateDiffuse(normal, directionToLight) +
+	totalLight += float4(selfShadow * (DirectionalLightDiffuse * tex2D(diffuseMapSampler, input.TexCoord) * CalculateDiffuse(normal, directionToLight) +
 					DirectionalLightDiffuse * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor +
 					texCUBE(EnvironmentSampler, reflection * float3(1,1,-1)) * fresnel * MaterialReflection), 1);
 	
@@ -167,6 +183,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float4 lightingPosition = GetPositionFromLight(input.OriginalPosition);
 	float2 shadowCoord = 0.5 * lightingPosition.xy / lightingPosition.w;
 	
+	/*
 	shadowCoord += 0.5f;
 	shadowCoord.y = 1.0f - shadowCoord.y;
 
@@ -175,6 +192,9 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		float ourDepth = 1 - (lightingPosition.z / lightingPosition.w);
 		totalLight.rgb *= .4 + .6 * CalcShadowTermPCF(shadowMapSampler, ourDepth, shadowCoord);
 	}
+	*/
+
+	//return tex2D(diffuseMapSampler, input.TexCoord);
 
 	return totalLight;
 }
