@@ -44,6 +44,8 @@ namespace datx02_rally
             //if (GameSettings.Default.FullScreen != Graphics.IsFullScreen)
             //    Graphics.ToggleFullScreen();
 
+            UniversalRandom.ResetInstance(0);
+
             IsMouseVisible = true;
         }
 

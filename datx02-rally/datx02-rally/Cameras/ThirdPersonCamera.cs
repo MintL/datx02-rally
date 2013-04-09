@@ -65,7 +65,7 @@ namespace datx02_rally
             // Get X relative to lookAt.
             Vector3 localX = Vector3.Cross(translationOffset, Vector3.Up);
 
-            Vector2 movement = RotationSpeed * new Vector2(input.GetState(Input.CameraX), input.GetState(Input.CameraY));
+            Vector2 movement = RotationSpeed * new Vector2(input.GetState(Input.CameraX), .0025f * input.GetState(Input.CameraY));
 
             // Offset with user controlled camera
             localOffset *= Matrix.CreateFromAxisAngle(localX, movement.Y) * Matrix.CreateRotationY(movement.X);
