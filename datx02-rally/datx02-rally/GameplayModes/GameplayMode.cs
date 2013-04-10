@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using datx02_rally.EventTrigger;
 using datx02_rally.Menus;
+using System;
 
 namespace datx02_rally
 {
@@ -30,7 +31,10 @@ namespace datx02_rally
             GameModeState current = states[currentState];
             current.Update(gameTime);
             if (current.IsStateFinished())
+            {
                 currentState++;
+                Console.WriteLine("Passed from state " + (currentState - 1) + " to state " + currentState);
+            }
             if (currentState > states.Count - 1)
                 GameOver = true;
         }
@@ -41,6 +45,7 @@ namespace datx02_rally
     public class GameModeState 
     {
         public Dictionary<PlayerWrapperTrigger, TriggerStatistics> Triggers = new Dictionary<PlayerWrapperTrigger, TriggerStatistics>();
+        private bool finished = false;
 
         public GameModeState(List<PlayerWrapperTrigger> triggers) 
         {
@@ -60,6 +65,9 @@ namespace datx02_rally
 
         public bool IsStateFinished()
         {
+            if (finished)
+                return true;
+
             foreach (var triggerStat in Triggers.Values)
             {
                 if (triggerStat == null) 
