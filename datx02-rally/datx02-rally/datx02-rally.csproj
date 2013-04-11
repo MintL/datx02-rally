@@ -135,6 +135,7 @@
     <Compile Include="Menus\MenuView.cs" />
     <Compile Include="Menus\MultiplayerMenu.cs" />
     <Compile Include="Menus\OverlayView.cs" />
+    <Compile Include="ObservableVariable.cs" />
     <Compile Include="Particles\WeatherSystems\SmokeCloudParticleSystem.cs" />
     <Compile Include="Menus\PauseMenu.cs" />
     <Compile Include="SpotLight.cs" />
