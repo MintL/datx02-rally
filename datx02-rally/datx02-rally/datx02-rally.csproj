@@ -129,9 +129,13 @@
     <Compile Include="Entities\OakTree.cs" />
     <Compile Include="Entities\Stone.cs" />
     <Compile Include="EventTrigger\AbstractTrigger.cs" />
+    <Compile Include="EventTrigger\PlayerWrapperTrigger.cs" />
     <Compile Include="EventTrigger\PositionTrigger.cs" />
     <Compile Include="EventTrigger\RectangleTrigger.cs" />
     <Compile Include="EventTrigger\TriggerManager.cs" />
+    <Compile Include="GameplayModes\GameplayMode.cs" />
+    <Compile Include="GameplayModes\MultiplayerRaceMode.cs" />
+    <Compile Include="GameplayModes\TimeTrialMode.cs" />
     <Compile Include="Graphics\MotionBlur.cs" />
     <Compile Include="GameLogic\CurveRasterization.cs" />
     <Compile Include="Menus\GamePlayView.cs" />
@@ -139,6 +143,7 @@
     <Compile Include="Menus\MultiplayerMenu.cs" />
     <Compile Include="Menus\OverlayView.cs" />
     <Compile Include="Particles\WeatherSystems\FireflySystem.cs" />
+    <Compile Include="ObservableVariable.cs" />
     <Compile Include="Particles\WeatherSystems\SmokeCloudParticleSystem.cs" />
     <Compile Include="Menus\PauseMenu.cs" />
     <Compile Include="SpotLight.cs" />
