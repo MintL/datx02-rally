@@ -15,22 +15,23 @@ namespace datx02_rally
     public class PointLight : GameObject
     {
         public Vector3 Diffuse { get; set; }
-        public float Range { get; set; }
+        public float Radius { get; set; }
 
-        private Vector3 colorDir = Vector3.One;
-        private Vector3 dir;
+        private Vector3 colorVariation = Vector3.One;
+        private Vector3 velocity;
 
-        public PointLight(Vector3 lightPosition, Vector3 diffuse, float range)
+        public PointLight(Vector3 position, Vector3 diffuse, float radius)
             : base()
         {
-            Position = lightPosition;
+            Position = position;
             Diffuse = diffuse;
-            Range = range;
+            Radius = radius;
 
-            dir = new Vector3(-1 + 2 * (float)UniversalRandom.GetInstance().NextDouble(),
+            // [-1..1]
+            velocity = new Vector3(-1 + 2 * (float)UniversalRandom.GetInstance().NextDouble(),
                         -1 + 2 * (float)UniversalRandom.GetInstance().NextDouble(),
                         -1 + 2 * (float)UniversalRandom.GetInstance().NextDouble());
-            dir.Normalize();
+            velocity.Normalize();
         }
 
         public PointLight(Vector3 lightPosition)
@@ -41,17 +42,17 @@ namespace datx02_rally
         public override void Update(GameTime gameTime)
         {
             Vector3 color = Diffuse;
-            color += colorDir * 0.01f;
+            color += colorVariation * 0.01f;
 
-            if (color.X < 0.4f || color.X > 0.99f) colorDir.X *= -1f;
-            if (color.Y < 0.4f || color.Y > 0.99f) colorDir.Y *= -1f;
-            if (color.Z < 0.4f || color.Z > 0.99f) colorDir.Z *= -1f;
+            if (color.X < 0.4f || color.X > 0.99f) colorVariation.X *= -1f;
+            if (color.Y < 0.4f || color.Y > 0.99f) colorVariation.Y *= -1f;
+            if (color.Z < 0.4f || color.Z > 0.99f) colorVariation.Z *= -1f;
 
             Diffuse = color;
 
             // position
-            dir += colorDir * 0.05f;
-            dir.Normalize();
+            velocity += colorVariation * 0.05f;
+            velocity.Normalize();
             //Position += new Vector3(dir.X * 10f, 0, dir.Y * 10f);
 
             BoundingSphere = new BoundingSphere(Position, 1);

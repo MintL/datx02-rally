@@ -1352,7 +1352,7 @@ namespace datx02_rally.Menus
             {
                 pointLightPositions[i] = pointLights[i].Position;
                 pointLightDiffuses[i] = pointLights[i].Diffuse;
-                pointLightRanges[i] = pointLights[i].Range;
+                pointLightRanges[i] = pointLights[i].Radius;
             }
 
             foreach (var mesh in car.Model.Meshes) // 5 meshes

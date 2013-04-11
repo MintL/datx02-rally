@@ -179,10 +179,10 @@ namespace datx02_rally
             {
                 lightingEffect.Parameters["LightColor"].SetValue(light.Diffuse * 2);
                 lightingEffect.Parameters["LightPosition"].SetValue(light.Position);
-                lightingEffect.Parameters["LightAttenuation"].SetValue(light.Range);
+                lightingEffect.Parameters["LightAttenuation"].SetValue(light.Radius);
 
                 light.Model.Meshes[0].MeshParts[0].Effect = lightingEffect;
-                Matrix wvp = (Matrix.CreateScale(light.Range / 10) * Matrix.CreateTranslation(light.Position)) * viewProjection;
+                Matrix wvp = (Matrix.CreateScale(light.Radius / 10) * Matrix.CreateTranslation(light.Position)) * viewProjection;
                 lightingEffect.Parameters["WorldViewProjection"].SetValue(wvp);
 
                 device.RasterizerState = RasterizerState.CullCounterClockwise;
