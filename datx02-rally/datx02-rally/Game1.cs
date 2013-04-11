@@ -48,6 +48,7 @@ namespace datx02_rally
             IsMouseVisible = true;
         }
 
+        // TODO: Use GameComponent.Game to get game-instance!
         public static Game1 GetInstance()
         {
             return Instance;

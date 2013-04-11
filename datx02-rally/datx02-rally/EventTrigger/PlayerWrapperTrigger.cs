@@ -10,9 +10,10 @@ namespace datx02_rally.EventTrigger
     {
         private AbstractTrigger trigger;
         private Car player;
-        public bool Active { 
-            private set;
-            get { return trigger.Active; }
+        public bool Active
+        {
+            private set { }
+            get { return false; }
         }
 
         public PlayerWrapperTrigger(AbstractTrigger trigger, Car player)
@@ -23,7 +24,7 @@ namespace datx02_rally.EventTrigger
 
         public void Update(GameTime gameTime)
         {
-            trigger.Update(gameTime, player.Position);
+            //trigger.Update(gameTime, player.Position);
         }
     }
 }
