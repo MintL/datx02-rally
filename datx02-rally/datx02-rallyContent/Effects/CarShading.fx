@@ -194,8 +194,6 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	}
 	*/
 
-	//return tex2D(diffuseMapSampler, input.TexCoord);
-
 	return totalLight;
 }
 

@@ -56,10 +56,6 @@ namespace datx02_rally.Menus
 
         #region Lights
 
-        // Model to represent a location of a pointlight
-        Model pointLightModel;
-        Model spotLightModel;
-
         List<PointLight> pointLights = new List<PointLight>();
         List<SpotLight> spotLights = new List<SpotLight>();
         DirectionalLight directionalLight;
@@ -175,67 +171,59 @@ namespace datx02_rally.Menus
         public override void Initialize()
         {
             // Components
-            var components = gameInstance.Components;
-            var services = gameInstance.Services;
+            var services = Game.Services;
 
             var cameraComponent = new CameraComponent(gameInstance);
-            components.Add(cameraComponent);
+            Game.Components.Add(cameraComponent);
             services.AddService(typeof(CameraComponent), cameraComponent);
 
             var hudComponent = new HUDComponent(gameInstance);
-            components.Add(hudComponent);
+            Game.Components.Add(hudComponent);
             services.AddService(typeof(HUDComponent), hudComponent);
             
             var carControlComponent = new CarControlComponent(gameInstance);
-            components.Add(carControlComponent);
+            Game.Components.Add(carControlComponent);
             services.AddService(typeof(CarControlComponent), carControlComponent);
 
             var triggerManager = new TriggerManager(gameInstance);
-            components.Add(triggerManager);
+            Game.Components.Add(triggerManager);
             services.AddService(typeof(TriggerManager), triggerManager);
 
             // Particle systems
 
             plasmaSystem = new PlasmaParticleSystem(gameInstance, content);
-            components.Add(plasmaSystem);
+            Game.Components.Add(plasmaSystem);
             particleSystems.Add(plasmaSystem);
 
             redSystem = new RedPlasmaParticleSystem(gameInstance, content);
-            components.Add(redSystem);
+            Game.Components.Add(redSystem);
             particleSystems.Add(redSystem);
 
             yellowSystem = new YellowPlasmaParticleSystem(gameInstance, content);
-            components.Add(yellowSystem);
+            Game.Components.Add(yellowSystem);
             particleSystems.Add(yellowSystem);
 
             greenSystem = new GreenParticleSystem(gameInstance, content);
-            components.Add(greenSystem);
+            Game.Components.Add(greenSystem);
             particleSystems.Add(greenSystem);
 
             airParticles = new AirParticleSystem(gameInstance, content);
-            components.Add(airParticles);
+            Game.Components.Add(airParticles);
             particleSystems.Add(airParticles);
 
-            //dustParticles = new ParticleSystem[2];
-            //dustParticles[0] = new SmokePlumeParticleSystem(gameInstance, content);
-            //dustParticles[1] = new SmokePlumeParticleSystem(gameInstance, content);
-            //foreach (var dustSystem in dustParticles)
-            //{
-            //    components.Add(dustSystem);
-            //    particleSystems.Add(dustSystem);
-            //}
-
             thunderParticleSystem = new ThunderParticleSystem(gameInstance, content);
-            components.Add(thunderParticleSystem);
+            Game.Components.Add(thunderParticleSystem);
             particleSystems.Add(thunderParticleSystem);
 
             rainSystem = new RainParticleSystem(gameInstance, content);
-            components.Add(rainSystem);
+            Game.Components.Add(rainSystem);
             particleSystems.Add(rainSystem);
 
             smokeSystem = new SmokeCloudParticleSystem(gameInstance, content);
-            components.Add(smokeSystem);
+            Game.Components.Add(smokeSystem);
             particleSystems.Add(smokeSystem);
+
+            // TODO: Why not added to Game.Components?
 
             for (int i = 0; i < 200; i++)
             {
@@ -251,6 +239,10 @@ namespace datx02_rally.Menus
 
             pauseMenu = new PauseMenu(gameInstance);
             pauseMenu.ChangeResolution();
+
+            dustSystem.Enabled = false;
+            rainSystem.Enabled = false;
+            smokeSystem.Enabled = false;
 
             base.Initialize();
         }
@@ -376,13 +368,9 @@ namespace datx02_rally.Menus
 
             #region Lights
 
-            PointLight.LoadMaterial(content);
-
             // Load model to represent our lightsources
-            pointLightModel = content.Load<Model>(@"Models\light");
-            spotLightModel = content.Load<Model>(@"Models\Cone");
-
-            
+            var pointLightModel = content.Load<Model>(@"Models\light");
+            //spotLightModel = content.Load<Model>(@"Models\Cone");
 
             Vector3 pointLightOffset = new Vector3(0, 250, 0);
             foreach (var point in raceTrack.CurveRasterization.Points)
@@ -394,11 +382,16 @@ namespace datx02_rally.Menus
                     .6f + .4f * (float)r.NextDouble(),
                     .6f + .4f * (float)r.NextDouble());
 
-                pointLights.Add(new PointLight(point.Position + pointLightOffset, color, 450));
-                //wayLights.Add(new PointLight(point.Position, new Vector3(2, 0, 0), 450));
+                pointLights.Add(new PointLight(point.Position + pointLightOffset, color, 450)
+                {
+                    Model = pointLightModel
+                });
 
-                fire = new FireObject(gameInstance, content, point.Position + point.Side * 600 + Vector3.Up * 30, Vector3.Up * 10);
-                pointLights.Add(fire);
+                // TODO: Unmotivated adds a fire
+
+                //fire = new FireObject(gameInstance, content, point.Position + point.Side * 600 + Vector3.Up * 30, Vector3.Up * 10);
+                //pointLights.Add(fire);
+
                 //fire = new FireObject(gameInstance, content, point.Position + point.Side * -300 + Vector3.Up * 30, Vector3.Up * 10);
                 //pointLights.Add(fire);
             }
@@ -561,7 +554,10 @@ namespace datx02_rally.Menus
 
             foreach (GameObject obj in GraphicalObjects)
             {
-                pointLights.Add(new PointLight(obj.Position + Vector3.Up * 500, new Vector3(0.7f, 0.7f, 0.7f), 450));
+                pointLights.Add(new PointLight(obj.Position + Vector3.Up * 500, new Vector3(0.7f, 0.7f, 0.7f), 450)
+                {
+                    Model = pointLightModel
+                });
             }
             GraphicalObjects.AddRange(pointLights);
 
@@ -617,15 +613,23 @@ namespace datx02_rally.Menus
 
             #endregion
 
-
-            prelightingRenderer = new PrelightingRenderer(GraphicsDevice, content, pointLightModel, spotLightModel);
-
+            // TODO: Does this belong out here, all by itselft, again, add more explaination what it is.
+            prelightingRenderer = new PrelightingRenderer(GraphicsDevice, content);
 
             #region ShadowMapEffect
 
             shadowMapEffect = content.Load<Effect>(@"Effects\ShadowMap");
 
             #endregion
+
+            #region Gameplay Trigger Manager (with sample)
+
+            /// <summary>
+            /// Gets the triggermanager
+            /// Add new PositionTrigger
+            /// Hook up to listener => when hit, use the thunderBoltGenerator and spawn a flash
+            /// Adds it to triggers.
+            /// </summary>
 
             var triggerManager = gameInstance.GetService<TriggerManager>();
 
@@ -635,7 +639,9 @@ namespace datx02_rally.Menus
                 thunderBoltGenerator.Flash();
             };
             triggerManager.Triggers.Add("start", trigger);
-            
+
+            #endregion
+
         }
 
         public Car MakeCar()

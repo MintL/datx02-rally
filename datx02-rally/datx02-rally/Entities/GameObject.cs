@@ -25,8 +25,6 @@ namespace datx02_rally.Entities
         protected Matrix world;
         protected Matrix[] baseTransforms;
 
-        
-
         public GameObject()
         {
             Scale = 1;

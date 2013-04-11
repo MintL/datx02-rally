@@ -20,16 +20,12 @@ namespace datx02_rally
         private Vector3 colorDir = Vector3.One;
         private Vector3 dir;
 
-        private static Model pointLight;
-
         public PointLight(Vector3 lightPosition, Vector3 diffuse, float range)
             : base()
         {
             Position = lightPosition;
             Diffuse = diffuse;
             Range = range;
-
-            Model = pointLight;
 
             dir = new Vector3(-1 + 2 * (float)UniversalRandom.GetInstance().NextDouble(),
                         -1 + 2 * (float)UniversalRandom.GetInstance().NextDouble(),
@@ -59,18 +55,11 @@ namespace datx02_rally
             //Position += new Vector3(dir.X * 10f, 0, dir.Y * 10f);
 
             BoundingSphere = new BoundingSphere(Position, 1);
-
         }
 
         protected override void SetEffectParameters(Effect effect)
         {
             ((BasicEffect)effect).DiffuseColor = Diffuse;
         }
-
-        public static void LoadMaterial(ContentManager content)
-        {
-            pointLight = content.Load<Model>(@"Models/light");
-        }
-
     }
 }
