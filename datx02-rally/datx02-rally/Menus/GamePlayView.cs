@@ -374,7 +374,10 @@ namespace datx02_rally.Menus
             //spotLightModel = content.Load<Model>(@"Models\Cone");
 
             Vector3 pointLightOffset = new Vector3(0, 250, 0);
-            foreach (var point in raceTrack.CurveRasterization.Points)
+
+            var cr = new CurveRasterization(raceTrack.Curve, 20);
+
+            foreach (var point in cr.Points)
             {
                 Random r = UniversalRandom.GetInstance();
 
@@ -461,22 +464,32 @@ namespace datx02_rally.Menus
 
             #endregion
 
-            #region Objects
+            #region GameObjects
 
             OakTree.LoadMaterial(content);
             BirchTree.LoadMaterial(content);
             Stone.LoadMaterial(content);
 
-            int numObjects = 200;
+            int numObjects = 75;
+
             for (int i = 0; i < numObjects; i++)
             {
+
                 var t = navMesh.triangles[UniversalRandom.GetInstance().Next(navMesh.triangles.Length)];
                 float v = (float)UniversalRandom.GetInstance().NextDouble();
-                float u = ((float)UniversalRandom.GetInstance().NextDouble() - .5f);
-                if (u < 0)
-                    u -= .5f;
+
+                //float u = (float) (UniversalRandom.GetInstance().NextDouble() - 1/2f);
+                //if (u < 0)
+                //    u -= .5f;
+                //else
+                //    u += 1.5f;
+
+                float u = 0;
+                if (UniversalRandom.GetInstance().NextDouble() <= .5)
+                    u = .3f * (float)(-UniversalRandom.GetInstance().NextDouble());
                 else
-                    u += 1.5f;
+                    u = (float)(1 + .3f * UniversalRandom.GetInstance().NextDouble());
+
 
                 var pos = (t.vertices[0] + u * t.ab + v * t.ac) / terrainScale;
                 //var treePos = new Vector3(-halfHeightMapSize + (float)UniversalRandom.GetInstance().NextDouble() * (heightMapSize-50), 0,
@@ -519,15 +532,15 @@ namespace datx02_rally.Menus
                 {
                 case 0:
                     obj = new OakTree(gameInstance);
-                    obj.Scale = 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
+                    obj.Scale = 1; // 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
                     break;
                 case 1:
                     obj = new BirchTree(gameInstance);
-                    obj.Scale = 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
+                    obj.Scale = 1; // 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
                     break;
                 default:
                     obj = new Stone(gameInstance);
-                    obj.Scale = 0.5f + 2 * (float)UniversalRandom.GetInstance().NextDouble();
+                    obj.Scale = 1; // 0.5f + 2 * (float)UniversalRandom.GetInstance().NextDouble();
                     break;
                 }
 
@@ -539,8 +552,6 @@ namespace datx02_rally.Menus
 
                 GraphicalObjects.Add(obj);
                 ShadowCasterObjects.Add(obj);
-
-                
             }
 
             for (int i = 0; i < GraphicalObjects.Count / 5; i++)
@@ -1330,6 +1341,28 @@ namespace datx02_rally.Menus
             }
 
             #endregion
+
+            int i = 0;
+            foreach (var GraphicalObject in GraphicalObjects)
+            {
+                ParticleSystem s = null;
+                switch (i++ % 4)
+                {
+                    case 0:
+                        s = yellowSystem;
+                        break;
+                    case 1:
+                        s = redSystem;
+                        break;
+                    case 2:
+                        s = greenSystem;
+                        break;
+                    case 3:
+                        s = plasmaSystem;
+                        break;
+                }
+                BoundingBox.CreateFromSphere(GraphicalObject.BoundingSphere).IlluminateBoundingBox(s);
+            }
 
             if (!environment)
             {

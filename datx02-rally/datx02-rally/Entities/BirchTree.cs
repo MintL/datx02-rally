@@ -22,7 +22,12 @@ namespace datx02_rally.Entities
 
         public override void Update(GameTime gameTime)
         {
-            BoundingSphere = new BoundingSphere(Position, Scale * 18);
+            BoundingSphere = new BoundingSphere();
+            foreach (var mesh in Model.Meshes)
+            {
+                BoundingSphere = BoundingSphere.CreateMerged(mesh.BoundingSphere.Transform(mesh.ParentBone.Transform), BoundingSphere);
+            }
+            BoundingSphere = BoundingSphere.Transform(Matrix.CreateScale(Scale) * Matrix.CreateTranslation(Position));
         }
 
         protected override void SetEffectParameters(Effect effect)
