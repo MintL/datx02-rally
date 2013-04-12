@@ -339,6 +339,7 @@ namespace datx02_rally.Menus
             terrainEffect.Parameters["TextureMap1"].SetValue(content.Load<Texture2D>(@"Terrain\grass"));
             terrainEffect.Parameters["TextureMap2"].SetValue(content.Load<Texture2D>(@"Terrain\rock"));
             terrainEffect.Parameters["TextureMap3"].SetValue(content.Load<Texture2D>(@"Terrain\snow"));
+            terrainEffect.Parameters["RoadNormalMap"].SetValue(content.Load<Texture2D>(@"Terrain\road_n"));
             terrainEffect.Parameters["Projection"].SetValue(projectionMatrix);
 
             // Creates a terrainmodel around Vector3.Zero
@@ -602,12 +603,6 @@ namespace datx02_rally.Menus
             #region DynamicEnvironment
 
             refCubeMap = new RenderTargetCube(this.GraphicsDevice, 256, true, SurfaceFormat.Color, DepthFormat.Depth16);
-            foreach (TerrainModel model in terrainSegments)
-            {
-                model.Effect.Parameters["EnvironmentMap"].SetValue(refCubeMap);
-            }
-            //skyBoxEffect.Parameters["SkyboxTexture"].SetValue(refCubeMap);
-
             carEffect.Parameters["EnvironmentMap"].SetValue(cubeMap);
 
             #endregion

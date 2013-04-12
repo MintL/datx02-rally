@@ -42,15 +42,15 @@ sampler2D shadowMapSampler = sampler_state
 	AddressV = Clamp;
 };
 
-Texture EnvironmentMap;
-samplerCUBE EnvironmentSampler = sampler_state
+texture2D RoadNormalMap;
+sampler2D RoadNormalSampler = sampler_state
 {
-	texture = <EnvironmentMap>;
+	texture = <RoadNormalMap>;
 	magfilter = LINEAR;
 	minfilter = LINEAR;
 	mipfilter = LINEAR;
-	AddressU = Mirror;
-	AddressV = Mirror;
+	AddressU = Wrap;
+	AddressV = Wrap;
 };
 
 texture TextureMap0;
@@ -101,22 +101,23 @@ struct VertexShaderInput
 {
     float4 Position : POSITION0;
 	float3 Normal : NORMAL0;
+	float3 Binormal : BINORMAL;
+	float3 Tangent : TANGENT;
 	float2 TexCoord : TEXCOORD0;
 	float4 TexWeights : TEXCOORD1;
 };
-
-
 
 struct VertexShaderOutput
 {
     float4 Position : POSITION0;
 	float2 TexCoord : TEXCOORD0;
 	float3 Normal : TEXCOORD1;
-	float3 ViewDirection : TEXCOORD2;
-	float3 WorldPosition : TEXCOORD3;
-	float4 TexWeights : TEXCOORD4;
-	float4 PositionCopy : TEXCOORD5;
-	float4 OriginalPosition : TEXCOORD6;
+	float4 OriginalPosition : TEXCOORD2;
+	float3 ViewDirection : TEXCOORD3;
+	float3 WorldPosition : TEXCOORD4;
+	float4 TexWeights : TEXCOORD5;
+	float4 PositionCopy : TEXCOORD6;
+	float3x3 WorldToTangentSpace : TEXCOORD7;
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
@@ -126,14 +127,21 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     float4 worldPosition = mul(input.Position, World);
     float4 viewPosition = mul(worldPosition, View);
     output.Position = mul(viewPosition, Projection);
-	output.ViewDirection = EyePosition - worldPosition.xyz;
+	output.OriginalPosition = input.Position;
 
 	output.TexCoord = input.TexCoord;
     output.Normal = mul(input.Normal, NormalMatrix);
+
+	output.WorldToTangentSpace[0] = mul(normalize(input.Tangent), World);
+	output.WorldToTangentSpace[1] = mul(normalize(input.Binormal), World);
+	output.WorldToTangentSpace[2] = mul(normalize(input.Normal), World);
+
+	output.ViewDirection = EyePosition - worldPosition.xyz;
+
 	output.WorldPosition = worldPosition.xyz;
 	output.TexWeights = input.TexWeights;
 	output.PositionCopy = mul(viewPosition, PrelightProjection);
-	output.OriginalPosition = input.Position;
+	
 
     return output;
 }
@@ -167,7 +175,12 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	color += tex2D(TextureMapSampler2, input.TexCoord) * input.TexWeights.z;
 	color += tex2D(TextureMapSampler3, input.TexCoord) * input.TexWeights.w;
 	
-	
+	// Change the normal to the normal map if the pixel is on the road
+	if (input.TexWeights.x > 0.5) {
+		normal = 2.0 * (tex2D(RoadNormalSampler, input.TexCoord)) - 1.0;
+		normal = normalize(mul(normal, input.WorldToTangentSpace));
+	}
+
 	float4 totalLight = float4(DirectionalAmbient, 1.0) * color * TerrainAmbientFactor;
 	
 	float3 directionToLight = -normalize(DirectionalDirection);

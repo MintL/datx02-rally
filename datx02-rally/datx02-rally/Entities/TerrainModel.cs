@@ -11,22 +11,28 @@ namespace datx02_rally
     {
         public Vector3 Position;
         public Vector3 Normal;
+        public Vector3 Binormal;
+        public Vector3 Tangent;
         public Vector2 TextureCoordinate;
         public Vector4 TexWeights;
 
-        public static int SizeInBytes = (3 + 3 + 2 + 4) * sizeof(float);
+        public static int SizeInBytes = (3 + 3 + 3 + 3 + 2 + 4) * sizeof(float);
         public static VertexDeclaration VertexDeclaration = new VertexDeclaration
         (
              new VertexElement( 0, VertexElementFormat.Vector3, VertexElementUsage.Position, 0 ),
              new VertexElement( sizeof(float) * 3, VertexElementFormat.Vector3, VertexElementUsage.Normal, 0 ),
-             new VertexElement( sizeof(float) * 6, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 0 ),
-             new VertexElement( sizeof(float) * 8, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 1 )
+             new VertexElement( sizeof(float) * 6, VertexElementFormat.Vector3, VertexElementUsage.Binormal, 0),
+             new VertexElement( sizeof(float) * 9, VertexElementFormat.Vector3, VertexElementUsage.Tangent, 0),
+             new VertexElement( sizeof(float) * 12, VertexElementFormat.Vector2, VertexElementUsage.TextureCoordinate, 0 ),
+             new VertexElement( sizeof(float) * 14, VertexElementFormat.Vector4, VertexElementUsage.TextureCoordinate, 1 )
         );
 
-        public MultitexturedVertex(Vector3 position, Vector3 normal, Vector2 texCoordinate, Vector4 texWeights)
+        public MultitexturedVertex(Vector3 position, Vector3 normal, Vector3 binormal, Vector3 tangent, Vector2 texCoordinate, Vector4 texWeights)
         {
             Position = position;
             Normal = normal;
+            Binormal = binormal;
+            Tangent = tangent;
             TextureCoordinate = texCoordinate;
             TexWeights = texWeights;
         }
@@ -90,7 +96,9 @@ namespace datx02_rally
                             heightMap[xOffset + x, zOffset + z], // Y
                             (terrainStart + zOffset + z)), // Z
                         Vector3.Zero, // Normal
-                        new Vector2(x / 10f, z / 10f),
+                        Vector3.Zero, // Binormal
+                        Vector3.Zero, // Tangent
+                        new Vector2(x / 8f, z / 8f),
                         textureWeights);
 
                 }
@@ -157,6 +165,40 @@ namespace datx02_rally
                 vertices[indices[i * 3]].Normal += normal;
                 vertices[indices[i * 3 + 1]].Normal += normal;
                 vertices[indices[i * 3 + 2]].Normal += normal;
+
+                #region Binormal & Tangent
+                // Calculate binormal and tangent to get normal map to work
+                // Retrieved from http://xboxforums.create.msdn.com/forums/p/30443/172880.aspx
+                Vector2 w1 = vertices[indices[i * 3]].TextureCoordinate;
+                Vector2 w2 = vertices[indices[i * 3  + 1]].TextureCoordinate;
+                Vector2 w3 = vertices[indices[i * 3 + 2]].TextureCoordinate;
+
+                float s1 = w2.X - w1.X,
+                    s2 = w3.X - w1.X,
+                    t1 = w2.Y - w1.Y,
+                    t2 = w3.Y - w1.Y;
+
+                float r = 1.0f / (s1 * t2 - s2 * t1);
+                Vector3 sdir = new Vector3((t2 * firstsub.X - t1 * secondsub.X) * r, (t2 * firstsub.Y - t1 * secondsub.Y) * r, (t2 * firstsub.Z - t1 * secondsub.Z) * r);
+                Vector3 tdir = new Vector3((s1 * secondsub.X - s2 * firstsub.X) * r, (s1 * secondsub.Y - s2 * firstsub.Y) * r, (s1 * secondsub.Z - s2 * firstsub.Z) * r);
+
+                // Gram-Schmidt orthogonalize
+                Vector3 tangent = sdir - normal * Vector3.Dot(normal, sdir);
+                tangent.Normalize();
+
+                // Calculate handedness (here maybe you need to switch >= with <= depend on the geometry winding order)
+                float tangentdir = (Vector3.Dot(Vector3.Cross(normal, sdir), tdir) <= 0.0f) ? 1.0f : -1.0f;
+                Vector3 binormal = Vector3.Cross(normal, tangent) * tangentdir;
+                
+                // Set the values to the vertices
+                vertices[indices[i * 3]].Tangent = tangent;
+                vertices[indices[i * 3 + 1]].Tangent = tangent;
+                vertices[indices[i * 3 + 2]].Tangent = tangent;
+
+                vertices[indices[i * 3]].Binormal = binormal;
+                vertices[indices[i * 3 + 1]].Binormal = binormal;
+                vertices[indices[i * 3 + 2]].Binormal = binormal;
+                #endregion
             }
 
             for (int i = 0; i < vertices.Length; i++)
@@ -183,7 +225,6 @@ namespace datx02_rally
 
 
         }
-
 
         public void Draw(Matrix view, Matrix projection, Vector3 cameraPosition, DirectionalLight directionalLight)
         {
