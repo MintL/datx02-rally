@@ -10,6 +10,7 @@ namespace datx02_rally.Menus
     {
         public PauseMenu(Game game) : base(game, GameState.PausedGameplay) 
         {
+            UpdateOrder = DrawOrder = 1;
         }
 
         protected override void LoadContent()
@@ -33,6 +34,18 @@ namespace datx02_rally.Menus
                 item.SetWidth(Bounds.Width);
                 AddMenuItem(item);
             }
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            var nextstate = UpdateState(gameTime);
+
+            if (!(nextstate == GameState.Gameplay || nextstate == GameState.PausedGameplay))
+            {
+                // Shit is going down
+                Game.Exit();
+            }
+            base.Update(gameTime);
         }
     }
 

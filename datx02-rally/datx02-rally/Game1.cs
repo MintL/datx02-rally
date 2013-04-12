@@ -8,7 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-using Particle3DSample;
+
 using datx02_rally.GameLogic;
 using datx02_rally.MapGeneration;
 using datx02_rally.Entities;
@@ -129,8 +129,8 @@ namespace datx02_rally
                         currentView = new OptionsMenu(this);
                         break;
                     case GameState.Gameplay:
-                        currentView = new GamePlayView(this, null, GamePlayMode.Singleplayer);
-                        //
+                        if (!(currentView is GamePlayView))
+                            currentView = Components.First(component => component is GamePlayView) as GamePlayView;
                         break;
                     case GameState.PausedGameplay:
                         break;

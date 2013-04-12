@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Particle3DSample;
 using Microsoft.Xna.Framework;
 
 namespace datx02_rally.Particles.WeatherSystems

@@ -12,7 +12,7 @@ using System;
 using Microsoft.Xna.Framework;
 #endregion
 
-namespace Particle3DSample
+namespace datx02_rally.Particles
 {
     /// <summary>
     /// Helper for objects that want to leave particles behind them as they

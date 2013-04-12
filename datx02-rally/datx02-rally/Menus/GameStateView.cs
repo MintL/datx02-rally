@@ -10,8 +10,11 @@ namespace datx02_rally.Menus
 {
     public abstract class GameStateView : DrawableGameComponent
     {
+        // TODO: Remove, exists in GameComponent.Game
         public Game1 gameInstance;
+        // TODO: Remove, GraphicsDevice exists in DrawableGameComponent.GraphicsDevice
         public GraphicsDeviceManager graphics;
+
         public ContentManager content;
         public readonly GameState gameState;
         protected SpriteBatch spriteBatch;
@@ -26,7 +29,9 @@ namespace datx02_rally.Menus
             content = gameInstance.Content;
             this.gameState = gameState;
             spriteBatch = new SpriteBatch(game.GraphicsDevice);
-            Initialize();
+
+            if (!(this is GamePlayView))
+                Initialize();
         }
 
         protected override void LoadContent()

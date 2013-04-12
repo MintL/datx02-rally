@@ -15,7 +15,7 @@ namespace datx02_rally.Graphics
     public class GaussianBlur
     {
         #region Fields
-        private Game1 game;
+        private Game game;
         private GraphicsDevice device;
         private SpriteBatch spriteBatch;
 
@@ -47,11 +47,11 @@ namespace datx02_rally.Graphics
 
         #endregion
 
-        public GaussianBlur(Game1 game)
+        public GaussianBlur(Game game)
         {
             this.game = game;
             this.device = game.GraphicsDevice;
-            this.spriteBatch = game.spriteBatch;
+            this.spriteBatch = (game as Game1).spriteBatch;
 
             effect = game.Content.Load<Effect>(@"Effects\GaussianBlur");
 

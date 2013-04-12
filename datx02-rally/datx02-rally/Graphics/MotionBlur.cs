@@ -10,7 +10,7 @@ namespace datx02_rally.Graphics
     public class MotionBlur
     {
         #region Fields and Properties
-        private Game1 game;
+        private Game game;
         private GraphicsDevice device;
         private SpriteBatch spriteBatch;
 
@@ -28,11 +28,11 @@ namespace datx02_rally.Graphics
         public float Size { get; set; }
         #endregion
 
-        public MotionBlur(Game1 game)
+        public MotionBlur(Game game)
         {
             this.game = game;
             this.device = game.GraphicsDevice;
-            this.spriteBatch = game.spriteBatch;
+            this.spriteBatch = (game as Game1).spriteBatch;
             effect = game.Content.Load<Effect>(@"Effects\MotionBlur");
 
             motionBlurTexture = new RenderTarget2D(device, device.Viewport.Width, device.Viewport.Height,

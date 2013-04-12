@@ -122,6 +122,7 @@
   <ItemGroup>
     <Compile Include="Components\HUDComponent.cs" />
     <Compile Include="Components\HUDConsoleComponent.cs" />
+    <Compile Include="Components\PostProcessingComponent.cs" />
     <Compile Include="Entities\BirchTree.cs" />
     <Compile Include="Entities\FireObject.cs" />
     <Compile Include="Entities\GameObject.cs" />

@@ -10,7 +10,7 @@ namespace datx02_rally.Graphics
     public class Bloom
     {
         #region Fields and Properties
-        private Game1 game;
+        private Game game;
         private GraphicsDevice device;
         private SpriteBatch spriteBatch;
         private GaussianBlur gaussianBlur;
@@ -46,11 +46,11 @@ namespace datx02_rally.Graphics
         public float OriginalSaturation { get; set; }
         #endregion
 
-        public Bloom(Game1 game, GaussianBlur gaussianBlur)
+        public Bloom(Game game, GaussianBlur gaussianBlur)
         {
             this.game = game;
             this.device = game.GraphicsDevice;
-            this.spriteBatch = game.spriteBatch;
+            this.spriteBatch = (game as Game1).spriteBatch;
             this.gaussianBlur = gaussianBlur;
             effect = game.Content.Load<Effect>(@"Effects\Bloom");
 

@@ -13,7 +13,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 #endregion
 
-namespace Particle3DSample
+namespace datx02_rally.Particles
 {
     /// <summary>
     /// Settings class describes all the tweakable options used

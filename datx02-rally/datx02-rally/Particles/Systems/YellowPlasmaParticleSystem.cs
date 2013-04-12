@@ -13,7 +13,7 @@ namespace datx02_rally.Particles.Systems
             : base(game, content)
         { }
 
-        protected override void InitializeSettings(Particle3DSample.ParticleSettings settings)
+        protected override void InitializeSettings(ParticleSettings settings)
         {
             base.InitializeSettings(settings);
 

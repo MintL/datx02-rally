@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 using datx02_rally.Graphics;
 using datx02_rally.GameLogic;
 using datx02_rally.Entities;
-using Particle3DSample;
+
 using datx02_rally.Particles.WeatherSystems;
 using Microsoft.Xna.Framework.Content;
 using datx02_rally.Particles.Systems;
@@ -15,6 +15,7 @@ using datx02_rally.MapGeneration;
 using datx02_rally.EventTrigger;
 using datx02_rally.Components;
 using Microsoft.Xna.Framework.Input;
+using datx02_rally.Particles;
 
 namespace datx02_rally.Menus
 {
@@ -25,13 +26,14 @@ namespace datx02_rally.Menus
 
         GamePlayMode mode;
 
-        public bool Paused { get; private set; }
         PauseMenu pauseMenu;
         public SpriteBatch spriteBatch;
 
         Matrix projectionMatrix;
 
         #region PostProcess
+
+        PostProcessingComponent postProcessingComponent;
 
         RenderTarget2D postProcessTexture;
         Effect postEffect;
@@ -109,7 +111,7 @@ namespace datx02_rally.Menus
         ParticleSystem smokeSystem;
         float smokeTime;
 
-        List<ParticleSystem> fireflySystem = new List<ParticleSystem>();
+        ParticleSystem fireflySystem;
         List<ParticleEmitter> fireflyEmitter = new List<ParticleEmitter>();
 
         FireObject fire;
@@ -161,7 +163,10 @@ namespace datx02_rally.Menus
             UniversalRandom.ResetInstance(usedSeed);
             UniversalRandom.ResetInstance(0);
             this.mode = mode;
-            this.Paused = false;
+
+            UpdateOrder = -1;
+            DrawOrder = -1;
+
         }
 
         public override void ChangeResolution()
@@ -223,26 +228,22 @@ namespace datx02_rally.Menus
             Game.Components.Add(smokeSystem);
             particleSystems.Add(smokeSystem);
 
-            // TODO: Why not added to Game.Components?
-
-            for (int i = 0; i < 200; i++)
-            {
-                FireflySystem system = new FireflySystem(gameInstance, content);
-                fireflySystem.Add(system);
-                system.Initialize();
-                particleSystems.Add(system);
-            }
+            fireflySystem = new FireflySystem(gameInstance, content);
+            Game.Components.Add(fireflySystem);
+            particleSystems.Add(fireflySystem);
 
             dustSystem = new DustParticleSystem(gameInstance, content);
+            Game.Components.Add(dustSystem);
             particleSystems.Add(dustSystem);
-            dustSystem.Initialize();
 
             pauseMenu = new PauseMenu(gameInstance);
             pauseMenu.ChangeResolution();
+            pauseMenu.Enabled = false;
+            Game.Components.Add(pauseMenu);
 
-            dustSystem.Enabled = false;
-            rainSystem.Enabled = false;
-            smokeSystem.Enabled = false;
+            //dustSystem.Enabled = false;
+            //rainSystem.Enabled = false;
+            //smokeSystem.Enabled = false;
 
             base.Initialize();
         }
@@ -545,7 +546,7 @@ namespace datx02_rally.Menus
             for (int i = 0; i < GraphicalObjects.Count / 5; i++)
             {
                 if (GraphicalObjects[i] is Stone) continue;
-                ParticleEmitter emitter = new ParticleEmitter(fireflySystem[i], 80, GraphicalObjects[i].Position);
+                ParticleEmitter emitter = new ParticleEmitter(fireflySystem, 80, GraphicalObjects[i].Position);
                 emitter.Origin = GraphicalObjects[i].Position + Vector3.Up * 500;
                 fireflyEmitter.Add(emitter);
             }
@@ -602,6 +603,9 @@ namespace datx02_rally.Menus
 
             #region PostProcess
 
+            postProcessingComponent = new PostProcessingComponent(Game);
+            Game.Components.Add(postProcessingComponent);
+
             postProcessTexture = new RenderTarget2D(GraphicsDevice,
                 GraphicsDevice.Viewport.Width,
                 GraphicsDevice.Viewport.Height,
@@ -615,6 +619,8 @@ namespace datx02_rally.Menus
 
             // TODO: Does this belong out here, all by itselft, again, add more explaination what it is.
             prelightingRenderer = new PrelightingRenderer(GraphicsDevice, content);
+            Game.Services.AddService(typeof(PrelightingRenderer), prelightingRenderer);
+
 
             #region ShadowMapEffect
 
@@ -641,6 +647,7 @@ namespace datx02_rally.Menus
             triggerManager.Triggers.Add("start", trigger);
 
             #endregion
+
 
         }
 
@@ -726,14 +733,37 @@ namespace datx02_rally.Menus
 
         public override GameState UpdateState(GameTime gameTime)
         {
+            return GameState.Gameplay;
+        }
+
+        public override void Update(GameTime gameTime)
+        {
             InputComponent input = gameInstance.GetService<InputComponent>();
             if (input.GetPressed(Input.Exit))
+                pauseMenu.Enabled = !pauseMenu.Enabled;
+
+            var cameraComponent = Game.GetService<CameraComponent>();
+
+            if (pauseMenu.Enabled)
             {
-                Paused = !Paused;
-                Game.GetService<CameraComponent>().Enabled = !Paused;
+                if (cameraComponent.Enabled)
+                    cameraComponent.Enabled = false;
+
+                //GameState state = pauseMenu.UpdateState(gameTime);
+
+                //if (state == GameState.Gameplay)
+                //    Paused = false;
+                //else if (state != GameState.PausedGameplay)
+                //{
+                //    // Exit
+                //    Game.Exit();
+                //    return;
+                //}
             }
-            if (!Paused)
+            else
             {
+                if (!cameraComponent.Enabled)
+                    cameraComponent.Enabled = true;
 
                 if (input.GetPressed(Input.ChangeController))
                 {
@@ -814,16 +844,8 @@ namespace datx02_rally.Menus
                 {
                     obj.Update(gameTime);
                 }
-            }
-            else
-            {
-                GameState state = pauseMenu.UpdateState(gameTime);
-                if (state == GameState.Gameplay)
-                    Paused = false;
-                else if (state != GameState.PausedGameplay)
-                    return state;
 
-                
+
             }
 
             // Particles should continue to spawn regardless of the pause state
@@ -860,11 +882,6 @@ namespace datx02_rally.Menus
                         (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 200));
             }
 
-            foreach (FireflySystem system in fireflySystem)
-            {
-                system.Update(gameTime);
-            }
-
             if (Car.Speed > 10)
             {
                 dustEmitter.Update(gameTime, dustEmitter.Origin +
@@ -873,14 +890,13 @@ namespace datx02_rally.Menus
                             0,
                             (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 40));
                 dustEmitter.Origin = Car.Position;
-                dustSystem.Update(gameTime);
             }
 
             //directionalLight.Direction = Vector3.Transform(
             //    directionalLight.Direction,
             //    Matrix.CreateRotationY(
             //    (float)gameTime.ElapsedGameTime.TotalSeconds));
-            
+
             //Vector3 pointLightOffset = new Vector3(0, 250, 0), rotationAxis = new Vector3(0,-100,0);
             //int index = 0;
             //foreach (var point in raceTrack.CurveRasterization.Points)
@@ -900,8 +916,8 @@ namespace datx02_rally.Menus
             //        500 * (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()),
             //        (float)UniversalRandom.GetInstance().NextDouble() * 500),
             //        Vector3.Up);
-
-            return GameState.Gameplay;
+   
+            base.Update(gameTime);
         }
 
         private bool CollisionCheck(NavMeshTriangle triangle)
@@ -979,7 +995,7 @@ namespace datx02_rally.Menus
         public override void Draw(GameTime gameTime)
         {
             Texture2D pauseOverlay = null;
-            if (Paused)
+            if (pauseMenu.Enabled)
                 pauseOverlay = pauseMenu.Render();
 
             //
@@ -996,7 +1012,6 @@ namespace datx02_rally.Menus
             if (shadowMapNotRendered)
             {
                 shadowMapNotRendered = false;
-
 
                 for (int z = 0; z < terrainSegmentsCount; z++)
                 {
@@ -1053,10 +1068,17 @@ namespace datx02_rally.Menus
 
             #endregion
 
+            #region Prelight Rendering
+
+            // Render to its rendertargets independently
             prelightingRenderer.Render(view, directionalLight, terrainSegments, terrainSegmentsCount, pointLights, Car, GraphicalObjects);
 
-            if (!GameSettings.Default.PerformanceMode)
-                RenderEnvironmentMap(gameTime);
+            #endregion
+
+            //if (!GameSettings.Default.PerformanceMode)
+            //    RenderEnvironmentMap(gameTime);
+
+            #region START RENDER SCENE!!! (to post processing target)
 
             GraphicsDevice.SetRenderTarget(postProcessTexture);
 
@@ -1066,11 +1088,12 @@ namespace datx02_rally.Menus
             GraphicsDevice.SamplerStates[0] = SamplerState.LinearWrap;
 
             GraphicsDevice.Clear(Color.White);
+
             RenderScene(gameTime, view, projectionMatrix, false);
 
-            GraphicsDevice.SetRenderTarget(null);
+            #endregion
 
-            RenderPostProcess();
+            postProcessingComponent.RenderedImage = postProcessTexture;
 
             RenderPauseMenu(pauseOverlay);
 
@@ -1079,7 +1102,7 @@ namespace datx02_rally.Menus
 
         public void RenderPauseMenu(Texture2D overlay)
         {
-            if (Paused)
+            if (pauseMenu.Enabled)
             {
                 spriteBatch.Begin();
                 Rectangle position = new Rectangle(GraphicsDevice.Viewport.Width / 2 - pauseMenu.RenderBounds.Width / 2,
@@ -1094,6 +1117,8 @@ namespace datx02_rally.Menus
         {
             // Apply bloom effect
             Texture2D finalTexture = postProcessTexture;
+
+            Game.Services.AddService(null, postProcessTexture);
 
             finalTexture = bloom.PerformBloom(postProcessTexture);
 
@@ -1223,6 +1248,13 @@ namespace datx02_rally.Menus
             GraphicsDevice.SetRenderTarget(null);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="gameTime"></param>
+        /// <param name="view"></param>
+        /// <param name="projection"></param>
+        /// <param name="environment">If this renderpass is render to our dynamic environmentmap</param>
         private void RenderScene(GameTime gameTime, Matrix view, Matrix projection, bool environment)
         {
             BoundingFrustum viewFrustum = new BoundingFrustum(Game.GetService<CameraComponent>().CurrentCamera.View * projection);
@@ -1298,14 +1330,6 @@ namespace datx02_rally.Menus
             }
 
             #endregion
-
-
-            foreach (FireflySystem system in fireflySystem)
-            {
-                system.Draw(gameTime);
-            }
-
-            dustSystem.Draw(gameTime);
 
             if (!environment)
             {

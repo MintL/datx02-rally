@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using Particle3DSample;
 using Microsoft.Xna.Framework.Graphics;
 
 namespace datx02_rally.Particles.WeatherSystems
@@ -35,8 +34,8 @@ namespace datx02_rally.Particles.WeatherSystems
             settings.MaxStartSize = 10f;
             settings.MaxEndSize = 15f;
 
-            settings.MinColor = new Color(.91f, .53f, .27f);
-            settings.MaxColor = new Color(.98f, .77f, .19f);
+            settings.MinColor = new Color(.91f, .83f, .27f);
+            settings.MaxColor = new Color(.98f, .97f, .19f);
 
             settings.BlendState = BlendState.AlphaBlend;
         }

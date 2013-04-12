@@ -14,7 +14,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 #endregion
 
-namespace Particle3DSample
+namespace datx02_rally.Particles.Systems
 {
     /// <summary>
     /// Custom particle system for leaving smoke trails behind the rocket projectiles.

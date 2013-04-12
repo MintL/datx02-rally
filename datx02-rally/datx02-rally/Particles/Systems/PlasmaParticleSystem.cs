@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using Particle3DSample;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace datx02_rally
+namespace datx02_rally.Particles.Systems
 {
-    class PlasmaParticleSystem : Particle3DSample.ParticleSystem
+    class PlasmaParticleSystem : ParticleSystem
     {
         public PlasmaParticleSystem(Game game, ContentManager content)
             : base(game, content)

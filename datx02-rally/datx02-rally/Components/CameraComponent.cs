@@ -34,7 +34,10 @@ namespace datx02_rally
                 currentCamera++;
             if (currentCamera == cameras.Count)
                 currentCamera = 0;
-            cameras[currentCamera].Update(gameTime);
+
+            if (Game.IsActive)
+                cameras[currentCamera].Update(gameTime);
+
             base.Update(gameTime);
         }
     }

@@ -13,7 +13,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Graphics.PackedVector;
 #endregion
 
-namespace Particle3DSample
+namespace datx02_rally.Particles
 {
     /// <summary>
     /// Custom vertex structure for drawing particles.

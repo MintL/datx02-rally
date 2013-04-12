@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
-using Particle3DSample;
 using Microsoft.Xna.Framework.Content;
+using datx02_rally.Particles.Systems;
+using datx02_rally.Particles;
 
 namespace datx02_rally.Entities
 {

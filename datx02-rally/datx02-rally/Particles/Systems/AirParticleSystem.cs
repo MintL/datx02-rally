@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
-using Particle3DSample;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace datx02_rally
+namespace datx02_rally.Particles.Systems
 {
-    class AirParticleSystem : Particle3DSample.ParticleSystem
+    class AirParticleSystem : ParticleSystem
     {
         public AirParticleSystem(Game game, ContentManager content)
             : base(game, content)

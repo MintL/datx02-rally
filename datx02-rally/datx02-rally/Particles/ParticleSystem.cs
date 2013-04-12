@@ -16,7 +16,7 @@ using Microsoft.Xna.Framework.Graphics.PackedVector;
 using datx02_rally;
 #endregion
 
-namespace Particle3DSample
+namespace datx02_rally.Particles
 {
     /// <summary>
     /// The main component in charge of displaying particles.

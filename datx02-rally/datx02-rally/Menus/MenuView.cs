@@ -180,6 +180,11 @@ namespace datx02_rally.Menus
                     }
                     else
                     {
+                        if (state == GameState.Gameplay)
+                        {
+                            Game.Components.Add(new GamePlayView(Game, null, GamePlayMode.Singleplayer));
+                            return GameState.Gameplay;
+                        }
                         return state;
                     }
                 }

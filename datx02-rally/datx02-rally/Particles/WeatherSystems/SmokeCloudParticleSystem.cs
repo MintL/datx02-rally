@@ -14,7 +14,7 @@ using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 #endregion
 
-namespace Particle3DSample
+namespace datx02_rally.Particles.WeatherSystems
 {
     /// <summary>
     /// Custom particle system for creating a giant plume of long lasting smoke.

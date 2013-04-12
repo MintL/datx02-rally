@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
-using Particle3DSample;
+using datx02_rally.Particles;
+
 
 namespace datx02_rally
 {
