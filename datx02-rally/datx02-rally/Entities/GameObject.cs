@@ -24,7 +24,13 @@ namespace datx02_rally.Entities
             get { return scale; }
             set { scale = value; UpdateBoundingVolume(); }
         }
-        
+        private Model model;
+        public Model Model 
+        {
+            get { return model; }
+            set { model = value; UpdateBoundingVolume(); }
+        }
+
         /// <summary>
         /// Yaw, pitch, roll
         /// </summary>
@@ -32,7 +38,7 @@ namespace datx02_rally.Entities
 
         public BoundingSphere BoundingSphere { get; set; }
 
-        public Model Model { get; set; }
+        
 
         protected Matrix world;
         protected Matrix[] baseTransforms;

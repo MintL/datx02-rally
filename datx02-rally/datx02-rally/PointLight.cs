@@ -32,6 +32,7 @@ namespace datx02_rally
                         -1 + 2 * (float)UniversalRandom.GetInstance().NextDouble(),
                         -1 + 2 * (float)UniversalRandom.GetInstance().NextDouble());
             velocity.Normalize();
+
         }
 
         public PointLight(Vector3 lightPosition)
@@ -53,9 +54,6 @@ namespace datx02_rally
             // position
             velocity += colorVariation * 0.05f;
             velocity.Normalize();
-            //Position += new Vector3(dir.X * 10f, 0, dir.Y * 10f);
-
-            BoundingSphere = new BoundingSphere(Position, 1);
         }
 
         protected override void SetEffectParameters(Effect effect)

@@ -117,7 +117,7 @@ namespace datx02_rally.Menus
 
         Model skyBoxModel;
         Effect skyBoxEffect;
-        TextureCube cubeMap;
+        TextureCube skyMap;
 
         #endregion
 
@@ -132,7 +132,7 @@ namespace datx02_rally.Menus
 
         #region DynamicEnvironment
 
-        RenderTargetCube refCubeMap;
+        RenderTargetCube environmentCubeMap;
 
         #endregion
 
@@ -145,6 +145,8 @@ namespace datx02_rally.Menus
         #endregion
 
         PrelightingRenderer prelightingRenderer;
+
+        BoundingFrustum viewFrustum;
 
         #endregion
 
@@ -415,7 +417,7 @@ namespace datx02_rally.Menus
             skyBoxModel = content.Load<Model>(@"Models/skybox");
             skyBoxEffect = content.Load<Effect>(@"Effects/SkyBox");
 
-            cubeMap = new TextureCube(GraphicsDevice, 2048, false, SurfaceFormat.Color);
+            skyMap = new TextureCube(GraphicsDevice, 2048, false, SurfaceFormat.Color);
             string[] cubemapfaces = { @"SkyBoxes/PurpleSky/skybox_right1", 
                 @"SkyBoxes/PurpleSky/skybox_left2", 
                 @"SkyBoxes/PurpleSky/skybox_top3", 
@@ -446,9 +448,9 @@ namespace datx02_rally.Menus
 
 
             for (int i = 0; i < cubemapfaces.Length; i++)
-                LoadCubemapFace(cubeMap, cubemapfaces[i], (CubeMapFace)i);
+                LoadCubemapFace(skyMap, cubemapfaces[i], (CubeMapFace)i);
 
-            skyBoxEffect.Parameters["SkyboxTexture"].SetValue(cubeMap);
+            skyBoxEffect.Parameters["SkyboxTexture"].SetValue(skyMap);
 
             foreach (var mesh in skyBoxModel.Meshes)
                 foreach (var part in mesh.MeshParts)
@@ -597,8 +599,10 @@ namespace datx02_rally.Menus
 
             #region DynamicEnvironment
 
-            refCubeMap = new RenderTargetCube(this.GraphicsDevice, 256, true, SurfaceFormat.Color, DepthFormat.Depth16);
-            carEffect.Parameters["EnvironmentMap"].SetValue(cubeMap);
+            environmentCubeMap = new RenderTargetCube(this.GraphicsDevice, 256, true, SurfaceFormat.Color, DepthFormat.Depth16);
+            foreach (ModelMesh mesh in Car.Model.Meshes)
+                foreach (ModelMeshPart part in mesh.MeshParts)
+                    part.Effect.Parameters["EnvironmentMap"].SetValue(skyMap);
 
             #endregion
 
@@ -841,9 +845,16 @@ namespace datx02_rally.Menus
 
                 #endregion
 
+                #region View frustum
+                // Update the view frustum
+                Matrix view = gameInstance.GetService<CameraComponent>().View;
+                viewFrustum = new BoundingFrustum(view * projectionMatrix);
+                #endregion
+ 
                 foreach (GameObject obj in GraphicalObjects)
                 {
-                    obj.Update(gameTime);
+                    if (obj.BoundingSphere.Intersects(viewFrustum))
+                        obj.Update(gameTime);
                 }
 
 
@@ -1006,7 +1017,6 @@ namespace datx02_rally.Menus
             skyBoxEffect.Parameters["ElapsedTime"].SetValue((float)gameTime.TotalGameTime.TotalSeconds);
 
             Matrix view = gameInstance.GetService<CameraComponent>().View;
-            BoundingFrustum viewFrustum = new BoundingFrustum(view * projectionMatrix);
 
             #region ShadowMap
 
@@ -1077,7 +1087,7 @@ namespace datx02_rally.Menus
             #endregion
 
             //if (!GameSettings.Default.PerformanceMode)
-            //    RenderEnvironmentMap(gameTime);
+            //RenderEnvironmentMap(gameTime);
 
             #region START RENDER SCENE!!! (to post processing target)
 
@@ -1200,7 +1210,7 @@ namespace datx02_rally.Menus
                 else
                     viewMatrix = Matrix.Identity;
 
-                GraphicsDevice.SetRenderTarget(refCubeMap, cubeMapFace);
+                GraphicsDevice.SetRenderTarget(environmentCubeMap, cubeMapFace);
                 GraphicsDevice.Clear(Color.White);
 
                 //Matrix projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
@@ -1295,27 +1305,27 @@ namespace datx02_rally.Menus
 
             #endregion
 
-            int i = 0;
-            foreach (var GraphicalObject in GraphicalObjects)
-            {
-                ParticleSystem s = null;
-                switch (i++ % 4)
-                {
-                    case 0:
-                        s = yellowSystem;
-                        break;
-                    case 1:
-                        s = redSystem;
-                        break;
-                    case 2:
-                        s = greenSystem;
-                        break;
-                    case 3:
-                        s = plasmaSystem;
-                        break;
-                }
-                BoundingBox.CreateFromSphere(GraphicalObject.BoundingSphere).IlluminateBoundingBox(s);
-            }
+            //int i = 0;
+            //foreach (var GraphicalObject in GraphicalObjects)
+            //{
+            //    ParticleSystem s = null;
+            //    switch (i++ % 4)
+            //    {
+            //        case 0:
+            //            s = yellowSystem;
+            //            break;
+            //        case 1:
+            //            s = redSystem;
+            //            break;
+            //        case 2:
+            //            s = greenSystem;
+            //            break;
+            //        case 3:
+            //            s = plasmaSystem;
+            //            break;
+            //    }
+            //    BoundingBox.CreateFromSphere(GraphicalObject.BoundingSphere).IlluminateBoundingBox(s);
+            //}
 
             if (!environment)
             {
@@ -1377,10 +1387,6 @@ namespace datx02_rally.Menus
                 {
                     EffectParameterCollection param = effect.Parameters;
 
-                    param["MaterialDiffuse"].SetValue(Color.Red.ToVector3());
-                    //param["MaterialAmbient"].SetValue(settings.MaterialAmbient);
-                    //param["MaterialSpecular"].SetValue(settings.MaterialSpecular);
-
                     param["MaterialReflection"].SetValue(.9f);
                     param["MaterialShininess"].SetValue(10);
 
@@ -1390,7 +1396,7 @@ namespace datx02_rally.Menus
 
                     param["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(world)));
 
-                    param["EyePosition"].SetValue(view.Translation);
+                    param["EyePosition"].SetValue(Game.GetService<CameraComponent>().Position);
 
                     param["DirectionalLightDirection"].SetValue(directionalLight.Direction);
                     param["DirectionalLightDiffuse"].SetValue(directionalLight.Diffuse);

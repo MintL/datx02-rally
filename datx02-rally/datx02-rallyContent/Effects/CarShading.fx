@@ -154,11 +154,13 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float selfShadow = saturate(4.0 * dot(normal, directionToLight));
 	float3 fresnel = MaterialSpecular + (float3(1.0, 1.0, 1.0) - MaterialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
 			0.0, 1.0), 5.0);
-
+	
 	float3 reflection = CalculateEnvironmentReflection(normal, directionFromEye);
+	float3 environmentMap = texCUBE(EnvironmentSampler, reflection) * fresnel * MaterialReflection;
+	
 	totalLight += float4(selfShadow * (DirectionalLightDiffuse * color.rgb * CalculateDiffuse(normal, directionToLight) +
 					DirectionalLightDiffuse * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor +
-					texCUBE(EnvironmentSampler, reflection * float3(1,1,-1)) * fresnel * MaterialReflection), 1);
+					environmentMap ), 1);
 	
 	totalLight = saturate(totalLight);
 

@@ -45,7 +45,7 @@ namespace datx02_rally.Entities
         public override void Update(GameTime gameTime)
         {
             colorTime += gameTime.ElapsedGameTime;
-            if (colorTime.TotalSeconds > 0.05f)
+            if (colorTime.TotalSeconds > 0.1f)
             {
                 colorIndex = (++colorIndex) % colors.Length;
                 Diffuse = colors[colorIndex].ToVector3();
@@ -54,13 +54,11 @@ namespace datx02_rally.Entities
 
             //Position += Vector3.Right * (float)gameTime.ElapsedGameTime.TotalSeconds * 100f;
 
-            BoundingSphere = new BoundingSphere(Position, 1);
-
-            fireEmitter.Origin = Position;
+            //fireEmitter.Origin = Position;
             fireEmitter.Update(gameTime, fireEmitter.Origin);
             fireSystem.Update(gameTime);
 
-            fireSmokeEmitter.Origin = Position + smokeOffset;
+            //fireSmokeEmitter.Origin = Position + smokeOffset;
             fireSmokeEmitter.Update(gameTime, fireSmokeEmitter.Origin);
             fireSmokeSystem.Update(gameTime);
         }
