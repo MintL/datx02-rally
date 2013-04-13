@@ -60,19 +60,7 @@ namespace datx02_rally.Components
             var spriteBatch = (Game as Game1).spriteBatch;
 
             spriteBatch.Begin();
-            //spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
-            //foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
-            //{
-            //    pass.Apply();
             spriteBatch.Draw(finalTexture, Vector2.Zero, Color.White);
-            //spriteBatch.Draw(RenderedImage, Vector2.Zero, Color.White);
-
-            //}
-
-            //spriteBatch.End();
-
-            //spriteBatch.Begin();
-            //spriteBatch.Draw(terrainSegments[7, 7].ShadowMap, new Rectangle(0, 0, 256, 256), Color.White);
             spriteBatch.End();
 
             GraphicsDevice.SetRenderTarget(null);

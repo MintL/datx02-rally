@@ -1,5 +1,6 @@
 #define MaxLights 10
 #include "SoftShadow.vsi"
+#include "Prelight/Shared.vsi"
 
 float4x4 World;
 float4x4 View;
@@ -7,8 +8,6 @@ float4x4 Projection;
 float4x4 NormalMatrix;
 
 float3 EyePosition;
-
-float4x4 PrelightProjection;
 
 bool MaterialUnshaded;
 float3 MaterialAmbient;
@@ -35,6 +34,15 @@ sampler2D diffuseMapSampler = sampler_state
 	mipfilter = linear;
 	AddressU = Clamp;
 	AddressV = Clamp;
+};
+
+texture2D LightTexture;
+sampler2D lightSampler = sampler_state
+{
+	texture = <LightTexture>;
+	minfilter = point;
+	magfilter = point;
+	mipfilter = point;
 };
 
 float MaterialReflection;
@@ -106,12 +114,6 @@ float3 CalculateDiffuse(float3 normal, float3 directionToLight)
 	return saturate(dot(normal, directionToLight));
 }
 
-float3 CalculateSpecular(float3 normal, float3 directionToLight, float3 directionFromEye, float shininess)
-{
-	float3 reflect = -directionToLight + normal * (2 * dot(normal, directionToLight));
-	return pow(saturate(dot(reflect, directionFromEye)), shininess);
-}
-
 float3 CalculateSpecularBlinn(float3 normal, float3 directionToLight, float3 directionFromEye, float shininess)
 {
 	float3 h = normalize(directionToLight - directionFromEye);
@@ -120,8 +122,6 @@ float3 CalculateSpecularBlinn(float3 normal, float3 directionToLight, float3 dir
 
 float3 CalculateEnvironmentReflection(float3 normal, float3 directionFromEye) 
 {
-	//return reflect(directionFromEye, normal);
-	//return normalize(reflect(directionFromEye, normal));
 	return normalize(directionFromEye + 2 * normal * saturate(dot(-directionFromEye, normal)));
 }
 
@@ -134,6 +134,7 @@ float4 GetPositionFromLight(float4 position)
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
 	float3 normal = normalize(input.Normal);
+	float4 color = tex2D(diffuseMapSampler, input.TexCoord);
 
 	float3 directionFromEye = -normalize(input.ViewDirection);
 	float normalizationFactor = ((MaterialShininess + 2.0) / 8.0);
@@ -144,28 +145,9 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		return float4(MaterialAmbient, 1);
 	}
 
-	/*
-	for (int i = 0; i < NumLights; i++)
-	{
-		float3 L = LightPosition[i] - input.WorldPosition;
-		float3 directionToLight = normalize(L);
-
-		// point light
-		float attenuation = saturate(1 - dot(L / LightRange[i], L / LightRange[i])); 
-
-		// Frazier threshold self shadowing
-		float selfShadow = saturate(4.0 * dot(normal, directionToLight));
-
-		// Fresnel
-		float3 fresnel = MaterialSpecular + (float3(1.0, 1.0, 1.0) - MaterialSpecular) * pow(clamp(1.0 + dot(-directionFromEye, normal),
-			0.0, 1.0), 5.0);
-
-		totalLight += float4(
-			attenuation * selfShadow *
-			(LightDiffuse[i] * tex2D(diffuseMapSampler, input.TexCoord) * CalculateDiffuse(normal, directionToLight) + 
-			LightDiffuse[i] * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor), 1);
-	}
-	*/
+	// Prelighting
+	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();
+	totalLight += tex2D(lightSampler, texCoord) * color;
 
 	// Directional light
 	float3 directionToLight = -normalize(DirectionalLightDirection);
@@ -174,7 +156,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 			0.0, 1.0), 5.0);
 
 	float3 reflection = CalculateEnvironmentReflection(normal, directionFromEye);
-	totalLight += float4(selfShadow * (DirectionalLightDiffuse * tex2D(diffuseMapSampler, input.TexCoord) * CalculateDiffuse(normal, directionToLight) +
+	totalLight += float4(selfShadow * (DirectionalLightDiffuse * color.rgb * CalculateDiffuse(normal, directionToLight) +
 					DirectionalLightDiffuse * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor +
 					texCUBE(EnvironmentSampler, reflection * float3(1,1,-1)) * fresnel * MaterialReflection), 1);
 	

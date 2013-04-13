@@ -1118,43 +1118,6 @@ namespace datx02_rally.Menus
                 spriteBatch.End();
             }
         }
-
-        private void RenderPostProcess()
-        {
-            // Apply bloom effect
-            Texture2D finalTexture = postProcessTexture;
-
-            Game.Services.AddService(null, postProcessTexture);
-
-            finalTexture = bloom.PerformBloom(postProcessTexture);
-
-            Matrix view = gameInstance.GetService<CameraComponent>().View;
-
-            if (gameInstance.GetService<InputComponent>().GetKey(Keys.M)) {
-                motionBlurEnabled = !motionBlurEnabled;
-            }
-
-            if (motionBlurEnabled) {
-                Matrix viewProjectionInverse = Matrix.Invert(view * prelightingRenderer.LightProjection);
-                finalTexture = motionBlur.PerformMotionBlur(finalTexture, prelightingRenderer.DepthTarget, viewProjectionInverse, previousViewProjection);
-                previousViewProjection = view * prelightingRenderer.LightProjection;
-            }
-
-            spriteBatch.Begin();
-            //spriteBatch.Begin(0, BlendState.Opaque, null, null, null, postEffect);
-            //foreach (EffectPass pass in postEffect.CurrentTechnique.Passes)
-            //{
-            //    pass.Apply();
-            spriteBatch.Draw(finalTexture, Vector2.Zero, Color.White);
-
-            //}
-
-            //spriteBatch.End();
-
-            //spriteBatch.Begin();
-            //spriteBatch.Draw(terrainSegments[7, 7].ShadowMap, new Rectangle(0, 0, 256, 256), Color.White);
-            spriteBatch.End();
-        }
         
         private void RenderShadowCasters(BoundingBox boundingBox, Matrix shadowMapView, Matrix shadowMapProjection)
         {
@@ -1397,16 +1360,6 @@ namespace datx02_rally.Menus
 
         private void DrawCar(Matrix view, Matrix projection, Car car)
         {
-            Vector3[] pointLightPositions = new Vector3[pointLights.Count];
-            Vector3[] pointLightDiffuses = new Vector3[pointLights.Count];
-            float[] pointLightRanges = new float[pointLights.Count];
-            for (int i = 0; i < 4; i++)
-            {
-                pointLightPositions[i] = pointLights[i].Position;
-                pointLightDiffuses[i] = pointLights[i].Diffuse;
-                pointLightRanges[i] = pointLights[i].Radius;
-            }
-
             foreach (var mesh in car.Model.Meshes) // 5 meshes
             {
                 Matrix world = Matrix.Identity;
@@ -1444,18 +1397,9 @@ namespace datx02_rally.Menus
 
                     param["EyePosition"].SetValue(view.Translation);
 
-                    param["LightPosition"].SetValue(pointLightPositions);
-                    param["LightDiffuse"].SetValue(pointLightDiffuses);
-                    param["LightRange"].SetValue(pointLightRanges);
-                    param["NumLights"].SetValue(2);
-
                     param["DirectionalLightDirection"].SetValue(directionalLight.Direction);
                     param["DirectionalLightDiffuse"].SetValue(directionalLight.Diffuse);
                     param["DirectionalLightAmbient"].SetValue(directionalLight.Ambient);
-
-                    //effect.Parameters["LightView"].SetValue( shadowMapView);
-                    //effect.Parameters["LightProjection"].SetValue(shadowMapProjection);
-                    //effect.Parameters["ShadowMap"].SetValue(terrainSegments[0,0].ShadowMap);
                 }
 
                 mesh.Draw();
