@@ -10,8 +10,20 @@ namespace datx02_rally.Entities
 {
     public abstract class GameObject
     {
-        public Vector3 Position { get; set; }
-        public float Scale { get; set; }
+        // TODO: UpdateBoundingVolume has to be called if either the position or scale 
+        //       is updated but that means it's updated twice in the beginning
+        private Vector3 position;
+        public Vector3 Position
+        {
+            get { return position; }
+            set { position = value; UpdateBoundingVolume(); }
+        }
+        private float scale;
+        public float Scale 
+        {
+            get { return scale; }
+            set { scale = value; UpdateBoundingVolume(); }
+        }
         
         /// <summary>
         /// Yaw, pitch, roll
@@ -29,6 +41,19 @@ namespace datx02_rally.Entities
         {
             Scale = 1;
             Rotation = Vector3.Zero;
+        }
+
+        public virtual void UpdateBoundingVolume()
+        {
+            if (Model != null)
+            {
+                BoundingSphere = new BoundingSphere();
+                foreach (var mesh in Model.Meshes)
+                {
+                    BoundingSphere = BoundingSphere.CreateMerged(mesh.BoundingSphere.Transform(mesh.ParentBone.Transform), BoundingSphere);
+                }
+                BoundingSphere = BoundingSphere.Transform(Matrix.CreateScale(Scale) * Matrix.CreateTranslation(Position));
+            }
         }
 
         public virtual void Update(GameTime gameTime)

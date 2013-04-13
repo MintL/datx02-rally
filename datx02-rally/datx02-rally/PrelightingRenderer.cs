@@ -68,7 +68,7 @@ namespace datx02_rally
             lightingEffect.Parameters["viewportHeight"].SetValue(viewHeight);
         }
 
-        public void Render(Matrix view, DirectionalLight directionalLight, TerrainModel[,] terrainSegments, int terrainSegmentsCount, List<PointLight> pointLights, Car car, List<GameObject> objects)
+        public void Render(Matrix view, TerrainModel[,] terrainSegments, int terrainSegmentsCount, List<PointLight> pointLights, Car car, List<GameObject> objects)
         {
             this.terrainSegments = terrainSegments;
             this.terrainSegmentsCount = terrainSegmentsCount;

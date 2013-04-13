@@ -27,8 +27,6 @@ namespace datx02_rally.Menus
         GamePlayMode mode;
 
         PauseMenu pauseMenu;
-        public SpriteBatch spriteBatch;
-
         Matrix projectionMatrix;
 
         #region PostProcess
@@ -36,13 +34,10 @@ namespace datx02_rally.Menus
         PostProcessingComponent postProcessingComponent;
 
         RenderTarget2D postProcessTexture;
-        Effect postEffect;
 
         Bloom bloom;
         GaussianBlur gaussianBlur;
         MotionBlur motionBlur;
-        Matrix previousViewProjection;
-        private bool motionBlurEnabled = false;
 
         #endregion
 
@@ -401,6 +396,9 @@ namespace datx02_rally.Menus
                 //pointLights.Add(fire);
             }
 
+            fire = new FireObject(gameInstance, content, Car.Position + Vector3.Up * 100, Vector3.Up * 10);
+            pointLights.Add(fire);
+
             //Vector3 forward = Vector3.Transform(Vector3.Backward,
             //    Matrix.CreateRotationY(Car.Rotation));
             
@@ -547,9 +545,6 @@ namespace datx02_rally.Menus
 
                 obj.Position = terrainScale * pos;
                 obj.Rotation = new Vector3(0, MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()), 0);
-
-                // Update the BoundingSphere
-                obj.Update(null);
 
                 GraphicalObjects.Add(obj);
                 ShadowCasterObjects.Add(obj);
@@ -1077,7 +1072,7 @@ namespace datx02_rally.Menus
             #region Prelight Rendering
 
             // Render to its rendertargets independently
-            prelightingRenderer.Render(view, directionalLight, terrainSegments, terrainSegmentsCount, pointLights, Car, GraphicalObjects);
+            prelightingRenderer.Render(view, terrainSegments, terrainSegmentsCount, pointLights, Car, GraphicalObjects);
 
             #endregion
 

@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using datx02_rally.Particles.Systems;
 using datx02_rally.Particles;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace datx02_rally.Entities
 {
@@ -20,7 +21,7 @@ namespace datx02_rally.Entities
 
         private TimeSpan colorTime = TimeSpan.Zero;
         private int colorIndex = 0;
-        private static Color[] colors = new Color[] { new Color(255, 100, 50), new Color(255, 50, 25) };
+        private static Color[] colors = new Color[] { new Color(255, 100, 50), new Color(255, 80, 40) };
 
         public FireObject(Game1 gameInstance, ContentManager content, Vector3 firePosition, Vector3 smokeOffset)
             : base(firePosition, Color.Red.ToVector3(), 400)
@@ -36,12 +37,15 @@ namespace datx02_rally.Entities
 
             fireSmokeEmitter = new ParticleEmitter(fireSmokeSystem, 100, firePosition + smokeOffset);
             fireSmokeEmitter.Origin = firePosition + smokeOffset;
+
+            this.smokeOffset = smokeOffset;
+            Model = content.Load<Model>(@"Models\light");
         }
         
         public override void Update(GameTime gameTime)
         {
             colorTime += gameTime.ElapsedGameTime;
-            if (colorTime.TotalSeconds > 0.15f)
+            if (colorTime.TotalSeconds > 0.05f)
             {
                 colorIndex = (++colorIndex) % colors.Length;
                 Diffuse = colors[colorIndex].ToVector3();
@@ -61,6 +65,7 @@ namespace datx02_rally.Entities
             fireSmokeSystem.Update(gameTime);
         }
 
+        // Overrides the default Draw without drawing the assigned model
         public override void Draw(Matrix view, Matrix projection)
         {
             fireSystem.SetCamera(view, projection);
