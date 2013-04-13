@@ -32,20 +32,22 @@ namespace datx02_rally.EventTrigger
 
         public abstract void Update(IMovingObject movingObject) ;
 
-        protected void Trigger(int index)
+        protected void Trigger(int index, IMovingObject movingObject)
         {
             if (Triggered != null)
-                Triggered(this, new TriggeredEventArgs(index));
+                Triggered(this, new TriggeredEventArgs(index, movingObject));
         }
     }
 
     public class TriggeredEventArgs : EventArgs
     {
         public int Index { get; private set; }
+        public IMovingObject Object { get; private set; }
 
-        public TriggeredEventArgs(int index)
+        public TriggeredEventArgs(int index, IMovingObject movingObject)
         {
             Index = index;
+            Object = movingObject;
         }
     }
 

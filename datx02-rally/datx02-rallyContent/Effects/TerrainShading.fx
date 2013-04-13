@@ -220,7 +220,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	}
 	else
 	{
-		totalLight.r *= 5;
+		//totalLight.r *= 5;
 	}
 	
 	float2 texCoord = postProjToScreen(input.PositionCopy) + halfPixel();

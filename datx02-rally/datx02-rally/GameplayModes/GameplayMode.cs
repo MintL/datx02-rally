@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using datx02_rally.EventTrigger;
 using datx02_rally.Menus;
 using System;
+using System.Timers;
 
 namespace datx02_rally
 {
@@ -10,15 +11,18 @@ namespace datx02_rally
     {
         protected Game1 gameInstance;
         protected List<GameModeState> states;
-        private int currentState;
+        protected List<string> addedTriggers;
+        protected int CurrentState { get; private set; }
+        private bool allStatesFinished = false;
         public bool GameOver { private set; get; }
 
         public GameplayMode(Game1 gameInstance)
         {
             this.gameInstance = gameInstance;
+            states = new List<GameModeState>();
+            addedTriggers = new List<string>();
             GameOver = false;
-            currentState = 0;
-            Initialize();
+            CurrentState = 0;
         }
 
         /// <summary>
@@ -28,15 +32,43 @@ namespace datx02_rally
 
         public void Update(GameTime gameTime)
         {
-            GameModeState current = states[currentState];
-            current.Update(gameTime);
+            if (allStatesFinished)
+                return;
+            GameModeState current = states[CurrentState];
             if (current.IsStateFinished())
             {
-                currentState++;
-                Console.WriteLine("Passed from state " + (currentState - 1) + " to state " + currentState);
+                CurrentState++;
+                Console.WriteLine("Passed from state " + (CurrentState - 1) + " to state " + CurrentState);
             }
-            if (currentState > states.Count - 1)
+            if (CurrentState > states.Count - 1)
+            {
+                Console.WriteLine("Game over!");
+                GameOverProcedure();
+            }
+        }
+
+        private void GameOverProcedure()
+        {
+            allStatesFinished = true;
+
+            // remove triggers from trigger manager
+            var triggerManager = gameInstance.GetService<TriggerManager>();
+            var inputManager = gameInstance.GetService<InputComponent>();
+            inputManager.InputEnabled = false;
+            foreach (var trigger in addedTriggers)
+            {
+                if (triggerManager.Triggers.ContainsKey(trigger))
+                    triggerManager.Triggers.Remove(trigger);
+            }
+
+            // disable keyboard for 3 seconds, then exit gameplay
+            Timer timer = new Timer(3 * 1000);
+            timer.Elapsed += (s, e) =>
+            {
+                inputManager.InputEnabled = true;
                 GameOver = true;
+            };
+            timer.Start();
         }
 
     }
@@ -44,24 +76,24 @@ namespace datx02_rally
 
     public class GameModeState 
     {
-        public Dictionary<PlayerWrapperTrigger, TriggerStatistics> Triggers = new Dictionary<PlayerWrapperTrigger, TriggerStatistics>();
+        public Dictionary<AbstractTrigger, TriggeredEventArgs> Triggers = new Dictionary<AbstractTrigger, TriggeredEventArgs>();
         private bool finished = false;
 
-        public GameModeState(List<PlayerWrapperTrigger> triggers) 
+        public GameModeState(List<AbstractTrigger> triggers) 
         {
             foreach (var trigger in triggers)
 		        Triggers.Add(trigger, null);
         }
 
-        public void Update(GameTime gameTime) 
-        {
-            foreach (var triggerPair in Triggers)
-            {
-                triggerPair.Key.Update(gameTime);
-                if (triggerPair.Value == null && triggerPair.Key.Active)
-                    Triggers[triggerPair.Key] = new TriggerStatistics(gameTime);
-            }
-        }
+        //public void Update(GameTime gameTime) 
+        //{
+        //    foreach (var triggerPair in Triggers)
+        //    {
+        //        triggerPair.Key.Update(gameTime);
+        //        if (triggerPair.Value == null && triggerPair.Key.Active)
+        //            Triggers[triggerPair.Key] = new TriggerStatistics(gameTime);
+        //    }
+        //}
 
         public bool IsStateFinished()
         {
@@ -77,13 +109,13 @@ namespace datx02_rally
         }
     }
 
-    public class TriggerStatistics
-    {
-        private GameTime triggerTime;
+    //public class TriggerStatistics
+    //{
+    //    private GameTime triggerTime;
 
-        public TriggerStatistics(GameTime triggerTime)
-        {
-            this.triggerTime = triggerTime;
-        }
-    }
+    //    public TriggerStatistics(GameTime triggerTime)
+    //    {
+    //        this.triggerTime = triggerTime;
+    //    }
+    //}
 }

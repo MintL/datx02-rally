@@ -24,7 +24,7 @@ namespace datx02_rally.Menus
     {
         #region Field
 
-        GamePlayMode mode;
+        GameplayMode mode;
 
         PauseMenu pauseMenu;
         Matrix projectionMatrix;
@@ -159,7 +159,6 @@ namespace datx02_rally.Menus
             int usedSeed = seed.HasValue ? seed.Value : 0;
             UniversalRandom.ResetInstance(usedSeed);
             UniversalRandom.ResetInstance(0);
-            this.mode = mode;
 
             UpdateOrder = -1;
             DrawOrder = -1;
@@ -262,6 +261,7 @@ namespace datx02_rally.Menus
 
             var roadMap = new float[heightMapSize, heightMapSize];
             raceTrack = new RaceTrack(heightMapSize, terrainScale);
+            this.mode = new MultiplayerRaceMode(gameInstance, 2, 10, raceTrack);
 
             navMesh = new NavMesh(GraphicsDevice, raceTrack.Curve, 1500, roadWidth, terrainScale);
 
@@ -642,15 +642,20 @@ namespace datx02_rally.Menus
             /// Adds it to triggers.
             /// </summary>
 
-            var triggerManager = gameInstance.GetService<TriggerManager>();
+            //var triggerManager = gameInstance.GetService<TriggerManager>();
 
-            var trigger = new PositionTrigger(raceTrack.CurveRasterization, 0, true, true);
-            trigger.Triggered += (sender, e) =>
-            {
-                thunderBoltGenerator.Flash();
-            };
-            triggerManager.Triggers.Add("start", trigger);
-
+            //int noOfCheckpoints = 10;
+            //for (int i = 0; i < noOfCheckpoints; i++)
+            //{
+            //    var trigger = new PositionTrigger(raceTrack.CurveRasterization, (int)(((float)i / noOfCheckpoints) * raceTrack.CurveRasterization.Points.Count), true, true);
+            //    string cp = "Checkpoint " + i;
+            //    trigger.Triggered += (sender, e) =>
+            //    {
+            //        Console.WriteLine(cp);
+            //    };
+            //    triggerManager.Triggers.Add("checkpoint"+i, trigger);
+            //}
+            
             #endregion
 
 
@@ -738,11 +743,14 @@ namespace datx02_rally.Menus
 
         public override GameState UpdateState(GameTime gameTime)
         {
+            if (mode.GameOver)
+                return GameState.MainMenu;
             return GameState.Gameplay;
         }
 
         public override void Update(GameTime gameTime)
         {
+            this.mode.Update(gameTime);
             InputComponent input = gameInstance.GetService<InputComponent>();
             if (input.GetPressed(Input.Exit))
                 pauseMenu.Enabled = !pauseMenu.Enabled;

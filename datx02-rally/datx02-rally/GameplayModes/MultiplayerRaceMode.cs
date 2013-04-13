@@ -3,55 +3,65 @@ using datx02_rally.Menus;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System;
+using datx02_rally.GameLogic;
 
 namespace datx02_rally
 {
     class MultiplayerRaceMode : GameplayMode
     {
         private int laps;
-        private List<Vector3[]> checkpoints;
-        Vector3[] goalLine;
+        private int checkpoints;
+        private RaceTrack raceTrack;
 
-        public MultiplayerRaceMode(Game1 gameInstance, int laps, List<Vector3[]> checkpoints, Vector3[] goalLine)
+        public MultiplayerRaceMode(Game1 gameInstance, int laps, int noOfCheckpoints, RaceTrack raceTrack)
             : base(gameInstance)
         {
             this.laps = laps;
-            this.checkpoints = checkpoints;
-            this.goalLine = goalLine;
+            this.checkpoints = noOfCheckpoints;
+            this.raceTrack = raceTrack;
+            Initialize();
         }
 
         public override void Initialize()
         {
-            //List<PlayerWrapperTrigger> checkpointTriggers = new List<PlayerWrapperTrigger>();
-            //PlayerWrapperTrigger goalTrigger = new PlayerWrapperTrigger(
-            //        new RectangleTrigger(goalLine[0], goalLine[1], goalLine[2], goalLine[3], new TimeSpan(0, 0, 5)),
-            //        (gameInstance.currentView as GamePlayView).Car);
+            List<AbstractTrigger> checkpointTriggers = new List<AbstractTrigger>();
+            for (int i = 0; i < checkpoints; i++)
+            {
+                PositionTrigger trigger = new PositionTrigger(raceTrack.CurveRasterization, 
+                    (int)(((float)i / checkpoints) * raceTrack.CurveRasterization.Points.Count), true, true);
+                string outputDebug = "Passing checkpoint " + i;
+                trigger.Triggered += (sender, e) =>
+                {
+                    Console.WriteLine(outputDebug);
+                    var current = states[CurrentState];
+                    var aTrigger = sender as AbstractTrigger;
+                    if (current.Triggers.ContainsKey(aTrigger))
+                        current.Triggers[aTrigger] = e;
+                };
+                
+                string checkpointID = "checkpoint" + i;
+                gameInstance.GetService<TriggerManager>().Triggers.Add(checkpointID, trigger);
+                checkpointTriggers.Add(trigger);
+                addedTriggers.Add(checkpointID);
+            }
 
-            //foreach (var checkpoint in checkpoints)
-            //{
-            //    checkpointTriggers.Add(new PlayerWrapperTrigger(
-            //        new RectangleTrigger(checkpoint[0], checkpoint[1], checkpoint[2], checkpoint[3], new TimeSpan(0, 0, 5)),
-            //        (gameInstance.currentView as GamePlayView).Car));
-            //}
-
-            // Starting state, waiting for countdown/start signal from server
+            //// Starting state, waiting for countdown/start signal from server
             //const int countdown = 3;
             //for (int i = 0; i < countdown; i++)
             //{
 			     
             //}
-            
-            // pass start line state
-            //states.Add(new GameModeState(new List<PlayerWrapperTrigger>{goalTrigger}));
 
-            //for (int i = 0; i < laps; i++)
-            //{
-            //    List<PlayerWrapperTrigger> lapTriggers = new List<PlayerWrapperTrigger>();
-            //    lapTriggers.AddRange(checkpointTriggers);
-            //    lapTriggers.Add(goalTrigger);
+            for (int i = 0; i < laps; i++)
+            {
+                List<AbstractTrigger> lapTriggers = new List<AbstractTrigger>();
+                lapTriggers.AddRange(checkpointTriggers);
 
-            //    states.Add(new GameModeState(lapTriggers));
-            //}
+                states.Add(new GameModeState(lapTriggers));
+            }
+
+            // Add state for passing the finish line
+            states.Add(new GameModeState(checkpointTriggers.GetRange(index: 0, count: 1)));
         }
     }
 }

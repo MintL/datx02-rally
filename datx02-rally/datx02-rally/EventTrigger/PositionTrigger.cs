@@ -48,7 +48,7 @@ namespace datx02_rally.EventTrigger
             {
                 currentPoint = nextPoint;
                 if (currentPoint == triggerPointIndex && (!preventReverse || direction > 0))
-                    Trigger(currentPoint);
+                    Trigger(currentPoint, movingObject);
             }
         }
 

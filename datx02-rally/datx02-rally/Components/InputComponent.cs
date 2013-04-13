@@ -16,18 +16,19 @@ namespace datx02_rally
         private KeyboardState previousKeyboard;
         private GamePadState gamePad;
         private GamePadState previousGamePad;
-        private Boolean enabled = true;
+        public bool InputEnabled { get; set; }
 
         public Controller CurrentController { get; set; }
 
         public InputComponent(Game1 game)
             : base(game)
         {
+            InputEnabled = true;
         }
 
         public float GetState(Input input)
         {
-            if (CurrentController == Controller.Keyboard && enabled)
+            if (CurrentController == Controller.Keyboard && InputEnabled)
             {
                 switch (input)
                 {
@@ -67,7 +68,7 @@ namespace datx02_rally
 
         public bool GetPressed(Input input)
         {
-            if (CurrentController == Controller.Keyboard && enabled)
+            if (CurrentController == Controller.Keyboard && InputEnabled)
             {
                 switch (input)
                 {
@@ -79,7 +80,7 @@ namespace datx02_rally
                         return keyboard.IsKeyDown(Keys.Escape) && previousKeyboard.IsKeyUp(Keys.Escape);
                     case Input.Console:
                         if (previousKeyboard.IsKeyUp(Keys.F2) && keyboard.IsKeyDown(Keys.F2))
-                            enabled = !enabled;
+                            InputEnabled = !InputEnabled;
                         return previousKeyboard.IsKeyUp(Keys.F2) && keyboard.IsKeyDown(Keys.F2);
                 }
             }
@@ -98,7 +99,7 @@ namespace datx02_rally
             else if (input == Input.Console) 
             {
                 if (previousKeyboard.IsKeyUp(Keys.F2) && keyboard.IsKeyDown(Keys.F2))
-                    enabled = !enabled;
+                    InputEnabled = !InputEnabled;
                 return previousKeyboard.IsKeyUp(Keys.F2) && keyboard.IsKeyDown(Keys.F2);
             }
             return false;
