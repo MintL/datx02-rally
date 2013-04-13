@@ -41,8 +41,8 @@ namespace datx02_rally.Menus
 
         public override void Update(GameTime gameTime)
         {
-            NextState = UpdateState(gameTime);
-			
+            NextState = UpdateState(gameTime); 
+
             base.Update(gameTime);
         }
     }
