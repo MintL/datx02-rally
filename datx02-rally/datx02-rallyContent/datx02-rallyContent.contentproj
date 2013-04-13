@@ -443,6 +443,13 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Menu\MenuHeaderFont.spritefont">
+      <Name>MenuHeaderFont</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Effects\Prelight\Light.fx">
       <Name>Light</Name>
       <Importer>EffectImporter</Importer>

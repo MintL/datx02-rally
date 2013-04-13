@@ -28,12 +28,14 @@ namespace datx02_rally
         public GraphicsDeviceManager Graphics { get; private set; }
         // shared sprite batch
         public SpriteBatch spriteBatch;
+        public List<IGameComponent> BaseComponents { get; private set; }
 
         #region Initialization
 
         public Game1()
         {
             Graphics = new GraphicsDeviceManager(this);
+            BaseComponents = new List<IGameComponent>();
             Content.RootDirectory = "Content";
             Instance = this;
 
@@ -63,19 +65,15 @@ namespace datx02_rally
         protected override void Initialize()
         {
             // Components
+            BaseComponents.Add(new ServerClient(this));
+            BaseComponents.Add(new InputComponent(this));
+            BaseComponents.Add(new HUDConsoleComponent(this));
 
-            var serverComponent = new ServerClient(this);
-            Components.Add(serverComponent);
-            Services.AddService(typeof(ServerClient), serverComponent);
-
-            var inputComponent = new InputComponent(this);
-            //inputComponent.CurrentController = Controller.GamePad;
-            Components.Add(inputComponent);
-            Services.AddService(typeof(InputComponent), inputComponent);
-
-            var consoleComponent = new HUDConsoleComponent(this);
-            Components.Add(consoleComponent);
-            Services.AddService(typeof(HUDConsoleComponent), consoleComponent);
+            foreach (IGameComponent component in BaseComponents)
+            {
+                Components.Add(component);
+                SetService(component.GetType(), component);
+            }
 
             currentState = GameState.MainMenu;
             currentView = new MenuView(this, currentState);
@@ -149,6 +147,13 @@ namespace datx02_rally
                 currentState = nextState;
             }
             base.Update(gameTime);
+        }
+
+        public void SetService(Type type, Object service)
+        {
+            if (Services.GetService(type) != null)
+                Services.RemoveService(type);
+            Services.AddService(type, service);
         }
 
         #endregion

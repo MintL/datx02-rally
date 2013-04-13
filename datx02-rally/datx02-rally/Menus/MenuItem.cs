@@ -21,6 +21,12 @@ namespace datx02_rally.Menus
         public Texture2D Background { get; set; }
         public Color FontColor { get; set; }
         public Color FontColorSelected { get; set; }
+        private bool enabled = true;
+        public bool Enabled
+        {
+            get { return enabled; }
+            set { enabled = value; }
+        }
 
         public abstract void Draw(SpriteBatch spriteBatch, Vector2 position, bool selected);
 
@@ -61,7 +67,15 @@ namespace datx02_rally.Menus
     public class TextInputMenuItem : MenuItem
     {
         KeyboardState PrevKeyState;
+        int FRAMES_PER_CARET_BLINK = 50;
+        int caretBlinkFrameCounter = 0;
+        bool blink = true;
         private StringBuilder enteredText;
+        public string EnteredText
+        {
+            get { return enteredText.ToString(); }
+            set { enteredText.Clear(); enteredText.Append(value); }
+        }
 
         public TextInputMenuItem(string text) : this(text, null) {}
 
@@ -79,21 +93,65 @@ namespace datx02_rally.Menus
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 position, bool selected)
         {
-            KeyboardState keyState = Keyboard.GetState();
-            foreach (var key in keyState.GetPressedKeys())
+            if (selected)
             {
-                if (PrevKeyState.IsKeyUp(key)) 
+                KeyboardState keyState = Keyboard.GetState();
+                foreach (var key in keyState.GetPressedKeys())
                 {
-                    if (keyState.IsKeyDown(Keys.Back) && enteredText.Length > 0)
-                        enteredText.Remove(enteredText.Length - 1, 1);
-                    else 
-                        enteredText.Append(Game1.GetInstance().GetService<InputComponent>().GetKeyText(key));
+                    if (PrevKeyState.IsKeyUp(key))
+                    {
+                        if (keyState.IsKeyDown(Keys.Back) && enteredText.Length > 0)
+                            enteredText.Remove(enteredText.Length - 1, 1);
+                        else if (!keyState.IsKeyDown(Keys.Space) && enteredText.Length <= 15)
+                        {
+                            string inputText = Game1.GetInstance().GetService<InputComponent>().GetKeyText(key);
+                            if (keyState.IsKeyDown(Keys.LeftShift) || keyState.IsKeyDown(Keys.RightShift))
+                                inputText = inputText.ToUpper();
+                            enteredText.Append(inputText);
+                        }
+                    }
                 }
+                PrevKeyState = keyState;
             }
-            PrevKeyState = keyState;
 
-            spriteBatch.DrawString(Font, Text + ": " + enteredText.ToString(), position, Color.White);
+            Rectangle b = Bounds;
+            b.X = (int)position.X + 5;
+            b.Width -= 10;
+            b.Y = (int)position.Y;
+            if (selected)
+            {
+                spriteBatch.Draw(Background, b, Color.White);
+            }
 
+            Color textColor;
+            if (!Enabled)
+                textColor = Color.Gray;
+            else
+                textColor = (selected) ? FontColorSelected : FontColor;
+
+            // Title string
+            Vector2 textOffset = Font.MeasureString(Text);
+            textOffset /= 2;
+            textOffset.X = Bounds.Width / 6;
+            textOffset.Y = Bounds.Height / 2 - textOffset.Y;
+            spriteBatch.DrawString(Font, Text, position + textOffset, textColor);
+
+            // Caret blinking
+            if (selected && ++caretBlinkFrameCounter > FRAMES_PER_CARET_BLINK)
+            {
+                blink = !blink;
+                caretBlinkFrameCounter = 0;
+            }
+
+            // Entered string
+            string textWithCaret = enteredText.ToString() + "|";
+            string textToDraw = blink && selected ? textWithCaret : enteredText.ToString();
+            textOffset = Font.MeasureString(textWithCaret);
+            textOffset /= 2;
+            textOffset.X = Bounds.Width - Bounds.Width * 3 / 12 - textOffset.X;
+            textOffset.Y = Bounds.Height / 2 - textOffset.Y;
+            spriteBatch.DrawString(Font, textToDraw, position + textOffset, textColor);
+            
         }
     }
  
@@ -123,11 +181,17 @@ namespace datx02_rally.Menus
             position.X += Bounds.Width / 2 - Background.Bounds.Width / 2;
             spriteBatch.Draw(Background, position, Color.White);
 
+            Color textColor;
+            if (!Enabled)
+                textColor = Color.Gray;
+            else
+                textColor = (selected) ? FontColorSelected : FontColor;
+
             Vector2 textOffset = Font.MeasureString(Text);
             textOffset /= 2;
             textOffset.X = Background.Bounds.Width / 2 - textOffset.X;
             textOffset.Y = Background.Bounds.Height / 2 - textOffset.Y + 3;
-            spriteBatch.DrawString(Font, Text, position + textOffset, (selected) ? FontColorSelected : FontColor);
+            spriteBatch.DrawString(Font, Text, position + textOffset, textColor);
         }
     }
 
@@ -152,7 +216,21 @@ namespace datx02_rally.Menus
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 position, bool selected)
         {
-            spriteBatch.DrawString(Font, Text, position, FontColor);
+
+            position.X += Bounds.Width / 2 - Background.Bounds.Width / 2;
+            spriteBatch.Draw(Background, position, Color.White);
+
+            Color textColor;
+            if (!Enabled)
+                textColor = Color.Gray;
+            else
+                textColor = (selected) ? FontColorSelected : FontColor;
+
+            Vector2 textOffset = Font.MeasureString(Text);
+            textOffset /= 2;
+            textOffset.X = Background.Bounds.Width / 2 - textOffset.X;
+            textOffset.Y = Background.Bounds.Height / 2 - textOffset.Y + 3;
+            spriteBatch.DrawString(Font, Text, position + textOffset, textColor);
         }
     }
 
@@ -252,13 +330,13 @@ namespace datx02_rally.Menus
             return options[selectedOptionIndex].Item2;
         }
 
-        // Hack to get equal to work for both reference and value types
+        // Hack to get equal to work for both reference and value types. Not needed anymore?
         private bool Equal(T o1, T o2)
         {
-            if (o1 is ValueType)
+            //if (o1 is ValueType)
                 return o1.Equals(o2);
-            else
-                return (Object)o1 == (Object)o2;
+            //else
+            // return (Object)o1 == (Object)o2;
         }
 
         public override void Draw(SpriteBatch spriteBatch, Vector2 position, bool selected)
@@ -272,20 +350,26 @@ namespace datx02_rally.Menus
                 spriteBatch.Draw(Background, b, Color.White);
             }
 
+            Color textColor;
+            if (!Enabled)
+                textColor = Color.Gray;
+            else
+                textColor = (selected) ? FontColorSelected : FontColor;
+
             // Title string
             Vector2 textOffset = Font.MeasureString(Text);
             textOffset /= 2;
             textOffset.X = Bounds.Width / 6;
             textOffset.Y = Bounds.Height / 2 - textOffset.Y;
 
-            spriteBatch.DrawString(Font, Text, position + textOffset, (selected) ? FontColorSelected : FontColor);
+            spriteBatch.DrawString(Font, Text, position + textOffset, textColor);
 
             // Option string
             textOffset = Font.MeasureString(SelectedOption());
             textOffset /= 2;
             textOffset.X = Bounds.Width - Bounds.Width * 3 / 12 - textOffset.X;
             textOffset.Y = Bounds.Height / 2 - textOffset.Y;
-            spriteBatch.DrawString(Font, SelectedOption(), position + textOffset, (selected) ? FontColorSelected : FontColor);
+            spriteBatch.DrawString(Font, SelectedOption(), position + textOffset, textColor);
 
             // Arrows
             Vector2 offset = new Vector2(ArrowLeft.Bounds.Width, ArrowLeft.Bounds.Height);

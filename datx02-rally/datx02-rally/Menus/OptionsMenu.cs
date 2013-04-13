@@ -20,20 +20,33 @@ namespace datx02_rally.Menus
         public OptionsMenu(Game game)
             : base(game, GameState.OptionsMenu)
         {
-            
+            MenuTitle = "Options";
         }
 
         protected override void LoadContent()
         {
             base.LoadContent();
 
-            Vector2 size = GetScreenPosition(new Vector2(0.6f, 0.6f));
+            Vector2 size = GetScreenPosition(new Vector2(0.6f, 0.75f));
             Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
-            OptionMenuItem<int> displayMode = new OptionMenuItem<int>("Display Mode");
+            OptionMenuItem<Tuple<int, int>> resolution = new OptionMenuItem<Tuple<int, int>>("Resolution", "res");
+            foreach (var res in GraphicsAdapter.DefaultAdapter.SupportedDisplayModes.Select(m => new Tuple<int,int>(m.Width, m.Height)).Distinct().OrderBy(r => r.Item1))
+                resolution.AddOption(res.Item1 + "x" + res.Item2, res);
+            resolution.SetStartOption(new Tuple<int, int>(gameInstance.Graphics.PreferredBackBufferWidth, gameInstance.Graphics.PreferredBackBufferHeight));
+            resolution.Bounds = Bounds;
+            resolution.Font = MenuFont;
+            resolution.ArrowLeft = ArrowLeft;
+            resolution.ArrowRight = ArrowRight;
+            resolution.Background = OptionSelected;
+            resolution.FontColor = ItemColor;
+            resolution.FontColorSelected = Color.Black;
+            AddMenuItem(resolution);
+
+            OptionMenuItem<int> displayMode = new OptionMenuItem<int>("Display Mode", "display");
             displayMode.AddOption("Fullscreen", 1);
             displayMode.AddOption("Windowed", 2);
-            displayMode.SetStartOption(1);
+            displayMode.SetStartOption(gameInstance.Graphics.IsFullScreen ? 1 : 2);
             displayMode.Bounds = Bounds;
             displayMode.Font = MenuFont;
             displayMode.ArrowLeft = ArrowLeft;
@@ -43,9 +56,19 @@ namespace datx02_rally.Menus
             displayMode.FontColorSelected = Color.Black;
             AddMenuItem(displayMode);
 
-            BoolOptionMenuItem shadows = new BoolOptionMenuItem("Shadows");
+            TextInputMenuItem playerName = new TextInputMenuItem("Player Name", "name");
+            playerName.Bounds = Bounds;
+            playerName.Font = MenuFont;
+            playerName.EnteredText = GameSettings.Default.PlayerName;
+            playerName.Background = OptionSelected;
+            playerName.FontColor = ItemColor;
+            playerName.FontColorSelected = Color.Black;
+            AddMenuItem(playerName);
+
+            BoolOptionMenuItem shadows = new BoolOptionMenuItem("Shadows", "shadows");
             shadows.Bounds = Bounds;
             shadows.Font = MenuFont;
+            shadows.SetStartOption(GameSettings.Default.Shadows);
             shadows.ArrowLeft = ArrowLeft;
             shadows.ArrowRight = ArrowRight;
             shadows.Background = OptionSelected;
@@ -53,9 +76,10 @@ namespace datx02_rally.Menus
             shadows.FontColorSelected = Color.Black;
             AddMenuItem(shadows);
 
-            BoolOptionMenuItem bloom = new BoolOptionMenuItem("Bloom");
+            BoolOptionMenuItem bloom = new BoolOptionMenuItem("Bloom", "bloom");
             bloom.Bounds = Bounds;
             bloom.Font = MenuFont;
+            bloom.SetStartOption(GameSettings.Default.Bloom);
             bloom.ArrowLeft = ArrowLeft;
             bloom.ArrowRight = ArrowRight;
             bloom.Background = OptionSelected;
@@ -71,56 +95,30 @@ namespace datx02_rally.Menus
             item.SetWidth(Bounds.Width);
             AddMenuItem(item);
 
-            item = new StateActionMenuItem("Apply", GameState.MainMenu);
+            item = new ActionMenuItem("Apply", ApplySettings);
             item.Background = ButtonBackground;
             item.Font = MenuFont;
             item.FontColor = ItemColor;
             item.FontColorSelected = ItemColorSelected;
             item.SetWidth(Bounds.Width);
             AddMenuItem(item);
-
-            //OptionMenuItem<DisplayMode> resolution = new OptionMenuItem<DisplayMode>("Resolution", "Resolution");
-            //foreach (DisplayMode mode in GraphicsAdapter.DefaultAdapter.SupportedDisplayModes)
-            //    resolution.AddOption(mode.Width + "x" + mode.Height, mode);
-            //resolution.SetStartOption(Game1.GetInstance().GraphicsDevice.Viewport.Width + "x" + GraphicsDevice.Viewport.Height);
-
-            //BoolOptionMenuItem fullscreen = new BoolOptionMenuItem("Fullscreen").SetStartOption(graphics.IsFullScreen) as BoolOptionMenuItem;
-            //BoolOptionMenuItem performanceMode = new BoolOptionMenuItem("Performance mode", "PerfMode").SetStartOption(GameSettings.Default.PerformanceMode) as BoolOptionMenuItem;
-            //ActionMenuItem applyButton = new ActionMenuItem("Apply", new ActionMenuItem.Action(ApplySettings));
-            //StateActionMenuItem backButton = new StateActionMenuItem("Back", GameState.MainMenu);
-
-            //AddMenuItem(resolution);
-            //AddMenuItem(fullscreen);
-            //AddMenuItem(performanceMode);
-            //AddMenuItem(applyButton);
-            //AddMenuItem(backButton);
-            
-            /*
-            List<Tuple<String, GameState>> itemInfo = new List<Tuple<string, GameState>>();
-            itemInfo.Add(new Tuple<String, GameState>("MainMenu", GameState.MainMenu));
-            itemInfo.Add(new Tuple<String, GameState>("OptionsMenu", GameState.OptionsMenu));
-            
-            foreach (var info in itemInfo)
-            {
-                MenuItem item = new StateActionMenuItem(info.Item1, info.Item2);
-                item.Background = ButtonBackground;
-                item.Font = MenuFont;
-                AddMenuItem(item);
-            }
-            */
             
         }
 
         private void ApplySettings()
         {
-            OptionMenuItem<DisplayMode> resolution = GetMenuItem("Resolution") as OptionMenuItem<DisplayMode>;
-            BoolOptionMenuItem fullscreen = GetMenuItem("Fullscreen") as BoolOptionMenuItem;
-            BoolOptionMenuItem performanceMode = GetMenuItem("PerfMode") as BoolOptionMenuItem;
+            OptionMenuItem<Tuple<int, int>> resolution = GetMenuItem("res") as OptionMenuItem<Tuple<int, int>>;
+            OptionMenuItem<int> displayMode = GetMenuItem("display") as OptionMenuItem<int>;
+            TextInputMenuItem playerName = GetMenuItem("name") as TextInputMenuItem;
+            BoolOptionMenuItem shadows = GetMenuItem("shadows") as BoolOptionMenuItem;
+            BoolOptionMenuItem bloom = GetMenuItem("bloom") as BoolOptionMenuItem;
 
-            GameSettings.Default.ResolutionWidth = resolution.SelectedValue().Width;
-            GameSettings.Default.ResolutionHeight = resolution.SelectedValue().Height;
-            GameSettings.Default.PerformanceMode = performanceMode.SelectedValue();
-            GameSettings.Default.FullScreen = fullscreen.SelectedValue();
+            GameSettings.Default.ResolutionWidth = resolution.SelectedValue().Item1;
+            GameSettings.Default.ResolutionHeight = resolution.SelectedValue().Item2;
+            GameSettings.Default.FullScreen = displayMode.SelectedValue() == 1;
+            GameSettings.Default.PlayerName = playerName.EnteredText;
+            GameSettings.Default.Shadows = shadows.SelectedValue();
+            GameSettings.Default.Bloom = bloom.SelectedValue();
             GameSettings.Default.Save();
 
             graphics.PreferredBackBufferWidth = GameSettings.Default.ResolutionWidth;

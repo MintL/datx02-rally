@@ -743,9 +743,21 @@ namespace datx02_rally.Menus
 
         public override GameState UpdateState(GameTime gameTime)
         {
+            GameState state = GameState.Gameplay;
             if (mode.GameOver)
-                return GameState.MainMenu;
-            return GameState.Gameplay;
+                state = GameState.MainMenu;
+			else if (pauseMenu.Enabled) 
+				state = pauseMenu.NextState;
+				
+			if (state == GameState.Gameplay)
+				pauseMenu.Enabled = false;
+			else if (state == GameState.MainMenu)
+				this.ExitGame();
+
+            if (state != GameState.PausedGameplay)
+                return state;
+            else
+                return GameState.Gameplay;
         }
 
         public override void Update(GameTime gameTime)
@@ -940,6 +952,26 @@ namespace datx02_rally.Menus
             base.Update(gameTime);
         }
 
+        private void ExitGame()
+        {
+            // Unload components
+            var components = gameInstance.Components;
+            var services = gameInstance.Services;
+
+            foreach (var component in components) 
+            {
+                services.RemoveService(component.GetType());
+            }
+            components.Clear();
+            foreach (var component in gameInstance.BaseComponents)
+            {
+                components.Add(component);
+                gameInstance.SetService(component.GetType(), component);
+            }
+            this.UnloadContent();
+            
+        }
+
         private bool CollisionCheck(NavMeshTriangle triangle)
         {
             var downray = new Ray(Car.Position, Vector3.Down);
@@ -970,6 +1002,7 @@ namespace datx02_rally.Menus
             }
             return false;
         }
+
 
         /// <summary>
         /// Determine whether a point P is inside the triangle ABC. Note, this function

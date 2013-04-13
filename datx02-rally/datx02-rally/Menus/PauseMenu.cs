@@ -8,9 +8,12 @@ namespace datx02_rally.Menus
 {
     class PauseMenu : OverlayView
     {
+		public GameState NextState { get; private set; } 
         public PauseMenu(Game game) : base(game, GameState.PausedGameplay) 
         {
             UpdateOrder = DrawOrder = 1;
+            MenuTitle = "Pause";
+			NextState = GameState.PausedGameplay;
         }
 
         protected override void LoadContent()
@@ -38,13 +41,8 @@ namespace datx02_rally.Menus
 
         public override void Update(GameTime gameTime)
         {
-            var nextstate = UpdateState(gameTime);
-
-            if (!(nextstate == GameState.Gameplay || nextstate == GameState.PausedGameplay))
-            {
-                // Shit is going down
-                Game.Exit();
-            }
+            NextState = UpdateState(gameTime);
+			
             base.Update(gameTime);
         }
     }

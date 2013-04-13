@@ -7,52 +7,103 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace datx02_rally.Menus
 {
-    class MultiplayerMenu : GameStateView
+    class MultiplayerMenu : OverlayView
     {
-        bool connected = false;
-        OverlayView connectOverlay;
+        bool waitingForConnection = false;
 
-        public MultiplayerMenu(Game game) : base(game, GameState.MultiplayerMenu) { }
+        public MultiplayerMenu(Game game) : base(game, GameState.MultiplayerMenu) 
+        {
+            MenuTitle = "Multiplayer Game";
+        }
 
         protected override void LoadContent()
         {
-            /*connectOverlay = new OverlayView(gameInstance);
-            connectOverlay.AddMenuItem(new ActionMenuItem("Connect", new ActionMenuItem.Action(ConnectToServer)));
-            connectOverlay.Transparency = 0.2f;
-            connectOverlay.Background = gameInstance.Content.Load<Texture2D>(@"Menu\Overlay_bg");
-            connectOverlay.Bounds = new Rectangle(graphics.GraphicsDevice.Viewport.Bounds.Center.X - 250, graphics.GraphicsDevice.Viewport.Bounds.Center.Y - 250, 500, 500);
-            */
             base.LoadContent();
-        }
 
-        public override void ChangeResolution()
-        {
-        }
+            Vector2 size = GetScreenPosition(new Vector2(0.5f, 0.5f));
+            Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
-        public override GameState UpdateState(GameTime gameTime)
-        {
-            if (!connected)
-                connectOverlay.Draw(gameTime);
-            return this.gameState;
-        }
+            TextInputMenuItem playerName = new TextInputMenuItem("Server IP", "server");
+            playerName.Bounds = Bounds;
+            playerName.Font = MenuFont;
+            playerName.Background = OptionSelected;
+            playerName.FontColor = ItemColor;
+            playerName.FontColorSelected = Color.Black;
+            AddMenuItem(playerName);
 
-        public override void Draw(GameTime gameTime)
-        {
-            if (!connected)
-                connectOverlay.Draw(gameTime);
+            MenuItem item = new ActionMenuItem("Connect", ConnectToServer, "connect");
+            item.Background = ButtonBackground;
+            item.Font = MenuFont;
+            item.FontColor = ItemColor;
+            item.FontColorSelected = ItemColorSelected;
+            item.SetWidth(Bounds.Width);
+            AddMenuItem(item);
 
-            spriteBatch.Begin();
-            string poo = string.Empty;
-            for (int i = 0; i < 50; i++)
-                 poo += "blalbalsdlsajdosajdoisajdoisajdiosajdoisajdoisajdoisajoisajdiosajdiosajoidjsaoidjsoaijdiosajdoisajdiosajdiosajdoisajdoisajoidjoisa\n";
-            spriteBatch.DrawString(connectOverlay.MenuFont, poo, new Vector2(0, 0), Color.Blue);
-            spriteBatch.End();
-            base.Draw(gameTime);
+            item = new StateActionMenuItem("Cancel", GameState.MainMenu, "cancel");
+            item.Background = ButtonBackground;
+            item.Font = MenuFont;
+            item.FontColor = ItemColor;
+            item.FontColorSelected = ItemColorSelected;
+            item.SetWidth(Bounds.Width);
+            AddMenuItem(item);
         }
 
         private void ConnectToServer()
         {
-            Console.WriteLine("CONNECTTTTT");
+            string server = (GetMenuItem("server") as TextInputMenuItem).EnteredText;
+            gameInstance.GetService<ServerClient>().Connect(System.Net.IPAddress.Parse(server));
+            waitingForConnection = true;
+
+            MenuItem start = new StateActionMenuItem("Connecting...", GameState.Gameplay, "start");
+            start.Background = ButtonBackground;
+            start.Font = MenuFont;
+            start.Enabled = false;
+            start.FontColor = ItemColor;
+            start.FontColorSelected = ItemColorSelected;
+            start.SetWidth(Bounds.Width);
+            SetMenuItem("connect", start);
+
+            MenuItem disconnect = new ActionMenuItem("Disconnect", Disconnect, "disconnect");
+            disconnect.Background = ButtonBackground;
+            disconnect.Font = MenuFont;
+            disconnect.FontColor = ItemColor;
+            disconnect.FontColorSelected = ItemColorSelected;
+            disconnect.SetWidth(Bounds.Width);
+            SetMenuItem("cancel", disconnect);
+        }
+
+        private void Disconnect()
+        {
+            gameInstance.GetService<ServerClient>().Disconnect();
+
+            MenuItem item = new ActionMenuItem("Connect", ConnectToServer, "connect");
+            item.Background = ButtonBackground;
+            item.Font = MenuFont;
+            item.FontColor = ItemColor;
+            item.FontColorSelected = ItemColorSelected;
+            item.SetWidth(Bounds.Width);
+            SetMenuItem("start", item);
+
+            item = new StateActionMenuItem("Cancel", GameState.MainMenu, "cancel");
+            item.Background = ButtonBackground;
+            item.Font = MenuFont;
+            item.FontColor = ItemColor;
+            item.FontColorSelected = ItemColorSelected;
+            item.SetWidth(Bounds.Width);
+            SetMenuItem("disconnect", item);
+        }
+
+        public override GameState UpdateState(GameTime gameTime)
+        {
+            if (waitingForConnection && gameInstance.GetService<ServerClient>().connected)
+            {
+                waitingForConnection = false;
+
+                MenuItem startButton = GetMenuItem("start");
+                startButton.Text = "Start Game!";
+                startButton.Enabled = true;
+            }
+            return base.UpdateState(gameTime);
         }
     }
 }

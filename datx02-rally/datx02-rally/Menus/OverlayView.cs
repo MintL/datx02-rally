@@ -12,8 +12,12 @@ namespace datx02_rally.Menus
     {
         public float Rotation { get; set; }
 
+        public string MenuTitle { get; set; }
         public SpriteFont MenuFont { get; set; }
+        public SpriteFont MenuHeaderFont { get; set; }
         public Texture2D Background { get; set; }
+        public Texture2D RightBorder { get; set; }
+        public Texture2D LeftBorder { get; set; }
         public Texture2D ButtonBackground { get; set; }
         public Texture2D ArrowLeft { get; set; }
         public Texture2D ArrowRight { get; set; }
@@ -34,8 +38,12 @@ namespace datx02_rally.Menus
             
             Transparency = 1f; //no transparency
             MenuItemOffset = new Vector2(0.005f, 0.005f);
-            
-            
+
+            var index = selectedIndex;
+            while (selectedIndex < menuItems.Count && !menuItems[selectedIndex].Enabled)
+                selectedIndex++;
+            if (selectedIndex > menuItems.Count - 1)
+                selectedIndex = index;
 
             Rotation = 0;
             
@@ -49,13 +57,16 @@ namespace datx02_rally.Menus
             ItemColorSelected = Color.Red;
 
             MenuFont = Game.Content.Load<SpriteFont>(@"Menu/MenuFont");
+            MenuHeaderFont = Game.Content.Load<SpriteFont>(@"Menu/MenuHeaderFont");
             Background = Game.Content.Load<Texture2D>(@"Menu/Menu-BG");
+            RightBorder = Game.Content.Load<Texture2D>(@"Menu/Menu-Right-Border");
+            LeftBorder = Game.Content.Load<Texture2D>(@"Menu/Menu-Left-Border");
             ButtonBackground = Game.Content.Load<Texture2D>(@"Menu/Menu-button");
             ArrowLeft = Game.Content.Load<Texture2D>(@"Menu/Menu-Left-Arrow");
             ArrowRight = Game.Content.Load<Texture2D>(@"Menu/Menu-Right-Arrow");
             OptionSelected = Game.Content.Load<Texture2D>(@"Menu/Menu-Option-Selected");
 
-            Vector2 size = GetScreenPosition(new Vector2(0.6f, 0.6f));
+            Vector2 size = GetScreenPosition(new Vector2(0.8f, 0.8f));
             RenderBounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
         }
@@ -69,7 +80,6 @@ namespace datx02_rally.Menus
         public void OffsetPosition(Vector2 offset)
         {
             Position += offset;
-
         }
 
         public Texture2D Render()
@@ -84,11 +94,21 @@ namespace datx02_rally.Menus
 
             Vector2 renderOffset = new Vector2((RenderBounds.Width - Bounds.Width) / 2,
                     (RenderBounds.Height - Bounds.Height) / 2);
-
+            
             spriteBatch.Begin();
-            spriteBatch.Draw(Background,
-                new Rectangle((int)renderOffset.X, (int)renderOffset.Y, Bounds.Width, Bounds.Height),
+            spriteBatch.Draw(Background, 
+                new Rectangle((int)renderOffset.X, (int)renderOffset.Y, Bounds.Width, Bounds.Height), 
                 Color.White);
+            spriteBatch.Draw(LeftBorder,
+                new Rectangle((int)renderOffset.X - LeftBorder.Width, (int)renderOffset.Y, LeftBorder.Width, Bounds.Height),
+                Color.White);
+            spriteBatch.Draw(RightBorder,
+                new Rectangle((int)renderOffset.X+Bounds.Width, (int)renderOffset.Y, LeftBorder.Width, Bounds.Height),
+                Color.White);
+            spriteBatch.DrawString(MenuHeaderFont, MenuTitle,
+                new Vector2((int)(renderOffset.X + Bounds.Width * 0.03), (int)(renderOffset.Y + Bounds.Height * 0.14) - MenuHeaderFont.MeasureString(MenuTitle).Y), 
+                Color.White);
+
 
             for (int i = 0; i < menuItems.Count; i++)
             {
@@ -121,9 +141,25 @@ namespace datx02_rally.Menus
             InputComponent input = gameInstance.GetService<InputComponent>();
             GameState nextGameState = GameState.None;
             if (input.GetKey(Keys.Down))
-                selectedIndex = Math.Min(menuItems.Count - 1, selectedIndex + 1);
+            {
+                var index = selectedIndex;
+                do
+                {
+                    selectedIndex++;
+                } while (selectedIndex < menuItems.Count && !menuItems[selectedIndex].Enabled);
+                if (selectedIndex > menuItems.Count - 1)
+                    selectedIndex = index;
+            }
             else if (input.GetKey(Keys.Up))
-                selectedIndex = Math.Max(0, selectedIndex - 1);
+            {
+                var index = selectedIndex;
+                do
+                {
+                    selectedIndex--;
+                } while (selectedIndex >= 0 && !menuItems[selectedIndex].Enabled);
+                if (selectedIndex < 0)
+                    selectedIndex = index;
+            }
             else if (input.GetKey(Keys.Right) && menuItems[selectedIndex] is OptionMenuItem)
                 (menuItems[selectedIndex] as OptionMenuItem).NextOption();
             else if (input.GetKey(Keys.Left) && menuItems[selectedIndex] is OptionMenuItem)
@@ -138,6 +174,20 @@ namespace datx02_rally.Menus
         public void AddMenuItem(MenuItem menuItem)
         {
             menuItems.Add(menuItem);
+        }
+
+        /// <summary>
+        /// Replaces the menu item with the given identifier with provided menu item.
+        /// If the menu item is not found, nothing will happen.
+        /// </summary>
+        /// <param name="identifier"></param>
+        public void SetMenuItem(string identifier, MenuItem menuItem)
+        {
+            int index = menuItems.FindIndex(item => item.Identifier == identifier);
+            if (index > -1)
+            {
+                menuItems[index] = menuItem;
+            }
         }
 
         // TODO: Only works if all menuitems have equal height
@@ -180,5 +230,6 @@ namespace datx02_rally.Menus
         {
             return menuItems.Find(item => item.Identifier == identifier);
         }
+
     }
 }
