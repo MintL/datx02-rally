@@ -138,6 +138,7 @@
     <Compile Include="GameplayModes\TimeTrialMode.cs" />
     <Compile Include="Graphics\MotionBlur.cs" />
     <Compile Include="GameLogic\CurveRasterization.cs" />
+    <Compile Include="Menus\CarChooser.cs" />
     <Compile Include="Menus\GamePlayView.cs" />
     <Compile Include="Menus\MenuView.cs" />
     <Compile Include="Menus\MultiplayerMenu.cs" />

@@ -31,6 +31,7 @@ namespace datx02_rally.Menus
 
             List<Tuple<String, GameState>> itemInfo = new List<Tuple<string,GameState>>();
             itemInfo.Add(new Tuple<String, GameState>("Play", GameState.Gameplay));
+            itemInfo.Add(new Tuple<String, GameState>("Choose car", GameState.CarChooser));
             itemInfo.Add(new Tuple<String, GameState>("Multiplayer", GameState.MultiplayerMenu));
             itemInfo.Add(new Tuple<String, GameState>("Options", GameState.OptionsMenu));
             itemInfo.Add(new Tuple<String, GameState>("Exit", GameState.Exiting));

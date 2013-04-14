@@ -62,8 +62,6 @@ namespace datx02_rally.Menus
             // Set vertex data in VertexBuffer
             vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionTexture), verts.Length, BufferUsage.None);
             vertexBuffer.SetData(verts);
-            vertexBuffer = new VertexBuffer(GraphicsDevice, typeof(VertexPositionTexture), verts.Length, BufferUsage.None);
-            vertexBuffer.SetData(verts);
             basicEffect = new BasicEffect(GraphicsDevice);
             basicEffect.View = Matrix.CreateLookAt(Vector3.UnitZ * 25, Vector3.Zero, Vector3.Up);
             basicEffect.Projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.1f, 100f);
@@ -181,6 +179,13 @@ namespace datx02_rally.Menus
                     else if (state == GameState.OptionsMenu)
                     {
                         Overlays.Insert(0, new OptionsMenu(Game));
+                        CurrentOverlay = Overlays.First<OverlayView>();
+                        ChangeResolution();
+                        ResetMenu();
+                    }
+                    else if (state == GameState.CarChooser)
+                    {
+                        Overlays.Insert(0, new CarChooser(Game));
                         CurrentOverlay = Overlays.First<OverlayView>();
                         ChangeResolution();
                         ResetMenu();
