@@ -19,7 +19,6 @@ using datx02_rally.Particles;
 
 namespace datx02_rally.Menus
 {
-    public enum GamePlayMode { Singleplayer, Multiplayer }
     class GamePlayView : GameStateView
     {
         #region Field

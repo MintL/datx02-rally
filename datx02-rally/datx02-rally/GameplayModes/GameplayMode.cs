@@ -7,8 +7,10 @@ using System.Timers;
 
 namespace datx02_rally
 {
+    public enum Mode { Singleplayer, Multiplayer }
     abstract class GameplayMode
     {
+        public Mode Mode { protected set; get; }
         protected Game1 gameInstance;
         protected List<GameModeState> states;
         protected List<string> addedTriggers;
@@ -19,6 +21,7 @@ namespace datx02_rally
         public GameplayMode(Game1 gameInstance)
         {
             this.gameInstance = gameInstance;
+            this.Mode = Mode.Singleplayer;
             states = new List<GameModeState>();
             addedTriggers = new List<string>();
             GameOver = false;
