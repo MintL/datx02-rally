@@ -118,21 +118,22 @@ namespace datx02_rally.Components
             var notificationPosition = new Vector2(Game.GraphicsDevice.Viewport.Width / 2.0f, Game.GraphicsDevice.Viewport.Height * 0.2f);  
             foreach (var notification in notifications)
             {
-                Vector2 textSize = font.MeasureString(notification.Text);
+                // fade in/out
+                float fadeProgress;
+                if (notification.FadeTime > notification.DisplayedTime)
+                    fadeProgress = (float)notification.DisplayedTime.Ticks / notification.FadeTime.Ticks;
+                else if (notification.DisplayedTime > notification.Timeout - notification.FadeTime)
+                    fadeProgress = ((notification.Timeout.Ticks - notification.DisplayedTime.Ticks) / (float)notification.FadeTime.Ticks);
+                else
+                    fadeProgress = 1.0f;
+
+                Vector2 textSize = font.MeasureString(notification.Text) * fadeProgress;
                 Vector2 thisNotificationPosition = new Vector2(
                     notificationPosition.X - textSize.X / 2,
                     notificationPosition.Y);
 
-                // fade in/out
-                float textAlpha;
-                if (notification.FadeTime > notification.DisplayedTime)
-                    textAlpha = 1 - (float)notification.DisplayedTime.Ticks / notification.FadeTime.Ticks;
-                else if (notification.DisplayedTime > notification.Timeout - notification.FadeTime)
-                    textAlpha = 1 - ((notification.Timeout.Ticks - notification.DisplayedTime.Ticks) / (float)notification.FadeTime.Ticks);
-                else
-                    textAlpha = 0.0f;
-
-                spriteBatch.DrawString(font, notification.Text, thisNotificationPosition, Color.Lerp(notification.Color, Color.Transparent, textAlpha));
+                spriteBatch.DrawString(font, notification.Text, thisNotificationPosition, Color.Lerp(Color.Transparent, notification.Color, fadeProgress), 
+                    0.0f, Vector2.Zero, fadeProgress, SpriteEffects.None, 0);
 
                 notificationPosition.Y += textSize.Y;
                 notification.DisplayedTime += gameTime.ElapsedGameTime;
