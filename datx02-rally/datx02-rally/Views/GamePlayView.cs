@@ -175,19 +175,19 @@ namespace datx02_rally.Menus
 
             var cameraComponent = new CameraComponent(gameInstance);
             Game.Components.Add(cameraComponent);
-            services.AddService(typeof(CameraComponent), cameraComponent);
+            Game.AddService(typeof(CameraComponent), cameraComponent);
 
             var hudComponent = new HUDComponent(gameInstance);
             Game.Components.Add(hudComponent);
-            services.AddService(typeof(HUDComponent), hudComponent);
+            Game.AddService(typeof(HUDComponent), hudComponent);
             
             var carControlComponent = new CarControlComponent(gameInstance);
             Game.Components.Add(carControlComponent);
-            services.AddService(typeof(CarControlComponent), carControlComponent);
+            Game.AddService(typeof(CarControlComponent), carControlComponent);
 
             var triggerManager = new TriggerManager(gameInstance);
             Game.Components.Add(triggerManager);
-            services.AddService(typeof(TriggerManager), triggerManager);
+            Game.AddService(typeof(TriggerManager), triggerManager);
 
             // Particle systems
 
@@ -328,7 +328,7 @@ namespace datx02_rally.Menus
                 new Vector3(.15f, .14f, .29f), // Ambient
                 new Vector3(.46f, .33f, .75f)); // Diffuse
 
-            gameInstance.Services.AddService(typeof(DirectionalLight), directionalLight);
+            Game.AddService(typeof(DirectionalLight), directionalLight);
 
             #endregion
             terrainEffect.Parameters["TextureMap0"].SetValue(content.Load<Texture2D>(@"Terrain\road"));
@@ -623,7 +623,7 @@ namespace datx02_rally.Menus
 
             // TODO: Does this belong out here, all by itselft, again, add more explaination what it is.
             prelightingRenderer = new PrelightingRenderer(GraphicsDevice, content);
-            Game.Services.AddService(typeof(PrelightingRenderer), prelightingRenderer);
+            Game.AddService(typeof(PrelightingRenderer), prelightingRenderer);
 
 
             #region ShadowMapEffect
@@ -957,17 +957,19 @@ namespace datx02_rally.Menus
             var components = gameInstance.Components;
             var services = gameInstance.Services;
 
-            foreach (var component in components) 
+            content.Unload();
+
+            foreach (Type service in Game.GetAddedServices())
             {
-                services.RemoveService(component.GetType());
+                services.RemoveService(service);
             }
+            
             components.Clear();
             foreach (var component in gameInstance.BaseComponents)
             {
                 components.Add(component);
                 gameInstance.SetService(component.GetType(), component);
             }
-            this.UnloadContent();
             
         }
 

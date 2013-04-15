@@ -99,7 +99,7 @@ namespace datx02_rally
         /// </summary>
         protected override void UnloadContent()
         {
-            // TODO: Unload any non ContentManager content here
+            base.UnloadContent();
         }
 
         #endregion
@@ -153,7 +153,7 @@ namespace datx02_rally
         {
             if (Services.GetService(type) != null)
                 Services.RemoveService(type);
-            Services.AddService(type, service);
+            this.AddService(type, service);
         }
 
         #endregion
