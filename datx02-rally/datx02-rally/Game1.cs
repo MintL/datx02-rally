@@ -134,7 +134,7 @@ namespace datx02_rally
                         break;
                     case GameState.MultiplayerMenu:
                         this.GetService<ServerClient>().Connect(System.Net.IPAddress.Loopback);
-                        currentView = new GamePlayView(this, 0, GamePlayMode.Multiplayer);//MultiplayerMenu(this);
+                        currentView = new GamePlayView(this, 0, null);//MultiplayerMenu(this);
                         break;
                     case GameState.SingleplayerMenu:
                         break;

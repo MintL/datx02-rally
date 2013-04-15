@@ -151,7 +151,7 @@ namespace datx02_rally.Menus
 
         #region Initialization
 
-        public GamePlayView(Game game, int? seed, GamePlayMode mode)
+        public GamePlayView(Game game, int? seed, GameplayMode mode)
             : base(game, GameState.Gameplay)
         {
             game.GetService<ServerClient>().GamePlay = this;
@@ -260,7 +260,7 @@ namespace datx02_rally.Menus
 
             var roadMap = new float[heightMapSize, heightMapSize];
             raceTrack = new RaceTrack(heightMapSize, terrainScale);
-            this.mode = new MultiplayerRaceMode(gameInstance, 2, 10, raceTrack);
+            this.mode = new SimpleRaceMode(gameInstance, 2, 10, raceTrack, Car);
 
             navMesh = new NavMesh(GraphicsDevice, raceTrack.Curve, 1500, roadWidth, terrainScale);
 

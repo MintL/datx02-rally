@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System;
 using datx02_rally.GameLogic;
+using datx02_rally.Components;
 
 namespace datx02_rally
 {
@@ -12,19 +13,20 @@ namespace datx02_rally
         private int laps;
         private int checkpoints;
         private RaceTrack raceTrack;
+        private Car car;
 
-        public SimpleRaceMode(Game1 gameInstance, int laps, int noOfCheckpoints, RaceTrack raceTrack)
+        public SimpleRaceMode(Game1 gameInstance, int laps, int noOfCheckpoints, RaceTrack raceTrack, Car localCar)
             : base(gameInstance)
         {
             this.laps = laps;
             this.checkpoints = noOfCheckpoints;
             this.raceTrack = raceTrack;
+            this.car = localCar;
             Initialize();
         }
 
         public override void Initialize()
         {
-            var car = (gameInstance.currentView as GamePlayView).Car;
             List<AbstractTrigger> checkpointTriggers = new List<AbstractTrigger>();
             for (int i = 0; i < checkpoints; i++)
             {
@@ -34,6 +36,7 @@ namespace datx02_rally
                 trigger.Triggered += (sender, e) =>
                 {
                     Console.WriteLine(outputDebug);
+                    gameInstance.GetService<HUDComponent>().ShowTextNotification(Color.Red, outputDebug);
                     var current = states[CurrentState];
                     var aTrigger = sender as AbstractTrigger;
                     if (e.Object == car && current.Triggers.ContainsKey(aTrigger))

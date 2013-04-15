@@ -21,6 +21,7 @@ namespace datx02_rally.Components
         private SpriteBatch spriteBatch;
         private SpriteFont font;
         private TimeSpan timeSinceLastFPS;
+        private List<TextNotification> notifications = new List<TextNotification>();
 
         private int frameCount = 0;
         private int currentFps;
@@ -54,9 +55,20 @@ namespace datx02_rally.Components
             base.Initialize();
         }
 
-        public void setPlayerPosition(int position) 
+        public void SetPlayerPosition(int position) 
         {
             playerPosition = position;
+        }
+
+        public void ShowTextNotification(Color c, string text)
+        {
+            TextNotification notification = new TextNotification();
+            notification.DisplayedTime = TimeSpan.Zero;
+            notification.Timeout = TimeSpan.FromSeconds(3);
+            notification.Color = c;
+            notification.Text = text;
+
+            notifications.Add(notification);
         }
 
         public override void Draw(GameTime gameTime)
@@ -101,11 +113,34 @@ namespace datx02_rally.Components
                 spriteBatch.DrawString(font, lapTime, topCenter1, Color.Red);
                 spriteBatch.DrawString(font, totalGameTime, topCenter2, Color.Red);
             }
+
+            var notificationPosition = new Vector2(Game.GraphicsDevice.Viewport.Width / 2.0f, Game.GraphicsDevice.Viewport.Height * 0.2f);  
+            foreach (var notification in notifications)
+            {
+                var thisNotificationPosition = new Vector2(
+                    notificationPosition.X - font.MeasureString(notification.Text).X/2,
+                    notificationPosition.Y);
+                spriteBatch.DrawString(font, notification.Text, thisNotificationPosition, notification.Color);
+
+                notificationPosition.Y += font.MeasureString(notification.Text).Y;
+                
+                notification.DisplayedTime += gameTime.ElapsedGameTime;
+            }
+            notifications.RemoveAll(notification => notification.DisplayedTime > notification.Timeout);
+
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
 
+    }
+
+    class TextNotification
+    {
+        public TimeSpan Timeout { get; set; }
+        public TimeSpan DisplayedTime { get; set; }
+        public Color Color { get; set; }
+        public string Text { get; set; }
     }
 }

@@ -189,7 +189,7 @@ namespace datx02_rally.Menus
                     {
                         if (state == GameState.Gameplay)
                         {
-                            Game.Components.Add(new GamePlayView(Game, null, GamePlayMode.Singleplayer));
+                            Game.Components.Add(new GamePlayView(Game, null, null));
                             return GameState.Gameplay;
                         }
                         return state;
