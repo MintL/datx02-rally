@@ -14,11 +14,24 @@ namespace datx02_rally
     /// </summary>
     static class GameExtensions
     {
+        private static List<Type> addedServices = new List<Type>();
+
         #region GameServices
 
         public static T GetService<T>(this Game game)
         {
             return (T)game.Services.GetService(typeof(T));
+        }
+
+        public static void AddService(this Game game, Type type, object provider)
+        {
+            addedServices.Add(type);
+            game.Services.AddService(type, provider);
+        }
+
+        public static List<Type> GetAddedServices(this Game game)
+        {
+            return addedServices;
         }
 
         #endregion
