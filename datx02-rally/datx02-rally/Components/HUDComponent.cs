@@ -65,6 +65,7 @@ namespace datx02_rally.Components
             TextNotification notification = new TextNotification();
             notification.DisplayedTime = TimeSpan.Zero;
             notification.Timeout = TimeSpan.FromSeconds(3);
+            notification.FadeTime = new TimeSpan((long)(notification.Timeout.Ticks * 0.1));
             notification.Color = c;
             notification.Text = text;
 
@@ -117,13 +118,23 @@ namespace datx02_rally.Components
             var notificationPosition = new Vector2(Game.GraphicsDevice.Viewport.Width / 2.0f, Game.GraphicsDevice.Viewport.Height * 0.2f);  
             foreach (var notification in notifications)
             {
-                var thisNotificationPosition = new Vector2(
-                    notificationPosition.X - font.MeasureString(notification.Text).X/2,
+                Vector2 textSize = font.MeasureString(notification.Text);
+                Vector2 thisNotificationPosition = new Vector2(
+                    notificationPosition.X - textSize.X / 2,
                     notificationPosition.Y);
-                spriteBatch.DrawString(font, notification.Text, thisNotificationPosition, notification.Color);
 
-                notificationPosition.Y += font.MeasureString(notification.Text).Y;
-                
+                // fade in/out
+                float textAlpha;
+                if (notification.FadeTime > notification.DisplayedTime)
+                    textAlpha = 1 - (float)notification.DisplayedTime.Ticks / notification.FadeTime.Ticks;
+                else if (notification.DisplayedTime > notification.Timeout - notification.FadeTime)
+                    textAlpha = 1 - ((notification.Timeout.Ticks - notification.DisplayedTime.Ticks) / (float)notification.FadeTime.Ticks);
+                else
+                    textAlpha = 0.0f;
+
+                spriteBatch.DrawString(font, notification.Text, thisNotificationPosition, Color.Lerp(notification.Color, Color.Transparent, textAlpha));
+
+                notificationPosition.Y += textSize.Y;
                 notification.DisplayedTime += gameTime.ElapsedGameTime;
             }
             notifications.RemoveAll(notification => notification.DisplayedTime > notification.Timeout);
@@ -139,6 +150,7 @@ namespace datx02_rally.Components
     class TextNotification
     {
         public TimeSpan Timeout { get; set; }
+        public TimeSpan FadeTime { get; set; }
         public TimeSpan DisplayedTime { get; set; }
         public Color Color { get; set; }
         public string Text { get; set; }
