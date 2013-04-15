@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 
 namespace datx02_rally.Menus
 {
@@ -17,6 +18,8 @@ namespace datx02_rally.Menus
 
         Vector3 cameraPosition;
         float rotation = 0;
+
+        List<Color> availableColors = new List<Color>() { Color.Red, Color.RoyalBlue, Color.Purple, Color.White };
 
         public CarChooser(Game game)
             : base(game, GameState.CarChooser)
@@ -49,23 +52,37 @@ namespace datx02_rally.Menus
             MakeCar();
             cameraPosition = new Vector3(0, 100f, 250f);
             view = Matrix.CreateLookAt(cameraPosition, new Vector3(0, 20f, 0f), Vector3.Up);
-            projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.1f, 10000f);
+            projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.01f, 500f);
 
             directionalLight = new DirectionalLight(
-                new Vector3(-1.25f, -2f, 5.0f), // Direction
-                new Vector3(.15f, .14f, .29f), // Ambient
-                new Vector3(.8f, .8f, .8f)); // Diffuse
+                new Vector3(1.25f, -2f, 5.0f), // Direction
+                new Vector3(.1f, .1f, .1f), // Ambient
+                new Vector3(0.7f, 0.7f, 0.7f)); // Diffuse
         }
 
         public override GameState UpdateState(GameTime gameTime)
         {
-            rotation += (float)gameTime.ElapsedGameTime.TotalSeconds * 0.5f; 
+            rotation += (float)gameTime.ElapsedGameTime.TotalSeconds * .5f;
+
+            InputComponent input = Game.GetService<InputComponent>();
+            int i = availableColors.FindIndex(0, c => c == diffuseColor);
+            if (input.GetKey(Keys.Left))
+            {
+                i--;
+                if (i < 0) i = availableColors.Count - 1;
+            }
+            else if (input.GetKey(Keys.Right))
+                i = (++i % availableColors.Count);
+
+            diffuseColor = availableColors[i];
 
             return base.UpdateState(gameTime);
         }
 
         protected override void RenderContent(Vector2 renderOffset)
         {
+            
+
             // Reset render settings
             GraphicsDevice.BlendState = BlendState.Opaque;
             GraphicsDevice.DepthStencilState = DepthStencilState.Default;
@@ -94,7 +111,7 @@ namespace datx02_rally.Menus
                 {
                     EffectParameterCollection param = effect.Parameters;
 
-                    param["MaterialReflection"].SetValue(0.1f);
+                    param["MaterialReflection"].SetValue(.1f);
                     param["MaterialShininess"].SetValue(10);
 
                     param["World"].SetValue(world);
@@ -104,8 +121,11 @@ namespace datx02_rally.Menus
                     param["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(world)));
                     param["EyePosition"].SetValue(cameraPosition);
 
-                    param["MaterialDiffuse"].SetValue(diffuseColor.ToVector3());
-                    param["MaterialAmbient"].SetValue(diffuseColor.ToVector3() * .5f);
+                    if (mesh.Name == "main")
+                    {
+                        param["MaterialDiffuse"].SetValue(diffuseColor.ToVector3());
+                        param["MaterialAmbient"].SetValue(diffuseColor.ToVector3());
+                    }
 
                     param["DirectionalLightDirection"].SetValue(directionalLight.Direction);
                     param["DirectionalLightDiffuse"].SetValue(directionalLight.Diffuse);
@@ -114,6 +134,8 @@ namespace datx02_rally.Menus
 
                 mesh.Draw();
             }
+
+            base.RenderContent(renderOffset);
 
         }
 
