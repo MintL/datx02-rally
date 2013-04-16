@@ -260,7 +260,6 @@ namespace datx02_rally.Menus
 
             var roadMap = new float[heightMapSize, heightMapSize];
             raceTrack = new RaceTrack(heightMapSize, terrainScale);
-            this.mode = new SimpleRaceMode(gameInstance, 2, 10, raceTrack, Car);
 
             navMesh = new NavMesh(GraphicsDevice, raceTrack.Curve, 1500, roadWidth, terrainScale);
 
@@ -658,6 +657,7 @@ namespace datx02_rally.Menus
             #endregion
 
 
+            this.mode = new SimpleRaceMode(gameInstance, 2, 10, raceTrack, Car);
         }
 
         public Car MakeCar()

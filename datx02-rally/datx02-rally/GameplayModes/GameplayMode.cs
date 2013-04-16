@@ -105,9 +105,10 @@ namespace datx02_rally
 
             foreach (var triggerStat in Triggers.Values)
             {
-                if (triggerStat == null) 
+                if (triggerStat == null)
                     return false;
             }
+            finished = true;
             return true;
         }
     }
