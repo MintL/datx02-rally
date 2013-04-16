@@ -20,7 +20,7 @@ namespace datx02_rally.Sound
             AEM = AudioEngineManager.GetInstance();
             previousVelocity = 0;
 
-            currentSound = AEM.soundBank.GetCue("EngineIdle");
+            currentSound = AEM.soundBank.GetCue("subengine");
         }
 
         public void UpdateEngineSound(float currentVelocity) 

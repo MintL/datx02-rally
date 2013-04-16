@@ -24,9 +24,9 @@ namespace datx02_rally.Sound
         private AudioEngineManager() 
         {
             //create and use appropriate XACT objects
-            audioEngine = new AudioEngine("");
-            soundBank = new SoundBank(audioEngine, "");
-            waveBank = new WaveBank(audioEngine, "");
+            audioEngine = new AudioEngine("Content\\Audio\\datx02.xgs");
+            soundBank = new SoundBank(audioEngine, "Content\\Audio\\SoundEffects.xsb");
+            waveBank = new WaveBank(audioEngine, "Content\\Audio\\SoundEffectWaves.xwb");
         }
 
 
