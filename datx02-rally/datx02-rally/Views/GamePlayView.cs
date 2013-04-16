@@ -770,21 +770,20 @@ namespace datx02_rally.Menus
             this.mode.Update(gameTime);
 
             if (this.mode.GameOver)
-            {
                 gameOverMenu.Enabled = true;
-                Console.WriteLine("Game over, enabling menu");
-            }
 
             InputComponent input = gameInstance.GetService<InputComponent>();
             if (input.GetPressed(Input.Exit))
                 pauseMenu.Enabled = !pauseMenu.Enabled;
 
+            var hudComponent = Game.GetService<HUDComponent>();
             var cameraComponent = Game.GetService<CameraComponent>();
 
             if (pauseMenu.Enabled || gameOverMenu.Enabled)
             {
                 if (cameraComponent.Enabled)
                     cameraComponent.Enabled = false;
+                hudComponent.Visible = false;
 
                 //GameState state = pauseMenu.UpdateState(gameTime);
 
@@ -801,6 +800,7 @@ namespace datx02_rally.Menus
             {
                 if (!cameraComponent.Enabled)
                     cameraComponent.Enabled = true;
+                hudComponent.Visible = true;
 
                 if (input.GetPressed(Input.ChangeController))
                 {
@@ -1166,7 +1166,6 @@ namespace datx02_rally.Menus
 
             postProcessingComponent.RenderedImage = postProcessTexture;
 
-            Console.WriteLine("drawing "+(overlay == pauseMenu ? (overlay == null ? "null" : "pause") : "gameover"));
             RenderOverlayMenu(overlay, overlayTexture);
 
             base.Draw(gameTime);
