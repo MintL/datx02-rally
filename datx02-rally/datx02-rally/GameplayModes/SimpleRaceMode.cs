@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System;
 using datx02_rally.GameLogic;
 using datx02_rally.Components;
+using datx02_rally.GameplayModes;
 
 namespace datx02_rally
 {
@@ -14,6 +15,9 @@ namespace datx02_rally
         private int checkpoints;
         private RaceTrack raceTrack;
         private Car car;
+        private int playerPosition = 1;
+
+        private List<TimeSpan> goalLineTimes = new List<TimeSpan>();
 
         public SimpleRaceMode(Game1 gameInstance, int laps, int noOfCheckpoints, RaceTrack raceTrack, Car localCar)
             : base(gameInstance)
@@ -49,6 +53,13 @@ namespace datx02_rally
                 addedTriggers.Add(checkpointID);
             }
 
+            // Keep track of times when passing goal line
+            var goalLine = checkpointTriggers[0];
+            goalLine.Triggered += (sender, e) =>
+            {
+                goalLineTimes.Add(e.Time.TotalGameTime);
+            };
+
             //// Starting state, waiting for countdown/start signal from server
             //const int countdown = 3;
             //for (int i = 0; i < countdown; i++)
@@ -67,5 +78,32 @@ namespace datx02_rally
             // Add state for passing the finish line
             states.Add(new GameModeState(checkpointTriggers.GetRange(index: 0, count: 1)));
         }
+
+        public override void PrepareStatistics()
+        {
+            TimeSpan totalTime = goalLineTimes[goalLineTimes.Count - 1] - goalLineTimes[0];
+
+            var playerHeading = new EndGameStatistics.Heading();
+            playerHeading.Title = null;
+            playerHeading.Items[playerPosition + ". " + gameInstance.GetService<Player>().PlayerName] = totalTime.ToString(@"m\:ss\:ff");
+
+            var lapsHeading = new EndGameStatistics.Heading();
+            lapsHeading.Title = "Your times";
+            for (int i = 1; i < goalLineTimes.Count; i++)
+            {
+                var lapTime = goalLineTimes[i] - goalLineTimes[i - 1];
+                lapsHeading.Items["Lap " + i] = lapTime.ToString(@"m\:ss\:ff");
+            }
+
+            var statsHeading = new EndGameStatistics.Heading();
+            statsHeading.Title = "Statistics";
+            statsHeading.Items["You suck"] = null;
+
+            var itemList = new List<EndGameStatistics.Heading> { playerHeading, lapsHeading, statsHeading };
+
+            Statistics = new EndGameStatistics(itemList);
+        }
+
+
     }
 }

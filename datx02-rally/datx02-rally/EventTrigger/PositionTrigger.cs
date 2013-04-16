@@ -21,7 +21,7 @@ namespace datx02_rally.EventTrigger
             this.keepProgress = keepProgress;
         }
 
-        public override void Update(IMovingObject movingObject)
+        public override void Update(IMovingObject movingObject, GameTime gameTime)
         {
             if (currentPoint < 0)
             {
@@ -48,7 +48,7 @@ namespace datx02_rally.EventTrigger
             {
                 currentPoint = nextPoint;
                 if (currentPoint == triggerPointIndex && (!preventReverse || direction > 0))
-                    Trigger(currentPoint, movingObject);
+                    Trigger(currentPoint, movingObject, gameTime);
             }
         }
 

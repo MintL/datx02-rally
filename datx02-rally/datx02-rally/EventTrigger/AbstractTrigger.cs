@@ -30,12 +30,12 @@ namespace datx02_rally.EventTrigger
             Curve = curve;
         }
 
-        public abstract void Update(IMovingObject movingObject) ;
+        public abstract void Update(IMovingObject movingObject, GameTime gameTime) ;
 
-        protected void Trigger(int index, IMovingObject movingObject)
+        protected void Trigger(int index, IMovingObject movingObject, GameTime gameTime)
         {
             if (Triggered != null)
-                Triggered(this, new TriggeredEventArgs(index, movingObject));
+                Triggered(this, new TriggeredEventArgs(index, movingObject, gameTime));
         }
     }
 
@@ -43,11 +43,13 @@ namespace datx02_rally.EventTrigger
     {
         public int Index { get; private set; }
         public IMovingObject Object { get; private set; }
+        public GameTime Time { get; set; }
 
-        public TriggeredEventArgs(int index, IMovingObject movingObject)
+        public TriggeredEventArgs(int index, IMovingObject movingObject, GameTime gameTime)
         {
             Index = index;
             Object = movingObject;
+            Time = gameTime;
         }
     }
 

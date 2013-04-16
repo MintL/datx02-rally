@@ -133,6 +133,7 @@
     <Compile Include="EventTrigger\PositionTrigger.cs" />
     <Compile Include="EventTrigger\RectangleTrigger.cs" />
     <Compile Include="EventTrigger\TriggerManager.cs" />
+    <Compile Include="GameplayModes\EndGameStatistics.cs" />
     <Compile Include="GameplayModes\GameplayMode.cs" />
     <Compile Include="GameplayModes\MultiplayerRaceMode.cs" />
     <Compile Include="GameplayModes\SimpleRaceMode.cs" />

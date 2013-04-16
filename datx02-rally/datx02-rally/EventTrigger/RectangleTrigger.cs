@@ -106,7 +106,7 @@ namespace datx02_rally.EventTrigger
         //    return (r <= 1 && t <= 1 && r + t <= 1);
         //}
 
-        public override void Update(Entities.IMovingObject movingObject)
+        public override void Update(Entities.IMovingObject movingObject, GameTime gameTime)
         {
             throw new NotImplementedException();
         }

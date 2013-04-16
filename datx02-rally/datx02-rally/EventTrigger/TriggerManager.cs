@@ -19,7 +19,7 @@ namespace datx02_rally.EventTrigger
         {
             foreach (var trigger in Triggers.Values)
                 foreach (var car in Game.GetService<CarControlComponent>().Cars.Values)
-                    trigger.Update(car);
+                    trigger.Update(car, gameTime);
         }
 
         //public void Update(GameTime gameTime, Vector3 position)

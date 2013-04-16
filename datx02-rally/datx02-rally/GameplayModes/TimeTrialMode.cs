@@ -53,5 +53,10 @@ namespace datx02_rally
             //    states.Add(new GameModeState(lapTriggers));
             //}
         }
+
+        public override void PrepareStatistics()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

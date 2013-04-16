@@ -40,7 +40,7 @@ namespace datx02_rally.Menus
             MenuItemOffset = new Vector2(0.005f, 0.005f);
 
             var index = selectedIndex;
-            while (selectedIndex < menuItems.Count && !menuItems[selectedIndex].Enabled)
+            while (selectedIndex < menuItems.Count && !menuItems[selectedIndex].Selectable)
                 selectedIndex++;
             if (selectedIndex > menuItems.Count - 1)
                 selectedIndex = index;
@@ -146,7 +146,7 @@ namespace datx02_rally.Menus
                 do
                 {
                     selectedIndex++;
-                } while (selectedIndex < menuItems.Count && !menuItems[selectedIndex].Enabled);
+                } while (selectedIndex < menuItems.Count && !menuItems[selectedIndex].Selectable);
                 if (selectedIndex > menuItems.Count - 1)
                     selectedIndex = index;
             }
@@ -156,7 +156,7 @@ namespace datx02_rally.Menus
                 do
                 {
                     selectedIndex--;
-                } while (selectedIndex >= 0 && !menuItems[selectedIndex].Enabled);
+                } while (selectedIndex >= 0 && !menuItems[selectedIndex].Selectable);
                 if (selectedIndex < 0)
                     selectedIndex = index;
             }

@@ -4,12 +4,14 @@ using datx02_rally.EventTrigger;
 using datx02_rally.Menus;
 using System;
 using System.Timers;
+using datx02_rally.GameplayModes;
 
 namespace datx02_rally
 {
     public enum Mode { Singleplayer, Multiplayer }
     abstract class GameplayMode
     {
+        public EndGameStatistics Statistics { protected set; get; }
         public Mode Mode { protected set; get; }
         protected Game1 gameInstance;
         protected List<GameModeState> states;
@@ -32,6 +34,8 @@ namespace datx02_rally
         /// For initializing the states list
         /// </summary>
         public abstract void Initialize();
+
+        public abstract void PrepareStatistics();
 
         public void Update(GameTime gameTime)
         {
@@ -72,10 +76,10 @@ namespace datx02_rally
                 GameOver = true;
             };
             timer.Start();
+            PrepareStatistics();
         }
 
     }
-
 
     public class GameModeState 
     {
@@ -112,14 +116,4 @@ namespace datx02_rally
             return true;
         }
     }
-
-    //public class TriggerStatistics
-    //{
-    //    private GameTime triggerTime;
-
-    //    public TriggerStatistics(GameTime triggerTime)
-    //    {
-    //        this.triggerTime = triggerTime;
-    //    }
-    //}
 }

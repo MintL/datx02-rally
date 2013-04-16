@@ -366,6 +366,7 @@ namespace datx02_rally.Menus
             Car = MakeCar();
             Player localPlayer = gameInstance.GetService<ServerClient>().LocalPlayer;
             gameInstance.GetService<CarControlComponent>().Cars[localPlayer] = Car;
+            gameInstance.AddService(typeof(Player), localPlayer);
 
             #endregion
 
@@ -664,6 +665,7 @@ namespace datx02_rally.Menus
 
 
             this.mode = new SimpleRaceMode(gameInstance, 2, 10, raceTrack, Car);
+            gameInstance.AddService(typeof(GameplayMode), mode);
         }
 
         public Car MakeCar()

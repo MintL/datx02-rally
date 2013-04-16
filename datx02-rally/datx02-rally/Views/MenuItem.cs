@@ -21,11 +21,18 @@ namespace datx02_rally.Menus
         public Texture2D Background { get; set; }
         public Color FontColor { get; set; }
         public Color FontColorSelected { get; set; }
+
+        private bool selectable = true;
+        public bool Selectable 
+        {
+            get { return selectable; }
+            set { selectable = value; }
+        }
         private bool enabled = true;
         public bool Enabled
         {
             get { return enabled; }
-            set { enabled = value; }
+            set { enabled = value; Selectable = value; }
         }
 
         public abstract void Draw(SpriteBatch spriteBatch, Vector2 position, bool selected);
@@ -383,6 +390,64 @@ namespace datx02_rally.Menus
             offset.X = Bounds.Width - Bounds.Width * 1 / 12 - offset.X;
             offset.Y = Bounds.Height / 2 - offset.Y;
             spriteBatch.Draw(ArrowRight, position + offset, Color.White);
+        }
+
+    }
+
+    public class TextMenuItem : MenuItem
+    {
+        private string columnTwoText = null;
+        public string ColumnTwoText {
+            get { return columnTwoText; }
+            set { columnTwoText = value; ColumnTwoEnabled = value != null; }
+        }
+        public bool ColumnTwoEnabled { get; set; }
+
+        public TextMenuItem(string columnOne, string columnTwo) : this(columnOne, columnTwo, null) { }
+
+        public TextMenuItem(string columnOne, string columnTwo, string identifier)
+        {
+            this.Text = columnOne;
+            this.ColumnTwoText = columnTwo;
+            this.Identifier = identifier != null ? identifier : columnOne;
+            this.Selectable = false;
+
+            MenuPositionX = ItemPositionX.CENTER;
+            MenuPositionY = ItemPositionY.CENTER;
+        }
+
+        public override void Draw(SpriteBatch spriteBatch, Vector2 position, bool selected)
+        {
+            if (Text == null)
+                return;
+            Rectangle b = Bounds;
+            b.X = (int)position.X + 5;
+            b.Width -= 10;
+            b.Y = (int)position.Y;
+
+            Color textColor;
+            if (!Enabled)
+                textColor = Color.Gray;
+            else
+                textColor = (selected) ? FontColorSelected : FontColor;
+
+            // Column one string
+            Vector2 textOffset = Font.MeasureString(Text);
+            textOffset /= 2;
+            textOffset.X = Bounds.Width / 6;
+            textOffset.Y = Bounds.Height / 2 - textOffset.Y;
+
+            spriteBatch.DrawString(Font, Text, position + textOffset, textColor);
+
+            // Column two string
+            if (ColumnTwoEnabled)
+            {
+                textOffset = Font.MeasureString(ColumnTwoText);
+                textOffset /= 2;
+                textOffset.X = Bounds.Width - Bounds.Width * 3 / 12 - textOffset.X;
+                textOffset.Y = Bounds.Height / 2 - textOffset.Y;
+                spriteBatch.DrawString(Font, ColumnTwoText, position + textOffset, textColor);
+            }
         }
 
     }
