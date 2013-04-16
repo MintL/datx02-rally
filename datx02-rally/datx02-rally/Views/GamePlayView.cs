@@ -26,6 +26,7 @@ namespace datx02_rally.Menus
         GameplayMode mode;
 
         PauseMenu pauseMenu;
+        GameOverMenu gameOverMenu;
         Matrix projectionMatrix;
 
         #region PostProcess
@@ -235,6 +236,11 @@ namespace datx02_rally.Menus
             pauseMenu.ChangeResolution();
             pauseMenu.Enabled = false;
             Game.Components.Add(pauseMenu);
+
+            gameOverMenu = new GameOverMenu(gameInstance);
+            gameOverMenu.ChangeResolution();
+            gameOverMenu.Enabled = false;
+            Game.Components.Add(gameOverMenu);
 
             //dustSystem.Enabled = false;
             //rainSystem.Enabled = false;
@@ -743,8 +749,8 @@ namespace datx02_rally.Menus
         public override GameState UpdateState(GameTime gameTime)
         {
             GameState state = GameState.Gameplay;
-            if (mode.GameOver)
-                state = GameState.MainMenu;
+            if (gameOverMenu.Enabled)
+                state = gameOverMenu.NextState;
 			else if (pauseMenu.Enabled) 
 				state = pauseMenu.NextState;
 				
@@ -753,7 +759,7 @@ namespace datx02_rally.Menus
 			else if (state == GameState.MainMenu)
 				this.ExitGame();
 
-            if (state != GameState.PausedGameplay)
+            if (state != GameState.PausedGameplay || state != GameState.GameOver)
                 return state;
             else
                 return GameState.Gameplay;
@@ -762,13 +768,20 @@ namespace datx02_rally.Menus
         public override void Update(GameTime gameTime)
         {
             this.mode.Update(gameTime);
+
+            if (this.mode.GameOver)
+            {
+                gameOverMenu.Enabled = true;
+                Console.WriteLine("Game over, enabling menu");
+            }
+
             InputComponent input = gameInstance.GetService<InputComponent>();
             if (input.GetPressed(Input.Exit))
                 pauseMenu.Enabled = !pauseMenu.Enabled;
 
             var cameraComponent = Game.GetService<CameraComponent>();
 
-            if (pauseMenu.Enabled)
+            if (pauseMenu.Enabled || gameOverMenu.Enabled)
             {
                 if (cameraComponent.Enabled)
                     cameraComponent.Enabled = false;
@@ -1048,9 +1061,14 @@ namespace datx02_rally.Menus
         /// <param name="gameTime"></param>
         public override void Draw(GameTime gameTime)
         {
-            Texture2D pauseOverlay = null;
-            if (pauseMenu.Enabled)
-                pauseOverlay = pauseMenu.Render();
+            OverlayView overlay = null;
+            Texture2D overlayTexture = null;
+            if (gameOverMenu.Enabled)
+                overlay = gameOverMenu;
+            else if (pauseMenu.Enabled)
+                overlay = pauseMenu;
+            if (overlay != null)
+                 overlayTexture = overlay.Render();
 
             //
             GraphicsDevice.DepthStencilState = DepthStencilState.Default;
@@ -1148,20 +1166,21 @@ namespace datx02_rally.Menus
 
             postProcessingComponent.RenderedImage = postProcessTexture;
 
-            RenderPauseMenu(pauseOverlay);
+            Console.WriteLine("drawing "+(overlay == pauseMenu ? (overlay == null ? "null" : "pause") : "gameover"));
+            RenderOverlayMenu(overlay, overlayTexture);
 
             base.Draw(gameTime);
         }
 
-        public void RenderPauseMenu(Texture2D overlay)
+        public void RenderOverlayMenu(OverlayView overlay, Texture2D overlayTexture)
         {
-            if (pauseMenu.Enabled)
+            if (overlay != null)
             {
                 spriteBatch.Begin();
-                Rectangle position = new Rectangle(GraphicsDevice.Viewport.Width / 2 - pauseMenu.RenderBounds.Width / 2,
-                                                   GraphicsDevice.Viewport.Height / 2 - pauseMenu.RenderBounds.Height / 2,
-                                                   pauseMenu.RenderBounds.Width, pauseMenu.RenderBounds.Height);
-                spriteBatch.Draw(overlay, position, Color.White);
+                Rectangle position = new Rectangle(GraphicsDevice.Viewport.Width / 2 - overlay.RenderBounds.Width / 2,
+                                                   GraphicsDevice.Viewport.Height / 2 - overlay.RenderBounds.Height / 2,
+                                                   overlay.RenderBounds.Width, overlay.RenderBounds.Height);
+                spriteBatch.Draw(overlayTexture, position, Color.White);
                 spriteBatch.End();
             }
         }

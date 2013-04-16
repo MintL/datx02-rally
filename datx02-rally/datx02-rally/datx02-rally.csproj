@@ -139,6 +139,7 @@
     <Compile Include="GameplayModes\TimeTrialMode.cs" />
     <Compile Include="Graphics\MotionBlur.cs" />
     <Compile Include="GameLogic\CurveRasterization.cs" />
+    <Compile Include="Views\GameOverMenu.cs" />
     <Compile Include="Views\GamePlayView.cs" />
     <Compile Include="Views\MenuView.cs" />
     <Compile Include="Views\MultiplayerMenu.cs" />
