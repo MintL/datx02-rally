@@ -724,7 +724,7 @@ namespace datx02_rally.Menus
 
         private void SetCarAtStart(Car car)
         {
-            Vector3 carPosition = raceTrack.Curve.GetPoint(0);
+            Vector3 carPosition = raceTrack.Curve.GetPoint(0.99f);
             Vector3 carHeading = (raceTrack.Curve.GetPoint(.001f) - carPosition);
             car.Position = carPosition;
             car.Rotation = (float)Math.Atan2(carHeading.X, carHeading.Z) - (float)Math.Atan2(0, -1);
