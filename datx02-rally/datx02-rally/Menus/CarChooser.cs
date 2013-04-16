@@ -24,7 +24,7 @@ namespace datx02_rally.Menus
         public CarChooser(Game game)
             : base(game, GameState.CarChooser)
         {
-            MenuTitle = "Choose car";
+            MenuTitle = "Choose color";
         }
 
         protected override void LoadContent()
@@ -55,7 +55,7 @@ namespace datx02_rally.Menus
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.01f, 500f);
 
             directionalLight = new DirectionalLight(
-                new Vector3(1.25f, -2f, 5.0f), // Direction
+                new Vector3(1.25f, -2f, -5.0f), // Direction
                 new Vector3(.1f, .1f, .1f), // Ambient
                 new Vector3(0.7f, 0.7f, 0.7f)); // Diffuse
         }
