@@ -225,15 +225,15 @@ Wave Bank
     Windows Bank Path Edited = 0;
     Seek Tables = 1;
     Compression Preset Name = <none>;
-    Bank Last Revised Low = 140609499;
-    Bank Last Revised High = 30292678;
+    Bank Last Revised Low = 1515174204;
+    Bank Last Revised High = 30292827;
 
     Wave
     {
         Name = birdchirp1;
-        File = ..\Sources\Ambient\birdchirp1.wav;
-        Build Settings Last Modified Low = 1126050605;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Ambient\birdchirp1.wav;
+        Build Settings Last Modified Low = 617993931;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -246,17 +246,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1729549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1039755493;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = cricketambient1;
-        File = ..\Sources\Ambient\cricketambient1.wav;
-        Build Settings Last Modified Low = 1127100665;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Ambient\cricketambient1.wav;
+        Build Settings Last Modified Low = 732382491;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -269,17 +269,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1749549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1039885467;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = cricketambient2;
-        File = ..\Sources\Ambient\cricketambient2.wav;
-        Build Settings Last Modified Low = 1128270732;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Ambient\cricketambient2.wav;
+        Build Settings Last Modified Low = 797815947;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -292,17 +292,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1789549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1039975449;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = dovechirp1;
-        File = ..\Sources\Ambient\dovechirp1.wav;
-        Build Settings Last Modified Low = 1129130781;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Ambient\dovechirp1.wav;
+        Build Settings Last Modified Low = 861499578;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -315,17 +315,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1799549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1040025439;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = dovechirp2;
-        File = ..\Sources\Ambient\dovechirp2.wav;
-        Build Settings Last Modified Low = 1130190841;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Ambient\dovechirp2.wav;
+        Build Settings Last Modified Low = 897545973;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -338,17 +338,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1819549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1040095425;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = forestambient1;
-        File = ..\Sources\Ambient\forestambient1.wav;
-        Build Settings Last Modified Low = 1131200899;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Ambient\forestambient1.wav;
+        Build Settings Last Modified Low = 939681759;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -361,17 +361,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1859549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1040335377;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = longwolfhowl1;
-        File = ..\Sources\Ambient\longwolfhowl1.wav;
-        Build Settings Last Modified Low = 1132480972;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Ambient\longwolfhowl1.wav;
+        Build Settings Last Modified Low = 969958731;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -384,17 +384,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1879549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1040465351;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = owl1;
-        File = ..\Sources\Ambient\owl1.wav;
-        Build Settings Last Modified Low = 1133661040;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Ambient\owl1.wav;
+        Build Settings Last Modified Low = 987996927;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -407,17 +407,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1889549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1040515341;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = owl2;
-        File = ..\Sources\Ambient\owl2.wav;
-        Build Settings Last Modified Low = 1134891110;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Ambient\owl2.wav;
+        Build Settings Last Modified Low = 1018053921;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -430,17 +430,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1909549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1040565331;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = shortwolfhowl1;
-        File = ..\Sources\Ambient\shortwolfhowl1.wav;
-        Build Settings Last Modified Low = 1136281190;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Ambient\shortwolfhowl1.wav;
+        Build Settings Last Modified Low = 1046541072;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -453,17 +453,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1949549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1040665311;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = crash1;
-        File = ..\Sources\Collision\crash1.wav;
-        Build Settings Last Modified Low = 1136791219;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Collision\crash1.wav;
+        Build Settings Last Modified Low = 1077198006;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -476,17 +476,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1629549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1040695305;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = crash2;
-        File = ..\Sources\Collision\crash2.wav;
-        Build Settings Last Modified Low = 1137991288;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Collision\crash2.wav;
+        Build Settings Last Modified Low = 1102725453;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -499,17 +499,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1629549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1040715301;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = fallingglass1;
-        File = ..\Sources\Collision\fallingglass1.wav;
-        Build Settings Last Modified Low = 1138241302;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Collision\fallingglass1.wav;
+        Build Settings Last Modified Low = 1123983327;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -522,17 +522,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1639549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1040735297;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = thud1;
-        File = ..\Sources\Collision\thud1.wav;
-        Build Settings Last Modified Low = 1138921341;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Collision\thud1.wav;
+        Build Settings Last Modified Low = 1141901535;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -545,17 +545,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1649549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1040745295;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = thudwithscreech1;
-        File = ..\Sources\Collision\thudwithscreech1.wav;
-        Build Settings Last Modified Low = 1139501374;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Collision\thudwithscreech1.wav;
+        Build Settings Last Modified Low = 1191606564;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -568,17 +568,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1659549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1040765291;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = woodcrash1;
-        File = ..\Sources\Collision\woodcrash1.wav;
-        Build Settings Last Modified Low = 1140981459;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Collision\woodcrash1.wav;
+        Build Settings Last Modified Low = 1191606564;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -591,17 +591,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 1669549440;
-            Last Modified High = 30291235;
+            Last Modified Low = 1040795285;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = firelong1;
-        File = ..\Sources\Fire\firelong1.wav;
-        Build Settings Last Modified Low = 1141831507;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Fire\firelong1.wav;
+        Build Settings Last Modified Low = 1332122511;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -614,17 +614,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 4743928;
             File Type = 1;
-            Last Modified Low = 4054516736;
-            Last Modified High = 30291234;
+            Last Modified Low = 1041335177;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = mediumintenserain1;
-        File = ..\Sources\Rain\mediumintenserain1.wav;
-        Build Settings Last Modified Low = 1143121581;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Rain\mediumintenserain1.wav;
+        Build Settings Last Modified Low = 1371718551;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -637,17 +637,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 494516736;
-            Last Modified High = 30291234;
+            Last Modified Low = 1041975049;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = softrain1;
-        File = ..\Sources\Rain\softrain1.wav;
-        Build Settings Last Modified Low = 1144331650;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Rain\softrain1.wav;
+        Build Settings Last Modified Low = 1371728550;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -660,17 +660,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 544516736;
-            Last Modified High = 30291234;
+            Last Modified Low = 1042334977;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = backgroundthunder1;
-        File = ..\Sources\Thunder\backgroundthunder1.wav;
-        Build Settings Last Modified Low = 1144501660;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Thunder\backgroundthunder1.wav;
+        Build Settings Last Modified Low = 1434372285;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -683,17 +683,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 4049484032;
-            Last Modified High = 30291233;
+            Last Modified Low = 1042434957;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = backgroundthunder2;
-        File = ..\Sources\Thunder\backgroundthunder2.wav;
-        Build Settings Last Modified Low = 1145531719;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Thunder\backgroundthunder2.wav;
+        Build Settings Last Modified Low = 1434372285;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -706,17 +706,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 4069484032;
-            Last Modified High = 30291233;
+            Last Modified Low = 1042594925;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = thunderstrike1;
-        File = ..\Sources\Thunder\thunderstrike1.wav;
-        Build Settings Last Modified Low = 1146771790;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Thunder\thunderstrike1.wav;
+        Build Settings Last Modified Low = 1434382284;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -729,17 +729,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 4119484032;
-            Last Modified High = 30291233;
+            Last Modified Low = 1042874869;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = thunderstrike2;
-        File = ..\Sources\Thunder\thunderstrike2.wav;
-        Build Settings Last Modified Low = 1147271818;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Thunder\thunderstrike2.wav;
+        Build Settings Last Modified Low = 1434382284;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -752,17 +752,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 4149484032;
-            Last Modified High = 30291233;
+            Last Modified Low = 1043034837;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = conttireskid1;
-        File = ..\Sources\Tires\conttireskid1.wav;
-        Build Settings Last Modified Low = 1148141868;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Tires\conttireskid1.wav;
+        Build Settings Last Modified Low = 1482687453;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -775,17 +775,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 3729484032;
-            Last Modified High = 30291233;
+            Last Modified Low = 1043054833;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = endtireskid1;
-        File = ..\Sources\Tires\endtireskid1.wav;
-        Build Settings Last Modified Low = 1148701900;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Tires\endtireskid1.wav;
+        Build Settings Last Modified Low = 1482697452;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -798,17 +798,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 3739484032;
-            Last Modified High = 30291233;
+            Last Modified Low = 1043074829;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = starttireskid1;
-        File = ..\Sources\Tires\starttireskid1.wav;
-        Build Settings Last Modified Low = 1149051920;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Tires\starttireskid1.wav;
+        Build Settings Last Modified Low = 1482707451;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -821,17 +821,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 3739484032;
-            Last Modified High = 30291233;
+            Last Modified Low = 1043094825;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = wind1;
-        File = ..\Sources\Wind\wind1.wav;
-        Build Settings Last Modified Low = 1150542005;
-        Build Settings Last Modified High = 30292669;
+        File = Sources\Wind\wind1.wav;
+        Build Settings Last Modified Low = 1515174204;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -844,17 +844,17 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 3579484032;
-            Last Modified High = 30291233;
+            Last Modified Low = 1043574729;
+            Last Modified High = 30292826;
         }
     }
 
     Wave
     {
         Name = ultimateengine;
-        File = ..\Sources\Engine\ultimateengine.wav;
-        Build Settings Last Modified Low = 4105537918;
-        Build Settings Last Modified High = 30292677;
+        File = Sources\Engine\ultimateengine.wav;
+        Build Settings Last Modified Low = 1278387885;
+        Build Settings Last Modified High = 30292827;
 
         Cache
         {
@@ -867,8 +867,8 @@ Wave Bank
             Loop Region Offset = 0;
             Loop Region Length = 0;
             File Type = 1;
-            Last Modified Low = 3697484579;
-            Last Modified High = 30292677;
+            Last Modified Low = 1040815281;
+            Last Modified High = 30292826;
         }
     }
 }
@@ -880,6 +880,8 @@ Sound Bank
     Windows File = Win\SoundEffects.xsb;
     Xbox Bank Path Edited = 0;
     Windows Bank Path Edited = 0;
+    Header Last Modified High = 0;
+    Header Last Modified Low = 0;
 
     Sound
     {
