@@ -149,10 +149,6 @@
     <Compile Include="ObservableVariable.cs" />
     <Compile Include="Particles\WeatherSystems\SmokeCloudParticleSystem.cs" />
     <Compile Include="Views\PauseMenu.cs" />
-    <Compile Include="Menus\GamePlayView.cs" />
-    <Compile Include="Menus\MenuView.cs" />
-    <Compile Include="Menus\MultiplayerMenu.cs" />
-    <Compile Include="Menus\OverlayView.cs" />
     <Compile Include="Sound\AudioEngineManager.cs" />
     <Compile Include="Sound\EnvironmentSoundManager.cs" />
     <Compile Include="Sound\OpponentEngineSoundManager.cs" />
