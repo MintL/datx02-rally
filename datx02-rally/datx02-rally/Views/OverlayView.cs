@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using datx02_rally.Sound;
 
 namespace datx02_rally.Menus
 {
@@ -149,6 +150,8 @@ namespace datx02_rally.Menus
                 } while (selectedIndex < menuItems.Count && !menuItems[selectedIndex].Selectable);
                 if (selectedIndex > menuItems.Count - 1)
                     selectedIndex = index;
+                AudioEngineManager.PlaySound("menutick");
+
             }
             else if (input.GetKey(Keys.Up))
             {
@@ -159,6 +162,7 @@ namespace datx02_rally.Menus
                 } while (selectedIndex >= 0 && !menuItems[selectedIndex].Selectable);
                 if (selectedIndex < 0)
                     selectedIndex = index;
+                AudioEngineManager.PlaySound("menutick");
             }
             else if (input.GetKey(Keys.Right) && menuItems[selectedIndex] is OptionMenuItem)
                 (menuItems[selectedIndex] as OptionMenuItem).NextOption();
