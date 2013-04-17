@@ -31,11 +31,12 @@ namespace datx02_rally.Menus
         {
             base.LoadContent();
 
-            Vector2 size = GetScreenPosition(new Vector2(0.7f, 0.7f));
+            Vector2 size = GetScreenPosition(new Vector2(0.5f, 0.6f));
             Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
             List<Tuple<String, GameState>> itemInfo = new List<Tuple<string, GameState>>();
             itemInfo.Add(new Tuple<String, GameState>("Back", GameState.MainMenu));
+            itemInfo.Add(new Tuple<String, GameState>("Start", GameState.Gameplay));
 
             foreach (var info in itemInfo)
             {
@@ -44,13 +45,13 @@ namespace datx02_rally.Menus
                 item.Font = MenuFont;
                 item.FontColor = ItemColor;
                 item.FontColorSelected = ItemColorSelected;
-                item.SetWidth(Bounds.Width);
+                item.SetWidth(ButtonBackground.Bounds.Width);
                 AddMenuItem(item);
             }
 
             // 3D variables needed to display the car
             MakeCar();
-            cameraPosition = new Vector3(0, 100f, 250f);
+            cameraPosition = new Vector3(0, 100f, 300f);
             view = Matrix.CreateLookAt(cameraPosition, new Vector3(0, 20f, 0f), Vector3.Up);
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.01f, 500f);
 
@@ -59,7 +60,7 @@ namespace datx02_rally.Menus
             }
 
             directionalLight = new DirectionalLight(
-                new Vector3(1.25f, -2f, -5.0f), // Direction
+                new Vector3(3f, -10f, -5.0f), // Direction
                 new Vector3(.1f, .1f, .1f), // Ambient
                 new Vector3(0.7f, 0.7f, 0.7f)); // Diffuse
         }
@@ -67,6 +68,10 @@ namespace datx02_rally.Menus
         public override GameState UpdateState(GameTime gameTime)
         {
             rotation += (float)gameTime.ElapsedGameTime.TotalSeconds * .5f;
+            car.Speed = ((float)Math.Sin(gameTime.TotalGameTime.TotalSeconds) + 2f) * 1.5f;
+            car.Update();
+
+            view = Matrix.CreateLookAt(cameraPosition + car.Position, car.Position + Vector3.Up * 20, Vector3.Up);
 
             InputComponent input = Game.GetService<InputComponent>();
             int i = availableColors.FindIndex(0, c => c == diffuseColor);
@@ -145,7 +150,24 @@ namespace datx02_rally.Menus
                 mesh.Draw();
             }
 
-            base.RenderContent(renderOffset);
+            spriteBatch.Begin();
+
+            Vector2 leftPos = renderOffset + new Vector2(Bounds.Width / 10, Bounds.Height / 2 - ArrowLeft.Height * 10 / 2);
+            Vector2 rightPos = renderOffset + new Vector2(Bounds.Width * 9 / 10, Bounds.Height / 2 - ArrowRight.Height * 10 / 2);
+            spriteBatch.Draw(ArrowLeft, new Rectangle((int)leftPos.X, (int)leftPos.Y, ArrowLeft.Width, ArrowLeft.Height * 10), Color.White);
+            spriteBatch.Draw(ArrowRight, new Rectangle((int)rightPos.X, (int)rightPos.Y, ArrowRight.Width, ArrowRight.Height * 10), Color.White);
+
+            // Render the buttons down to the right
+            for (int i = 0; i < MenuItems.Count; i++)
+            {
+                MenuItem menuItem = MenuItems[i];
+                Vector2 position = renderOffset + new Vector2(Bounds.Width, Bounds.Height) - new Vector2(menuItem.Bounds.Width, menuItem.Bounds.Height) - GetScreenPosition(Vector2.UnitY * 0.03f);
+                position.X -= (MenuItems.Count - i - 1) * menuItem.Bounds.Width;
+
+                menuItem.Draw(spriteBatch, position, i == selectedIndex);
+            }
+
+            spriteBatch.End();
 
         }
 

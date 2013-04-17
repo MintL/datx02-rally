@@ -26,8 +26,8 @@ namespace datx02_rally.Menus
         public Color ItemColor { get; set; }
         public Color ItemColorSelected { get; set; }
         public float Transparency { get; set; }
-        private List<MenuItem> menuItems = new List<MenuItem>();
-        private int selectedIndex = 0;
+        protected List<MenuItem> MenuItems = new List<MenuItem>();
+        protected int selectedIndex = 0;
 
         public Rectangle RenderBounds { get; set; }
         protected RenderTarget2D renderTarget;
@@ -40,9 +40,9 @@ namespace datx02_rally.Menus
             MenuItemOffset = new Vector2(0.005f, 0.005f);
 
             var index = selectedIndex;
-            while (selectedIndex < menuItems.Count && !menuItems[selectedIndex].Enabled)
+            while (selectedIndex < MenuItems.Count && !MenuItems[selectedIndex].Enabled)
                 selectedIndex++;
-            if (selectedIndex > menuItems.Count - 1)
+            if (selectedIndex > MenuItems.Count - 1)
                 selectedIndex = index;
 
             Rotation = 0;
@@ -90,9 +90,9 @@ namespace datx02_rally.Menus
 
             spriteBatch.Begin();
 
-            for (int i = 0; i < menuItems.Count; i++)
+            for (int i = 0; i < MenuItems.Count; i++)
             {
-                MenuItem menuItem = menuItems[i];
+                MenuItem menuItem = MenuItems[i];
                 int noInOrder;
                 if (menuItem.MenuPositionY == ItemPositionY.TOP)
                     noInOrder = noOfItemsTop++;
@@ -104,7 +104,7 @@ namespace datx02_rally.Menus
                 Vector2 position = renderOffset;
                 Vector2 offset = GetScreenPosition(MenuItemOffset);
 
-                position.Y += Bounds.Height / 2 - menuItems.Count / 2 * (menuItem.Bounds.Height + offset.Y) +
+                position.Y += Bounds.Height / 2 - MenuItems.Count / 2 * (menuItem.Bounds.Height + offset.Y) +
                     noInOrder * (menuItem.Bounds.Height + offset.Y);
                 menuItem.Draw(spriteBatch, position, i == selectedIndex);
             }
@@ -153,8 +153,8 @@ namespace datx02_rally.Menus
                 do
                 {
                     selectedIndex++;
-                } while (selectedIndex < menuItems.Count && !menuItems[selectedIndex].Enabled);
-                if (selectedIndex > menuItems.Count - 1)
+                } while (selectedIndex < MenuItems.Count && !MenuItems[selectedIndex].Enabled);
+                if (selectedIndex > MenuItems.Count - 1)
                     selectedIndex = index;
             }
             else if (input.GetKey(Keys.Up))
@@ -163,24 +163,24 @@ namespace datx02_rally.Menus
                 do
                 {
                     selectedIndex--;
-                } while (selectedIndex >= 0 && !menuItems[selectedIndex].Enabled);
+                } while (selectedIndex >= 0 && !MenuItems[selectedIndex].Enabled);
                 if (selectedIndex < 0)
                     selectedIndex = index;
             }
-            else if (input.GetKey(Keys.Right) && menuItems[selectedIndex] is OptionMenuItem)
-                (menuItems[selectedIndex] as OptionMenuItem).NextOption();
-            else if (input.GetKey(Keys.Left) && menuItems[selectedIndex] is OptionMenuItem)
-                (menuItems[selectedIndex] as OptionMenuItem).PreviousOption();
-            else if (input.GetKey(Keys.Enter) && menuItems[selectedIndex] is StateActionMenuItem)
-                nextGameState = (menuItems[selectedIndex] as StateActionMenuItem).NextState;
-            else if (input.GetKey(Keys.Enter) && menuItems[selectedIndex] is ActionMenuItem)
-                (menuItems[selectedIndex] as ActionMenuItem).PerformAction();
+            else if (input.GetKey(Keys.Right) && MenuItems[selectedIndex] is OptionMenuItem)
+                (MenuItems[selectedIndex] as OptionMenuItem).NextOption();
+            else if (input.GetKey(Keys.Left) && MenuItems[selectedIndex] is OptionMenuItem)
+                (MenuItems[selectedIndex] as OptionMenuItem).PreviousOption();
+            else if (input.GetKey(Keys.Enter) && MenuItems[selectedIndex] is StateActionMenuItem)
+                nextGameState = (MenuItems[selectedIndex] as StateActionMenuItem).NextState;
+            else if (input.GetKey(Keys.Enter) && MenuItems[selectedIndex] is ActionMenuItem)
+                (MenuItems[selectedIndex] as ActionMenuItem).PerformAction();
             return nextGameState != GameState.None ? nextGameState : this.gameState;
         }
 
         public void AddMenuItem(MenuItem menuItem)
         {
-            menuItems.Add(menuItem);
+            MenuItems.Add(menuItem);
         }
 
         /// <summary>
@@ -190,10 +190,10 @@ namespace datx02_rally.Menus
         /// <param name="identifier"></param>
         public void SetMenuItem(string identifier, MenuItem menuItem)
         {
-            int index = menuItems.FindIndex(item => item.Identifier == identifier);
+            int index = MenuItems.FindIndex(item => item.Identifier == identifier);
             if (index > -1)
             {
-                menuItems[index] = menuItem;
+                MenuItems[index] = menuItem;
             }
         }
 
@@ -235,7 +235,7 @@ namespace datx02_rally.Menus
 
         public MenuItem GetMenuItem(string identifier)
         {
-            return menuItems.Find(item => item.Identifier == identifier);
+            return MenuItems.Find(item => item.Identifier == identifier);
         }
 
     }
