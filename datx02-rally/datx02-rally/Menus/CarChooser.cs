@@ -54,6 +54,10 @@ namespace datx02_rally.Menus
             view = Matrix.CreateLookAt(cameraPosition, new Vector3(0, 20f, 0f), Vector3.Up);
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.01f, 500f);
 
+            if (availableColors.Exists(c => c == GameSettings.Default.CarColor)) {
+                diffuseColor = GameSettings.Default.CarColor;
+            }
+
             directionalLight = new DirectionalLight(
                 new Vector3(1.25f, -2f, -5.0f), // Direction
                 new Vector3(.1f, .1f, .1f), // Ambient
@@ -75,8 +79,14 @@ namespace datx02_rally.Menus
                 i = (++i % availableColors.Count);
 
             diffuseColor = availableColors[i];
+            GameSettings.Default.CarColor = diffuseColor;
 
-            return base.UpdateState(gameTime);
+            GameState state = base.UpdateState(gameTime);
+            if (state != this.gameState)
+            {
+                GameSettings.Default.Save();
+            }
+            return state;
         }
 
         protected override void RenderContent(Vector2 renderOffset)

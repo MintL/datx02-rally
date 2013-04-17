@@ -1439,6 +1439,12 @@ namespace datx02_rally.Menus
 
                     param["EyePosition"].SetValue(Game.GetService<CameraComponent>().Position);
 
+                    if (mesh.Name == "main")
+                    {
+                        param["MaterialDiffuse"].SetValue(GameSettings.Default.CarColor.ToVector3());
+                        param["MaterialAmbient"].SetValue(GameSettings.Default.CarColor.ToVector3());
+                    }
+
                     param["DirectionalLightDirection"].SetValue(directionalLight.Direction);
                     param["DirectionalLightDiffuse"].SetValue(directionalLight.Diffuse);
                     param["DirectionalLightAmbient"].SetValue(directionalLight.Ambient);
