@@ -74,7 +74,7 @@ namespace datx02_rally.Menus
         public override void ChangeResolution()
         {
             
-            renderTarget = new RenderTarget2D(GraphicsDevice, RenderBounds.Width, RenderBounds.Height);
+            renderTarget = new RenderTarget2D(GraphicsDevice, RenderBounds.Width, RenderBounds.Height, false, SurfaceFormat.Color, DepthFormat.Depth24);
         }
 
         public void OffsetPosition(Vector2 offset)
