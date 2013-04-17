@@ -15,12 +15,6 @@ float3 MaterialDiffuse;
 float3 MaterialSpecular;
 float MaterialShininess;
 
-float3 LightPosition[MaxLights];
-//float3 LightAmbient[MaxLights];
-float3 LightDiffuse[MaxLights];
-float LightRange[MaxLights];
-int NumLights;
-
 float3 DirectionalLightDirection;
 float3 DirectionalLightAmbient;
 float3 DirectionalLightDiffuse;
@@ -138,11 +132,11 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	float3 directionFromEye = -normalize(input.ViewDirection);
 	float normalizationFactor = ((MaterialShininess + 2.0) / 8.0);
-	float4 totalLight = float4(MaterialAmbient * DirectionalLightAmbient, 1);
+	float4 totalLight = float4(MaterialAmbient * DirectionalLightAmbient * color, 1);
 
 	if (MaterialUnshaded) 
 	{
-		return float4(MaterialAmbient, 1);
+		return float4(MaterialAmbient * color, 1);
 	}
 
 	// Prelighting
@@ -158,7 +152,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float3 reflection = CalculateEnvironmentReflection(normal, directionFromEye);
 	float3 environmentMap = texCUBE(EnvironmentSampler, reflection) * fresnel * MaterialReflection;
 	
-	totalLight += float4(selfShadow * (DirectionalLightDiffuse * color.rgb * CalculateDiffuse(normal, directionToLight) +
+	totalLight += float4(selfShadow * (MaterialDiffuse * DirectionalLightDiffuse * color.rgb * CalculateDiffuse(normal, directionToLight) +
 					DirectionalLightDiffuse * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor +
 					environmentMap ), 1);
 	

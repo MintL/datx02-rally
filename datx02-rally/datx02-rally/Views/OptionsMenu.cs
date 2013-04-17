@@ -42,7 +42,7 @@ namespace datx02_rally.Menus
             resolution.FontColor = ItemColor;
             resolution.FontColorSelected = Color.Black;
             AddMenuItem(resolution);
-
+            
             OptionMenuItem<int> displayMode = new OptionMenuItem<int>("Display Mode", "display");
             displayMode.AddOption("Fullscreen", 1);
             displayMode.AddOption("Windowed", 2);

@@ -28,10 +28,10 @@ namespace datx02_rally.Menus
         public Color ItemColorSelected { get; set; }
         public float Transparency { get; set; }
         public List<MenuItem> MenuItems { get; private set; }
-        private int selectedIndex = 0;
+        protected int selectedIndex = 0;
 
         public Rectangle RenderBounds { get; set; }
-        private RenderTarget2D renderTarget;
+        protected RenderTarget2D renderTarget;
 
         public OverlayView(Game game, GameState gameState)
             : base(game, gameState)
@@ -76,7 +76,7 @@ namespace datx02_rally.Menus
         public override void ChangeResolution()
         {
             
-            renderTarget = new RenderTarget2D(GraphicsDevice, RenderBounds.Width, RenderBounds.Height);
+            renderTarget = new RenderTarget2D(GraphicsDevice, RenderBounds.Width, RenderBounds.Height, false, SurfaceFormat.Color, DepthFormat.Depth24);
         }
 
         public void OffsetPosition(Vector2 offset)
@@ -84,33 +84,13 @@ namespace datx02_rally.Menus
             Position += offset;
         }
 
-        public Texture2D Render()
+        protected virtual void RenderContent(Vector2 renderOffset)
         {
             int noOfItemsBottom = 0,
                 noOfItemsTop = 0,
                 noOfItemsCenter = 0;
 
-
-            GraphicsDevice.SetRenderTarget(renderTarget);
-            GraphicsDevice.Clear(Color.Transparent);
-
-            Vector2 renderOffset = new Vector2((RenderBounds.Width - Bounds.Width) / 2,
-                    (RenderBounds.Height - Bounds.Height) / 2);
-            
             spriteBatch.Begin();
-            spriteBatch.Draw(Background, 
-                new Rectangle((int)renderOffset.X, (int)renderOffset.Y, Bounds.Width, Bounds.Height), 
-                Color.White);
-            spriteBatch.Draw(LeftBorder,
-                new Rectangle((int)renderOffset.X - LeftBorder.Width, (int)renderOffset.Y, LeftBorder.Width, Bounds.Height),
-                Color.White);
-            spriteBatch.Draw(RightBorder,
-                new Rectangle((int)renderOffset.X+Bounds.Width, (int)renderOffset.Y, LeftBorder.Width, Bounds.Height),
-                Color.White);
-            spriteBatch.DrawString(MenuHeaderFont, MenuTitle,
-                new Vector2((int)(renderOffset.X + Bounds.Width * 0.03), (int)(renderOffset.Y + Bounds.Height * 0.14) - MenuHeaderFont.MeasureString(MenuTitle).Y), 
-                Color.White);
-
 
             for (int i = 0; i < MenuItems.Count; i++)
             {
@@ -128,17 +108,44 @@ namespace datx02_rally.Menus
 
                 position.Y += Bounds.Height / 2 - MenuItems.Count / 2 * (menuItem.Bounds.Height + offset.Y) +
                     noInOrder * (menuItem.Bounds.Height + offset.Y);
-                menuItem.Draw(spriteBatch, position, i == selectedIndex); 
+                menuItem.Draw(spriteBatch, position, i == selectedIndex);
             }
 
             spriteBatch.End();
+        }
+
+        public Texture2D Render()
+        {
+            GraphicsDevice.SetRenderTarget(renderTarget);
+            GraphicsDevice.Clear(Color.Transparent);
+
+            Vector2 renderOffset = new Vector2((RenderBounds.Width - Bounds.Width) / 2,
+                    (RenderBounds.Height - Bounds.Height) / 2);
+
+            spriteBatch.Begin();
+            spriteBatch.Draw(Background,
+                new Rectangle((int)renderOffset.X, (int)renderOffset.Y, Bounds.Width, Bounds.Height),
+                Color.White);
+            spriteBatch.Draw(LeftBorder,
+                new Rectangle((int)renderOffset.X - LeftBorder.Width, (int)renderOffset.Y, LeftBorder.Width, Bounds.Height),
+                Color.White);
+            spriteBatch.Draw(RightBorder,
+                new Rectangle((int)renderOffset.X + Bounds.Width, (int)renderOffset.Y, LeftBorder.Width, Bounds.Height),
+                Color.White);
+            spriteBatch.DrawString(MenuHeaderFont, MenuTitle,
+                new Vector2((int)(renderOffset.X + Bounds.Width * 0.03), (int)(renderOffset.Y + Bounds.Height * 0.14) - MenuHeaderFont.MeasureString(MenuTitle).Y),
+                Color.White);
+
+            spriteBatch.End();
+
+            RenderContent(renderOffset);
 
             GraphicsDevice.SetRenderTarget(null);
 
             return (Texture2D)renderTarget;
         }
 
-        public override GameState UpdateState(Microsoft.Xna.Framework.GameTime gameTime)
+        public override GameState UpdateState(GameTime gameTime)
         {
             InputComponent input = gameInstance.GetService<InputComponent>();
             GameState nextGameState = GameState.None;
@@ -149,6 +156,7 @@ namespace datx02_rally.Menus
                 {
                     selectedIndex++;
                 } while (selectedIndex < MenuItems.Count && !MenuItems[selectedIndex].Selectable);
+
                 if (selectedIndex > MenuItems.Count - 1)
                     selectedIndex = index;
                 AudioEngineManager.PlaySound("menutick");
@@ -161,6 +169,7 @@ namespace datx02_rally.Menus
                 {
                     selectedIndex--;
                 } while (selectedIndex >= 0 && !MenuItems[selectedIndex].Selectable);
+
                 if (selectedIndex < 0)
                     selectedIndex = index;
                 AudioEngineManager.PlaySound("menutick");

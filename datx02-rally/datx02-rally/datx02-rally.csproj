@@ -106,6 +106,7 @@
     <Reference Include="System">
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml">
       <Private>False</Private>
     </Reference>
@@ -145,6 +146,7 @@
     <Compile Include="Views\MenuView.cs" />
     <Compile Include="Views\MultiplayerMenu.cs" />
     <Compile Include="Views\OverlayView.cs" />
+    <Compile Include="Views\CarChooser.cs" />
     <Compile Include="Particles\WeatherSystems\FireflySystem.cs" />
     <Compile Include="ObservableVariable.cs" />
     <Compile Include="Particles\WeatherSystems\SmokeCloudParticleSystem.cs" />

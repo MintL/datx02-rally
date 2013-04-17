@@ -19,7 +19,7 @@ using datx02_rally.Menus;
 
 namespace datx02_rally
 {
-    public enum GameState { None, MainMenu, OptionsMenu, Gameplay, PausedGameplay, MultiplayerMenu, SingleplayerMenu, Exiting, GameOver };
+    public enum GameState { None, MainMenu, OptionsMenu, Gameplay, PausedGameplay, MultiplayerMenu, SingleplayerMenu, Exiting, CarChooser, GameOver };
     public class Game1 : Microsoft.Xna.Framework.Game
     {
         public GameStateView currentView { get; private set; }
