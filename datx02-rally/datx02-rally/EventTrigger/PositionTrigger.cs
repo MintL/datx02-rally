@@ -26,7 +26,7 @@ namespace datx02_rally.EventTrigger
             if (currentPoint < 0)
             {
                 var orderedList = Curve.Points.OrderBy(point => Vector3.DistanceSquared(movingObject.Position, point.Position)).ToList();
-                currentPoint = Curve.Points.IndexOf(orderedList.ElementAt(0));
+                currentPoint = Curve.Points.IndexOf(orderedList.First(point => IsInFrontOf(movingObject.Position, point)));
             }
 
             float currentDistance = Vector3.DistanceSquared(movingObject.Position, Curve.Points[currentPoint].Position);
@@ -40,11 +40,11 @@ namespace datx02_rally.EventTrigger
             {
                 direction = -1;
             }
-            int nextPoint = (currentPoint + direction) % (Curve.Points.Count - 1);
+            int nextPoint = (currentPoint + direction) % Curve.Points.Count;
             if (nextPoint < 0) nextPoint += Curve.Points.Count;
             distanceToNext = Vector3.DistanceSquared(movingObject.Position, Curve.Points[nextPoint].Position);
 
-            if (distanceToNext < currentDistance)
+            if (distanceToNext < currentDistance && IsInFrontOf(movingObject.Position, Curve.Points[nextPoint]))
             {
                 currentPoint = nextPoint;
                 if (currentPoint == triggerPointIndex && (!preventReverse || direction > 0))
@@ -52,5 +52,11 @@ namespace datx02_rally.EventTrigger
             }
         }
 
+        private bool IsInFrontOf(Vector3 position, CurveRasterization.CurvePoint point)
+        {
+            var relativePosition = Vector3.Normalize(position - point.Position);
+
+            return Vector3.Dot(relativePosition, point.Heading) > 0;
+        }
     }
 }

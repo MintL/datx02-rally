@@ -10,12 +10,17 @@ namespace datx02_rally.GameLogic
     {
         public Curve Curve { get; private set; }
 
-        public CurveRasterization CurveRasterization { get; private set; }
+        private Dictionary<int, CurveRasterization> curveRasterizations = new Dictionary<int, CurveRasterization>();
+        public CurveRasterization GetCurveRasterization(int detail)
+        {
+            if (!curveRasterizations.ContainsKey(detail))
+                curveRasterizations.Add(detail, new CurveRasterization(Curve, detail));
+            return curveRasterizations[detail];
+        }
 
         public RaceTrack(float terrainWidth, Vector3 terrainScale)
         {
             Curve = new RaceTrackCurve(terrainWidth, terrainScale);
-            CurveRasterization = new CurveRasterization(Curve, 100);
         }
     }
 }
