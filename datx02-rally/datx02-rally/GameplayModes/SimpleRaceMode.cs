@@ -32,11 +32,12 @@ namespace datx02_rally
 
         public override void Initialize()
         {
+            var trackRasterization = raceTrack.GetCurveRasterization(checkpoints);
+
             List<AbstractTrigger> checkpointTriggers = new List<AbstractTrigger>();
             for (int i = 0; i < checkpoints; i++)
             {
-                PositionTrigger trigger = new PositionTrigger(raceTrack.CurveRasterization, 
-                    (int)(((float)i / checkpoints) * raceTrack.CurveRasterization.Points.Count), true, true);
+                PositionTrigger trigger = new PositionTrigger(trackRasterization, i, true, true);
                 string outputDebug = "Passing checkpoint " + i;
                 trigger.Triggered += (sender, e) =>
                 {
@@ -47,7 +48,7 @@ namespace datx02_rally
                     if (e.Object == car && current.Triggers.ContainsKey(aTrigger))
                         current.Triggers[aTrigger] = e;
                 };
-                
+
                 string checkpointID = "checkpoint" + i;
                 gameInstance.GetService<TriggerManager>().Triggers.Add(checkpointID, trigger);
                 checkpointTriggers.Add(trigger);

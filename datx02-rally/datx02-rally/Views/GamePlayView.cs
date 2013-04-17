@@ -567,14 +567,14 @@ namespace datx02_rally.Menus
 
             #endregion
 
-            foreach (GameObject obj in GraphicalObjects)
-            {
-                pointLights.Add(new PointLight(obj.Position + Vector3.Up * 500, new Vector3(0.7f, 0.7f, 0.7f), 450)
-                {
-                    Model = pointLightModel
-                });
-            }
-            GraphicalObjects.AddRange(pointLights);
+            //foreach (GameObject obj in GraphicalObjects)
+            //{
+            //    pointLights.Add(new PointLight(obj.Position + Vector3.Up * 500, new Vector3(0.7f, 0.7f, 0.7f), 450)
+            //    {
+            //        Model = pointLightModel
+            //    });
+            //}
+            //GraphicalObjects.AddRange(pointLights);
 
             //List<FireObject> list = new List<FireObject>();
             //foreach (PointLight p in pointLights)
@@ -663,8 +663,21 @@ namespace datx02_rally.Menus
             
             #endregion
 
+            int cp = 30;
 
-            this.mode = new SimpleRaceMode(gameInstance, 2, 10, raceTrack, Car);
+            this.mode = new SimpleRaceMode(gameInstance, 2, cp, raceTrack, Car);
+
+            foreach (var point in raceTrack.GetCurveRasterization(cp).Points)
+            {
+                var pl = new PointLight(point.Position + 500 * Vector3.Up,
+
+                     raceTrack.GetCurveRasterization(cp).Points.IndexOf(point) == 0 ? Vector3.UnitY : Vector3.UnitX, 
+                    
+                    750) { Model = pointLightModel };
+                pointLights.Add(pl);
+                GraphicalObjects.Add(pl);
+            }
+
             gameInstance.AddService(typeof(GameplayMode), mode);
             if (mode.Mode == Mode.Multiplayer)
             {

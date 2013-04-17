@@ -385,6 +385,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audio\datx02.xap">
+      <Name>datx02</Name>
+      <Importer>XactImporter</Importer>
+      <Processor>XactProcessor</Processor>
+    </Compile>
     <None Include="Effects\Prelight\Shared.vsi">
       <Name>Shared</Name>
       <Importer>EffectImporter</Importer>
