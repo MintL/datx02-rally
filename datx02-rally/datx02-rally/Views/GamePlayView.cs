@@ -666,6 +666,12 @@ namespace datx02_rally.Menus
 
             this.mode = new SimpleRaceMode(gameInstance, 2, 10, raceTrack, Car);
             gameInstance.AddService(typeof(GameplayMode), mode);
+            if (mode.Mode == Mode.Multiplayer)
+            {
+                foreach (var player in gameInstance.GetService<ServerClient>().Players.Values)
+                    gameInstance.GetService<CarControlComponent>().AddCar(player, null);
+            }
+
         }
 
         public Car MakeCar()

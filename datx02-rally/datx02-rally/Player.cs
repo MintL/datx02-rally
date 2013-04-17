@@ -24,7 +24,6 @@ namespace datx02_rally
             ID = id;
             PlayerName = name;
             LOCAL_PLAYER = false;
-            Game.GetService<CarControlComponent>().AddCar(this, null);
         }
 
         public override void Update(GameTime gameTime)
