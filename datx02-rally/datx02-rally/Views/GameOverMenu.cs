@@ -27,23 +27,7 @@ namespace datx02_rally.Menus
 
             Vector2 size = GetScreenPosition(new Vector2(0.7f, 0.7f));
             Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
-
-            /*List<Tuple<String, GameState>> itemInfo = new List<Tuple<string, GameState>>();
-            //itemInfo.Add(new Tuple<String, GameState>("Resume", GameState.Gameplay));
-            itemInfo.Add(new Tuple<String, GameState>("Main menu", GameState.MainMenu));
-            //itemInfo.Add(new Tuple<String, GameState>("Quit", GameState.Exiting));
             
-            foreach (var info in itemInfo) 
-            {
-                MenuItem item = new StateActionMenuItem(info.Item1, info.Item2);
-                item.Background = ButtonBackground;
-                item.Font = MenuFont;
-                item.FontColorSelected = ItemColorSelected;
-                item.SetWidth(Bounds.Width);
-                AddMenuItem(item);
-            }*/
-
-
         }
 
         public override GameState UpdateState(GameTime gameTime)
@@ -59,6 +43,10 @@ namespace datx02_rally.Menus
             var mode = gameInstance.GetService<GameplayMode>();
             if (mode.GameOver && !populated)
             {
+                if (mode.Statistics.Won)
+                    this.MenuTitle = "You won!";
+                else
+                    this.MenuTitle = "You lost!";
                 foreach (var heading in mode.Statistics.CategorizedItems)
 	            {
                     if (heading.Title != null)

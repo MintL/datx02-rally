@@ -15,7 +15,7 @@ namespace datx02_rally
         private int checkpoints;
         private RaceTrack raceTrack;
         private Car car;
-        private int playerPosition = 1;
+        public int PlayerPosition { get; set; }
 
         private List<TimeSpan> goalLineTimes = new List<TimeSpan>();
 
@@ -26,6 +26,7 @@ namespace datx02_rally
             this.checkpoints = noOfCheckpoints;
             this.raceTrack = raceTrack;
             this.car = localCar;
+            PlayerPosition = 1;
             Initialize();
         }
 
@@ -85,7 +86,7 @@ namespace datx02_rally
 
             var playerHeading = new EndGameStatistics.Heading();
             playerHeading.Title = null;
-            playerHeading.Items[playerPosition + ". " + gameInstance.GetService<Player>().PlayerName] = totalTime.ToString(@"m\:ss\:ff");
+            playerHeading.Items[PlayerPosition + ". " + gameInstance.GetService<Player>().PlayerName] = totalTime.ToString(@"m\:ss\:ff");
 
             var lapsHeading = new EndGameStatistics.Heading();
             lapsHeading.Title = "Your times";
@@ -101,7 +102,8 @@ namespace datx02_rally
 
             var itemList = new List<EndGameStatistics.Heading> { playerHeading, lapsHeading, statsHeading };
 
-            Statistics = new EndGameStatistics(itemList);
+            bool won = PlayerPosition == 1;
+            Statistics = new EndGameStatistics(itemList, won);
         }
 
 

@@ -8,10 +8,12 @@ namespace datx02_rally.GameplayModes
     public class EndGameStatistics
     {
         public List<EndGameStatistics.Heading> CategorizedItems { get; private set; }
+        public bool Won { get; private set; }
 
-        public EndGameStatistics(List<EndGameStatistics.Heading> items)
+        public EndGameStatistics(List<EndGameStatistics.Heading> items, bool won)
         {
             CategorizedItems = items;
+            Won = won;
         }
 
         public void SetItemText(string itemTitle, string text) 
