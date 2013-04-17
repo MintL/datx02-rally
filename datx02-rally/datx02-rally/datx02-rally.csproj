@@ -149,6 +149,14 @@
     <Compile Include="ObservableVariable.cs" />
     <Compile Include="Particles\WeatherSystems\SmokeCloudParticleSystem.cs" />
     <Compile Include="Views\PauseMenu.cs" />
+    <Compile Include="Menus\GamePlayView.cs" />
+    <Compile Include="Menus\MenuView.cs" />
+    <Compile Include="Menus\MultiplayerMenu.cs" />
+    <Compile Include="Menus\OverlayView.cs" />
+    <Compile Include="Sound\AudioEngineManager.cs" />
+    <Compile Include="Sound\EnvironmentSoundManager.cs" />
+    <Compile Include="Sound\OpponentEngineSoundManager.cs" />
+    <Compile Include="Sound\PlayerEngineSound.cs" />
     <Compile Include="SpotLight.cs" />
     <Compile Include="DebugConsole\Commands\ConnectCommand.cs" />
     <Compile Include="DebugConsole\Commands\ClearCommand.cs" />
@@ -267,6 +275,7 @@
       <LastGenOutput>GameSettings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />
   <!--
