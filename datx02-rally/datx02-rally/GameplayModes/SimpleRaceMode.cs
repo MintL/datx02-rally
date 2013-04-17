@@ -6,6 +6,7 @@ using System;
 using datx02_rally.GameLogic;
 using datx02_rally.Components;
 using datx02_rally.GameplayModes;
+using datx02_rally.Sound;
 
 namespace datx02_rally
 {
@@ -47,6 +48,7 @@ namespace datx02_rally
                     var aTrigger = sender as AbstractTrigger;
                     if (e.Object == car && current.Triggers.ContainsKey(aTrigger))
                         current.Triggers[aTrigger] = e;
+                    AudioEngineManager.PlaySound("passfinishline");
                 };
 
                 string checkpointID = "checkpoint" + i;

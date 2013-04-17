@@ -214,6 +214,53 @@ Global Settings
         Min = 0.000000;
         Max = 1000000.000000;
     }
+
+    RPC
+    {
+        Name = DistVolAdjust;
+
+        RPC Curve
+        {
+            Name = Sound::f3239572-f1f3-4b3f-984c-a4e9f92ddf97;
+            Property = 0;
+            Sound = 1;
+            Line Color = 4294934783;
+            Viewable = 1;
+
+            Variable Entry
+            {
+                Name = Distance;
+            }
+
+            RPC Point
+            {
+                X = 0.000000;
+                Y = 35.294117;
+                Curve = 0;
+            }
+
+            RPC Point
+            {
+                X = 2500.000000;
+                Y = -3105.882324;
+                Curve = 0;
+            }
+
+            RPC Point
+            {
+                X = 4907.017578;
+                Y = -7764.705566;
+                Curve = 0;
+            }
+
+            RPC Point
+            {
+                X = 9200.658203;
+                Y = -9600.000000;
+                Curve = 0;
+            }
+        }
+    }
 }
 
 Wave Bank
@@ -225,8 +272,8 @@ Wave Bank
     Windows Bank Path Edited = 0;
     Seek Tables = 1;
     Compression Preset Name = <none>;
-    Bank Last Revised Low = 262850680;
-    Bank Last Revised High = 30292833;
+    Bank Last Revised Low = 3352304931;
+    Bank Last Revised High = 30292842;
 
     Wave
     {
@@ -894,6 +941,52 @@ Wave Bank
             Last Modified High = 30292832;
         }
     }
+
+    Wave
+    {
+        Name = checkpointpass1;
+        File = Sources\Effects\checkpointpass1.wav;
+        Build Settings Last Modified Low = 4202546819;
+        Build Settings Last Modified High = 30292839;
+
+        Cache
+        {
+            Format Tag = 0;
+            Channels = 1;
+            Sampling Rate = 44100;
+            Bits Per Sample = 1;
+            Play Region Offset = 44;
+            Play Region Length = 260036;
+            Loop Region Offset = 0;
+            Loop Region Length = 0;
+            File Type = 1;
+            Last Modified Low = 3508476819;
+            Last Modified High = 30292839;
+        }
+    }
+
+    Wave
+    {
+        Name = checkpointpass2;
+        File = Sources\Effects\checkpointpass2.wav;
+        Build Settings Last Modified Low = 3098894931;
+        Build Settings Last Modified High = 30292842;
+
+        Cache
+        {
+            Format Tag = 0;
+            Channels = 2;
+            Sampling Rate = 44100;
+            Bits Per Sample = 1;
+            Play Region Offset = 44;
+            Play Region Length = 308736;
+            Loop Region Offset = 0;
+            Loop Region Length = 0;
+            File Type = 1;
+            Last Modified Low = 1485742227;
+            Last Modified High = 30292841;
+        }
+    }
 }
 
 Sound Bank
@@ -1341,6 +1434,11 @@ Sound Bank
         Category Entry
         {
             Name = Default;
+        }
+
+        RPC Entry
+        {
+            RPC Name = DistVolAdjust;
         }
 
         Track
@@ -2037,6 +2135,7 @@ Sound Bank
 
             Play Wave Event
             {
+                Loop Count = 255;
                 Break Loop = 0;
                 Use Speaker Position = 0;
                 Use Center Speaker = 1;
@@ -2105,6 +2204,100 @@ Sound Bank
                     Bank Index = 0;
                     Entry Name = menutick1;
                     Entry Index = 28;
+                    Weight = 255;
+                    Weight Min = 0;
+                }
+            }
+        }
+    }
+
+    Sound
+    {
+        Name = passcheckpoint;
+        Volume = -1200;
+        Pitch = 0;
+        Priority = 0;
+
+        Category Entry
+        {
+            Name = Default;
+        }
+
+        Track
+        {
+            Volume = 0;
+            Use Filter = 0;
+
+            Play Wave Event
+            {
+                Break Loop = 0;
+                Use Speaker Position = 0;
+                Use Center Speaker = 1;
+                New Speaker Position On Loop = 1;
+                Speaker Position Angle = 0.000000;
+                Speaker Position Arc = 0.000000;
+
+                Event Header
+                {
+                    Timestamp = 0;
+                    Relative = 0;
+                    Random Recurrence = 0;
+                    Random Offset = 0;
+                }
+
+                Wave Entry
+                {
+                    Bank Name = SoundEffectWaves;
+                    Bank Index = 0;
+                    Entry Name = checkpointpass1;
+                    Entry Index = 29;
+                    Weight = 255;
+                    Weight Min = 0;
+                }
+            }
+        }
+    }
+
+    Sound
+    {
+        Name = passfinishline;
+        Volume = -1200;
+        Pitch = 0;
+        Priority = 0;
+
+        Category Entry
+        {
+            Name = Default;
+        }
+
+        Track
+        {
+            Volume = 0;
+            Use Filter = 0;
+
+            Play Wave Event
+            {
+                Break Loop = 0;
+                Use Speaker Position = 0;
+                Use Center Speaker = 1;
+                New Speaker Position On Loop = 1;
+                Speaker Position Angle = 0.000000;
+                Speaker Position Arc = 0.000000;
+
+                Event Header
+                {
+                    Timestamp = 0;
+                    Relative = 0;
+                    Random Recurrence = 0;
+                    Random Offset = 0;
+                }
+
+                Wave Entry
+                {
+                    Bank Name = SoundEffectWaves;
+                    Bank Index = 0;
+                    Entry Name = checkpointpass2;
+                    Entry Index = 30;
                     Weight = 255;
                     Weight Min = 0;
                 }
@@ -2631,6 +2824,46 @@ Sound Bank
         {
             Name = menutick;
             Index = 22;
+            Weight Min = 0;
+            Weight Max = 255;
+        }
+    }
+
+    Cue
+    {
+        Name = passcheckpoint;
+
+        Variation
+        {
+            Variation Type = 3;
+            Variation Table Type = 1;
+            New Variation on Loop = 0;
+        }
+
+        Sound Entry
+        {
+            Name = passcheckpoint;
+            Index = 23;
+            Weight Min = 0;
+            Weight Max = 255;
+        }
+    }
+
+    Cue
+    {
+        Name = passfinishline;
+
+        Variation
+        {
+            Variation Type = 3;
+            Variation Table Type = 1;
+            New Variation on Loop = 0;
+        }
+
+        Sound Entry
+        {
+            Name = passfinishline;
+            Index = 24;
             Weight Min = 0;
             Weight Max = 255;
         }
