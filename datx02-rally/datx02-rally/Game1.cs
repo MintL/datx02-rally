@@ -16,6 +16,7 @@ using datx02_rally.Particles.Systems;
 using datx02_rally.Particles.WeatherSystems;
 using datx02_rally.Graphics;
 using datx02_rally.Menus;
+using datx02_rally.Cameras;
 
 namespace datx02_rally
 {
@@ -77,6 +78,12 @@ namespace datx02_rally
 
             currentState = GameState.MainMenu;
             currentView = new MenuView(this, currentState);
+
+            // Camera component
+
+            var cameraComponent = new CameraComponent(this);
+            Components.Add(cameraComponent);
+            Services.AddService(typeof(CameraComponent), cameraComponent);
 
             base.Initialize();
         }

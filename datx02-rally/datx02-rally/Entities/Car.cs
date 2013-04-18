@@ -16,9 +16,24 @@ namespace datx02_rally
 
         private Model model;
 
-        private Vector3 normal;
+        public Vector3 Normal;
 
         private Matrix normalMatrix = Matrix.Identity;
+
+        private float wheelRadius;
+        private float wheelRotationX;
+
+        // Distance between wheelaxis.
+        private float L = 40.197f;
+
+        #endregion
+
+        #region Constant properties
+
+        public float MaxSpeed { get; protected set; }
+        public float Acceleration { get; protected set; }
+        public float MaxWheelTurn { get; protected set; }
+        public float TurnSpeed { get; protected set; }
 
         #endregion
 
@@ -29,51 +44,48 @@ namespace datx02_rally
         /// </summary>
         public float Rotation { get; set; }
 
-
-        #endregion
-
-
-        
         /// <summary>
         /// Set only for repositioning, not driving
         /// </summary>
         public Vector3 Position { get; set; }
 
-        private float wheelRadius;
-        public float WheelRotationX { get; private set; }
-
-        public Matrix TranslationMatrix { get { return Matrix.CreateTranslation(Position); } }
-        public Matrix RotationMatrix { get { return Matrix.CreateRotationY(Rotation) * normalMatrix; } }
-
         /// <summary>
         /// This is set from outside to make the car go forward or backward.
         /// </summary>
         public float Speed { get; set; }
+
         /// <summary>
         /// This is set from outside to make the car turn.
         /// </summary>
         public float WheelRotationY { get; set; }
 
-        // Constants
-        public float MaxSpeed { get; protected set; }
-        public float Acceleration { get; protected set; }
-        public float MaxWheelTurn { get; protected set; }
-        public float TurnSpeed { get; protected set; }
-        
-        // Distance between wheelaxis.
-        private float L = 40.197f;
+        #endregion
+
+        #region ITargetNode used by Camera
+
+        public Matrix TranslationMatrix { get { return Matrix.CreateTranslation(Position); } }
+        public Matrix RotationMatrix { get { return Matrix.CreateRotationY(Rotation) * normalMatrix; } }
+
+        #endregion
+
+        #region IMovingObject used by TriggerManager
 
         // Forward direction calculated to know where the car is heading. Not for set outside.
         public Vector3 Heading { get; set; }
 
+        #endregion
+
+        #region Initialization
+
         // Constructor
         private Car(Game game, Model model, float wheelRadius) : base(game)
         {
-            this.Model = model;
+            this.model = model;
 
             this.Position = Vector3.Zero;
 
-            // Constants
+            // TODO: Move
+            // Set Constants
             Acceleration = .15f;
             MaxSpeed = 50;
             MaxWheelTurn = MathHelper.PiOver4 / 0.7f;
@@ -84,7 +96,9 @@ namespace datx02_rally
             this.wheelRadius = wheelRadius;
         }
 
-        #region Static
+        #endregion
+
+        #region Static factory
 
         private static Model carModel;
         private static float carWheelRadius = 13.4631138f;
@@ -93,7 +107,7 @@ namespace datx02_rally
             mainEffect,
             wheelEffect,
             glassEffect,
-            otherEfect;
+            otherEffect;
 
         private static Dictionary<string, Effect> meshEffect;
 
@@ -110,35 +124,50 @@ namespace datx02_rally
                 InitializeEffects(game.Content);
 
                 // Keep some parameters from imported modeleffect
-                foreach (ModelMesh mesh in carModel.Meshes)
+                foreach (var mesh in carModel.Meshes)
                 {
-                    foreach (ModelMeshPart part in mesh.MeshParts)
+                    foreach (var part in mesh.MeshParts)
                     {
                         var basicEffect = part.Effect as BasicEffect;
 
-                        part.Effect = meshEffect[mesh.Name];
+                        part.Effect = meshEffect[mesh.Name].Clone();
 
-                        if (mesh.Name.Equals("main"))
-                        {
+                        if (part.Effect.Parameters["DiffuseMap"] != null)
                             part.Effect.Parameters["DiffuseMap"].SetValue(basicEffect.Texture);
+
+                        if (part.Effect.Parameters["MaterialDiffuse"] != null)
                             part.Effect.Parameters["MaterialDiffuse"].SetValue(basicEffect.DiffuseColor);
+
+                        if (part.Effect.Parameters["MaterialAmbient"] != null)
                             part.Effect.Parameters["MaterialAmbient"].SetValue(basicEffect.DiffuseColor);
+
+                        if (part.Effect.Parameters["MaterialSpecular"] != null)
                             part.Effect.Parameters["MaterialSpecular"].SetValue(basicEffect.DiffuseColor);
-                        }
-
                     }
-                }
 
+                    if (mesh.Name.StartsWith("wheel"))
+                    {
+                        if (mesh.Name.EndsWith("001") || mesh.Name.EndsWith("002"))
+                            mesh.Tag = 2;
+                        else
+                            mesh.Tag = 1;
+                    }
+                    else
+                        mesh.Tag = 0;
+                }
             }
-            return new Car(game, carModel, carWheelRadius);
+
+            var car = new Car(game, carModel, carWheelRadius);
+            car.Initialize();
+            return car;
         }
 
         private static void InitializeEffects(ContentManager content)
         {
             mainEffect = content.Load<Effect>(@"Effects/Car/CarBodyEffect");
             wheelEffect = content.Load<Effect>(@"Effects/Car/OtherCarEffect");
-            glassEffect = content.Load<Effect>(@"Effects/Car/OtherCarEffect");
-            otherEfect = content.Load<Effect>(@"Effects/Car/OtherCarEffect");
+            glassEffect = content.Load<Effect>(@"Effects/Car/GlassEffect");
+            otherEffect = content.Load<Effect>(@"Effects/Car/OtherCarEffect");
 
             meshEffect = new Dictionary<string, Effect>()
             {
@@ -149,10 +178,10 @@ namespace datx02_rally
                 { "wheel004", wheelEffect },
                 { "glasswindows", glassEffect },
                 { "frontlightglass", glassEffect },
-                { "lights", otherEfect },
-                { "interior", otherEfect },
-                { "realmirrors", otherEfect },
-                { "registerplate", otherEfect },
+                { "lights", otherEffect },
+                { "interior", mainEffect },
+                { "realmirrors", otherEffect },
+                { "registerplate", otherEffect },
             };
         }
 
@@ -195,13 +224,10 @@ namespace datx02_rally
         }
         */
 
-        public Vector3 previousPos;
-        public float previousRotation;
-
         public void Update()
         {
-            previousPos = Position;
-            previousRotation = Rotation;
+            var previousPos = Position;
+            var previousRotation = Rotation;
 
             Heading = Vector3.Transform(Vector3.Forward,
                 Matrix.CreateRotationY(Rotation));
@@ -217,7 +243,7 @@ namespace datx02_rally
             Vector3 oldPos = Position;
             Position = (front + back) / 2;
             Rotation = (float)Math.Atan2(back.X - front.X, back.Z - front.Z);
-            WheelRotationX += (Speed < 0 ? 1 : -1) * (Position - oldPos).Length() / wheelRadius;
+            wheelRotationX += (Speed < 0 ? 1 : -1) * (Position - oldPos).Length() / wheelRadius;
 
             normalMatrix = Matrix.Lerp(normalMatrix, Vector3.Up.GetRotationMatrix(Normal), .2f);
 
@@ -230,15 +256,16 @@ namespace datx02_rally
 
         public override void Draw(GameTime gameTime)
         {
+            var meshes = model.Meshes.OrderBy(m => m.Name.ToLower().Contains("glass") ? 1 : -1).ToList();
 
-            foreach (var mesh in Model.Meshes)
+            foreach (var mesh in meshes)
             {
                 var world = Matrix.Identity;
 
                 // Wheel transformation
                 if ((int)mesh.Tag > 0)
                 {
-                    world *= Matrix.CreateRotationX(WheelRotationX);
+                    world *= Matrix.CreateRotationX(wheelRotationX);
                     if ((int)mesh.Tag > 1)
                         world *= Matrix.CreateRotationY(WheelRotationY);
                 }
@@ -249,30 +276,30 @@ namespace datx02_rally
                 // World
                 world *= RotationMatrix * TranslationMatrix;
 
-                foreach (Effect effect in mesh.Effects) // 5 effects for main, 1 for each wheel
+                foreach (Effect effect in mesh.Effects)
                 {
                     EffectParameterCollection param = effect.Parameters;
-
-                    if (mesh.Name.Equals("main"))
-                    {
-                        param["MaterialReflection"].SetValue(.9f);
-                        param["MaterialShininess"].SetValue(10);
-                    }
 
                     param["World"].SetValue(world);
                     param["View"].SetValue(View);
                     param["Projection"].SetValue(Projection);
 
+                    // TODO: CARMOVE
                     if (mesh.Name.Equals("main"))
                     {
+                        param["MaterialReflection"].SetValue(.9f);
+                        param["MaterialShininess"].SetValue(10);
 
                         param["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(world)));
 
                         param["EyePosition"].SetValue(Game.GetService<CameraComponent>().Position);
 
-                        param["DirectionalLightDirection"].SetValue(DirectionalLight.Direction);
-                        param["DirectionalLightDiffuse"].SetValue(DirectionalLight.Diffuse);
-                        param["DirectionalLightAmbient"].SetValue(DirectionalLight.Ambient);
+                        if (DirectionalLight != null)
+                        {
+                            param["DirectionalLightDirection"].SetValue(DirectionalLight.Direction);
+                            param["DirectionalLightDiffuse"].SetValue(DirectionalLight.Diffuse);
+                            param["DirectionalLightAmbient"].SetValue(DirectionalLight.Ambient);
+                        }
                     }
                 }
 

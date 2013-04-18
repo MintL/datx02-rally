@@ -121,6 +121,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cameras\CarChooserCamera.cs" />
     <Compile Include="Components\HUDComponent.cs" />
     <Compile Include="Components\HUDConsoleComponent.cs" />
     <Compile Include="Components\PostProcessingComponent.cs" />

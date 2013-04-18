@@ -35,7 +35,7 @@ namespace datx02_rally
             if (currentCamera == cameras.Count)
                 currentCamera = 0;
 
-            if (Game.IsActive)
+            if (Game.IsActive && cameras.Count > 0)
                 cameras[currentCamera].Update(gameTime);
 
             base.Update(gameTime);

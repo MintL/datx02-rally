@@ -4,8 +4,8 @@
 float4x4 World;
 float4x4 View;
 float4x4 Projection;
-float4x4 NormalMatrix;
 
+float4x4 NormalMatrix;
 float3 EyePosition;
 
 float3 MaterialAmbient;
@@ -172,6 +172,9 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 		totalLight.rgb *= .4 + .6 * CalcShadowTermPCF(shadowMapSampler, ourDepth, shadowCoord);
 	}
 	*/
+
+	if (totalLight.r == 0)
+		return tex2D(DiffuseMapSampler, input.TexCoord);
 
 	return totalLight;
 }
