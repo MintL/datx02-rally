@@ -607,7 +607,8 @@ namespace datx02_rally.Menus
             environmentCubeMap = new RenderTargetCube(this.GraphicsDevice, 256, true, SurfaceFormat.Color, DepthFormat.Depth16);
             foreach (ModelMesh mesh in Car.Model.Meshes)
                 foreach (ModelMeshPart part in mesh.MeshParts)
-                    part.Effect.Parameters["EnvironmentMap"].SetValue(skyMap);
+                    if (part.Effect.Parameters["EnvironmentMap"] != null)
+                        part.Effect.Parameters["EnvironmentMap"].SetValue(skyMap);
 
             #endregion
 
@@ -692,7 +693,7 @@ namespace datx02_rally.Menus
             // Load car effect (10p-light, env-map)
             carEffect = content.Load<Effect>(@"Effects/CarShading");
 
-            Car car = new Car(content.Load<Model>(@"Models/Cars/porsche_new"), 13.4631138f);
+            Car car = Car.CreateCar(Game); // (content.Load<Model>(@"Models/Cars/porsche"), 13.4631138f);
 
             foreach (var mesh in car.Model.Meshes)
             {
@@ -709,24 +710,23 @@ namespace datx02_rally.Menus
 
 
             // Keep some old settings from imported modeleffect, then replace with carEffect
-            foreach (ModelMesh mesh in car.Model.Meshes)
-            {
-                foreach (ModelMeshPart part in mesh.MeshParts)
-                {
-                    BasicEffect oldEffect = part.Effect as BasicEffect;
-                    if (oldEffect != null)
-                    {
-                        part.Effect = carEffect.Clone();
+            //foreach (ModelMesh mesh in car.Model.Meshes)
+            //{
+            //    foreach (ModelMeshPart part in mesh.MeshParts)
+            //    {
+            //        var effect = part.Effect as Effect;
+            //        if (oldEffect != null)
+            //        {
+            //            part.Effect = carEffect.Clone();
 
-                        part.Effect.Parameters["DiffuseMap"].SetValue(oldEffect.Texture);
-                        //part.Effect.Parameters["DiffuseMap"].SetValue(content.Load<Texture2D>(@"Terrain\grass"));
+            //            part.Effect.Parameters["DiffuseMap"].SetValue(oldEffect.Texture);
 
-                        part.Effect.Parameters["MaterialDiffuse"].SetValue(oldEffect.DiffuseColor);
-                        part.Effect.Parameters["MaterialAmbient"].SetValue(oldEffect.DiffuseColor * .5f);
-                        part.Effect.Parameters["MaterialSpecular"].SetValue(oldEffect.DiffuseColor * .3f);
-                    }
-                }
-            }
+            //            part.Effect.Parameters["MaterialDiffuse"].SetValue(oldEffect.DiffuseColor);
+            //            part.Effect.Parameters["MaterialAmbient"].SetValue(oldEffect.DiffuseColor * .5f);
+            //            part.Effect.Parameters["MaterialSpecular"].SetValue(oldEffect.DiffuseColor * .3f);
+            //        }
+            //    }
+            //}
 
             // CAR LIGHTS
 
@@ -1468,26 +1468,33 @@ namespace datx02_rally.Menus
                 {
                     EffectParameterCollection param = effect.Parameters;
 
-                    param["MaterialReflection"].SetValue(.9f);
-                    param["MaterialShininess"].SetValue(10);
+                    if (mesh.Name.Equals("main"))
+                    {
+                        param["MaterialReflection"].SetValue(.9f);
+                        param["MaterialShininess"].SetValue(10); 
+                    }
 
                     param["World"].SetValue(world);
                     param["View"].SetValue(view);
                     param["Projection"].SetValue(projection);
 
-                    param["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(world)));
-
-                    param["EyePosition"].SetValue(Game.GetService<CameraComponent>().Position);
-
-                    if (mesh.Name == "main")
+                    if (mesh.Name.Equals("main"))
                     {
-                        param["MaterialDiffuse"].SetValue(GameSettings.Default.CarColor.ToVector3());
-                        param["MaterialAmbient"].SetValue(GameSettings.Default.CarColor.ToVector3());
-                    }
 
-                    param["DirectionalLightDirection"].SetValue(directionalLight.Direction);
-                    param["DirectionalLightDiffuse"].SetValue(directionalLight.Diffuse);
-                    param["DirectionalLightAmbient"].SetValue(directionalLight.Ambient);
+                        param["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(world)));
+
+                        param["EyePosition"].SetValue(Game.GetService<CameraComponent>().Position);
+
+                        if (mesh.Name == "main")
+                        {
+                            param["MaterialDiffuse"].SetValue(GameSettings.Default.CarColor.ToVector3());
+                            param["MaterialAmbient"].SetValue(GameSettings.Default.CarColor.ToVector3());
+                        }
+
+                        param["DirectionalLightDirection"].SetValue(directionalLight.Direction);
+                        param["DirectionalLightDiffuse"].SetValue(directionalLight.Diffuse);
+                        param["DirectionalLightAmbient"].SetValue(directionalLight.Ambient);
+                    }
                 }
 
                 mesh.Draw();

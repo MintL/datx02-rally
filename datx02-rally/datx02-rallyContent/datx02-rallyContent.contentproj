@@ -390,6 +390,16 @@
       <Importer>XactImporter</Importer>
       <Processor>XactProcessor</Processor>
     </Compile>
+    <Compile Include="Effects\Car\CarBodyEffect.fx">
+      <Name>CarBodyEffect</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </Compile>
+    <Compile Include="Effects\Car\OtherCarEffect.fx">
+      <Name>OtherCarEffect</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </Compile>
     <None Include="Effects\Prelight\Shared.vsi">
       <Name>Shared</Name>
       <Importer>EffectImporter</Importer>
@@ -443,6 +453,11 @@
     </Compile>
     <Compile Include="Models\Cars\porsche_new.FBX">
       <Name>porsche_new</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+    </Compile>
+    <Compile Include="Models\Cars\porsche.FBX">
+      <Name>porsche</Name>
       <Importer>FbxImporter</Importer>
       <Processor>ModelProcessor</Processor>
     </Compile>
@@ -610,9 +625,7 @@
       <ProcessorParameters_GenerateMipmaps>True</ProcessorParameters_GenerateMipmaps>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Effects\Car\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Compile Include="Terrain\road_n.png">
       <Name>road_n</Name>
