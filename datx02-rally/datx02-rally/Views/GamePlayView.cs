@@ -16,6 +16,7 @@ using datx02_rally.EventTrigger;
 using datx02_rally.Components;
 using Microsoft.Xna.Framework.Input;
 using datx02_rally.Particles;
+using datx02_rally.GameplayModes;
 
 namespace datx02_rally.Menus
 {
@@ -24,6 +25,7 @@ namespace datx02_rally.Menus
         #region Field
 
         GameplayMode mode;
+        GameModeChoice gameModeChoice;
 
         PauseMenu pauseMenu;
         GameOverMenu gameOverMenu;
@@ -152,17 +154,17 @@ namespace datx02_rally.Menus
 
         #region Initialization
 
-        public GamePlayView(Game game, int? seed, GameplayMode mode)
+        public GamePlayView(Game game, int? seed, GameModeChoice gamePlayChoice)
             : base(game, GameState.Gameplay)
         {
             game.GetService<ServerClient>().GamePlay = this;
             int usedSeed = seed.HasValue ? seed.Value : 0;
             UniversalRandom.ResetInstance(usedSeed);
             UniversalRandom.ResetInstance(0);
+            gameModeChoice = gamePlayChoice;
 
             UpdateOrder = -1;
             DrawOrder = -1;
-
         }
 
         public override void ChangeResolution()
@@ -664,9 +666,14 @@ namespace datx02_rally.Menus
             #endregion
 
             int cp = 30;
+            if (gameModeChoice == GameModeChoice.SimpleRace)
+                this.mode = new SimpleRaceMode(gameInstance, 2, cp, raceTrack, Car);
+            else if (gameModeChoice == GameModeChoice.Multiplayer)
+                this.mode = new MultiplayerRaceMode(gameInstance, 2, cp, raceTrack, Car);
+            else
+                throw new Exception("Fuck you");
 
-            this.mode = new SimpleRaceMode(gameInstance, 2, cp, raceTrack, Car);
-
+            
             foreach (var point in raceTrack.GetCurveRasterization(cp).Points)
             {
                 var pl = new PointLight(point.Position + 500 * Vector3.Up,
@@ -677,6 +684,7 @@ namespace datx02_rally.Menus
                 pointLights.Add(pl);
                 GraphicalObjects.Add(pl);
             }
+
 
             gameInstance.AddService(typeof(GameplayMode), mode);
             if (mode.Mode == Mode.Multiplayer)

@@ -19,6 +19,7 @@ using datx02_rally.Menus;
 
 namespace datx02_rally
 {
+    public enum GameModeChoice { Multiplayer, SimpleRace, TimeTrial }
     public enum GameState { None, MainMenu, OptionsMenu, Gameplay, PausedGameplay, MultiplayerMenu, SingleplayerMenu, Exiting, CarChooser, GameOver };
     public class Game1 : Microsoft.Xna.Framework.Game
     {
@@ -134,7 +135,7 @@ namespace datx02_rally
                         break;
                     case GameState.MultiplayerMenu:
                         this.GetService<ServerClient>().Connect(System.Net.IPAddress.Loopback);
-                        currentView = new GamePlayView(this, 0, null);//MultiplayerMenu(this);
+                        currentView = new GamePlayView(this, 0, GameModeChoice.SimpleRace);//MultiplayerMenu(this);
                         break;
                     case GameState.SingleplayerMenu:
                         break;

@@ -9,9 +9,10 @@ namespace datx02_rally.Menus
 {
     class MultiplayerMenu : OverlayView
     {
-        bool waitingForConnection = false;
+        enum State { Connected, Unconnected }
+        private State state = State.Unconnected;
         List<MenuItem> lobbyItems = new List<MenuItem>();
-        TextInputMenuItem playerNameInput;
+        TextInputMenuItem serverInput;
 
         public MultiplayerMenu(Game game) : base(game, GameState.MultiplayerMenu) 
         {
@@ -25,13 +26,13 @@ namespace datx02_rally.Menus
             Vector2 size = GetScreenPosition(new Vector2(0.5f, 0.5f));
             Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
-            playerNameInput = new TextInputMenuItem("Server IP", "server");
-            playerNameInput.Bounds = Bounds;
-            playerNameInput.Font = MenuFont;
-            playerNameInput.Background = OptionSelected;
-            playerNameInput.FontColor = ItemColor;
-            playerNameInput.FontColorSelected = Color.Black;
-            AddMenuItem(playerNameInput);
+            serverInput = new TextInputMenuItem("Server IP", "server");
+            serverInput.Bounds = Bounds;
+            serverInput.Font = MenuFont;
+            serverInput.Background = OptionSelected;
+            serverInput.FontColor = ItemColor;
+            serverInput.FontColorSelected = Color.Black;
+            AddMenuItem(serverInput);
 
             MenuItem item = new ActionMenuItem("Connect", ConnectToServer, "connect");
             item.Background = ButtonBackground;
@@ -54,7 +55,6 @@ namespace datx02_rally.Menus
         {
             string server = (GetMenuItem("server") as TextInputMenuItem).EnteredText;
             gameInstance.GetService<ServerClient>().Connect(System.Net.IPAddress.Parse(server));
-            waitingForConnection = true;
 
             MenuItem start = new StateActionMenuItem("Connecting...", GameState.Gameplay, "start");
             start.Background = ButtonBackground;
@@ -78,8 +78,6 @@ namespace datx02_rally.Menus
         {
             gameInstance.GetService<ServerClient>().Disconnect();
 
-            MenuItems.Insert(0, playerNameInput);
-
             MenuItem item = new ActionMenuItem("Connect", ConnectToServer, "connect");
             item.Background = ButtonBackground;
             item.Font = MenuFont;
@@ -101,17 +99,17 @@ namespace datx02_rally.Menus
         {
             var serverClient = gameInstance.GetService<ServerClient>();
             // prepare lobby (once)
-            if (waitingForConnection && serverClient.connected)
+            if (state == State.Unconnected && serverClient.connected)
             {
-                waitingForConnection = false;
+                state = State.Connected;
 
                 MenuItem startButton = GetMenuItem("start");
                 startButton.Text = "Start Game!";
 
-                Vector2 size = GetScreenPosition(new Vector2(1.5f, 1.5f));
+                Vector2 size = GetScreenPosition(new Vector2(1f, 1.6f));
                 Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
 
-                MenuItems.Remove(playerNameInput);
+                MenuItems.Remove(serverInput);
 
                 MenuItem item = new TextMenuItem("Players", null, "playerHeading");
                 item.Background = OptionSelected;
@@ -128,9 +126,21 @@ namespace datx02_rally.Menus
                 
                 startButton.Enabled = true;
             }
+            else if (state == State.Connected && !serverClient.connected)
+            {
+                state = State.Unconnected;
 
-            // update lobby
-            if (serverClient.connected)
+                Vector2 size = GetScreenPosition(new Vector2(1f, 0.625f));
+                Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
+
+                MenuItems.RemoveAll(i => lobbyItems.Exists(i2 => i == i2));
+                lobbyItems.Clear();
+
+                MenuItems.Insert(0, serverInput);
+            }
+
+            // update lobby if connected
+            if (state == State.Connected)
             {
                 var fullPlayerList = new List<Player>(serverClient.Players.Values);
                 fullPlayerList.Add(serverClient.LocalPlayer);

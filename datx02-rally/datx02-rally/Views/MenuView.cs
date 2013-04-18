@@ -194,7 +194,12 @@ namespace datx02_rally.Menus
                     {
                         if (state == GameState.Gameplay)
                         {
-                            Game.Components.Add(new GamePlayView(Game, null, null));
+                            GameModeChoice choice;
+                            if (CurrentOverlay is MultiplayerMenu)
+                                choice = GameModeChoice.Multiplayer;
+                            else
+                                choice = GameModeChoice.SimpleRace;
+                            Game.Components.Add(new GamePlayView(Game, null, choice));
                             return GameState.Gameplay;
                         }
                         return state;
