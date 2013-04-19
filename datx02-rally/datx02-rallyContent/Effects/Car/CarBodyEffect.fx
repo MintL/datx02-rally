@@ -140,9 +140,11 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float normalizationFactor = ((MaterialShininess + 2.0) / 8.0);
 	float4 totalLight = float4(MaterialAmbient * DirectionalLightAmbient, 1);
 
+	float4 additionalLight = float4(0,0,0,0);
+
 	// Light Map
 	float2 texCoord = postProjToScreen(input.LightMapPosition) + halfPixel();
-	totalLight += tex2D(LightMapSampler, texCoord) * color;
+	additionalLight += tex2D(LightMapSampler, texCoord) * color;
 
 	// Directional light
 	float3 directionToLight = -normalize(DirectionalLightDirection);
@@ -153,24 +155,33 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float3 reflection = CalculateEnvironmentReflection(normal, directionFromEye);
 	float3 environmentMap = texCUBE(EnvironmentMapSampler, reflection) * fresnel * MaterialReflection;
 	
-	totalLight += float4(selfShadow * (DirectionalLightDiffuse * color.rgb * CalculateDiffuse(normal, directionToLight) +
-					DirectionalLightDiffuse * fresnel * CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * normalizationFactor +
-					environmentMap ), 1);
+	additionalLight += float4(selfShadow * 
+						(DirectionalLightDiffuse * color.rgb * 
+							CalculateDiffuse(normal, directionToLight) +
+						DirectionalLightDiffuse * fresnel * 
+							CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * 
+							normalizationFactor + environmentMap ), 1);
 	
-	totalLight = saturate(totalLight);
+	additionalLight = saturate(additionalLight);
+	
+	totalLight += additionalLight;
+
+	/*
 
 	float4 lightingPosition = GetPositionFromLight(input.ModelPosition);
 	float2 shadowCoord = 0.5 * lightingPosition.xy / lightingPosition.w;
 	
-	/*
 	shadowCoord += 0.5f;
 	shadowCoord.y = 1.0f - shadowCoord.y;
 
 	if (shadowCoord.x > 0 && shadowCoord.x < 1 && shadowCoord.y > 0 && shadowCoord.y < 1)
 	{
 		float ourDepth = 1 - (lightingPosition.z / lightingPosition.w);
-		totalLight.rgb *= .4 + .6 * CalcShadowTermPCF(shadowMapSampler, ourDepth, shadowCoord);
+		//totalLight.rgb *= .2 + .8 * CalcShadowTermPCF(ShadowMapSampler, ourDepth, shadowCoord);
+
+
 	}
+
 	*/
 
 	if (totalLight.r == 0)

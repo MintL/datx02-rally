@@ -602,10 +602,7 @@ namespace datx02_rally.Menus
 
             // TODO: CARMOVE
             environmentCubeMap = new RenderTargetCube(this.GraphicsDevice, 256, true, SurfaceFormat.Color, DepthFormat.Depth16);
-            //foreach (ModelMesh mesh in Car.Model.Meshes)
-            //    foreach (ModelMeshPart part in mesh.MeshParts)
-            //        if (part.Effect.Parameters["EnvironmentMap"] != null)
-            //            part.Effect.Parameters["EnvironmentMap"].SetValue(skyMap);
+            Car.EnvironmentMap = skyMap;
 
             #endregion
 

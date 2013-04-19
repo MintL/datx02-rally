@@ -307,5 +307,16 @@ namespace datx02_rally
             }
 
         }
+
+        public TextureCube EnvironmentMap
+        {
+            set
+            {
+                foreach (ModelMesh mesh in model.Meshes)
+                    foreach (ModelMeshPart part in mesh.MeshParts)
+                        if (part.Effect.Parameters["EnvironmentMap"] != null)
+                            part.Effect.Parameters["EnvironmentMap"].SetValue(value);
+            }
+        }
     }
 }
