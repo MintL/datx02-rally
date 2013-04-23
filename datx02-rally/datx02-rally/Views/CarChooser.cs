@@ -18,7 +18,7 @@ namespace datx02_rally.Menus
 
         Color diffuseColor = Color.Red;
         DirectionalLight directionalLight;
-        Matrix view, projection;
+        Matrix projection;
 
         Vector3 cameraPosition;
         float rotation = 0;
@@ -33,12 +33,13 @@ namespace datx02_rally.Menus
             MenuTitle = "Choose color";
         }
 
+        Camera cam;
+
         public override void Initialize()
         {
             base.Initialize();
-
-            Game.GetService<CameraComponent>().AddCamera(
-                new CarChooserCamera(300, .5f));
+            cam = new CarChooserCamera(300, .5f);
+            Game.GetService<CameraComponent>().AddCamera(cam);
         }
 
         protected override void LoadContent()
@@ -66,7 +67,7 @@ namespace datx02_rally.Menus
             // 3D variables needed to display the car
             MakeCar();
             cameraPosition = new Vector3(0, 100f, 300f);
-            view = Matrix.CreateLookAt(cameraPosition, new Vector3(0, 20f, 0f), Vector3.Up);
+
             projection = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4, GraphicsDevice.Viewport.AspectRatio, 0.01f, 500f);
 
             if (availableColors.Exists(c => c == GameSettings.Default.CarColor)) {
@@ -84,8 +85,6 @@ namespace datx02_rally.Menus
             //rotation += (float)gameTime.ElapsedGameTime.TotalSeconds * .5f;
             //car.Speed = ((float)Math.Sin(gameTime.TotalGameTime.TotalSeconds) + 2f) * 1.5f;
             //car.Update();
-
-            view = Matrix.CreateLookAt(cameraPosition + car.Position, car.Position + Vector3.Up * 20, Vector3.Up);
 
             InputComponent input = Game.GetService<InputComponent>();
             int i = availableColors.FindIndex(0, c => c == diffuseColor);

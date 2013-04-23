@@ -27,6 +27,11 @@ namespace datx02_rally
             cameras.Add(camera);
         }
 
+        public void RemoveCamera(Camera camera)
+        {
+            cameras.Remove(camera);
+        }
+
         public override void Update(GameTime gameTime)
         {
             var input = Game.GetService<InputComponent>();
@@ -40,5 +45,6 @@ namespace datx02_rally
 
             base.Update(gameTime);
         }
+
     }
 }

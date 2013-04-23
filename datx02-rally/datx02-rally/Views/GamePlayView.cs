@@ -370,6 +370,7 @@ namespace datx02_rally.Menus
 
             // Load model to represent our lightsources
             var pointLightModel = content.Load<Model>(@"Models\light");
+
             //spotLightModel = content.Load<Model>(@"Models\Cone");
 
             Vector3 pointLightOffset = new Vector3(0, 250, 0);
@@ -948,7 +949,7 @@ namespace datx02_rally.Menus
             var components = gameInstance.Components;
             var services = gameInstance.Services;
 
-            content.Unload();
+            //content.Unload();
 
             foreach (Type service in Game.GetAddedServices())
             {
