@@ -44,6 +44,7 @@ namespace datx02_rally.Entities
         public static void LoadMaterial(ContentManager content)
         {
             Effect alphaMapEffect = content.Load<Effect>(@"Effects\AlphaMap");
+            stoneVariants.Clear();
             stoneVariants.Add(content.Load<Model>(@"Foliage\Stone_01"));
             stoneVariants.Add(content.Load<Model>(@"Foliage\Stone_02"));
 

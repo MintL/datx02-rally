@@ -12,7 +12,7 @@ namespace datx02_rally
         private List<Camera> cameras = new List<Camera>();
         private int currentCamera;
 
-        public Camera CurrentCamera { get { return cameras[currentCamera]; } }
+        public Camera CurrentCamera { get { return cameras[currentCamera]; } set { currentCamera = cameras.IndexOf(value); } }
 
         public Matrix View { get { return cameras[currentCamera].View; } }
 

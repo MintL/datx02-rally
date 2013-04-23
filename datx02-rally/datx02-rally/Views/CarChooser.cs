@@ -39,7 +39,10 @@ namespace datx02_rally.Menus
         {
             base.Initialize();
             cam = new CarChooserCamera(300, .5f);
-            Game.GetService<CameraComponent>().AddCamera(cam);
+            var camComp = Game.GetService<CameraComponent>();
+            camComp .AddCamera(cam);
+            camComp.CurrentCamera = cam;
+
         }
 
         protected override void LoadContent()

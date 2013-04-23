@@ -160,6 +160,8 @@ namespace datx02_rally.Menus
             UniversalRandom.ResetInstance(usedSeed);
             UniversalRandom.ResetInstance(0);
 
+            content = new ContentManager(Game.Services, "Content");
+
             UpdateOrder = -1;
             DrawOrder = -1;
 
@@ -595,7 +597,10 @@ namespace datx02_rally.Menus
 
             var input = gameInstance.GetService<InputComponent>();
             gameInstance.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(-11800, 3000, -8200), input));
-            gameInstance.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(Car, input));
+            Camera c;
+            gameInstance.GetService<CameraComponent>().AddCamera(c = new ThirdPersonCamera(Car, input));
+            gameInstance.GetService<CameraComponent>().CurrentCamera = c;
+
             
             #endregion
 
@@ -949,7 +954,7 @@ namespace datx02_rally.Menus
             var components = gameInstance.Components;
             var services = gameInstance.Services;
 
-            //content.Unload();
+            content.Unload();
 
             foreach (Type service in Game.GetAddedServices())
             {
@@ -962,7 +967,8 @@ namespace datx02_rally.Menus
                 components.Add(component);
                 gameInstance.SetService(component.GetType(), component);
             }
-            
+
+            (components.First(c => c is CameraComponent) as GameComponent).Enabled = true;            
         }
 
         private bool CollisionCheck(NavMeshTriangle triangle)

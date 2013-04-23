@@ -69,6 +69,7 @@ namespace datx02_rally
             BaseComponents.Add(new ServerClient(this));
             BaseComponents.Add(new InputComponent(this));
             BaseComponents.Add(new HUDConsoleComponent(this));
+            BaseComponents.Add(new CameraComponent(this));
 
             foreach (IGameComponent component in BaseComponents)
             {
@@ -81,9 +82,9 @@ namespace datx02_rally
 
             // Camera component
 
-            var cameraComponent = new CameraComponent(this);
-            Components.Add(cameraComponent);
-            Services.AddService(typeof(CameraComponent), cameraComponent);
+            //var cameraComponent = 
+            //Components.Add(cameraComponent);
+            //Services.AddService(typeof(CameraComponent), cameraComponent);
 
             base.Initialize();
         }
