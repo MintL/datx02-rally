@@ -1281,7 +1281,13 @@ namespace datx02_rally.Menus
 
             skyBoxEffect.Parameters["View"].SetValue(view);
             skyBoxEffect.Parameters["Projection"].SetValue(projection);
-            skyBoxModel.Meshes[0].Draw();
+            
+            //skyBoxModel.Meshes[0].Draw();
+            if (Keyboard.GetState().IsKeyUp(Keys.O))
+            {
+                skyBoxModel.Meshes[0].Draw();
+            }
+
 
             #endregion
 

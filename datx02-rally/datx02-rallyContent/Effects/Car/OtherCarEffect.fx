@@ -2,23 +2,28 @@ float4x4 World;
 float4x4 View;
 float4x4 Projection;
 
-// TODO: add effect parameters here.
+texture2D DiffuseMap;
+sampler2D DiffuseMapSampler = sampler_state
+{
+	texture = <DiffuseMap>;
+	minfilter = linear;
+	magfilter = linear;
+	mipfilter = linear;
+	AddressU = clamp;
+	AddressV = clamp;
+};
 
 struct VertexShaderInput
 {
     float4 Position : POSITION0;
-
-    // TODO: add input channels such as texture
-    // coordinates and vertex colors here.
+	float2 TexCoord : TEXCOORD0;
 };
 
 struct VertexShaderOutput
 {
     float4 Position : POSITION0;
+	float2 TexCoord : TEXCOORD0;
 
-    // TODO: add vertex shader outputs such as colors and texture
-    // coordinates here. These values will automatically be interpolated
-    // over the triangle, and provided as input to your pixel shader.
 };
 
 VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
@@ -28,8 +33,8 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     float4 worldPosition = mul(input.Position, World);
     float4 viewPosition = mul(worldPosition, View);
     output.Position = mul(viewPosition, Projection);
-
-    // TODO: add your vertex shader code here.
+	
+	output.TexCoord = input.TexCoord;
 
     return output;
 }
@@ -38,7 +43,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
     // TODO: add your pixel shader code here.
 
-    return float4(.1, .1, 0, 1);
+    return tex2D(DiffuseMapSampler, input.TexCoord);
 }
 
 technique Technique1
