@@ -39,7 +39,7 @@ namespace datx02_rally
             }
         }
 
-        private Boolean isPlayerMessage(MessageType type)
+        private Boolean IsPlayerMessage(MessageType type)
         {
             return MessageType.Debug > type;
         }
@@ -49,7 +49,7 @@ namespace datx02_rally
             MessageType type = (MessageType)msg.ReadByte();
             Dictionary<byte, Player> PlayerList = ServerHandler.Players;
             Player player = null;
-            if (isPlayerMessage(type) && !PlayerList.TryGetValue(msg.ReadByte(), out player))
+            if (IsPlayerMessage(type) && !PlayerList.TryGetValue(msg.ReadByte(), out player))
             {
                 //Console.WriteLine("Received message from unknown player, discarding...");
                 return;
@@ -103,7 +103,9 @@ namespace datx02_rally
                 case MessageType.OK:
                     Console.WriteLine("Received OK handshake from server");
                     byte assignedID = msg.ReadByte();
+                    int gameSeed = msg.ReadInt32();
                     ServerHandler.LocalPlayer.ID = assignedID;
+                    UniversalRandom.ResetInstance(gameSeed);
                     ServerHandler.connected = true;
                     ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Connected! (id "+assignedID+")");
                     break;

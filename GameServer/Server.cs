@@ -9,11 +9,12 @@ namespace GameServer
 {
     class Server
     {
-        byte PlayerIdCounter = 0;
-        string ServerName;
-        readonly int MaxPlayers;
-        Dictionary<IPAddress, ServerPlayer> Players;
-        readonly int Port;
+        int genSeed;
+        byte playerIdCounter = 0;
+        string serverName;
+        readonly int maxPlayers;
+        Dictionary<IPAddress, ServerPlayer> players;
+        readonly int port;
         NetServer serverThread;
         Boolean running;
         ServerState state;
@@ -28,16 +29,20 @@ namespace GameServer
         }
         public enum ServerState { Lobby, Gameplay, Ended }
 
-        public Server()
+        public Server(int genSeed)
         {
-            ServerName = "Test server";
-            MaxPlayers = 4;
-            Players = new Dictionary<IPAddress, ServerPlayer>();
-            Port = 19283;
+            this.genSeed = genSeed;
+            serverName = "Test server";
+            maxPlayers = 4;
+            players = new Dictionary<IPAddress, ServerPlayer>();
+            port = 19283;
             state = ServerState.Lobby;
 
             Start();
         }
+
+        public Server() : this( (int) DateTime.Now.Ticks)
+        { }
 
         private void Run()
         {
@@ -87,7 +92,7 @@ namespace GameServer
             //Console.Write("Received data from player " + msg.SenderEndPoint.Address);
             
             ServerPlayer player;
-            if (!Players.TryGetValue(msg.SenderEndPoint.Address, out player)) 
+            if (!players.TryGetValue(msg.SenderEndPoint.Address, out player)) 
             {
                 Console.WriteLine("Player not found!");
                 return;
@@ -136,8 +141,8 @@ namespace GameServer
         {
             NetOutgoingMessage msg = serverThread.CreateMessage();
             msg.Write((byte)MessageType.LobbyUpdate);
-            msg.Write((byte)Players.Values.Count);
-            foreach (var player in Players.Values)
+            msg.Write((byte)players.Values.Count);
+            foreach (var player in players.Values)
             {
                 msg.Write(player.PlayerID);
                 msg.Write(player.PlayerName);
@@ -171,6 +176,7 @@ namespace GameServer
             NetOutgoingMessage msg = serverThread.CreateMessage();
             msg.Write((byte)MessageType.OK);
             msg.Write(player.PlayerID);
+            msg.Write(genSeed);
             serverThread.SendMessage(msg, player.Connection, NetDeliveryMethod.Unreliable);
             Console.WriteLine("Sent OK handshake to player " + player.Connection.RemoteEndPoint.Address);
         }
@@ -184,10 +190,10 @@ namespace GameServer
 
         public void Start()
         {
-            Console.WriteLine("Started server: " + ServerName + ".");
+            Console.WriteLine("Started server: " + serverName + ".");
 
             NetPeerConfiguration config = new NetPeerConfiguration("DATX02");
-            config.Port = Port;
+            config.Port = port;
 
             serverThread = new NetServer(config);
             serverThread.Start();
@@ -209,8 +215,8 @@ namespace GameServer
             foreach (NetConnection conn in serverThread.Connections)
                 Console.WriteLine(conn.RemoteEndPoint.Address);
 
-            ServerPlayer player = new ServerPlayer(++PlayerIdCounter, connection);
-            Players[connection.RemoteEndPoint.Address] = player;
+            ServerPlayer player = new ServerPlayer(++playerIdCounter, connection);
+            players[connection.RemoteEndPoint.Address] = player;
         }
 
         public void PlayerDisconnected(NetConnection connection)
@@ -220,7 +226,7 @@ namespace GameServer
             foreach (NetConnection conn in serverThread.Connections)
                 Console.WriteLine(conn.RemoteEndPoint.Address);
 
-            Players.Remove(connection.RemoteEndPoint.Address);
+            players.Remove(connection.RemoteEndPoint.Address);
             DistributeLobbyUpdate();
         }
     }
