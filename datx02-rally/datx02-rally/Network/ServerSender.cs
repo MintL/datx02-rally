@@ -53,5 +53,12 @@ namespace datx02_rally
             msg.Write(ServerHandler.LocalPlayer.PlayerName);
             ServerThread.SendMessage(msg, NetDeliveryMethod.Unreliable);
         }
+
+        public void SendReadySignal()
+        {
+            NetOutgoingMessage msg = ServerThread.CreateMessage();
+            msg.Write((byte)MessageType.OK);
+            ServerThread.SendMessage(msg, NetDeliveryMethod.Unreliable);
+        }
     }
 }

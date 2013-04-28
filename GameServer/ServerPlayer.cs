@@ -17,6 +17,7 @@ namespace GameServer
     class ServerPlayer
     {
         public string PlayerName { get; set; }
+        public bool Ready { get; set; }
         public byte SequenceNo = 0;
         public readonly byte PlayerID;
         public Position PlayerPos;
@@ -26,6 +27,7 @@ namespace GameServer
         public ServerPlayer(byte id, NetConnection connection)
         {
             PlayerID = id;
+            Ready = false;
             PlayerName = "Unnamed Player "+id;
             Connection = connection;
             PlayerPos = new Position();
@@ -39,6 +41,7 @@ namespace GameServer
             PlayerPos.rotation = rotation;
             PlayerPos.velocity = velocity;
         }
+
 
     }
 }

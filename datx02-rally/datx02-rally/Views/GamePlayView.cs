@@ -24,7 +24,7 @@ namespace datx02_rally.Menus
     {
         #region Field
 
-        GameplayMode mode;
+        public GameplayMode mode;
         GameModeChoice gameModeChoice;
 
         PauseMenu pauseMenu;
@@ -693,6 +693,8 @@ namespace datx02_rally.Menus
                 {
                     gameInstance.GetService<CarControlComponent>().AddCar(player, null, this);
                 }
+                var carList = gameInstance.GetService<CarControlComponent>().Cars.OrderBy(pc => pc.Key.ID).Select(pc => pc.Value).ToList();
+                SetCarsAtStart(carList);
             }
 
         }
@@ -759,6 +761,19 @@ namespace datx02_rally.Menus
             car.Rotation = (float)Math.Atan2(carHeading.X, carHeading.Z) - (float)Math.Atan2(0, -1);
         }
 
+        private void SetCarsAtStart(List<Car> cars)
+        {
+            Vector3 carPosition = raceTrack.Curve.GetPoint(0.99f);
+            foreach (var car in cars)
+            {
+                Vector3 carHeading = (raceTrack.Curve.GetPoint(.001f) - carPosition);
+                car.Position = carPosition;
+                car.Rotation = (float)Math.Atan2(carHeading.X, carHeading.Z) - (float)Math.Atan2(0, -1);
+                carPosition += new Vector3(0, 10, 0);
+            }
+            
+        }
+
         /// <summary>
         /// Loads a texture from Content and asign it to the cubemaps face.
         /// </summary>
@@ -810,7 +825,7 @@ namespace datx02_rally.Menus
             var hudComponent = Game.GetService<HUDComponent>();
             var cameraComponent = Game.GetService<CameraComponent>();
 
-            if (pauseMenu.Enabled || gameOverMenu.Enabled)
+            if (pauseMenu.Enabled || gameOverMenu.Enabled || !mode.GameStarted)
             {
                 if (cameraComponent.Enabled)
                     cameraComponent.Enabled = false;

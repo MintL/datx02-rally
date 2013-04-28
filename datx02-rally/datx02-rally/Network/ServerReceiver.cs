@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Lidgren.Network;
+using datx02_rally.Components;
 
 namespace datx02_rally
 {
@@ -112,6 +113,12 @@ namespace datx02_rally
                     UniversalRandom.ResetInstance(gameSeed);
                     ServerHandler.connected = true;
                     ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Connected! (id "+assignedID+")");
+                    break;
+                case MessageType.Countdown:
+                    byte countdown = msg.ReadByte();
+                    ServerHandler.Game.GetService<HUDComponent>().ShowTextNotification(Color.AliceBlue, countdown < 4 ? countdown+" " : "Go!");
+                    if (countdown == 4)
+                        ServerHandler.GamePlay.mode.GameStarted = true;
                     break;
                 default:
                     break;

@@ -7,6 +7,7 @@ using datx02_rally.GameLogic;
 using datx02_rally.Components;
 using datx02_rally.GameplayModes;
 using datx02_rally.Sound;
+using System.Timers;
 
 namespace datx02_rally
 {
@@ -29,6 +30,7 @@ namespace datx02_rally
             this.raceTrack = raceTrack;
             this.car = localCar;
             PlayerPlace = 1;
+            GameStarted = false;
 
             players.Add(gameInstance.GetService<Player>());
 

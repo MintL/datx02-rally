@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Lidgren.Network;
 using System.Net;
+using System.Timers;
 
 namespace GameServer
 {
@@ -18,6 +19,7 @@ namespace GameServer
         NetServer serverThread;
         Boolean running;
         ServerState state;
+        bool started = false;
         
         //Debug stuff
         Boolean DbgPlayerPos = false;
@@ -25,7 +27,7 @@ namespace GameServer
         public enum MessageType
         {
             PlayerPos, Chat, Debug, StateChange, // game info exchange stuff
-            LobbyUpdate, PlayerInfo, OK // handshake-y stuff    
+            LobbyUpdate, PlayerInfo, OK, Countdown // handshake-y stuff    
         }
         public enum ServerState { Lobby, Gameplay, Ended }
 
@@ -52,6 +54,13 @@ namespace GameServer
                 while ((msg = serverThread.ReadMessage()) != null)
                 {
                     HandleIncomingPacket(msg);
+
+                    if (!started && players.Count > 0 && players.Values.All(c => c.Ready))
+                    {
+                        Console.WriteLine("All players ready, starting countdown!");
+                        DistributeCountdown();
+                        started = true;
+                    }
                 }
             }
         }
@@ -130,6 +139,9 @@ namespace GameServer
                     }
                     DistributeLobbyUpdate();
                     break;
+                case MessageType.OK:
+                    player.Ready = true;
+                    break;
                 default:
                     Console.WriteLine(" of unknown type!");
                     break;
@@ -147,6 +159,22 @@ namespace GameServer
                 msg.Write(player.PlayerName);
             }
             serverThread.SendToAll(msg, NetDeliveryMethod.Unreliable);
+        }
+
+        private void DistributeCountdown()
+        {
+            for (int i = 1; i <= 4; i++)
+            {
+                Timer timer = new Timer(i * 1000);
+                timer.Elapsed += (s, e) =>
+                {
+                    NetOutgoingMessage msg = serverThread.CreateMessage();
+                    msg.Write((byte)MessageType.Countdown);
+                    msg.Write((byte)i);
+                    serverThread.SendToAll(msg, NetDeliveryMethod.Unreliable);
+                };
+                timer.Start();
+            }
         }
 
         private void DistributeChatMessage(ServerPlayer player, string chatMsg)
@@ -211,14 +239,17 @@ namespace GameServer
 
         public void PlayerConnected(NetConnection connection)
         {
-            serverThread.SendDiscoveryResponse(null, connection.RemoteEndPoint);
-            Console.WriteLine("Player " + connection.RemoteEndPoint.Address + " connected!");
-            Console.WriteLine("Current players: " + serverThread.ConnectionsCount);
-            foreach (NetConnection conn in serverThread.Connections)
-                Console.WriteLine(conn.RemoteEndPoint.Address);
+            if (state == ServerState.Lobby)
+            {
+                serverThread.SendDiscoveryResponse(null, connection.RemoteEndPoint);
+                Console.WriteLine("Player " + connection.RemoteEndPoint.Address + " connected!");
+                Console.WriteLine("Current players: " + serverThread.ConnectionsCount);
+                foreach (NetConnection conn in serverThread.Connections)
+                    Console.WriteLine(conn.RemoteEndPoint.Address);
 
-            ServerPlayer player = new ServerPlayer(++playerIdCounter, connection);
-            players[connection.RemoteEndPoint.Address] = player;
+                ServerPlayer player = new ServerPlayer(++playerIdCounter, connection);
+                players[connection.RemoteEndPoint.Address] = player;
+            }
         }
 
         public void PlayerDisconnected(NetConnection connection)

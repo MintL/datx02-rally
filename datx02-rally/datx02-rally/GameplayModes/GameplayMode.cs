@@ -19,6 +19,7 @@ namespace datx02_rally
         protected int CurrentState { get; private set; }
         private bool allStatesFinished = false;
         public bool GameOver { private set; get; }
+        public bool GameStarted { set; get; }
 
         public GameplayMode(Game1 gameInstance)
         {
@@ -26,6 +27,7 @@ namespace datx02_rally
             this.Mode = Mode.Singleplayer;
             states = new List<GameModeState>();
             addedTriggers = new List<string>();
+            GameStarted = true;
             GameOver = false;
             CurrentState = 0;
         }

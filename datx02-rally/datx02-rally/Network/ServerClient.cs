@@ -9,9 +9,10 @@ using datx02_rally.Menus;
 
 namespace datx02_rally
 {
-    public enum MessageType { 
+    public enum MessageType
+    {
         PlayerPos, Chat, Debug, StateChange, // game info exchange stuff
-        LobbyUpdate, PlayerInfo, OK // handshake-y stuff    
+        LobbyUpdate, PlayerInfo, OK, Countdown // handshake-y stuff    
     }
     public enum ServerState { Lobby, Gameplay, Ended }
     class ServerClient : GameComponent
@@ -20,6 +21,7 @@ namespace datx02_rally
         ServerSender Sender;
         ServerReceiver Receiver;
         Game1 Game;
+        public bool started = false;
         public GamePlayView GamePlay { set; get; }
         public readonly Player LocalPlayer;
         public LinkedList<Tuple<string, string, DateTime>> ChatHistory = new LinkedList<Tuple<string, string, DateTime>>();
@@ -82,6 +84,8 @@ namespace datx02_rally
                 }
                 return;
             }
+            if (!started && GamePlay != null && Game.GetService<CameraComponent>().CurrentCamera is ThirdPersonCamera)
+                Sender.SendReadySignal();
 
             base.Update(gameTime);
         }
