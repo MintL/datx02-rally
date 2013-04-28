@@ -23,13 +23,12 @@ namespace datx02_rally
             this.simulationStrategy = new DeadReckoningStrategy();
         }
 
-        public void AddCar(Player player, Model model)
+        public void AddCar(Player player, Model model, GamePlayView gameplay)
         {
             if (model == null)
                 model = Game.Content.Load<Model>(@"Models/porsche");
 
-            if (Game1.GetInstance().currentState == GameState.Gameplay)
-                Cars[player] = (Game1.GetInstance().currentView as GamePlayView).MakeCar();
+            Cars[player] = gameplay.MakeCar();
         }
 
         public void RemoveCar(Player player)
@@ -40,7 +39,7 @@ namespace datx02_rally
         public override void Update(GameTime gameTime)
         {
             foreach (var playerCarPair in Cars)
-            {
+            {                    
                 if (playerCarPair.Key.LOCAL_PLAYER)
                     UpdateLocalCar(playerCarPair.Key, playerCarPair.Value);
                 else

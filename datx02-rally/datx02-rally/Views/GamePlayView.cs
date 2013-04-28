@@ -690,7 +690,9 @@ namespace datx02_rally.Menus
             if (mode.Mode == Mode.Multiplayer)
             {
                 foreach (var player in gameInstance.GetService<ServerClient>().Players.Values)
-                    gameInstance.GetService<CarControlComponent>().AddCar(player, null);
+                {
+                    gameInstance.GetService<CarControlComponent>().AddCar(player, null, this);
+                }
             }
 
         }

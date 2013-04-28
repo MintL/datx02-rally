@@ -29,7 +29,6 @@ namespace datx02_rally.Network
             }
 
             // If new position available, update, else simulate
-            Console.WriteLine(latest.Sequence);
             if (latest.Sequence > latestMessageSeq[player] || 
                 (latestMessageSeq[player] > byte.MaxValue-10 && latest.Sequence < byte.MinValue+10)) // handle wrap-around, very ugly
             {
