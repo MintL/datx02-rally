@@ -94,7 +94,7 @@ namespace datx02_rally.Particles
                     timeToSpend -= timeBetweenParticles;
 
                     // Work out the optimal position for this particle. This will produce
-                    // evenly spaced particles regardless of the object speed, particle
+                    // evenly spaced particles regardless of the object velocity, particle
                     // creation frequency, or game update rate.
                     float mu = currentTime / elapsedTime;
 

@@ -64,9 +64,9 @@ namespace datx02_rally
 
        //   Does not exist in current version of master, only added in track
        //    if (delta.LengthSquared() > 0)
-       //        speed = Math.Min(MaxSpeed, speed * 1.02f);
+       //        velocity = Math.Min(MaxSpeed, velocity * 1.02f);
        //    else
-       //        speed = MinSpeed;
+       //        velocity = MinSpeed;
 
             Position += delta;
 

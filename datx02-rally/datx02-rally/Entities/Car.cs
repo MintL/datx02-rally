@@ -47,7 +47,7 @@ namespace datx02_rally
         public float TurnSpeed { get; protected set; }
         
         // Distance between wheelaxis.
-        private float L = 40.197f;
+        public readonly float L = 40.197f;
 
         // Forward direction calculated to know where the car is heading. Not for set outside.
         public Vector3 Heading { get; set; }

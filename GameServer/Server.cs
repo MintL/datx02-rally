@@ -102,12 +102,11 @@ namespace GameServer
             switch (type)
             {
                 case MessageType.PlayerPos:
-                    double msGameTime = msg.ReadDouble();
                     float x = msg.ReadFloat(); float y = msg.ReadFloat(); float z = msg.ReadFloat();
-                    float rotation = msg.ReadFloat();
+                    float rotation = msg.ReadFloat(); float velocity = msg.ReadFloat();
                     if (DbgPlayerPos) 
                         Console.WriteLine("PlayerPos: X:{0}, Y:{1}, Z:{2}",x,y,z);
-                    player.UpdatePosition(x, y, z, rotation);
+                    player.UpdatePosition(x, y, z, rotation, velocity);
                     DistributePlayerPosition(player);
                     break;
                 case MessageType.Chat:
@@ -164,10 +163,13 @@ namespace GameServer
             NetOutgoingMessage msg = serverThread.CreateMessage();
             msg.Write((byte)MessageType.PlayerPos);
             msg.Write(player.PlayerID);
+            msg.Write((byte)(++player.SequenceNo));
             msg.Write(player.PlayerPos.x);
             msg.Write(player.PlayerPos.y);
             msg.Write(player.PlayerPos.z);
             msg.Write(player.PlayerPos.rotation);
+            msg.Write(player.PlayerPos.velocity);
+            msg.Write(DateTime.UtcNow.Ticks);
             SendToAllOtherPlayers(msg, player.Connection);
         }
 

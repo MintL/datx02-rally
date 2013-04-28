@@ -66,9 +66,9 @@ namespace datx02_rally.Particles
 
 
         // Controls how the particle velocity will change over their lifetime. If set
-        // to 1, particles will keep going at the same speed as when they were created.
+        // to 1, particles will keep going at the same velocity as when they were created.
         // If set to 0, particles will come to a complete stop right before they die.
-        // Values greater than 1 make the particles speed up over time.
+        // Values greater than 1 make the particles velocity up over time.
         public float EndVelocity = 1;
 
 

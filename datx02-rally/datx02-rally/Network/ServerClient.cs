@@ -83,9 +83,6 @@ namespace datx02_rally
                 return;
             }
 
-            if (State == ServerState.Gameplay)
-                Sender.SendPlayerPosition(GamePlay.Car.Position, GamePlay.Car.Rotation, gameTime.TotalGameTime.TotalMilliseconds);
-
             base.Update(gameTime);
         }
 
@@ -99,6 +96,11 @@ namespace datx02_rally
             LocalPlayer.PlayerName = name;
             if (connected)
                 Sender.SendPlayerInfo();
+        }
+
+        public void SendPlayerPosition()
+        {
+            Sender.SendPlayerPosition(GamePlay.Car.Position, GamePlay.Car.Rotation, GamePlay.Car.Speed);
         }
 
     }

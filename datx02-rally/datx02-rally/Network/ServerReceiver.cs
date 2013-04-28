@@ -57,7 +57,11 @@ namespace datx02_rally
             switch (type)
             {
                 case MessageType.PlayerPos:
-                    player.SetPosition(msg.ReadFloat(), msg.ReadFloat(), msg.ReadFloat(), msg.ReadFloat());
+                    byte sequenceNo = msg.ReadByte();
+                    float x = msg.ReadFloat(); float y = msg.ReadFloat(); float z = msg.ReadFloat();
+                    float rotation = msg.ReadFloat(); float velocity = msg.ReadFloat();
+                    DateTime sentTime = new DateTime(msg.ReadInt64());
+                    player.SetPosition(x, y, z, rotation, velocity, sequenceNo, sentTime);
                     break;
                 case MessageType.Chat:
                     string chatMsg = msg.ReadString();

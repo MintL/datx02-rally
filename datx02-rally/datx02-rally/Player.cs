@@ -10,13 +10,18 @@ namespace datx02_rally
     {
         public Vector3 Position { get; set; }
         public float Rotation { get; set; }
+        public float Speed { get; set; }
+        public PositionMessage LastReceived { get; private set; }
+
         public byte ID;
         public readonly bool LOCAL_PLAYER;
         public string PlayerName;
         public Player(Game1 game) : base(game)
         {
-            PlayerName = "UnnamedPlayer";
+            PlayerName = GameSettings.Default.PlayerName;
             LOCAL_PLAYER = true;
+            LastReceived = new PositionMessage();
+            LastReceived.Sequence = byte.MinValue;
         }
 
         public Player(Game1 game, byte id, string name) : base(game)
@@ -24,6 +29,8 @@ namespace datx02_rally
             ID = id;
             PlayerName = name;
             LOCAL_PLAYER = false;
+            LastReceived = new PositionMessage();
+            LastReceived.Sequence = byte.MinValue;
         }
 
         public override void Update(GameTime gameTime)
@@ -35,10 +42,16 @@ namespace datx02_rally
         /// Gets 
         /// </summary>
         /// <returns></returns>
-        public void SetPosition(float x, float y, float z, float rotation) 
+        public void SetPosition(float x, float y, float z, float rotation, float velocity, byte sequence, DateTime sentTime) 
         {
-            Position = new Vector3(x, y, z);
-            Rotation = rotation;
+            PositionMessage newMessage = new PositionMessage();
+            newMessage.Position = new Vector3(x, y, z);
+            newMessage.Rotation = rotation;
+            newMessage.Sequence = sequence;
+            newMessage.TimeSent = sentTime;
+            newMessage.Velocity = velocity;
+
+            LastReceived = newMessage;
         }
 
         public Vector3 GetPosition()
@@ -46,6 +59,14 @@ namespace datx02_rally
             return Game.GetService<CarControlComponent>().Cars[this].Position;
         }
 
-
+        public class PositionMessage
+        {
+            public Vector3 Position { get; set; }
+            public float Rotation { get; set; }
+            public byte Sequence { get; set; }
+            public float Velocity { get; set; }
+            public DateTime TimeSent { get; set; }
+        }
     }
+
 }

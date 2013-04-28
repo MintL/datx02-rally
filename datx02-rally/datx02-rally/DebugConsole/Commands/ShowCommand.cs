@@ -88,7 +88,7 @@ namespace datx02_rally.DebugConsole.Commands
                     case "fps":
                         game.GetService<HUDComponent>().ConsoleEnabled = true;
                         break;
-                    case "speed":
+                    case "velocity":
                         game.GetService<HUDComponent>().SpeedEnabled = true;
                         break;
                     default:

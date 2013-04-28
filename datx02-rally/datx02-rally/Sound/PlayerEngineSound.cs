@@ -25,7 +25,7 @@ namespace datx02_rally.Sound
 
         public void UpdateEngineSound(float currentVelocity) 
         {
-            //Positive = accelerating, negative = deccelerating, 0 = maintained speed
+            //Positive = accelerating, negative = deccelerating, 0 = maintained velocity
             float acceleration = currentVelocity - previousVelocity;
 
             //double layered switch(?), based on first currentVelocity, and then current acceleration
