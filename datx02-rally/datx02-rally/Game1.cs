@@ -16,6 +16,8 @@ using datx02_rally.Particles.Systems;
 using datx02_rally.Particles.WeatherSystems;
 using datx02_rally.Graphics;
 using datx02_rally.Menus;
+using Indiefreaks.Xna.Profiler;
+using Indiefreaks.AOP.Profiler;
 
 namespace datx02_rally
 {
@@ -47,6 +49,10 @@ namespace datx02_rally
             //    Graphics.ToggleFullScreen();
 
             UniversalRandom.ResetInstance(0);
+
+            var profilerGameComponent = new ProfilerGameComponent(this, "ProfilerFont");
+            ProfilingManager.Run = true;
+            Components.Add(profilerGameComponent);
 
             IsMouseVisible = true;
         }
