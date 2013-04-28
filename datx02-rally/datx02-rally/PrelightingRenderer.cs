@@ -169,48 +169,51 @@ namespace datx02_rally
                     }
                 }
 
-                // Car rendering
-                foreach (var mesh in car.Model.Meshes) // 5 meshes
+                
+            }
+
+            
+            // Car rendering
+            foreach (var mesh in car.Model.Meshes) // 5 meshes
+            {
+                Matrix world = Matrix.Identity;
+
+                // Wheel transformation
+                if ((int)mesh.Tag > 0)
                 {
-                    Matrix world = Matrix.Identity;
-
-                    // Wheel transformation
-                    if ((int)mesh.Tag > 0)
-                    {
-                        world *= Matrix.CreateRotationX(car.WheelRotationX);
-                        if ((int)mesh.Tag > 1)
-                            world *= Matrix.CreateRotationY(car.WheelRotationY);
-                    }
-
-                    // Local modelspace
-                    world *= mesh.ParentBone.Transform;
-
-                    // World
-                    world *= car.RotationMatrix * car.TranslationMatrix;
-
-                    foreach (ModelMeshPart part in mesh.MeshParts) // 5 effects for main, 1 for each wheel
-                    {
-                        oldEffects.Add(part, part.Effect);
-                        part.Effect = depthNormalEffect;
-
-                        EffectParameterCollection param = part.Effect.Parameters;
-
-                        param["World"].SetValue(world);
-                        param["View"].SetValue(view);
-                        param["Projection"].SetValue(LightProjection);
-                    }
-                    mesh.Draw();
+                    world *= Matrix.CreateRotationX(car.WheelRotationX);
+                    if ((int)mesh.Tag > 1)
+                        world *= Matrix.CreateRotationY(car.WheelRotationY);
                 }
+
+                // Local modelspace
+                world *= mesh.ParentBone.Transform;
+
+                // World
+                world *= car.RotationMatrix * car.TranslationMatrix;
+
+                Dictionary<ModelMeshPart, Effect> oldEffects = new Dictionary<ModelMeshPart, Effect>();
+                foreach (ModelMeshPart part in mesh.MeshParts) // 5 effects for main, 1 for each wheel
+                {
+                    oldEffects.Add(part, part.Effect);
+                    part.Effect = depthNormalEffect;
+
+                    EffectParameterCollection param = part.Effect.Parameters;
+
+                    param["World"].SetValue(world);
+                    param["View"].SetValue(view);
+                    param["Projection"].SetValue(LightProjection);
+                }
+
+                mesh.Draw();
 
                 // Reset all effects
-                foreach (ModelMesh mesh in car.Model.Meshes)
+                foreach (ModelMeshPart part in mesh.MeshParts)
                 {
-                    foreach (ModelMeshPart part in mesh.MeshParts)
-                    {
-                        part.Effect = oldEffects[part];
-                    }
+                    part.Effect = oldEffects[part];
                 }
             }
+
 
             device.SetRenderTargets(null);
         }
