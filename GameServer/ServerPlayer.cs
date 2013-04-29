@@ -22,6 +22,7 @@ namespace GameServer
         public readonly byte PlayerID;
         public Position PlayerPos;
         public NetConnection Connection { get; set; }
+        public long RaceTime { get; set; }
         public bool connected = false;
 
         public ServerPlayer(byte id, NetConnection connection)

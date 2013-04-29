@@ -17,7 +17,7 @@ namespace datx02_rally
         protected List<GameModeState> states;
         protected List<string> addedTriggers;
         protected int CurrentState { get; private set; }
-        private bool allStatesFinished = false;
+        protected bool allStatesFinished = false;
         public bool GameOver { private set; get; }
         public bool GameStarted { set; get; }
 
@@ -30,6 +30,7 @@ namespace datx02_rally
             GameStarted = true;
             GameOver = false;
             CurrentState = 0;
+            Statistics = null;
         }
 
         /// <summary>
@@ -39,20 +40,21 @@ namespace datx02_rally
 
         public abstract void PrepareStatistics();
 
-        public void Update(GameTime gameTime)
+        public virtual void Update(GameTime gameTime)
         {
-            if (allStatesFinished)
-                return;
-            GameModeState current = states[CurrentState];
-            if (current.IsStateFinished())
+            if (!allStatesFinished)
             {
-                CurrentState++;
-                Console.WriteLine("Passed from state " + (CurrentState - 1) + " to state " + CurrentState);
-            }
-            if (CurrentState > states.Count - 1)
-            {
-                Console.WriteLine("Game over!");
-                GameOverProcedure();
+                GameModeState current = states[CurrentState];
+                if (current.IsStateFinished())
+                {
+                    CurrentState++;
+                    Console.WriteLine("Passed from state " + (CurrentState - 1) + " to state " + CurrentState);
+                }
+                if (CurrentState > states.Count - 1)
+                {
+                    Console.WriteLine("Game over!");
+                    GameOverProcedure();
+                }
             }
         }
 

@@ -50,13 +50,28 @@ namespace datx02_rally.Menus
                 foreach (var heading in mode.Statistics.CategorizedItems)
 	            {
                     if (heading.Title != null)
-                        AddTextItem(true, heading.Title, null);
+                        AddTextItem(true, heading.Title, null, "");
                     foreach (var item in heading.Items)
-                        AddTextItem(false, item.Key, item.Value);
+                        AddTextItem(false, item.Key, item.Value, heading.Updateable ? "u"+item.Key : "");
 	            }
                 populated = true;
 
-                AddTextItem(false, "\nPress enter to return to Main Menu!", null);
+                AddTextItem(false, "\nPress enter to return to Main Menu!", null, null);
+            }
+            if (populated)
+            {
+                foreach (var heading in mode.Statistics.CategorizedItems)
+                {
+                    if (heading.Updateable)
+                    {
+                        foreach (var item in heading.Items)
+                        {
+                            var textItem = (GetMenuItem("u" + item.Key) as TextMenuItem);
+                            textItem.Text = item.Key;
+                            textItem.ColumnTwoText = item.Value;
+                        }
+                    }
+                }
             }
 
             NextState = UpdateState(gameTime);
@@ -64,11 +79,11 @@ namespace datx02_rally.Menus
             base.Update(gameTime);
         }
 
-        public void AddTextItem(bool heading, string columnOne, string columnTwo)
+        public void AddTextItem(bool heading, string columnOne, string columnTwo, string id)
         {
             if (heading) // some spacing before headings
-                AddTextItem(false, " ", null);
-            MenuItem item = new TextMenuItem(columnOne, columnTwo);
+                AddTextItem(false, " ", null, "");
+            MenuItem item = new TextMenuItem(columnOne, columnTwo, id);
             item.Bounds = Bounds;
             item.Font = heading ? MenuHeaderFont : MenuFont;
             item.Background = OptionSelected;

@@ -32,9 +32,11 @@ namespace datx02_rally.GameplayModes
         {
             public string Title { get; set; }
             public Dictionary<string, string> Items { get; set; }
+            public bool Updateable { get; set; }
 
             public Heading()
             {
+                Updateable = false;
                 Items = new Dictionary<string, string>();
             }
         }

@@ -43,7 +43,10 @@ namespace datx02_rally
 
         private Boolean IsPlayerMessage(MessageType type)
         {
-            return MessageType.Debug > type;
+            return type != MessageType.LobbyUpdate &&
+                type != MessageType.Countdown &&
+                type != MessageType.OK &&
+                type != MessageType.Debug;
         }
 
         private void ParseDataPackage(NetIncomingMessage msg) 
@@ -124,6 +127,9 @@ namespace datx02_rally
                     ServerHandler.Game.GetService<HUDComponent>().ShowTextNotification(Color.AliceBlue, countdown < 4 ? countdown+" " : "Go!");
                     if (countdown == 4)
                         ServerHandler.GamePlay.mode.GameStarted = true;
+                    break;
+                case MessageType.RaceTime:
+                    player.RaceTime = new TimeSpan(msg.ReadInt64());
                     break;
                 default:
                     break;

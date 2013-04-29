@@ -12,7 +12,7 @@ namespace datx02_rally
     public enum MessageType
     {
         PlayerPos, Chat, Debug, StateChange, // game info exchange stuff
-        LobbyUpdate, PlayerInfo, OK, Countdown // handshake-y stuff    
+        LobbyUpdate, PlayerInfo, OK, Countdown, RaceTime // handshake-y stuff    
     }
     public enum ServerState { Lobby, Gameplay, Ended }
     class ServerClient : GameComponent
@@ -106,6 +106,11 @@ namespace datx02_rally
         public void SendPlayerPosition()
         {
             Sender.SendPlayerPosition(GamePlay.Car.Position, GamePlay.Car.Rotation, GamePlay.Car.Speed);
+        }
+
+        public void SendRaceTime(TimeSpan time)
+        {
+            Sender.SendRaceTime(time.Ticks);
         }
 
 

@@ -27,7 +27,7 @@ namespace GameServer
         public enum MessageType
         {
             PlayerPos, Chat, Debug, StateChange, // game info exchange stuff
-            LobbyUpdate, PlayerInfo, OK, Countdown // handshake-y stuff    
+            LobbyUpdate, PlayerInfo, OK, Countdown, RaceTime // handshake-y stuff    
         }
         public enum ServerState { Lobby, Gameplay, Ended }
 
@@ -61,6 +61,9 @@ namespace GameServer
                         DistributeCountdown();
                         started = true;
                     }
+
+                    if (started && players.Count == 0)
+                        started = false;
                 }
             }
         }
@@ -142,6 +145,10 @@ namespace GameServer
                 case MessageType.OK:
                     player.Ready = true;
                     break;
+                case MessageType.RaceTime:
+                    player.RaceTime = msg.ReadInt64();
+                    DistributeRaceTime(player, player.RaceTime);
+                    break;
                 default:
                     Console.WriteLine(" of unknown type!");
                     break;
@@ -186,6 +193,15 @@ namespace GameServer
             msg.Write(player.PlayerID);
             msg.Write(chatMsg);
             SendToAllOtherPlayers(msg, player.Connection);   
+        }
+
+        private void DistributeRaceTime(ServerPlayer player, long raceTime)
+        {
+            NetOutgoingMessage msg = serverThread.CreateMessage();
+            msg.Write((byte)MessageType.RaceTime);
+            msg.Write(player.PlayerID);
+            msg.Write(raceTime);
+            SendToAllOtherPlayers(msg, player.Connection);
         }
 
         private void DistributePlayerPosition(ServerPlayer player)

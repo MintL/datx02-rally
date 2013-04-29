@@ -60,5 +60,13 @@ namespace datx02_rally
             msg.Write((byte)MessageType.OK);
             ServerThread.SendMessage(msg, NetDeliveryMethod.Unreliable);
         }
+
+        public void SendRaceTime(long time)
+        {
+            NetOutgoingMessage msg = ServerThread.CreateMessage();
+            msg.Write((byte)MessageType.RaceTime);
+            msg.Write(time);
+            ServerThread.SendMessage(msg, NetDeliveryMethod.Unreliable);
+        }
     }
 }

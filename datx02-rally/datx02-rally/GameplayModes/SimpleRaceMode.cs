@@ -19,6 +19,7 @@ namespace datx02_rally
         private Car car;
         protected List<Player> players = new List<Player>();
         public int PlayerPlace { get; set; }
+        public TimeSpan TotalRaceTime { get; private set; }
 
         private List<TimeSpan> goalLineTimes = new List<TimeSpan>();
 
@@ -31,6 +32,7 @@ namespace datx02_rally
             this.car = localCar;
             PlayerPlace = 1;
             GameStarted = false;
+            TotalRaceTime = TimeSpan.Zero;
 
             players.Add(gameInstance.GetService<Player>());
 
@@ -91,12 +93,13 @@ namespace datx02_rally
 
         public override void PrepareStatistics()
         {
-            TimeSpan totalTime = goalLineTimes[goalLineTimes.Count - 1] - goalLineTimes[0];
+            TotalRaceTime = goalLineTimes[goalLineTimes.Count - 1] - goalLineTimes[0];
 
             var playerHeading = new EndGameStatistics.Heading();
             playerHeading.Title = null;
+            playerHeading.Updateable = true;
             foreach (var player in players)
-                playerHeading.Items[PlayerPlace + ". " + player.PlayerName] = totalTime.ToString(@"m\:ss\:ff");
+                playerHeading.Items[PlayerPlace + ". " + player.PlayerName] = TotalRaceTime.ToString(@"m\:ss\:ff");
 
             var lapsHeading = new EndGameStatistics.Heading();
             lapsHeading.Title = "Your times";
@@ -106,16 +109,15 @@ namespace datx02_rally
                 lapsHeading.Items["Lap " + i] = lapTime.ToString(@"m\:ss\:ff");
             }
 
-            var statsHeading = new EndGameStatistics.Heading();
+            /*var statsHeading = new EndGameStatistics.Heading();
             statsHeading.Title = "Statistics";
-            statsHeading.Items["You suck"] = null;
+            statsHeading.Items["You suck"] = null;*/
 
-            var itemList = new List<EndGameStatistics.Heading> { playerHeading, lapsHeading, statsHeading };
+            var itemList = new List<EndGameStatistics.Heading> { playerHeading, lapsHeading/*, statsHeading*/ };
 
             bool won = PlayerPlace == 1;
             Statistics = new EndGameStatistics(itemList, won);
         }
-
 
     }
 }
