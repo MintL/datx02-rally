@@ -17,7 +17,7 @@ namespace datx02_rally.Network
             this.threshold = threshold;
         }
 
-        public DeadReckoningStrategy() : this( new Vector3(0.1f, 0.1f, 0.1f) )
+        public DeadReckoningStrategy() : this( new Vector3(0.01f, 0.01f, 0.01f) )
         {        }
 
         public bool UpdatePosition(Player player, Car car)
