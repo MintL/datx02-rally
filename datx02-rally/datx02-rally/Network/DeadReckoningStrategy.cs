@@ -35,8 +35,8 @@ namespace datx02_rally.Network
                 simCar = car;
 
             // If new position available, update, else simulate
-            if (latest.Sequence > latestMessageSeq[player] || 
-                (latestMessageSeq[player] > byte.MaxValue-10 && latest.Sequence < byte.MinValue+10)) // handle wrap-around, very ugly
+            if (latest.Sequence != latestMessageSeq[player]/* || 
+                (latestMessageSeq[player] > byte.MaxValue-10 && latest.Sequence < byte.MinValue+10)*/) // handle wrap-around, very ugly
             {
                 //Console.WriteLine("New msg! Setting player pos");
                 simCar.Position = latest.Position;
