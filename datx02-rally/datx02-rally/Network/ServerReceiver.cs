@@ -114,7 +114,7 @@ namespace datx02_rally
                     int gameSeed = msg.ReadInt32();
                     if (DEBUG_MODE) Console.WriteLine("Received OK handshake from server with ID: "+assignedID+", seed: "+gameSeed);
                     ServerHandler.LocalPlayer.ID = assignedID;
-                    UniversalRandom.ResetInstance(gameSeed);
+                    ServerHandler.Seed = gameSeed;
                     ServerHandler.connected = true;
                     ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Connected! (id "+assignedID+")");
                     break;

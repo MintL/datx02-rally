@@ -28,7 +28,8 @@ namespace datx02_rally
         public Dictionary<byte,Player> Players = new Dictionary<byte, Player>();
         readonly int PORT = 19283;
         public bool connected = false;
-        public ServerState State { get; set; } 
+        public ServerState State { get; set; }
+        public int Seed { get; set; }
 
         private DateTime TryConnectedTime = DateTime.MinValue;
         private TimeSpan WaitConnect = new TimeSpan(0, 0, 1); // 3 second wait
@@ -106,6 +107,7 @@ namespace datx02_rally
         {
             Sender.SendPlayerPosition(GamePlay.Car.Position, GamePlay.Car.Rotation, GamePlay.Car.Speed);
         }
+
 
     }
 }

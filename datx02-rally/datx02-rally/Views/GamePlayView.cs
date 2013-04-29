@@ -160,7 +160,6 @@ namespace datx02_rally.Menus
             game.GetService<ServerClient>().GamePlay = this;
             int usedSeed = seed.HasValue ? seed.Value : 0;
             UniversalRandom.ResetInstance(usedSeed);
-            UniversalRandom.ResetInstance(0);
             gameModeChoice = gamePlayChoice;
 
             UpdateOrder = -1;
