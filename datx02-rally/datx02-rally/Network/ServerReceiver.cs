@@ -12,6 +12,7 @@ namespace datx02_rally
     {
         NetClient ServerThread;
         ServerClient ServerHandler;
+        bool DEBUG_MODE = true;
 
         public ServerReceiver(NetClient serverThread, ServerClient handler)
         {
@@ -73,6 +74,7 @@ namespace datx02_rally
                 case MessageType.Debug:
                     break;
                 case MessageType.LobbyUpdate:
+                    if (DEBUG_MODE) Console.Write("Received LobbyUpdate message: ");
                     Dictionary<byte, Player> newPlayerList = new Dictionary<byte, Player>();
 
                     byte playerCount = msg.ReadByte();
@@ -80,6 +82,7 @@ namespace datx02_rally
                     {
                         byte discoveredPlayerId = msg.ReadByte();
                         string discoveredPlayerName = msg.ReadString();
+                        if (DEBUG_MODE) Console.Write(discoveredPlayerName + ", ");
 
                         if (ServerHandler.LocalPlayer.ID != discoveredPlayerId) // ignore info of local player
                         {
@@ -104,11 +107,12 @@ namespace datx02_rally
                         ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Player "+disconnectedPlayer.PlayerName+" disconnected!");
                         ServerHandler.Game.GetService<CarControlComponent>().RemoveCar(disconnectedPlayer);
                     }
+                    if (DEBUG_MODE) Console.WriteLine();
                     break;
                 case MessageType.OK:
-                    Console.WriteLine("Received OK handshake from server");
                     byte assignedID = msg.ReadByte();
                     int gameSeed = msg.ReadInt32();
+                    if (DEBUG_MODE) Console.WriteLine("Received OK handshake from server with ID: "+assignedID+", seed: "+gameSeed);
                     ServerHandler.LocalPlayer.ID = assignedID;
                     UniversalRandom.ResetInstance(gameSeed);
                     ServerHandler.connected = true;
@@ -116,6 +120,7 @@ namespace datx02_rally
                     break;
                 case MessageType.Countdown:
                     byte countdown = msg.ReadByte();
+                    if (DEBUG_MODE) Console.WriteLine("Received Countdown from server: " + countdown);
                     ServerHandler.Game.GetService<HUDComponent>().ShowTextNotification(Color.AliceBlue, countdown < 4 ? countdown+" " : "Go!");
                     if (countdown == 4)
                         ServerHandler.GamePlay.mode.GameStarted = true;
