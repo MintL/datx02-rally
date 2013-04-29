@@ -824,8 +824,11 @@ namespace datx02_rally.Menus
 
             var hudComponent = Game.GetService<HUDComponent>();
             var cameraComponent = Game.GetService<CameraComponent>();
+            var carControlComponent = Game.GetService<CarControlComponent>();
 
-            if (pauseMenu.Enabled || gameOverMenu.Enabled || !mode.GameStarted)
+            carControlComponent.Enabled = mode.GameStarted;
+
+            if (pauseMenu.Enabled || gameOverMenu.Enabled)
             {
                 if (cameraComponent.Enabled)
                     cameraComponent.Enabled = false;
