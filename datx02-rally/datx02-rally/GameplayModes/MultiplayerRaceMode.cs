@@ -18,7 +18,6 @@ namespace datx02_rally.GameplayModes
 
         public override void PrepareStatistics()
         {
-            gameInstance.GetService<ServerClient>().Disconnect();
             base.PrepareStatistics();
         }
 
@@ -33,6 +32,8 @@ namespace datx02_rally.GameplayModes
                     playerHeading.Items[player.ID + ". " + player.PlayerName] = player.RaceTime == TimeSpan.MaxValue ? "" : player.RaceTime.ToString(@"m\:ss\:ff");
                 }
             }
+            if (GameOver)
+                gameInstance.GetService<ServerClient>().Disconnect();
             base.Update(gameTime);
         }
     }

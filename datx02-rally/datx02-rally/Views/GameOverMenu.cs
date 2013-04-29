@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using datx02_rally.GameplayModes;
 
 namespace datx02_rally.Menus
 {
@@ -48,12 +49,7 @@ namespace datx02_rally.Menus
                 else
                     this.MenuTitle = "You lost!";
                 foreach (var heading in mode.Statistics.CategorizedItems)
-	            {
-                    if (heading.Title != null)
-                        AddTextItem(true, heading.Title, null, "");
-                    foreach (var item in heading.Items)
-                        AddTextItem(false, item.Key, item.Value, heading.Updateable ? "u"+item.Key : "");
-	            }
+                    AddHeading(heading);
                 populated = true;
 
                 AddTextItem(false, "\nPress enter to return to Main Menu!", null, null);
@@ -64,12 +60,12 @@ namespace datx02_rally.Menus
                 {
                     if (heading.Updateable)
                     {
-                        foreach (var item in heading.Items)
-                        {
-                            var textItem = (GetMenuItem("u" + item.Key) as TextMenuItem);
-                            textItem.Text = item.Key;
-                            textItem.ColumnTwoText = item.Value;
-                        }
+                        int index = MenuItems.FindLastIndex(i => i.Identifier == "uz1"+heading.Title);
+                        MenuItems.RemoveAll(i => i.Identifier.StartsWith("uz1"));
+                        if (index > MenuItems.Count - 1)
+                            AddHeading(heading);
+                        else
+                            InsertHeading(index, heading);
                     }
                 }
             }
@@ -79,17 +75,46 @@ namespace datx02_rally.Menus
             base.Update(gameTime);
         }
 
-        public void AddTextItem(bool heading, string columnOne, string columnTwo, string id)
+        public void InsertHeading(int index, EndGameStatistics.Heading heading)
+        {
+            if (heading.Title != null)
+                InsertTextItem(index++, true, heading.Title, null, heading.Updateable ? "uz1" + heading.Title : "");
+            foreach (var item in heading.Items)
+                InsertTextItem(index++, false, item.Key, item.Value, heading.Updateable ? "uz1" + heading.Title + item.Key : "");
+        }
+
+        public void AddHeading(EndGameStatistics.Heading heading)
+        {
+            if (heading.Title != null)
+                AddTextItem(true, heading.Title, null, heading.Updateable ? "uz1" + heading.Title : "");
+            foreach (var item in heading.Items)
+                AddTextItem(false, item.Key, item.Value, heading.Updateable ? "uz1" + heading.Title + item.Key : "");
+        }
+
+        public void InsertTextItem(int index, bool heading, string columnOne, string columnTwo, string id)
         {
             if (heading) // some spacing before headings
-                AddTextItem(false, " ", null, "");
+                InsertTextItem(index++, false, " ", null, id+"spacing");
             MenuItem item = new TextMenuItem(columnOne, columnTwo, id);
             item.Bounds = Bounds;
             item.Font = heading ? MenuHeaderFont : MenuFont;
             item.Background = OptionSelected;
             item.FontColor = ItemColor;
             item.FontColorSelected = ItemColor;
-            AddMenuItem(item);
+            MenuItems.Insert(index, item);
+        }
+
+        public void AddTextItem(bool heading, string columnOne, string columnTwo, string id)
+        {
+            if (heading) // some spacing before headings
+                AddTextItem(false, " ", null, id + "spacing");
+            MenuItem item = new TextMenuItem(columnOne, columnTwo, id);
+            item.Bounds = Bounds;
+            item.Font = heading ? MenuHeaderFont : MenuFont;
+            item.Background = OptionSelected;
+            item.FontColor = ItemColor;
+            item.FontColorSelected = ItemColor;
+            MenuItems.Add(item);
         }
     }
 }
