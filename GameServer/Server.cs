@@ -165,12 +165,14 @@ namespace GameServer
         {
             for (int i = 1; i <= 4; i++)
             {
-                Timer timer = new Timer(i * 1000);
+                byte countdown = (byte)i;
+                Timer timer = new Timer(i * 2000);
+                timer.AutoReset = false;
                 timer.Elapsed += (s, e) =>
                 {
                     NetOutgoingMessage msg = serverThread.CreateMessage();
                     msg.Write((byte)MessageType.Countdown);
-                    msg.Write((byte)i);
+                    msg.Write(countdown);
                     serverThread.SendToAll(msg, NetDeliveryMethod.Unreliable);
                 };
                 timer.Start();
