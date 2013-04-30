@@ -25,6 +25,8 @@ namespace datx02_rally.Menus
     {
         #region Field
 
+        bool init = false;
+        public bool Initialized { get; set; }
         public GameplayMode mode;
         GameModeChoice gameModeChoice;
 
@@ -603,7 +605,7 @@ namespace datx02_rally.Menus
             #region Cameras
 
             var input = gameInstance.GetService<InputComponent>();
-            gameInstance.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(-11800, 3000, -8200), input));
+            //gameInstance.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(-11800, 3000, -8200), input));
             gameInstance.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(Car, input));
             
             #endregion
@@ -705,6 +707,7 @@ namespace datx02_rally.Menus
             loopSoundManager.AddNewSound("forestambient");
             #endregion
 
+            init = true;
         }
 
         public Car MakeCar()
@@ -777,7 +780,7 @@ namespace datx02_rally.Menus
                 Vector3 carHeading = (raceTrack.Curve.GetPoint(.001f) - carPosition);
                 car.Position = carPosition;
                 car.Rotation = (float)Math.Atan2(carHeading.X, carHeading.Z) - (float)Math.Atan2(0, -1);
-                carPosition += new Vector3(10, 0, 0);
+                carPosition += new Vector3(150, 0, 0);
             }
             
         }
@@ -1236,6 +1239,11 @@ namespace datx02_rally.Menus
             RenderOverlayMenu(overlay, overlayTexture);
 
             base.Draw(gameTime);
+            if (init)
+            {
+                Initialized = true;
+                init = false;
+            }
         }
 
         public void RenderOverlayMenu(OverlayView overlay, Texture2D overlayTexture)
@@ -1618,6 +1626,7 @@ namespace datx02_rally.Menus
         #endregion
 
         #endregion
+
 
     }
 }

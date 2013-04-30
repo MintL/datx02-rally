@@ -85,7 +85,7 @@ namespace datx02_rally
                 }
                 return;
             }
-            if (!started && GamePlay != null && Game.GetService<CameraComponent>().CurrentCamera is ThirdPersonCamera)
+            if (!started && GamePlay != null && GamePlay.Initialized)
                 Sender.SendReadySignal();
 
             base.Update(gameTime);
