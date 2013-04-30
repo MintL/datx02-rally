@@ -124,8 +124,9 @@ namespace datx02_rally
                 case MessageType.Countdown:
                     byte countdown = msg.ReadByte();
                     if (DEBUG_MODE) Console.WriteLine("Received Countdown from server: " + countdown);
-                    ServerHandler.Game.GetService<HUDComponent>().ShowTextNotification(Color.AliceBlue, countdown < 4 ? countdown+" " : "Go!");
-                    if (countdown == 4)
+                    string[] countdownStr = { "3", "2", "1", "Go!" };
+                    ServerHandler.Game.GetService<HUDComponent>().ShowTextNotification(Color.AliceBlue, countdownStr[countdown], TimeSpan.FromSeconds(0.8));
+                    if (countdown == 3)
                         ServerHandler.GamePlay.mode.GameStarted = true;
                     break;
                 case MessageType.RaceTime:
