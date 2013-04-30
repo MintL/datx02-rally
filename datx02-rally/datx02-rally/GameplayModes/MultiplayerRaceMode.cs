@@ -13,6 +13,7 @@ namespace datx02_rally.GameplayModes
             : base(gameInstance, laps, noOfCheckpoints, raceTrack, localCar)
         {
             this.Mode = Mode.Multiplayer;
+            GameStarted = false;
             players.AddRange(gameInstance.GetService<ServerClient>().Players.Values);
         }
 
