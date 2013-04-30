@@ -20,6 +20,7 @@ namespace datx02_rally
         protected List<Player> players = new List<Player>();
         public int PlayerPlace { get; set; }
         public TimeSpan TotalRaceTime { get; private set; }
+        protected TimeSpan startTime = TimeSpan.Zero;
 
         private List<TimeSpan> goalLineTimes = new List<TimeSpan>();
 
@@ -93,6 +94,7 @@ namespace datx02_rally
 
         public override void PrepareStatistics()
         {
+            goalLineTimes[0] = startTime;
             TotalRaceTime = goalLineTimes[goalLineTimes.Count - 1] - goalLineTimes[0];
             players.Find(p => p.LOCAL_PLAYER).RaceTime = TotalRaceTime;
 
@@ -118,6 +120,13 @@ namespace datx02_rally
 
             bool won = PlayerPlace == 1;
             Statistics = new EndGameStatistics(itemList, won);
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            if (startTime != TimeSpan.Zero && GameStarted)
+                startTime = gameTime.TotalGameTime;
+            base.Update(gameTime);
         }
 
     }

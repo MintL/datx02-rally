@@ -771,7 +771,7 @@ namespace datx02_rally.Menus
                 Vector3 carHeading = (raceTrack.Curve.GetPoint(.001f) - carPosition);
                 car.Position = carPosition;
                 car.Rotation = (float)Math.Atan2(carHeading.X, carHeading.Z) - (float)Math.Atan2(0, -1);
-                carPosition += new Vector3(10, 0, 0);
+                carPosition += new Vector3(150, 0, 0);
             }
             
         }
