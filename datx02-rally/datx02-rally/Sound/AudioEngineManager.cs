@@ -27,6 +27,8 @@ namespace datx02_rally.Sound
             audioEngine = new AudioEngine("Content\\Audio\\datx02.xgs");
             soundBank = new SoundBank(audioEngine, "Content\\Audio\\SoundEffects.xsb");
             waveBank = new WaveBank(audioEngine, "Content\\Audio\\SoundEffectWaves.xwb");
+
+            
         }
 
 

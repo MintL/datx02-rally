@@ -18,6 +18,7 @@ using datx02_rally.Graphics;
 using datx02_rally.Menus;
 using Indiefreaks.Xna.Profiler;
 using Indiefreaks.AOP.Profiler;
+using datx02_rally.Sound;
 
 namespace datx02_rally
 {
@@ -53,6 +54,8 @@ namespace datx02_rally
             var profilerGameComponent = new ProfilerGameComponent(this, "ProfilerFont");
             ProfilingManager.Run = true;
             Components.Add(profilerGameComponent);
+
+
 
             IsMouseVisible = true;
         }
@@ -95,6 +98,8 @@ namespace datx02_rally
         protected override void LoadContent()
         {
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            AudioEngineManager.GetInstance();
 
             base.LoadContent();
         }

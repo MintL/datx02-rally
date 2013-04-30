@@ -17,6 +17,7 @@ using datx02_rally.Components;
 using Microsoft.Xna.Framework.Input;
 using datx02_rally.Particles;
 using datx02_rally.GameplayModes;
+using datx02_rally.Sound;
 
 namespace datx02_rally.Menus
 {
@@ -144,6 +145,10 @@ namespace datx02_rally.Menus
         Plane zeroPlane = new Plane(Vector3.Up, 0);
         bool shadowMapNotRendered = true;
 
+        #endregion
+
+        #region Audio
+        LoopSoundManager loopSoundManager = new LoopSoundManager();
         #endregion
 
         PrelightingRenderer prelightingRenderer;
@@ -696,6 +701,10 @@ namespace datx02_rally.Menus
                 SetCarsAtStart(carList);
             }
 
+            #region BackgroundSound
+            loopSoundManager.AddNewSound("forestambient");
+            #endregion
+
         }
 
         public Car MakeCar()
@@ -940,6 +949,14 @@ namespace datx02_rally.Menus
 
             }
 
+            #region Audio
+            // Spawn random audios
+            if (gameTime.TotalGameTime.Milliseconds % 7000 < 10 && UniversalRandom.GetInstance().NextDouble() > 0.5)
+            {
+                AudioEngineManager.PlaySound("randomambient");
+            }
+            #endregion
+
             // Particles should continue to spawn regardless of the pause state
             for (int x = -3; x < 3; x++)
             {
@@ -1031,6 +1048,8 @@ namespace datx02_rally.Menus
                 components.Add(component);
                 gameInstance.SetService(component.GetType(), component);
             }
+
+            loopSoundManager.StopAllSounds();
             
         }
 

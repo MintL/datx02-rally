@@ -151,6 +151,7 @@
     <Compile Include="GameLogic\CurveRasterization.cs" />
     <Compile Include="Network\DeadReckoningStrategy.cs" />
     <Compile Include="Network\ISimulationStrategy.cs" />
+    <Compile Include="Sound\LoopSoundManager.cs" />
     <Compile Include="Views\GameOverMenu.cs" />
     <Compile Include="Views\GamePlayView.cs" />
     <Compile Include="Views\MenuView.cs" />
