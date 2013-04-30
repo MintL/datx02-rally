@@ -62,9 +62,14 @@ namespace datx02_rally.Components
 
         public void ShowTextNotification(Color c, string text)
         {
+            ShowTextNotification(c, text, TimeSpan.FromSeconds(3));
+        }
+
+        public void ShowTextNotification(Color c, string text, TimeSpan time)
+        {
             TextNotification notification = new TextNotification();
             notification.DisplayedTime = TimeSpan.Zero;
-            notification.Timeout = TimeSpan.FromSeconds(3);
+            notification.Timeout = time;
             notification.FadeTime = new TimeSpan((long)(notification.Timeout.Ticks * 0.1));
             notification.Color = c;
             notification.Text = text;

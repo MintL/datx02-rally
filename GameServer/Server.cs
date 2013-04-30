@@ -170,10 +170,10 @@ namespace GameServer
 
         private void DistributeCountdown()
         {
-            for (int i = 1; i <= 4; i++)
+            for (int i = 0; i <= 3; i++)
             {
                 byte countdown = (byte)i;
-                Timer timer = new Timer(i * 2000);
+                Timer timer = new Timer(i * 1000 + 2000);
                 timer.AutoReset = false;
                 timer.Elapsed += (s, e) =>
                 {
