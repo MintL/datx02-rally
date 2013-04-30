@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using datx02_rally.GameLogic;
 using Microsoft.Xna.Framework;
+using datx02_rally.Menus;
 
 namespace datx02_rally.GameplayModes
 {
@@ -13,7 +14,6 @@ namespace datx02_rally.GameplayModes
             : base(gameInstance, laps, noOfCheckpoints, raceTrack, localCar)
         {
             this.Mode = Mode.Multiplayer;
-            GameStarted = false;
             players.AddRange(gameInstance.GetService<ServerClient>().Players.Values);
         }
 
@@ -22,7 +22,7 @@ namespace datx02_rally.GameplayModes
             base.PrepareStatistics();
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime, GamePlayView gamePlay)
         {
             if (TotalRaceTime != TimeSpan.Zero && allStatesFinished)
                 gameInstance.GetService<ServerClient>().SendRaceTime(TotalRaceTime);
@@ -33,7 +33,7 @@ namespace datx02_rally.GameplayModes
                 foreach (var player in players.OrderBy(p => p.RaceTime))
                     playerHeading.Items[place++ + ". " + player.PlayerName] = player.RaceTime == TimeSpan.MaxValue ? "" : player.RaceTime.ToString(@"m\:ss\:ff");
             }
-            base.Update(gameTime);
+            base.Update(gameTime, gamePlay);
         }
     }
 }

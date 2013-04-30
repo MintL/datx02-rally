@@ -824,7 +824,7 @@ namespace datx02_rally.Menus
 
         public override void Update(GameTime gameTime)
         {
-            this.mode.Update(gameTime);
+            this.mode.Update(gameTime, this);
 
             if (this.mode.GameOver)
                 gameOverMenu.Enabled = true;

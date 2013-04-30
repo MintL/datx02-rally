@@ -21,6 +21,7 @@ namespace datx02_rally
         public int PlayerPlace { get; set; }
         public TimeSpan TotalRaceTime { get; private set; }
         protected TimeSpan startTime = TimeSpan.Zero;
+        private bool countdown = false;
 
         private List<TimeSpan> goalLineTimes = new List<TimeSpan>();
 
@@ -32,7 +33,7 @@ namespace datx02_rally
             this.raceTrack = raceTrack;
             this.car = localCar;
             PlayerPlace = 1;
-            GameStarted = true;
+            GameStarted = false;
             TotalRaceTime = TimeSpan.Zero;
 
             players.Add(gameInstance.GetService<Player>());
@@ -122,11 +123,36 @@ namespace datx02_rally
             Statistics = new EndGameStatistics(itemList, won);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime, GamePlayView gamePlay)
         {
             if (startTime != TimeSpan.Zero && GameStarted)
                 startTime = gameTime.TotalGameTime;
-            base.Update(gameTime);
+            if (Mode == Mode.Singleplayer && !countdown && gamePlay.Initialized)
+            {
+                countdown = true;
+                StartCountdown();
+            }
+            base.Update(gameTime, gamePlay);
+        }
+
+        private void StartCountdown()
+        {
+            string[] countdownStr = { "3", "2", "1", "Go!" };
+            var hudComponent = gameInstance.GetService<HUDComponent>();
+            for (int i = 0; i <= 3; i++)
+            {
+                int iCountdown = i;
+                string countdown = countdownStr[iCountdown];
+                Timer timer = new Timer(i * 1000 + 2000);
+                timer.AutoReset = false;
+                timer.Elapsed += (s, e) =>
+                {
+                    hudComponent.ShowTextNotification(Color.AliceBlue, countdown, TimeSpan.FromSeconds(0.8));
+                    if (iCountdown == 3)
+                        this.GameStarted = true;
+                };
+                timer.Start();
+            }
         }
 
     }

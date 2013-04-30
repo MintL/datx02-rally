@@ -40,7 +40,7 @@ namespace datx02_rally
 
         public abstract void PrepareStatistics();
 
-        public virtual void Update(GameTime gameTime)
+        public virtual void Update(GameTime gameTime, GamePlayView gamePlay)
         {
             if (!allStatesFinished)
             {
