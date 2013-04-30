@@ -605,8 +605,8 @@ namespace datx02_rally.Menus
             #region Cameras
 
             var input = gameInstance.GetService<InputComponent>();
-            //gameInstance.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(-11800, 3000, -8200), input));
             gameInstance.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(Car, input));
+            gameInstance.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(-11800, 3000, -8200), input));
             
             #endregion
 
@@ -671,11 +671,11 @@ namespace datx02_rally.Menus
             
             #endregion
 
-            int cp = 30;
+            int cp = 5;
             if (gameModeChoice == GameModeChoice.SimpleRace)
                 this.mode = new SimpleRaceMode(gameInstance, 2, cp, raceTrack, Car);
             else if (gameModeChoice == GameModeChoice.Multiplayer)
-                this.mode = new MultiplayerRaceMode(gameInstance, 1, cp, raceTrack, Car);
+                this.mode = new MultiplayerRaceMode(gameInstance, 2, cp, raceTrack, Car);
             else
                 throw new Exception("Fuck you");
 

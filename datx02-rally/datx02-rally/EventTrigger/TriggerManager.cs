@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using datx02_rally.Entities;
 
 namespace datx02_rally.EventTrigger
 {
     public class TriggerManager : GameComponent
     {
         public Dictionary<string, AbstractTrigger> Triggers = new Dictionary<string, AbstractTrigger>();
+        public Dictionary<AbstractTrigger, List<IMovingObject>> ObjectTriggers = new Dictionary<AbstractTrigger,List<IMovingObject>>();
         
         public TriggerManager(Game game)
             : base(game)
@@ -20,6 +22,13 @@ namespace datx02_rally.EventTrigger
             var localCar = Game.GetService<CarControlComponent>().Cars[Game.GetService<ServerClient>().LocalPlayer];
             foreach (var trigger in Triggers.Values)
                 trigger.Update(localCar, gameTime);
+            foreach (var triggerObjectPair in ObjectTriggers)
+	        {
+                foreach (var obj in triggerObjectPair.Value)
+	            {
+		            triggerObjectPair.Key.Update(obj, gameTime);
+	            }
+	        }
                 
         }
 

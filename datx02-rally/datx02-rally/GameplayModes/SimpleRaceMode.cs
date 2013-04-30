@@ -22,6 +22,7 @@ namespace datx02_rally
         public TimeSpan TotalRaceTime { get; private set; }
         protected TimeSpan startTime = TimeSpan.Zero;
         private bool countdown = false;
+        protected CurveRasterization trackRasterization;
 
         private List<TimeSpan> goalLineTimes = new List<TimeSpan>();
 
@@ -43,7 +44,7 @@ namespace datx02_rally
 
         public override void Initialize()
         {
-            var trackRasterization = raceTrack.GetCurveRasterization(checkpoints);
+            trackRasterization = raceTrack.GetCurveRasterization(checkpoints);
 
             List<AbstractTrigger> checkpointTriggers = new List<AbstractTrigger>();
             for (int i = 0; i < checkpoints; i++)
@@ -53,7 +54,7 @@ namespace datx02_rally
                 trigger.Triggered += (sender, e) =>
                 {
                     Console.WriteLine(outputDebug);
-                    gameInstance.GetService<HUDComponent>().ShowTextNotification(Color.Red, outputDebug);
+                    gameInstance.GetService<HUDComponent>().ShowTextNotification(Color.BurlyWood, outputDebug);
                     var current = states[CurrentState];
                     var aTrigger = sender as AbstractTrigger;
                     if (e.Object == car && current.Triggers.ContainsKey(aTrigger))
@@ -68,18 +69,11 @@ namespace datx02_rally
             }
 
             // Keep track of times when passing goal line
-            var goalLine = checkpointTriggers[0];
-            goalLine.Triggered += (sender, e) =>
+            var goalTrigger = checkpointTriggers[0];
+            goalTrigger.Triggered += (sender, e) =>
             {
                 goalLineTimes.Add(e.Time.TotalGameTime);
             };
-
-            //// Starting state, waiting for countdown/start signal from server
-            //const int countdown = 3;
-            //for (int i = 0; i < countdown; i++)
-            //{
-			     
-            //}
 
             for (int i = 0; i < laps; i++)
             {
