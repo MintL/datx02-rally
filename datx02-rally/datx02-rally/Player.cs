@@ -13,6 +13,7 @@ namespace datx02_rally
         public float Speed { get; set; }
         public PositionMessage LastReceived { get; private set; }
         public TimeSpan RaceTime { get; set; }
+        public int Lap { get; set; }
 
         public byte ID;
         public readonly bool LOCAL_PLAYER;
@@ -24,6 +25,7 @@ namespace datx02_rally
             LastReceived = new PositionMessage();
             LastReceived.Sequence = byte.MinValue;
             RaceTime = TimeSpan.MaxValue;
+            Lap = 0;
         }
 
         public Player(Game1 game, byte id, string name) : base(game)
@@ -34,6 +36,7 @@ namespace datx02_rally
             LastReceived = new PositionMessage();
             LastReceived.Sequence = byte.MinValue;
             RaceTime = TimeSpan.MaxValue;
+            Lap = 0;
         }
 
         public override void Update(GameTime gameTime)
@@ -70,6 +73,7 @@ namespace datx02_rally
             public float Velocity { get; set; }
             public DateTime TimeSent { get; set; }
         }
+
     }
 
 }

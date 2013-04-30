@@ -16,6 +16,7 @@ namespace datx02_rally
         protected Game1 gameInstance;
         protected List<GameModeState> states;
         protected List<string> addedTriggers;
+        protected List<string> addedObjTriggers;
         protected int CurrentState { get; private set; }
         protected bool allStatesFinished = false;
         public bool GameOver { private set; get; }
@@ -27,6 +28,7 @@ namespace datx02_rally
             this.Mode = Mode.Singleplayer;
             states = new List<GameModeState>();
             addedTriggers = new List<string>();
+            addedObjTriggers = new List<string>();
             GameStarted = true;
             GameOver = false;
             CurrentState = 0;
@@ -70,6 +72,11 @@ namespace datx02_rally
             {
                 if (triggerManager.Triggers.ContainsKey(trigger))
                     triggerManager.Triggers.Remove(trigger);
+            }
+            foreach (var trigger in addedObjTriggers)
+            {
+                if (triggerManager.ObjectTriggers.ContainsKey(trigger))
+                    triggerManager.ObjectTriggers.Remove(trigger);
             }
 
             // disable keyboard for 3 seconds, then exit gameplay

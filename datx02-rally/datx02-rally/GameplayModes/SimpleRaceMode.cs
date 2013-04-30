@@ -8,6 +8,7 @@ using datx02_rally.Components;
 using datx02_rally.GameplayModes;
 using datx02_rally.Sound;
 using System.Timers;
+using datx02_rally.Entities;
 
 namespace datx02_rally
 {
@@ -74,7 +75,7 @@ namespace datx02_rally
             {
                 goalLineTimes.Add(e.Time.TotalGameTime);
             };
-
+            
             for (int i = 0; i < laps; i++)
             {
                 List<AbstractTrigger> lapTriggers = new List<AbstractTrigger>();
@@ -85,6 +86,23 @@ namespace datx02_rally
 
             // Add state for passing the finish line
             states.Add(new GameModeState(checkpointTriggers.GetRange(index: 0, count: 1)));
+
+            // add lap counter triggers at finish line
+            foreach (var player in players)
+            {
+                var lPlayer = player;
+                var car = gameInstance.GetService<CarControlComponent>().Cars[lPlayer];
+                PositionTrigger trigger = new PositionTrigger(trackRasterization, 0, true, true);
+                trigger.Triggered += (sender, e) =>
+                {
+                    lPlayer.Lap++;
+                };
+                Tuple<AbstractTrigger, List<IMovingObject>> objTrigger = 
+                    new Tuple<AbstractTrigger, List<IMovingObject>>(trigger, new List<IMovingObject> { car });
+                string id = "lapT"+player.PlayerName;
+                gameInstance.GetService<TriggerManager>().ObjectTriggers.Add(id, objTrigger);
+                addedObjTriggers.Add(id);
+            }
         }
 
         public override void PrepareStatistics()
@@ -126,6 +144,12 @@ namespace datx02_rally
                 countdown = true;
                 StartCountdown();
             }
+            Console.Write("players: ");
+            foreach (var player in players)
+            {
+                Console.Write(player.PlayerName + " (" + player.Lap + "),");
+            }
+            Console.WriteLine();
             base.Update(gameTime, gamePlay);
         }
 

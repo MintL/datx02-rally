@@ -10,7 +10,8 @@ namespace datx02_rally.EventTrigger
     public class TriggerManager : GameComponent
     {
         public Dictionary<string, AbstractTrigger> Triggers = new Dictionary<string, AbstractTrigger>();
-        public Dictionary<AbstractTrigger, List<IMovingObject>> ObjectTriggers = new Dictionary<AbstractTrigger,List<IMovingObject>>();
+        public Dictionary<string, Tuple<AbstractTrigger, List<IMovingObject>>> ObjectTriggers = 
+            new Dictionary<string, Tuple<AbstractTrigger, List<IMovingObject>>>();
         
         public TriggerManager(Game game)
             : base(game)
@@ -22,11 +23,11 @@ namespace datx02_rally.EventTrigger
             var localCar = Game.GetService<CarControlComponent>().Cars[Game.GetService<ServerClient>().LocalPlayer];
             foreach (var trigger in Triggers.Values)
                 trigger.Update(localCar, gameTime);
-            foreach (var triggerObjectPair in ObjectTriggers)
+            foreach (var triggerObjectPair in ObjectTriggers.Values)
 	        {
-                foreach (var obj in triggerObjectPair.Value)
+                foreach (var obj in triggerObjectPair.Item2)
 	            {
-		            triggerObjectPair.Key.Update(obj, gameTime);
+		            triggerObjectPair.Item1.Update(obj, gameTime);
 	            }
 	        }
                 

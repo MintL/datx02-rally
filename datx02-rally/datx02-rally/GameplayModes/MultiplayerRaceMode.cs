@@ -21,21 +21,6 @@ namespace datx02_rally.GameplayModes
         public override void Initialize()
         {
             base.Initialize();
-            foreach (var player in players.FindAll(p => !p.LOCAL_PLAYER))
-            {
-                var remoteCar = gameInstance.GetService<CarControlComponent>().Cars[player];
-                PositionTrigger trigger = new PositionTrigger(trackRasterization, 0, true, true);
-                trigger.Triggered += (sender, e) =>
-                {
-                    /*Console.WriteLine(outputDebug);
-                    gameInstance.GetService<HUDComponent>().ShowTextNotification(Color.BurlyWood, outputDebug);
-                    var current = states[CurrentState];
-                    var aTrigger = sender as AbstractTrigger;
-                    if (e.Object == car && current.Triggers.ContainsKey(aTrigger))
-                        current.Triggers[aTrigger] = e;
-                    AudioEngineManager.PlaySound("passfinishline");*/
-                };
-            }
         }
 
         public override void PrepareStatistics()
