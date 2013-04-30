@@ -24,6 +24,8 @@ namespace datx02_rally.Menus
     {
         #region Field
 
+        bool init = false;
+        public bool Initialized { get; set; }
         public GameplayMode mode;
         GameModeChoice gameModeChoice;
 
@@ -598,7 +600,7 @@ namespace datx02_rally.Menus
             #region Cameras
 
             var input = gameInstance.GetService<InputComponent>();
-            gameInstance.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(-11800, 3000, -8200), input));
+            //gameInstance.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(-11800, 3000, -8200), input));
             gameInstance.GetService<CameraComponent>().AddCamera(new ThirdPersonCamera(Car, input));
             
             #endregion
@@ -696,6 +698,7 @@ namespace datx02_rally.Menus
                 SetCarsAtStart(carList);
             }
 
+            init = true;
         }
 
         public Car MakeCar()
@@ -1217,6 +1220,11 @@ namespace datx02_rally.Menus
             RenderOverlayMenu(overlay, overlayTexture);
 
             base.Draw(gameTime);
+            if (init)
+            {
+                Initialized = true;
+                init = false;
+            }
         }
 
         public void RenderOverlayMenu(OverlayView overlay, Texture2D overlayTexture)
@@ -1599,6 +1607,7 @@ namespace datx02_rally.Menus
         #endregion
 
         #endregion
+
 
     }
 }
