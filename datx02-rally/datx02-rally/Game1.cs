@@ -52,7 +52,7 @@ namespace datx02_rally
             UniversalRandom.ResetInstance(0);
 
             var profilerGameComponent = new ProfilerGameComponent(this, "ProfilerFont");
-            ProfilingManager.Run = true;
+            ProfilingManager.Run = false;
             Components.Add(profilerGameComponent);
 
 

@@ -66,14 +66,15 @@ namespace datx02_rally.Menus
 
         #region Level terrain
 
-        int terrainSegmentSize = 32;
+        // Old value: 32
+        int terrainSegmentSize = 25;
         int terrainSegmentsCount = 16;
 
         // XZ- & Y scaling.
         //Vector3 terrainScale = new Vector3(75, 10000, 75);
         Vector3 terrainScale = new Vector3(75, 3500, 75);
 
-        float roadWidth = 10; // #Quads
+        float roadWidth = 7; // #Quads
         float roadFalloff = 30; // #Quads
 
         RaceTrack raceTrack;
@@ -546,15 +547,15 @@ namespace datx02_rally.Menus
                 {
                 case 0:
                     obj = new OakTree(gameInstance);
-                    obj.Scale = 1; // 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
+                    obj.Scale = 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
                     break;
                 case 1:
                     obj = new BirchTree(gameInstance);
-                    obj.Scale = 1; // 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
+                    obj.Scale = 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
                     break;
                 default:
                     obj = new Stone(gameInstance);
-                    obj.Scale = 1; // 0.5f + 2 * (float)UniversalRandom.GetInstance().NextDouble();
+                    obj.Scale = 0.5f + (float)UniversalRandom.GetInstance().NextDouble();
                     break;
                 }
 
