@@ -94,6 +94,7 @@ namespace datx02_rally
         public override void PrepareStatistics()
         {
             TotalRaceTime = goalLineTimes[goalLineTimes.Count - 1] - goalLineTimes[0];
+            players.Find(p => p.LOCAL_PLAYER).RaceTime = TotalRaceTime;
 
             var playerHeading = new EndGameStatistics.Heading();
             playerHeading.Title = null;

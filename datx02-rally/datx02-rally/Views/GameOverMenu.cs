@@ -54,18 +54,14 @@ namespace datx02_rally.Menus
 
                 AddTextItem(false, "\nPress enter to return to Main Menu!", null, null);
             }
-            if (populated)
+            else if (populated)
             {
                 foreach (var heading in mode.Statistics.CategorizedItems)
                 {
                     if (heading.Updateable)
                     {
-                        int index = MenuItems.FindLastIndex(i => i.Identifier == "uz1"+heading.Title);
                         MenuItems.RemoveAll(i => i.Identifier.StartsWith("uz1"));
-                        if (index > MenuItems.Count - 1)
-                            AddHeading(heading);
-                        else
-                            InsertHeading(index, heading);
+                        InsertHeading(0, heading);
                     }
                 }
             }
@@ -107,7 +103,7 @@ namespace datx02_rally.Menus
         public void AddTextItem(bool heading, string columnOne, string columnTwo, string id)
         {
             if (heading) // some spacing before headings
-                AddTextItem(false, " ", null, id + "spacing");
+                AddTextItem(false, " ", null, "spacing"+id);
             MenuItem item = new TextMenuItem(columnOne, columnTwo, id);
             item.Bounds = Bounds;
             item.Font = heading ? MenuHeaderFont : MenuFont;
@@ -115,6 +111,7 @@ namespace datx02_rally.Menus
             item.FontColor = ItemColor;
             item.FontColorSelected = ItemColor;
             MenuItems.Add(item);
+            Console.WriteLine("Painting " + (heading ? " heading " : "") + columnOne + "/" + columnTwo + ", id: " + id);
         }
     }
 }

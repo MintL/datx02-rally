@@ -668,7 +668,7 @@ namespace datx02_rally.Menus
             if (gameModeChoice == GameModeChoice.SimpleRace)
                 this.mode = new SimpleRaceMode(gameInstance, 2, cp, raceTrack, Car);
             else if (gameModeChoice == GameModeChoice.Multiplayer)
-                this.mode = new MultiplayerRaceMode(gameInstance, 2, cp, raceTrack, Car);
+                this.mode = new MultiplayerRaceMode(gameInstance, 1, cp, raceTrack, Car);
             else
                 throw new Exception("Fuck you");
 
