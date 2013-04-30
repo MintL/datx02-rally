@@ -115,7 +115,6 @@ namespace datx02_rally.Menus
             item.FontColor = ItemColor;
             item.FontColorSelected = ItemColor;
             MenuItems.Add(item);
-            Console.WriteLine("Painting " + (heading ? " heading " : "") + columnOne + "/" + columnTwo + ", id: " + id);
         }
     }
 }

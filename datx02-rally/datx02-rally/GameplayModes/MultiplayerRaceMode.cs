@@ -27,13 +27,10 @@ namespace datx02_rally.GameplayModes
                 gameInstance.GetService<ServerClient>().SendRaceTime(TotalRaceTime);
             if (Statistics != null) {
                 var playerHeading = Statistics.CategorizedItems.First(h => h.Updateable);
-                Console.Write("Players: ");
+                playerHeading.Items.Clear();
+                int place = 1;
                 foreach (var player in players.OrderBy(p => p.RaceTime))
-                {
-                    Console.Write(player.PlayerName + "( "+player.RaceTime.ToString(@"m\:ss\:ff")+"), ");
-                    playerHeading.Items[player.ID + ". " + player.PlayerName] = player.RaceTime == TimeSpan.MaxValue ? "" : player.RaceTime.ToString(@"m\:ss\:ff");
-                }
-                Console.WriteLine();
+                    playerHeading.Items[place++ + ". " + player.PlayerName] = player.RaceTime == TimeSpan.MaxValue ? "" : player.RaceTime.ToString(@"m\:ss\:ff");
             }
             base.Update(gameTime);
         }
