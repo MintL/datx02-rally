@@ -35,7 +35,11 @@ namespace datx02_rally.Menus
         {
             var state = base.UpdateState(gameTime);
             if (gameInstance.GetService<InputComponent>().GetKey(Keys.Enter))
+            {
+                if (gameInstance.GetService<ServerClient>().connected)
+                    gameInstance.GetService<ServerClient>().Disconnect();
                 return GameState.MainMenu;
+            }
             return state;
         }
 
