@@ -31,7 +31,7 @@ namespace datx02_rally
             this.raceTrack = raceTrack;
             this.car = localCar;
             PlayerPlace = 1;
-            GameStarted = false;
+            GameStarted = true;
             TotalRaceTime = TimeSpan.Zero;
 
             players.Add(gameInstance.GetService<Player>());
