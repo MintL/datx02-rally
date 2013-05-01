@@ -2,6 +2,7 @@
 using datx02_rally.Menus;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using System.Linq;
 using System;
 using datx02_rally.GameLogic;
 using datx02_rally.Components;
@@ -23,7 +24,7 @@ namespace datx02_rally
         public TimeSpan TotalRaceTime { get; private set; }
         protected TimeSpan startTime = TimeSpan.Zero;
         private bool countdown = false;
-        protected CurveRasterization trackRasterization;
+        protected CurveRasterization placementRasterization;
 
         private List<TimeSpan> goalLineTimes = new List<TimeSpan>();
 
@@ -34,6 +35,7 @@ namespace datx02_rally
             this.checkpoints = noOfCheckpoints;
             this.raceTrack = raceTrack;
             this.car = localCar;
+            this.placementRasterization = raceTrack.GetCurveRasterization(100);
             PlayerPlace = 1;
             GameStarted = false;
             TotalRaceTime = TimeSpan.Zero;
@@ -45,7 +47,7 @@ namespace datx02_rally
 
         public override void Initialize()
         {
-            trackRasterization = raceTrack.GetCurveRasterization(checkpoints);
+            var trackRasterization = raceTrack.GetCurveRasterization(checkpoints);
 
             List<AbstractTrigger> checkpointTriggers = new List<AbstractTrigger>();
             for (int i = 0; i < checkpoints; i++)
@@ -150,6 +152,7 @@ namespace datx02_rally
                 Console.Write(player.PlayerName + " (" + player.Lap + "),");
             }
             Console.WriteLine();
+            gameInstance.GetService<HUDComponent>().SetPlayerPosition(CalculatePlayerPosition());
             base.Update(gameTime, gamePlay);
         }
 
@@ -171,6 +174,56 @@ namespace datx02_rally
                 };
                 timer.Start();
             }
+        }
+
+        private int CalculatePlayerPosition()
+        {
+            var localPlayer = players.Find(p => p.LOCAL_PLAYER);
+            var localCar = gameInstance.GetService<CarControlComponent>().Cars[localPlayer];
+            var lDist = CalculateClosestPoint(localCar);
+            int lClosestPositionIndex = lDist.Item1;
+            float lDistanceToClosestPosition = lDist.Item2;
+
+            List<Player> playersBefore = new List<Player>();
+            List<Player> playersAfter = new List<Player>();
+
+            var remotePlayers = players.FindAll(p => !p.LOCAL_PLAYER);
+            foreach (var player in remotePlayers)
+            {
+                if (player.Lap > localPlayer.Lap)
+                    playersBefore.Add(player);
+                else if (player.Lap < localPlayer.Lap)
+                    playersAfter.Add(player);
+                else
+                {
+                    var dist = CalculateClosestPoint(localCar);
+                    int closestPositionIndex = dist.Item1;
+                    float distanceToClosestPosition = dist.Item2;
+
+                    if (closestPositionIndex > lClosestPositionIndex)
+                        playersBefore.Add(player);
+                    else if (closestPositionIndex < lClosestPositionIndex)
+                        playersAfter.Add(player);
+                    else
+                    {
+                        if (distanceToClosestPosition > lDistanceToClosestPosition)
+                            playersBefore.Add(player);
+                        else if (distanceToClosestPosition < lDistanceToClosestPosition)
+                            playersAfter.Add(player);
+                        else
+                            playersAfter.Add(player);
+                    }
+                }
+
+            }
+            return playersBefore.Count+1;
+        }
+
+        private Tuple<int, float> CalculateClosestPoint(Car car)
+        {
+            var closestPoint = placementRasterization.Points.OrderBy(point => Vector3.DistanceSquared(car.Position, point.Position)).ElementAt(0);
+            return new Tuple<int, float>(placementRasterization.Points.IndexOf(closestPoint), Vector3.DistanceSquared(car.Position, closestPoint.Position));
+
         }
 
     }

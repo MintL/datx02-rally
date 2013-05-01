@@ -108,7 +108,7 @@ namespace datx02_rally.Components
                 int totalPlayers = Game.GetService<CarControlComponent>().Cars.Count;
                 string positionText = playerPosition + "/" + totalPlayers;
                 Vector2 topRight = new Vector2(Game.GraphicsDevice.Viewport.Width - font.MeasureString(positionText).X, 0);
-                spriteBatch.DrawString(font, positionText, topRight, Color.Moccasin);
+                spriteBatch.DrawString(font, positionText, topRight, Color.Azure);
             }
             if (TimeEnabled)
             {
@@ -121,7 +121,7 @@ namespace datx02_rally.Components
             }
 
             var notificationPosition = new Vector2(Game.GraphicsDevice.Viewport.Width / 2.0f, Game.GraphicsDevice.Viewport.Height * 0.2f);  
-            foreach (var notification in notifications)
+            foreach (var notification in new List<TextNotification>(notifications)) //thread safety
             {
                 // fade in/out
                 float fadeProgress;
