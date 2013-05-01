@@ -32,6 +32,7 @@ namespace datx02_rally.Components
         public bool SpeedEnabled { get; set; }
         public bool PlayerPlaceEnabled { get; set; }
         public bool TimeEnabled { get; set; }
+        public bool PlacementNotificationsEnabled { get; set; }
 
         public HUDComponent(Game game)
             : base(game)
@@ -44,6 +45,7 @@ namespace datx02_rally.Components
             SpeedEnabled = true;
             PlayerPlaceEnabled = true;
             TimeEnabled = true;
+            PlacementNotificationsEnabled = true;
         }
 
         /// <summary>
@@ -57,6 +59,17 @@ namespace datx02_rally.Components
 
         public void SetPlayerPosition(int position) 
         {
+            if (PlacementNotificationsEnabled && position != playerPosition)
+            {
+                const string[] suffixes = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
+                string text = position.ToString();
+                if (position > 9 && (position % 10) % 10 == 1)
+                    text += "th place!";
+                else
+                    text += (suffixes[position % 10] + " place!");
+                ShowTextNotification(Color.Aqua, text);
+            }
+
             playerPosition = position;
         }
 
