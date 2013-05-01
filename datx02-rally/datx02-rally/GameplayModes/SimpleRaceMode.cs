@@ -185,34 +185,20 @@ namespace datx02_rally
             float lDistanceToClosestPosition = lDist.Item2;
 
             List<Player> playersBefore = new List<Player>();
-            List<Player> playersAfter = new List<Player>();
 
             var remotePlayers = players.FindAll(p => !p.LOCAL_PLAYER);
             foreach (var player in remotePlayers)
             {
                 if (player.Lap > localPlayer.Lap)
                     playersBefore.Add(player);
-                else if (player.Lap < localPlayer.Lap)
-                    playersAfter.Add(player);
                 else
                 {
                     var dist = CalculateClosestPoint(localCar);
                     int closestPositionIndex = dist.Item1;
                     float distanceToClosestPosition = dist.Item2;
 
-                    if (closestPositionIndex > lClosestPositionIndex)
+                    if (closestPositionIndex > lClosestPositionIndex || distanceToClosestPosition > lDistanceToClosestPosition)
                         playersBefore.Add(player);
-                    else if (closestPositionIndex < lClosestPositionIndex)
-                        playersAfter.Add(player);
-                    else
-                    {
-                        if (distanceToClosestPosition > lDistanceToClosestPosition)
-                            playersBefore.Add(player);
-                        else if (distanceToClosestPosition < lDistanceToClosestPosition)
-                            playersAfter.Add(player);
-                        else
-                            playersAfter.Add(player);
-                    }
                 }
 
             }
