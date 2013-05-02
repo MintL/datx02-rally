@@ -130,12 +130,12 @@ namespace datx02_rally.Components
             }
             if (TimeEnabled)
             {
-                string totalGameTime = gameTime.TotalGameTime.ToString(@"ss\:ff");
-                string lapTime = gameTime.TotalGameTime.ToString(@"m\:ss\:ff");
-                Vector2 topCenter1 = new Vector2((Game.GraphicsDevice.Viewport.Width / 2) - (font.MeasureString(lapTime).X / 2), 0);
-                Vector2 topCenter2 = new Vector2((Game.GraphicsDevice.Viewport.Width / 2) - (font.MeasureString(totalGameTime).X / 2), font.MeasureString(totalGameTime).Y);
-                spriteBatch.DrawString(font, lapTime, topCenter1, Color.Red);
-                spriteBatch.DrawString(font, totalGameTime, topCenter2, Color.Red);
+                string totalGameTime = gameTime.TotalGameTime.ToString(@"m\:ss\:ff");
+                //string lapTime = gameTime.TotalGameTime.ToString(@"m\:ss\:ff");
+                Vector2 topCenter1 = new Vector2((Game.GraphicsDevice.Viewport.Width / 2) - (font.MeasureString(totalGameTime).X / 2), 0);
+                //Vector2 topCenter2 = new Vector2((Game.GraphicsDevice.Viewport.Width / 2) - (font.MeasureString(totalGameTime).X / 2), font.MeasureString(totalGameTime).Y);
+                //spriteBatch.DrawString(font, lapTime, topCenter1, Color.Red);
+                spriteBatch.DrawString(font, totalGameTime, topCenter1, Color.SpringGreen);
             }
 
             var notificationPosition = new Vector2(Game.GraphicsDevice.Viewport.Width / 2.0f, Game.GraphicsDevice.Viewport.Height * 0.2f);  

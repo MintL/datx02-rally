@@ -26,6 +26,7 @@ namespace datx02_rally
         private bool countdown = false;
         protected CurveRasterization checkpointRasterization;
         protected CurveRasterization placementRasterization;
+        private DateTime lastCheckpointPass = DateTime.MinValue;
 
         private List<TimeSpan> goalLineTimes = new List<TimeSpan>();
 
@@ -58,7 +59,12 @@ namespace datx02_rally
                 trigger.Triggered += (sender, e) =>
                 {
                     Console.WriteLine(outputDebug);
-                    gameInstance.GetService<HUDComponent>().ShowTextNotification(Color.BurlyWood, outputDebug);
+                    
+                    var now = DateTime.Now;
+                    if (lastCheckpointPass != DateTime.MinValue)
+                        gameInstance.GetService<HUDComponent>().ShowTextNotification(Color.BurlyWood, (now - lastCheckpointPass).ToString(@"m\:ss\:ff"));
+                    lastCheckpointPass = now;
+
                     var current = states[CurrentState];
                     var aTrigger = sender as AbstractTrigger;
                     if (e.Object == car && current.Triggers.ContainsKey(aTrigger))
@@ -77,6 +83,7 @@ namespace datx02_rally
             goalTrigger.Triggered += (sender, e) =>
             {
                 goalLineTimes.Add(e.Time.TotalGameTime);
+                gameInstance.GetService<HUDComponent>().ShowTextNotification(Color.Teal, "Lap " + (++gameInstance.GetService<Player>().Lap));
             };
             
             for (int i = 0; i < laps; i++)
@@ -137,7 +144,8 @@ namespace datx02_rally
                 Console.Write(player.PlayerName + " (" + player.Lap + "),");
             }
             Console.WriteLine();*/
-            gameInstance.GetService<HUDComponent>().SetPlayerPosition(CalculatePlayerPosition());
+            PlayerPlace = CalculatePlayerPosition();
+            gameInstance.GetService<HUDComponent>().SetPlayerPosition(PlayerPlace);
             base.Update(gameTime, gamePlay);
         }
 

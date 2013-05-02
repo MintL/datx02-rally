@@ -23,7 +23,7 @@ namespace datx02_rally.GameplayModes
         public void AddLapTriggers()
         {
             // add lap counter triggers at finish line
-            foreach (var player in players)
+            foreach (var player in players.FindAll(p => !p.LOCAL_PLAYER))
             {
                 var lPlayer = player;
                 var car = gameInstance.GetService<CarControlComponent>().Cars[lPlayer];
