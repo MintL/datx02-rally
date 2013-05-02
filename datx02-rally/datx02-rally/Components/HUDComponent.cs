@@ -44,6 +44,8 @@ namespace datx02_rally.Components
             SpeedEnabled = true;
             PlayerPlaceEnabled = true;
             TimeEnabled = true;
+
+            DrawOrder = 100;
         }
 
         /// <summary>

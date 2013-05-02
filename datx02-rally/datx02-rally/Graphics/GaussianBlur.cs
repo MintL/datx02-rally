@@ -58,8 +58,8 @@ namespace datx02_rally.Graphics
             // Since we're performing a Gaussian blur on a texture image the
             // render targets are half the size of the source texture image.
             // This will help improve the blurring effect.
-            renderTargetWidth = device.Viewport.Width / 2;
-            renderTargetHeight = device.Viewport.Height / 2;
+            renderTargetWidth = device.Viewport.Width / 4;
+            renderTargetHeight = device.Viewport.Height / 4;
 
             blurHTarget = new RenderTarget2D(device, renderTargetWidth, renderTargetHeight,
                 false, SurfaceFormat.Color, DepthFormat.Depth24);
@@ -67,7 +67,7 @@ namespace datx02_rally.Graphics
                 false, SurfaceFormat.Color, DepthFormat.Depth24);
 
             Radius = 7;
-            Amount = 2.0f;
+            Amount = 3.0f;
 
             ComputeKernel(Radius, Amount);
             ComputeOffsets(renderTargetWidth, renderTargetHeight);

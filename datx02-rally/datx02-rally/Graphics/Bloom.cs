@@ -62,8 +62,8 @@ namespace datx02_rally.Graphics
             Threshold = 0.3f;
             BloomIntensity = 1.4f;
             OriginalIntensity = 1.0f;
-            BloomSaturation = 1.0f;
-            OriginalSaturation = 1.0f;
+            BloomSaturation = 1.2f;
+            OriginalSaturation = 1.2f;
         }
 
         public Texture2D PerformBloom(Texture2D srcTexture)

@@ -40,10 +40,6 @@ namespace datx02_rally.Menus
 
         RenderTarget2D postProcessTexture;
 
-        Bloom bloom;
-        GaussianBlur gaussianBlur;
-        MotionBlur motionBlur;
-
         #endregion
 
         List<GameObject> GraphicalObjects = new List<GameObject>();
@@ -629,10 +625,6 @@ namespace datx02_rally.Menus
                 GraphicsDevice.Viewport.Width,
                 GraphicsDevice.Viewport.Height,
                 true, SurfaceFormat.Color, DepthFormat.Depth24);
-
-            gaussianBlur = new GaussianBlur(gameInstance);
-            bloom = new Bloom(gameInstance, gaussianBlur);
-            motionBlur = new MotionBlur(gameInstance);
 
             #endregion
 

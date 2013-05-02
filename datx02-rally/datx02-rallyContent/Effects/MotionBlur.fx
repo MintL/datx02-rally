@@ -43,8 +43,7 @@ float4 PixelShaderFunction(float2 texCoord : TEXCOORD0) : COLOR0
 	}
 	blur /= NumSamples;
 	
-	return lerp(color, blur, abs(cos(texCoord.x * 3.14)) * 0.5);
-
+	return lerp(color, blur, max(abs(cos(texCoord.x * 3.14))-0.20, 0) * 0.7);
 }
 
 technique Technique1
