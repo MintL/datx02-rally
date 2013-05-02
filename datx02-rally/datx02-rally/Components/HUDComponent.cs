@@ -22,6 +22,7 @@ namespace datx02_rally.Components
         private SpriteFont font;
         private TimeSpan timeSinceLastFPS;
         private List<TextNotification> notifications = new List<TextNotification>();
+        private DateTime lastPlacementNotification = DateTime.MinValue;
 
         private int frameCount = 0;
         private int currentFps;
@@ -60,15 +61,18 @@ namespace datx02_rally.Components
 
         public void SetPlayerPosition(int position) 
         {
+            if (TimeSpan.FromSeconds(3) > DateTime.Now - lastPlacementNotification)
+                return;
             if (PlacementNotificationsEnabled && position != playerPosition)
             {
+                lastPlacementNotification = DateTime.Now;
                 string[] suffixes = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
                 string text = position.ToString();
                 if (position > 9 && (position % 10) % 10 == 1)
                     text += "th place!";
                 else
                     text += (suffixes[position % 10] + " place!");
-                ShowTextNotification(Color.Aqua, text);
+                ShowTextNotification(Color.Aqua, text, TimeSpan.FromSeconds(2));
             }
 
             playerPosition = position;

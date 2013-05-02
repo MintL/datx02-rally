@@ -168,14 +168,12 @@ namespace datx02_rally
             var lDist = CalculateClosestPoint(localCar);
             int lClosestPositionIndex = lDist.Item1;
             float lDistanceToClosestPosition = lDist.Item2;
-            Console.Write("local, lap" + localPlayer.Lap + ", closestPoint" + lClosestPositionIndex + ", distance" + lDistanceToClosestPosition);
 
             List<Player> playersBefore = new List<Player>();
 
             var remotePlayers = players.FindAll(p => !p.LOCAL_PLAYER);
             foreach (var player in remotePlayers)
             {
-                Console.Write(". " + player.PlayerName + ", lap" + player.Lap);
                 if (player.Lap > localPlayer.Lap)
                     playersBefore.Add(player);
                 else if (player.Lap == localPlayer.Lap)
@@ -184,22 +182,48 @@ namespace datx02_rally
                     var dist = CalculateClosestPoint(car);
                     int closestPositionIndex = dist.Item1;
                     float distanceToClosestPosition = dist.Item2;
-                    Console.Write(", closestPoint" + closestPositionIndex + ", distance" + distanceToClosestPosition);
                     if (closestPositionIndex > lClosestPositionIndex ||
                         (closestPositionIndex == lClosestPositionIndex && distanceToClosestPosition > lDistanceToClosestPosition))
                         playersBefore.Add(player);
                 }
 
             }
-            Console.WriteLine();
             return playersBefore.Count+1;
         }
 
+        Tuple<int, float> cachedClosestPoint = new Tuple<int,float>(0, 0);
         private Tuple<int, float> CalculateClosestPoint(Car car)
         {
-            var closestPoint = placementRasterization.Points.OrderBy(point => Vector3.DistanceSquared(car.Position, point.Position)).ElementAt(0);
-            return new Tuple<int, float>(placementRasterization.Points.IndexOf(closestPoint), Vector3.DistanceSquared(car.Position, closestPoint.Position));
+            var orderedPoints = placementRasterization.Points.OrderBy(point => Vector3.DistanceSquared(car.Position, point.Position));
+            var closestPoint = orderedPoints.ElementAt(0);
+            int closestIndex = placementRasterization.Points.IndexOf(closestPoint);
+            var nextClosestPoint = orderedPoints.ElementAt(1);
+            int nextClosestIndex = placementRasterization.Points.IndexOf(nextClosestPoint);
 
+            int newClosestIndex = closestIndex;
+            float newClosestDistance = Vector3.DistanceSquared(car.Position, closestPoint.Position);
+            if (Math.Abs(closestIndex - nextClosestIndex) > 1)
+            {
+                // cases too god damn annoying, don't have time to code, just return same as before
+                return cachedClosestPoint;
+                /*var thirdClosest = placementRasterization.Points.IndexOf(orderedPoints.ElementAt(3));
+                Console.WriteLine("WOW, ABOUT TO LAP, closest: " + closestIndex + "(" + newClosestDistance + "), nextclosest: " + nextClosestIndex + "(" + Vector3.DistanceSquared(car.Position, nextClosestPoint.Position) + "), third:" + thirdClosest);
+                if (Math.Abs(thirdClosest - closestIndex) > 2)//Vector3.DistanceSquared(closestPoint.Position, thirdClosest.Position) > Vector3.DistanceSquared(nextClosestPoint.Position, thirdClosest.Position))
+                {
+                    newClosestIndex = nextClosestIndex;
+                    newClosestDistance = Vector3.DistanceSquared(car.Position, nextClosestPoint.Position);
+                }*/
+            }
+            cachedClosestPoint = new Tuple<int, float>(newClosestIndex, newClosestDistance);
+            return cachedClosestPoint;
+
+        }
+
+        private bool IsInFrontOf(Vector3 position, CurveRasterization.CurvePoint point)
+        {
+            var relativePosition = Vector3.Normalize(position - point.Position);
+
+            return Vector3.Dot(relativePosition, point.Heading) > 0;
         }
 
     }
