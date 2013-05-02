@@ -19,6 +19,7 @@ using datx02_rally.Menus;
 using Indiefreaks.Xna.Profiler;
 using Indiefreaks.AOP.Profiler;
 using datx02_rally.Sound;
+using datx02_rally.Cameras;
 
 namespace datx02_rally
 {
@@ -78,6 +79,7 @@ namespace datx02_rally
             BaseComponents.Add(new ServerClient(this));
             BaseComponents.Add(new InputComponent(this));
             BaseComponents.Add(new HUDConsoleComponent(this));
+            BaseComponents.Add(new CameraComponent(this));
 
             foreach (IGameComponent component in BaseComponents)
             {
@@ -87,6 +89,12 @@ namespace datx02_rally
 
             currentState = GameState.MainMenu;
             currentView = new MenuView(this, currentState);
+
+            // Camera component
+
+            //var cameraComponent = 
+            //Components.Add(cameraComponent);
+            //Services.AddService(typeof(CameraComponent), cameraComponent);
 
             base.Initialize();
         }

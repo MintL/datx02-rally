@@ -44,6 +44,7 @@ namespace datx02_rally.Entities
         public static void LoadMaterial(ContentManager content)
         {
             Effect alphaMapEffect = content.Load<Effect>(@"Effects\AlphaMap");
+            birchTreesVariants.Clear();
             birchTreesVariants.Add(content.Load<Model>(@"Foliage\Birch_01"));
             birchTreesVariants.Add(content.Load<Model>(@"Foliage\Birch_02"));
             birchTreesVariants.Add(content.Load<Model>(@"Foliage\Birch_03"));

@@ -236,6 +236,9 @@ technique TerrainShading
 {
     pass Pass1
     {
+        // Normals are messed up
+        CullMode = None;  
+
         VertexShader = compile vs_3_0 VertexShaderFunction();
         PixelShader = compile ps_3_0 PixelShaderFunction();
     }
