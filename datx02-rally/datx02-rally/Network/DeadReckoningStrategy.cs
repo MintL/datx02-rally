@@ -9,15 +9,19 @@ namespace datx02_rally.Network
     class DeadReckoningStrategy : ISimulationStrategy
     {
         public Dictionary<Player, byte> latestMessageSeq = new Dictionary<Player, byte>();
-        //private Car simulatedLocalCar = new Car(null, null, 13.4631138f);
+        private Car simulatedLocalCar;
         Vector3 threshold;
+        public Game Game { get; set; }
 
-        public DeadReckoningStrategy(Vector3 threshold)
+        public DeadReckoningStrategy(Game game, Vector3 threshold)
         {
+            this.Game = game;
             this.threshold = threshold;
+            this.simulatedLocalCar = Car.CreateSimulatedCar(game);
+            game.Components.Add(simulatedLocalCar);
         }
 
-        public DeadReckoningStrategy() : this( new Vector3(0.01f, 0.01f, 0.01f) )
+        public DeadReckoningStrategy(Game game) : this(game, new Vector3(0.01f, 0.01f, 0.01f) )
         {        }
 
         public bool UpdatePosition(Player player, Car car)
@@ -29,10 +33,10 @@ namespace datx02_rally.Network
             }
 
             Car simCar = null;
-            //if (player.LOCAL_PLAYER)
-            //    simCar = simulatedLocalCar;
-            //else
-            //    simCar = car;
+            if (player.LOCAL_PLAYER)
+                simCar = simulatedLocalCar;
+            else
+                simCar = car;
 
             // If new position available, update, else simulate
             if (latest.Sequence != latestMessageSeq[player]/* || 
@@ -43,13 +47,13 @@ namespace datx02_rally.Network
                 simCar.Rotation = latest.Rotation;
                 simCar.Speed = latest.Velocity;
                 latestMessageSeq[player] = latest.Sequence;
-                simCar.Update();
+                //simCar.Update();
 
                 return false;
             }
             else
             {
-                simCar.Update();
+                //simCar.Update();
 
                 // Return whether car position differs from simulated position more than threshold
                 Vector3 diff = (car.Position - simCar.Position);

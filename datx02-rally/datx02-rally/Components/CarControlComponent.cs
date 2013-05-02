@@ -20,7 +20,7 @@ namespace datx02_rally
             : base(game)
         {
             this.input = game.GetService<InputComponent>();
-            this.simulationStrategy = new DeadReckoningStrategy();
+            this.simulationStrategy = new DeadReckoningStrategy(Game);
         }
 
         public void AddCar(Player player, Model model, GamePlayView gameplay)

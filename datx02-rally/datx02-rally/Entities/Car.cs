@@ -168,6 +168,18 @@ namespace datx02_rally
             return car;
         }
 
+        /// <summary>
+        /// Factory for creating a simulated car, i.e. a car that is not drawn.
+        /// </summary>
+        /// <param name="game"></param>
+        /// <returns>A brand new porsche.</returns>
+        public static Car CreateSimulatedCar(Game game)
+        {
+            var car = new Car(game, null, carWheelRadius);
+            car.Visible = false;
+            return car;
+        }
+
         private static void InitializeEffects(ContentManager content)
         {
             mainEffect = content.Load<Effect>(@"Effects/Car/CarBodyEffect");

@@ -62,7 +62,7 @@ namespace datx02_rally.Components
         {
             if (PlacementNotificationsEnabled && position != playerPosition)
             {
-                const string[] suffixes = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
+                string[] suffixes = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
                 string text = position.ToString();
                 if (position > 9 && (position % 10) % 10 == 1)
                     text += "th place!";
