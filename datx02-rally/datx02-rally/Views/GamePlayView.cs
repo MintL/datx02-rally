@@ -44,6 +44,7 @@ namespace datx02_rally.Menus
 
         List<GameObject> GraphicalObjects = new List<GameObject>();
         List<GameObject> ShadowCasterObjects = new List<GameObject>();
+        List<GameObject> FireflyCandidates = new List<GameObject>();
 
         #region Animals
 
@@ -383,29 +384,25 @@ namespace datx02_rally.Menus
 
             Vector3 pointLightOffset = new Vector3(0, 250, 0);
 
-            var cr = new CurveRasterization(raceTrack.Curve, 20);
+            var cr = new CurveRasterization(raceTrack.Curve, 75);
+
+            float colorOffset = 0f;
 
             foreach (var point in cr.Points)
             {
                 Random r = UniversalRandom.GetInstance();
 
-                Vector3 color = new Vector3(
-                    .6f + .4f * (float)r.NextDouble(),
-                    .6f + .4f * (float)r.NextDouble(),
-                    .6f + .4f * (float)r.NextDouble());
-
-                pointLights.Add(new PointLight(point.Position + pointLightOffset, color, 450)
+                Vector3 color = new Vector3(0f,0f,0f);
+                PointLight pl = new PointLight(point.Position + pointLightOffset, color, 450)
                 {
-                    Model = pointLightModel
-                });
+                    Model = pointLightModel, 
+                    ColorTimeOffset = colorOffset
+                };
 
-                // TODO: Unmotivated adds a fire
+                pointLights.Add(pl);
+                GraphicalObjects.Add(pl);
 
-                //fire = new FireObject(gameInstance, content, point.Position + point.Side * 600 + Vector3.Up * 30, Vector3.Up * 10);
-                //pointLights.Add(fire);
-
-                //fire = new FireObject(gameInstance, content, point.Position + point.Side * -300 + Vector3.Up * 30, Vector3.Up * 10);
-                //pointLights.Add(fire);
+                colorOffset += 100 / cr.Points.Count;
             }
 
             fire = new FireObject(gameInstance, content, Car.Position + Vector3.Up * 100, Vector3.Up * 10);
@@ -544,10 +541,12 @@ namespace datx02_rally.Menus
                 case 0:
                     obj = new OakTree(gameInstance);
                     obj.Scale = 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
+                    FireflyCandidates.Add(obj);
                     break;
                 case 1:
                     obj = new BirchTree(gameInstance);
                     obj.Scale = 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
+                    FireflyCandidates.Add(obj);
                     break;
                 default:
                     obj = new Stone(gameInstance);
@@ -562,11 +561,10 @@ namespace datx02_rally.Menus
                 ShadowCasterObjects.Add(obj);
             }
 
-            for (int i = 0; i < GraphicalObjects.Count / 5; i++)
+            for (int i = 0; i < FireflyCandidates.Count; i+=5)
             {
-                if (GraphicalObjects[i] is Stone) continue;
-                ParticleEmitter emitter = new ParticleEmitter(fireflySystem, 80, GraphicalObjects[i].Position);
-                emitter.Origin = GraphicalObjects[i].Position + Vector3.Up * 500;
+                ParticleEmitter emitter = new ParticleEmitter(fireflySystem, 80, FireflyCandidates[i].Position);
+                emitter.Origin = FireflyCandidates[i].Position + Vector3.Up * 500;
                 fireflyEmitter.Add(emitter);
             }
 
@@ -628,7 +626,7 @@ namespace datx02_rally.Menus
 
             #endregion
 
-            // TODO: Does this belong out here, all by itselft, again, add more explaination what it is.
+            // Adding a prelighingrenderer as a service
             prelightingRenderer = new PrelightingRenderer(GraphicsDevice, content);
             Game.AddService(typeof(PrelightingRenderer), prelightingRenderer);
 
@@ -675,11 +673,10 @@ namespace datx02_rally.Menus
             
             foreach (var point in raceTrack.GetCurveRasterization(cp).Points)
             {
-                var pl = new PointLight(point.Position + 500 * Vector3.Up,
-
-                     raceTrack.GetCurveRasterization(cp).Points.IndexOf(point) == 0 ? Vector3.UnitY : Vector3.UnitX, 
-                    
-                    750) { Model = pointLightModel };
+                var pl = new CheckpointLight(point.Position + 500 * Vector3.Up) 
+                { 
+                    Model = pointLightModel 
+                };
                 pointLights.Add(pl);
                 GraphicalObjects.Add(pl);
             }
