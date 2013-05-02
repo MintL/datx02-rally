@@ -9,7 +9,7 @@ namespace datx02_rally.Network
     class DeadReckoningStrategy : ISimulationStrategy
     {
         public Dictionary<Player, byte> latestMessageSeq = new Dictionary<Player, byte>();
-        private Car simulatedLocalCar = new Car(null, 13.4631138f);
+        //private Car simulatedLocalCar = new Car(null, null, 13.4631138f);
         Vector3 threshold;
 
         public DeadReckoningStrategy(Vector3 threshold)
@@ -28,11 +28,11 @@ namespace datx02_rally.Network
                 latestMessageSeq[player] = byte.MinValue;
             }
 
-            Car simCar;
-            if (player.LOCAL_PLAYER)
-                simCar = simulatedLocalCar;
-            else
-                simCar = car;
+            Car simCar = null;
+            //if (player.LOCAL_PLAYER)
+            //    simCar = simulatedLocalCar;
+            //else
+            //    simCar = car;
 
             // If new position available, update, else simulate
             if (latest.Sequence != latestMessageSeq[player]/* || 

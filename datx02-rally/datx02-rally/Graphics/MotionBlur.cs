@@ -38,8 +38,8 @@ namespace datx02_rally.Graphics
             motionBlurTexture = new RenderTarget2D(device, device.Viewport.Width, device.Viewport.Height,
                 false, SurfaceFormat.Color, DepthFormat.Depth24);
 
-            NumSamples = 4;
-            Size = 30.0f;
+            NumSamples = 7;
+            Size = 30f;
         }
 
         public Texture2D PerformMotionBlur(Texture2D srcTexture, Texture2D depthTexture, Matrix viewProjectionInverse, Matrix previousViewProjection)
