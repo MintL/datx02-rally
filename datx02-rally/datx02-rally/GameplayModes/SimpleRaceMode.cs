@@ -24,6 +24,7 @@ namespace datx02_rally
         public TimeSpan TotalRaceTime { get; private set; }
         protected TimeSpan startTime = TimeSpan.Zero;
         private bool countdown = false;
+        protected CurveRasterization checkpointRasterization;
         protected CurveRasterization placementRasterization;
 
         private List<TimeSpan> goalLineTimes = new List<TimeSpan>();
@@ -47,12 +48,12 @@ namespace datx02_rally
 
         public override void Initialize()
         {
-            var trackRasterization = raceTrack.GetCurveRasterization(checkpoints);
+            checkpointRasterization = raceTrack.GetCurveRasterization(checkpoints);
 
             List<AbstractTrigger> checkpointTriggers = new List<AbstractTrigger>();
             for (int i = 0; i < checkpoints; i++)
             {
-                PositionTrigger trigger = new PositionTrigger(trackRasterization, i, true, true);
+                PositionTrigger trigger = new PositionTrigger(checkpointRasterization, i, true, true);
                 string outputDebug = "Passing checkpoint " + i;
                 trigger.Triggered += (sender, e) =>
                 {
@@ -89,22 +90,6 @@ namespace datx02_rally
             // Add state for passing the finish line
             states.Add(new GameModeState(checkpointTriggers.GetRange(index: 0, count: 1)));
 
-            // add lap counter triggers at finish line
-            foreach (var player in players)
-            {
-                var lPlayer = player;
-                var car = gameInstance.GetService<CarControlComponent>().Cars[lPlayer];
-                PositionTrigger trigger = new PositionTrigger(trackRasterization, 0, true, true);
-                trigger.Triggered += (sender, e) =>
-                {
-                    lPlayer.Lap++;
-                };
-                Tuple<AbstractTrigger, List<IMovingObject>> objTrigger = 
-                    new Tuple<AbstractTrigger, List<IMovingObject>>(trigger, new List<IMovingObject> { car });
-                string id = "lapT"+player.PlayerName;
-                gameInstance.GetService<TriggerManager>().ObjectTriggers.Add(id, objTrigger);
-                addedObjTriggers.Add(id);
-            }
         }
 
         public override void PrepareStatistics()
@@ -146,12 +131,12 @@ namespace datx02_rally
                 countdown = true;
                 StartCountdown();
             }
-            Console.Write("players: ");
+            /*Console.Write("players: ");
             foreach (var player in players)
             {
                 Console.Write(player.PlayerName + " (" + player.Lap + "),");
             }
-            Console.WriteLine();
+            Console.WriteLine();*/
             gameInstance.GetService<HUDComponent>().SetPlayerPosition(CalculatePlayerPosition());
             base.Update(gameTime, gamePlay);
         }
@@ -183,25 +168,30 @@ namespace datx02_rally
             var lDist = CalculateClosestPoint(localCar);
             int lClosestPositionIndex = lDist.Item1;
             float lDistanceToClosestPosition = lDist.Item2;
+            Console.Write("local, lap" + localPlayer.Lap + ", closestPoint" + lClosestPositionIndex + ", distance" + lDistanceToClosestPosition);
 
             List<Player> playersBefore = new List<Player>();
 
             var remotePlayers = players.FindAll(p => !p.LOCAL_PLAYER);
             foreach (var player in remotePlayers)
             {
+                Console.Write(". " + player.PlayerName + ", lap" + player.Lap);
                 if (player.Lap > localPlayer.Lap)
                     playersBefore.Add(player);
-                else
+                else if (player.Lap == localPlayer.Lap)
                 {
-                    var dist = CalculateClosestPoint(localCar);
+                    var car = gameInstance.GetService<CarControlComponent>().Cars[player];
+                    var dist = CalculateClosestPoint(car);
                     int closestPositionIndex = dist.Item1;
                     float distanceToClosestPosition = dist.Item2;
-
-                    if (closestPositionIndex > lClosestPositionIndex || distanceToClosestPosition > lDistanceToClosestPosition)
+                    Console.Write(", closestPoint" + closestPositionIndex + ", distance" + distanceToClosestPosition);
+                    if (closestPositionIndex > lClosestPositionIndex ||
+                        (closestPositionIndex == lClosestPositionIndex && distanceToClosestPosition > lDistanceToClosestPosition))
                         playersBefore.Add(player);
                 }
 
             }
+            Console.WriteLine();
             return playersBefore.Count+1;
         }
 

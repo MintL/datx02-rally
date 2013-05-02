@@ -664,28 +664,8 @@ namespace datx02_rally.Menus
             
             #endregion
 
-            int cp = 5;
-            if (gameModeChoice == GameModeChoice.SimpleRace)
-                this.mode = new SimpleRaceMode(gameInstance, 2, cp, raceTrack, Car);
-            else if (gameModeChoice == GameModeChoice.Multiplayer)
-                this.mode = new MultiplayerRaceMode(gameInstance, 2, cp, raceTrack, Car);
-            else
-                throw new Exception("Fuck you");
-
-            
-            foreach (var point in raceTrack.GetCurveRasterization(cp).Points)
-            {
-                var pl = new CheckpointLight(point.Position + 500 * Vector3.Up) 
-                { 
-                    Model = pointLightModel 
-                };
-                pointLights.Add(pl);
-                GraphicalObjects.Add(pl);
-            }
-
-
-            gameInstance.AddService(typeof(GameplayMode), mode);
-            if (mode.Mode == Mode.Multiplayer)
+            #region Game Mode
+            if (gameInstance.GetService<ServerClient>().connected)
             {
                 foreach (var player in gameInstance.GetService<ServerClient>().Players.Values)
                 {
@@ -693,6 +673,28 @@ namespace datx02_rally.Menus
                 }
                 var carList = gameInstance.GetService<CarControlComponent>().Cars.OrderBy(pc => pc.Key.ID).Select(pc => pc.Value).ToList();
                 SetCarsAtStart(carList);
+            }
+
+            int cp = 5;
+            if (gameModeChoice == GameModeChoice.SimpleRace)
+                this.mode = new SimpleRaceMode(gameInstance, 2, cp, raceTrack, Car);
+            else if (gameModeChoice == GameModeChoice.Multiplayer)
+                this.mode = new MultiplayerRaceMode(gameInstance, 2, cp, raceTrack, Car);
+            else
+                throw new Exception("Stop choosing weird game modes");
+
+            gameInstance.AddService(typeof(GameplayMode), mode);
+
+            #endregion
+
+            foreach (var point in raceTrack.GetCurveRasterization(cp).Points)
+            {
+                var pl = new CheckpointLight(point.Position + 500 * Vector3.Up)
+                {
+                    Model = pointLightModel
+                };
+                pointLights.Add(pl);
+                GraphicalObjects.Add(pl);
             }
 
             #region BackgroundSound
