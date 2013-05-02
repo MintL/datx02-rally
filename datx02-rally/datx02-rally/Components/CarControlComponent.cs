@@ -66,12 +66,12 @@ namespace datx02_rally
             if (Game.GetService<CameraComponent>().CurrentCamera is ThirdPersonCamera)
             {
                 //Accelerate
-                car.Speed = Math.Min(car.Speed + car.Acceleration *
-                    (input.GetState(Input.Thrust) -
-                    input.GetState(Input.Brake)), car.MaxSpeed);
+                car.Speed = Math.Min(car.Speed + (car.Acceleration - car.Speed * 0.00305f) *
+                    input.GetState(Input.Thrust) -
+                    input.GetState(Input.Brake) * car.Deacceleration, car.MaxSpeed);
 
                 // Turn Wheel
-                car.WheelRotationY += (input.GetState(Input.Steer) * car.TurnSpeed);
+                car.WheelRotationY += (input.GetState(Input.Steer) * (car.TurnSpeed - Math.Abs(car.Speed) * 0.00005f));
                 car.WheelRotationY = MathHelper.Clamp(car.WheelRotationY, -car.MaxWheelTurn, car.MaxWheelTurn);
                 if (Math.Abs(car.WheelRotationY) > .001f)
                     car.WheelRotationY *= .95f;
@@ -80,10 +80,10 @@ namespace datx02_rally
             }
 
             //Friction if is not driving
-            float friction = .97f;
+            float friction = .995f;
             if (Math.Abs(input.GetState(Input.Thrust)) < .001f)
             {
-                car.Speed *= friction;
+                car.Speed *= (friction - Math.Abs(car.Speed-car.MaxSpeed) * 0.0005f);
             }
 
             // If in a network game, run parallell simulation of car

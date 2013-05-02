@@ -45,7 +45,8 @@ namespace datx02_rally
         public float Acceleration { get; protected set; }
         public float MaxWheelTurn { get; protected set; }
         public float TurnSpeed { get; protected set; }
-        
+        public float Deacceleration { get; protected set; }
+
         // Distance between wheelaxis.
         public readonly float L = 40.197f;
 
@@ -61,9 +62,11 @@ namespace datx02_rally
 
             // Constants
             Acceleration = .15f;
+            Deacceleration = .35f;
             MaxSpeed = 50;
             MaxWheelTurn = MathHelper.PiOver4 / 0.7f;
             TurnSpeed = .005f;
+
 
             Normal = Vector3.Up;
 
