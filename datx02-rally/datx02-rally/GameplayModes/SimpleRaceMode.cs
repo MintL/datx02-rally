@@ -164,6 +164,7 @@ namespace datx02_rally
                     hudComponent.ShowTextNotification(Color.AliceBlue, countdown, TimeSpan.FromSeconds(0.8));
                     if (iCountdown == 3)
                         this.GameStarted = true;
+                    this.CountDownState = iCountdown;
                 };
                 timer.Start();
             }

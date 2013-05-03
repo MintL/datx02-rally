@@ -21,6 +21,7 @@ namespace datx02_rally
         protected bool allStatesFinished = false;
         public bool GameOver { private set; get; }
         public bool GameStarted { set; get; }
+        public int CountDownState { get; protected set; }
 
         public GameplayMode(Game1 gameInstance)
         {

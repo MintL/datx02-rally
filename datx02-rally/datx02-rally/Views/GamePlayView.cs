@@ -61,6 +61,15 @@ namespace datx02_rally.Menus
 
         #endregion
 
+        #region Countdown
+        Color[] countdownColors = new Color[] { Color.Red, Color.Orange, Color.Yellow, Color.Green };
+        
+        /// <summary>
+        /// Time spent on the GO state
+        /// </summary>
+        TimeSpan countdownTimeGo = TimeSpan.Zero;
+        #endregion
+
         #region Level terrain
 
         // Old value: 32
@@ -960,6 +969,24 @@ namespace datx02_rally.Menus
                 dustEmitter.Origin = Car.Position;
             }
 
+
+            #region Countdown Lights
+
+            // Update all lights to represent the countdown state. Red - Orange - Yellow - Green
+            if (countdownTimeGo.TotalSeconds < 1)
+            {
+                foreach (PointLight light in pointLights)
+                {
+                    light.Diffuse = countdownColors[mode.CountDownState].ToVector3();
+
+                }
+                if (mode.CountDownState == 3)
+                {
+                    countdownTimeGo += gameTime.ElapsedGameTime;
+                }
+            }
+
+            #endregion
             //directionalLight.Direction = Vector3.Transform(
             //    directionalLight.Direction,
             //    Matrix.CreateRotationY(
