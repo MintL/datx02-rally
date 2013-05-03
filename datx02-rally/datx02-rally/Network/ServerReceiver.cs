@@ -126,6 +126,7 @@ namespace datx02_rally
                     if (DEBUG_MODE) Console.WriteLine("Received Countdown from server: " + countdown);
                     string[] countdownStr = { "3", "2", "1", "Go!" };
                     ServerHandler.Game.GetService<HUDComponent>().ShowTextNotification(Color.AliceBlue, countdownStr[countdown], TimeSpan.FromSeconds(0.8));
+                    ServerHandler.GamePlay.mode.CountDownState = countdown;
                     if (countdown == 3)
                         ServerHandler.GamePlay.mode.GameStarted = true;
                     break;
