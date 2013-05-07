@@ -83,7 +83,9 @@ namespace datx02_rally
             goalTrigger.Triggered += (sender, e) =>
             {
                 goalLineTimes.Add(e.Time.TotalGameTime);
-                gameInstance.GetService<HUDComponent>().ShowTextNotification(Color.Teal, "Lap " + (++gameInstance.GetService<Player>().Lap));
+                var player = gameInstance.GetService<Player>();
+                string notification = (++player.Lap) > laps ? "Race finished!" : "Lap " + (player.Lap);
+                gameInstance.GetService<HUDComponent>().ShowTextNotification(Color.Teal, notification);
             };
             
             for (int i = 0; i < laps; i++)

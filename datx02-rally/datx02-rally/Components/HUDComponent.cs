@@ -59,7 +59,7 @@ namespace datx02_rally.Components
             base.Initialize();
         }
 
-        public void SetPlayerPosition(int position) 
+        public void SetPlayerPosition(int position, TimeSpan notificationTime) 
         {
             if (TimeSpan.FromSeconds(3) > DateTime.Now - lastPlacementNotification)
                 return;
@@ -72,10 +72,15 @@ namespace datx02_rally.Components
                     text += "th place!";
                 else
                     text += (suffixes[position % 10] + " place!");
-                ShowTextNotification(Color.Aqua, text, TimeSpan.FromSeconds(2));
+                ShowTextNotification(Color.Aqua, text, notificationTime);
             }
 
             playerPosition = position;
+        }
+
+        public void SetPlayerPosition(int position)
+        {
+            SetPlayerPosition(position, TimeSpan.FromSeconds(2));
         }
 
         public void ShowTextNotification(Color c, string text)
