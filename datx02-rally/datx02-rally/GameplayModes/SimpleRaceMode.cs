@@ -30,7 +30,7 @@ namespace datx02_rally
 
         private List<TimeSpan> goalLineTimes = new List<TimeSpan>();
 
-        public SimpleRaceMode(Game1 gameInstance, int laps, int noOfCheckpoints, RaceTrack raceTrack, Car localCar)
+        public SimpleRaceMode(GameManager gameInstance, int laps, int noOfCheckpoints, RaceTrack raceTrack, Car localCar)
             : base(gameInstance)
         {
             this.laps = laps;

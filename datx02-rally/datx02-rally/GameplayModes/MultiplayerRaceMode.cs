@@ -12,7 +12,7 @@ namespace datx02_rally.GameplayModes
 {
     class MultiplayerRaceMode : SimpleRaceMode
     {
-        public MultiplayerRaceMode(Game1 gameInstance, int laps, int noOfCheckpoints, RaceTrack raceTrack, Car localCar)
+        public MultiplayerRaceMode(GameManager gameInstance, int laps, int noOfCheckpoints, RaceTrack raceTrack, Car localCar)
             : base(gameInstance, laps, noOfCheckpoints, raceTrack, localCar)
         {
             this.Mode = Mode.Multiplayer;

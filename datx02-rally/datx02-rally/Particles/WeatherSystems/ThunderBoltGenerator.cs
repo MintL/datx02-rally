@@ -20,7 +20,7 @@ namespace datx02_rally.Particles.WeatherSystems
 
         private float rotationSeed = MathHelper.Pi / 1.3f;
 
-        public ThunderBoltGenerator(Game1 game, ThunderParticleSystem thunderParticleSystem)
+        public ThunderBoltGenerator(GameManager game, ThunderParticleSystem thunderParticleSystem)
             : base(game)
         {
             particleSystem = thunderParticleSystem;

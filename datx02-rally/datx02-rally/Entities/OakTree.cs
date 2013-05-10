@@ -10,10 +10,10 @@ namespace datx02_rally.Entities
 {
     public class OakTree : GameObject
     {
-        Game1 game;
+        GameManager game;
         private static Model oakTree;
 
-        public OakTree(Game1 game)
+        public OakTree(GameManager game)
             : base()
         {
             this.game = game;

@@ -10,10 +10,10 @@ namespace datx02_rally.Entities
 {
     public class Stone : GameObject
     {
-        Game1 game;
+        GameManager game;
         private static List<Model> stoneVariants = new List<Model>();
 
-        public Stone(Game1 game)
+        public Stone(GameManager game)
             : base()
         {
             this.game = game;

@@ -11,7 +11,7 @@ namespace datx02_rally.Menus
     public abstract class GameStateView : DrawableGameComponent
     {
         // TODO: Remove, exists in GameComponent.Game
-        public Game1 gameInstance;
+        public GameManager gameInstance;
         // TODO: Remove, GraphicsDevice exists in DrawableGameComponent.GraphicsDevice
         public GraphicsDeviceManager graphics;
 
@@ -24,7 +24,7 @@ namespace datx02_rally.Menus
         public GameStateView(Game game, GameState gameState)
             : base(game)
         {
-            this.gameInstance = game as Game1;
+            this.gameInstance = game as GameManager;
             graphics = gameInstance.Graphics;
             content = gameInstance.Content;
             this.gameState = gameState;

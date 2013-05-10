@@ -11,14 +11,14 @@ namespace datx02_rally.DebugConsole.Commands
         {
             get { return "set"; }
         }
-        private Game1 game;
+        private GameManager game;
 
         public string[] Description
         {
             get { return new string[] {"Set game variables"}; }
         }
 
-        public SetCommand(Game1 game)
+        public SetCommand(GameManager game)
         {
             this.game = game;
         }

@@ -23,7 +23,7 @@ namespace datx02_rally.Entities
         private int colorIndex = 0;
         private static Color[] colors = new Color[] { new Color(255, 100, 50), new Color(255, 80, 40) };
 
-        public FireObject(Game1 gameInstance, ContentManager content, Vector3 firePosition, Vector3 smokeOffset)
+        public FireObject(GameManager gameInstance, ContentManager content, Vector3 firePosition, Vector3 smokeOffset)
             : base(firePosition, Color.Red.ToVector3(), 400)
         {
             fireSystem = new FireParticleSystem(gameInstance, content);

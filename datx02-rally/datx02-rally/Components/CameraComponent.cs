@@ -18,7 +18,7 @@ namespace datx02_rally
 
         public Vector3 Position { get { return cameras[currentCamera].Position; } }
 
-        public CameraComponent(Game1 game) : base(game)
+        public CameraComponent(GameManager game) : base(game)
         {
         }
 

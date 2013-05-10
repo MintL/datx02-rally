@@ -20,7 +20,7 @@ namespace datx02_rally
         NetClient ServerThread;
         ServerSender Sender;
         ServerReceiver Receiver;
-        Game1 Game;
+        GameManager Game;
         public bool started = false;
         public GamePlayView GamePlay { set; get; }
         public readonly Player LocalPlayer;
@@ -36,7 +36,7 @@ namespace datx02_rally
         private int ConnectTryCount = 0;
         private int MAX_CONNECT_TRIES = 5;
 
-        public ServerClient(Game1 game) : base(game)
+        public ServerClient(GameManager game) : base(game)
         {
             NetPeerConfiguration config = new NetPeerConfiguration("DATX02");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);

@@ -10,10 +10,10 @@ namespace datx02_rally.Entities
 {
     public class BirchTree : GameObject
     {
-        Game1 game;
+        GameManager game;
         private static List<Model> birchTreesVariants = new List<Model>();
 
-        public BirchTree(Game1 game)
+        public BirchTree(GameManager game)
             : base()
         {
             this.game = game;

@@ -25,11 +25,11 @@ namespace datx02_rally
 {
     public enum GameModeChoice { Multiplayer, SimpleRace, TimeTrial }
     public enum GameState { None, MainMenu, OptionsMenu, Gameplay, PausedGameplay, MultiplayerMenu, SingleplayerMenu, Exiting, CarChooser, GameOver };
-    public class Game1 : Microsoft.Xna.Framework.Game
+    public class GameManager : Microsoft.Xna.Framework.Game
     {
         public GameStateView currentView { get; private set; }
         public GameState currentState { get; private set; }
-        private static Game1 Instance = null;
+        private static GameManager Instance = null;
         public GraphicsDeviceManager Graphics { get; private set; }
         // shared sprite batch
         public SpriteBatch spriteBatch;
@@ -37,7 +37,7 @@ namespace datx02_rally
 
         #region Initialization
 
-        public Game1()
+        public GameManager()
         {
             Graphics = new GraphicsDeviceManager(this);
             BaseComponents = new List<IGameComponent>();
@@ -62,7 +62,7 @@ namespace datx02_rally
         }
 
         // TODO: Use GameComponent.Game to get game-instance!
-        public static Game1 GetInstance()
+        public static GameManager GetInstance()
         {
             return Instance;
         }

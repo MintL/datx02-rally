@@ -18,7 +18,7 @@ namespace datx02_rally
         public byte ID;
         public readonly bool LOCAL_PLAYER;
         public string PlayerName;
-        public Player(Game1 game) : base(game)
+        public Player(GameManager game) : base(game)
         {
             PlayerName = GameSettings.Default.PlayerName;
             LOCAL_PLAYER = true;
@@ -28,7 +28,7 @@ namespace datx02_rally
             Lap = 0;
         }
 
-        public Player(Game1 game, byte id, string name) : base(game)
+        public Player(GameManager game, byte id, string name) : base(game)
         {
             ID = id;
             PlayerName = name;

@@ -13,7 +13,7 @@ namespace datx02_rally
     {
         public EndGameStatistics Statistics { protected set; get; }
         public Mode Mode { protected set; get; }
-        protected Game1 gameInstance;
+        protected GameManager gameInstance;
         protected List<GameModeState> states;
         protected List<string> addedTriggers;
         protected List<string> addedObjTriggers;
@@ -23,7 +23,7 @@ namespace datx02_rally
         public bool GameStarted { set; get; }
         public int CountDownState { get; set; }
 
-        public GameplayMode(Game1 gameInstance)
+        public GameplayMode(GameManager gameInstance)
         {
             this.gameInstance = gameInstance;
             this.Mode = Mode.Singleplayer;

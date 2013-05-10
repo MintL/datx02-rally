@@ -111,7 +111,7 @@ namespace datx02_rally.Menus
                             enteredText.Remove(enteredText.Length - 1, 1);
                         else if (!keyState.IsKeyDown(Keys.Space) && enteredText.Length <= 15)
                         {
-                            string inputText = Game1.GetInstance().GetService<InputComponent>().GetKeyText(key);
+                            string inputText = GameManager.GetInstance().GetService<InputComponent>().GetKeyText(key);
                             if (keyState.IsKeyDown(Keys.LeftShift) || keyState.IsKeyDown(Keys.RightShift))
                                 inputText = inputText.ToUpper();
                             enteredText.Append(inputText);

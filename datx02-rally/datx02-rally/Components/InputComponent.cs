@@ -20,7 +20,7 @@ namespace datx02_rally
 
         public Controller CurrentController { get; set; }
 
-        public InputComponent(Game1 game)
+        public InputComponent(GameManager game)
             : base(game)
         {
             InputEnabled = true;

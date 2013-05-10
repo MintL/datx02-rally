@@ -93,7 +93,7 @@ namespace datx02_rally
                             if (!PlayerList.TryGetValue(discoveredPlayerId, out discoveredPlayer))
                             {
                                 ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("New remote player "+discoveredPlayerName+" discovered!");
-                                newPlayerList[discoveredPlayerId] = new Player(Game1.GetInstance(), discoveredPlayerId, discoveredPlayerName);
+                                newPlayerList[discoveredPlayerId] = new Player(GameManager.GetInstance(), discoveredPlayerId, discoveredPlayerName);
                             }
                             else
                             {

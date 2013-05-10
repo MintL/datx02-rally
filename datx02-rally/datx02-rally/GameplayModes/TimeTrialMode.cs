@@ -12,7 +12,7 @@ namespace datx02_rally
         private List<Vector3[]> checkpoints;
         Vector3[] goalLine;
 
-        public TimeTrialMode(Game1 gameInstance, int laps, List<Vector3[]> checkpoints, Vector3[] goalLine)
+        public TimeTrialMode(GameManager gameInstance, int laps, List<Vector3[]> checkpoints, Vector3[] goalLine)
             : base(gameInstance)
         {
             this.laps = laps;

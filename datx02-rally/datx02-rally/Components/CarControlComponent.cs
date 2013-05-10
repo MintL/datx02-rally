@@ -16,7 +16,7 @@ namespace datx02_rally
         private ISimulationStrategy simulationStrategy;
         public Dictionary<Player, Car> Cars = new Dictionary<Player, Car>();
 
-        public CarControlComponent(Game1 game)
+        public CarControlComponent(GameManager game)
             : base(game)
         {
             this.input = game.GetService<InputComponent>();

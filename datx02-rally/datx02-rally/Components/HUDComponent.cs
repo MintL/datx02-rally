@@ -122,7 +122,7 @@ namespace datx02_rally.Components
             }
             if (SpeedEnabled)
             {
-                double carSpeed = Math.Abs(Math.Round(((Game as Game1).currentView as GamePlayView).Car.Speed * 2.35f, 1));
+                double carSpeed = Math.Abs(Math.Round(((Game as GameManager).currentView as GamePlayView).Car.Speed * 2.35f, 1));
                 Vector2 bottomLeft = new Vector2(0, Game.GraphicsDevice.Viewport.Height - font.LineSpacing);
                 spriteBatch.DrawString(font, carSpeed.ToString(), bottomLeft, Color.Moccasin);
             }

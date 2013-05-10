@@ -13,7 +13,7 @@ using Indiefreaks.AOP.Profiler;
 [assembly: AssemblyCopyright("Copyright ©  2013")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
-[assembly: Profiler(GameClass = "datx02_rally.Game1", IgnoredNamespaces="datx02_rally.MapGeneration")]
+[assembly: Profiler(GameClass = "datx02_rally.GameManager", IgnoredNamespaces="datx02_rally.MapGeneration")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
 // to COM components.  If you need to access a type in this assembly from 

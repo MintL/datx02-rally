@@ -57,7 +57,7 @@ namespace datx02_rally.Components
                 previousViewProjection = view * prelightingRenderer.LightProjection;
             }
 
-            var spriteBatch = (Game as Game1).spriteBatch;
+            var spriteBatch = (Game as GameManager).spriteBatch;
 
             spriteBatch.Begin();
             spriteBatch.Draw(finalTexture, Vector2.Zero, Color.White);

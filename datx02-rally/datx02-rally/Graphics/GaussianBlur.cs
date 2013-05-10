@@ -51,7 +51,7 @@ namespace datx02_rally.Graphics
         {
             this.game = game;
             this.device = game.GraphicsDevice;
-            this.spriteBatch = (game as Game1).spriteBatch;
+            this.spriteBatch = (game as GameManager).spriteBatch;
 
             effect = game.Content.Load<Effect>(@"Effects\GaussianBlur");
 

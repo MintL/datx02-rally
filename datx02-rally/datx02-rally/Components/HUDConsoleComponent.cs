@@ -28,9 +28,9 @@ namespace datx02_rally
         Texture2D Background;
         KeyboardState PrevKeyState;
         Boolean enabled = false;
-        Game1 Game1;
+        GameManager Game1;
 
-        public HUDConsoleComponent(Game1 game)
+        public HUDConsoleComponent(GameManager game)
             : base(game)
         {
             Game1 = game;

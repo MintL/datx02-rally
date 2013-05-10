@@ -32,7 +32,7 @@ namespace datx02_rally.DebugConsole.Commands
             List<string> output = new List<string>();
             if (arguments.Length > 1)
             {
-                Game1 game = Game1.GetInstance();
+                GameManager game = GameManager.GetInstance();
                 switch (arguments[1].ToLower())
                 {
                     case "players":
