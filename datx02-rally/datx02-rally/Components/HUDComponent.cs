@@ -120,12 +120,12 @@ namespace datx02_rally.Components
                 Vector2 topLeft = new Vector2(0, 0);
                 spriteBatch.DrawString(font, currentFps == 0 ? "" : currentFps.ToString(), topLeft, Color.Moccasin);
             }
-            if (SpeedEnabled)
+           /* if (SpeedEnabled)
             {
                 double carSpeed = Math.Abs(Math.Round(((Game as GameManager).currentView as GamePlayView).Car.Speed * 2.35f, 1));
                 Vector2 bottomLeft = new Vector2(0, Game.GraphicsDevice.Viewport.Height - font.LineSpacing);
                 spriteBatch.DrawString(font, carSpeed.ToString(), bottomLeft, Color.Moccasin);
-            }
+            }*/
             if (PlayerPlaceEnabled)
             {
                 int totalPlayers = Game.GetService<CarControlComponent>().Cars.Count;

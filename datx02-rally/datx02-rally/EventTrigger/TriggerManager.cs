@@ -20,7 +20,7 @@ namespace datx02_rally.EventTrigger
 
         public override void Update(GameTime gameTime)
         {
-            var localCar = Game.GetService<CarControlComponent>().Cars[Game.GetService<ServerClient>().LocalPlayer];
+           /* var localCar = Game.GetService<CarControlComponent>().Cars[Game.GetService<ServerClient>().LocalPlayer];
             foreach (var trigger in Triggers.Values)
                 trigger.Update(localCar, gameTime);
             foreach (var triggerObjectPair in ObjectTriggers.Values)
@@ -30,7 +30,7 @@ namespace datx02_rally.EventTrigger
 		            triggerObjectPair.Item1.Update(obj, gameTime);
 	            }
 	        }
-                
+             */   
         }
 
         //public void Update(GameTime gameTime, Vector3 position)

@@ -236,7 +236,7 @@ namespace datx02_rally
             device.DepthStencilState = DepthStencilState.None;
 
 
-            BasicEffect current = (BasicEffect)pointLights[0].Model.Meshes[0].MeshParts[0].Effect;
+            /*BasicEffect current = (BasicEffect)pointLights[0].Model.Meshes[0].MeshParts[0].Effect;
             foreach (PointLight light in pointLights)
             {
                 lightingEffect.Parameters["LightColor"].SetValue(light.Diffuse * 2);
@@ -251,7 +251,7 @@ namespace datx02_rally
                 light.Model.Meshes[0].Draw();
                 light.Model.Meshes[0].MeshParts[0].Effect = current;
             }
-
+            */
             device.BlendState = BlendState.Opaque;
             device.DepthStencilState = DepthStencilState.Default;
 

@@ -278,6 +278,7 @@ namespace datx02_rally.Menus
             var heightMap = heightmapGenerator.Generate();
 
             var roadMap = new float[heightMapSize, heightMapSize];
+            /*
             raceTrack = new RaceTrack(heightMapSize, terrainScale);
 
             navMesh = new NavMesh(GraphicsDevice, raceTrack.Curve, 1500, roadWidth, terrainScale);
@@ -321,7 +322,7 @@ namespace datx02_rally.Menus
             {
                 heightmapGenerator.Smoothen();
             }
-
+            */
             terrainEffect = content.Load<Effect>(@"Effects\TerrainShading");
 
             
@@ -343,8 +344,8 @@ namespace datx02_rally.Menus
 
             directionalLight = new DirectionalLight(
                 new Vector3(-1.25f, -2f, 5.0f), // Direction
-                new Vector3(.15f, .14f, .29f), // Ambient
-                new Vector3(.46f, .33f, .75f)); // Diffuse
+                new Vector3(.30f, .28f, .49f), // Ambient
+                new Vector3(.56f, .43f, .75f)); // Diffuse
 
             Game.AddService(typeof(DirectionalLight), directionalLight);
 
@@ -373,7 +374,7 @@ namespace datx02_rally.Menus
             }
 
             #endregion
-
+            /*
             #region Car
 
             Car = MakeCar();
@@ -426,7 +427,7 @@ namespace datx02_rally.Menus
             #endregion
 
             dustEmitter = new ParticleEmitter(dustSystem, 150, Car.Position);
-
+            */
             #region SkySphere
 
             skyBoxModel = content.Load<Model>(@"Models/skybox");
@@ -479,7 +480,7 @@ namespace datx02_rally.Menus
             gameInstance.Components.Add(thunderBoltGenerator);
 
             #endregion
-
+            /*
             #region GameObjects
 
             OakTree.LoadMaterial(content);
@@ -604,15 +605,15 @@ namespace datx02_rally.Menus
             birdCurve = new BirdCurve();
 
             #endregion
-
+            */
             #region Cameras
 
             var input = gameInstance.GetService<InputComponent>();
 
             gameInstance.GetService<CameraComponent>().AddCamera(new DebugCamera(new Vector3(-11800, 3000, -8200), input));
             Camera c;
-            gameInstance.GetService<CameraComponent>().AddCamera(c = new ThirdPersonCamera(Car, input));
-            gameInstance.GetService<CameraComponent>().CurrentCamera = c;
+            //gameInstance.GetService<CameraComponent>().AddCamera(c = new ThirdPersonCamera(Car, input));
+            //gameInstance.GetService<CameraComponent>().CurrentCamera = c;
 
             
             #endregion
@@ -621,7 +622,7 @@ namespace datx02_rally.Menus
 
             // TODO: CARMOVE
             environmentCubeMap = new RenderTargetCube(this.GraphicsDevice, 256, true, SurfaceFormat.Color, DepthFormat.Depth16);
-            Car.EnvironmentMap = skyMap;
+            //Car.EnvironmentMap = skyMap;
 
             #endregion
 
@@ -672,7 +673,7 @@ namespace datx02_rally.Menus
             //}
             
             #endregion
-
+            /*
             #region Game Mode
             if (gameInstance.GetService<ServerClient>().connected)
             {
@@ -695,7 +696,8 @@ namespace datx02_rally.Menus
             gameInstance.AddService(typeof(GameplayMode), mode);
 
             #endregion
-
+             * /
+            /*
             foreach (var point in raceTrack.GetCurveRasterization(cp).Points)
             {
                 var pl = new CheckpointLight(point.Position + 500 * Vector3.Up)
@@ -705,7 +707,7 @@ namespace datx02_rally.Menus
                 pointLights.Add(pl);
                 GraphicalObjects.Add(pl);
             }
-
+            */
             #region BackgroundSound
             loopSoundManager.AddNewSound("forestambient");
             #endregion
@@ -789,10 +791,10 @@ namespace datx02_rally.Menus
 
         public override void Update(GameTime gameTime)
         {
-            this.mode.Update(gameTime, this);
+            //this.mode.Update(gameTime, this);
 
-            if (this.mode.GameOver)
-                gameOverMenu.Enabled = true;
+            //if (this.mode.GameOver)
+            //    gameOverMenu.Enabled = true;
 
             InputComponent input = gameInstance.GetService<InputComponent>();
             if (input.GetPressed(Input.Exit))
@@ -802,7 +804,7 @@ namespace datx02_rally.Menus
             var cameraComponent = Game.GetService<CameraComponent>();
             var carControlComponent = Game.GetService<CarControlComponent>();
 
-            carControlComponent.Enabled = mode.GameStarted;
+            //carControlComponent.Enabled = mode.GameStarted;
 
             if (pauseMenu.Enabled || gameOverMenu.Enabled)
             {
@@ -845,9 +847,9 @@ namespace datx02_rally.Menus
                     gameInstance.GetService<HUDConsoleComponent>().Toggle();
 
                 //Apply changes to car
-                Car.Update();
+                //Car.Update();
 
-                #region Ray
+                /*#region Ray
 
                 bool onTrack = false;
 
@@ -901,7 +903,7 @@ namespace datx02_rally.Menus
                 }
 
                 #endregion
-
+                */
                 #region View frustum
                 // Update the view frustum
                 Matrix view = gameInstance.GetService<CameraComponent>().View;
@@ -924,7 +926,7 @@ namespace datx02_rally.Menus
                 AudioEngineManager.PlaySound("randomambient");
             }
             #endregion
-
+            /*
             // Particles should continue to spawn regardless of the pause state
             for (int x = -3; x < 3; x++)
             {
@@ -936,8 +938,8 @@ namespace datx02_rally.Menus
                         (float)UniversalRandom.GetInstance().NextDouble() * z * 200),
                         new Vector3(-1, -1, -1));//Vector3.Down);
                 }
-            }
-
+            }*/
+            /*
             smokeTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (smokeTime > 0.2)
             {
@@ -948,7 +950,7 @@ namespace datx02_rally.Menus
                         (float)UniversalRandom.GetInstance().NextDouble() * 500),
                         Vector3.Up);
                 smokeTime = 0;
-            }
+            }*/
 
             foreach (ParticleEmitter emitter in fireflyEmitter)
             {
@@ -959,7 +961,7 @@ namespace datx02_rally.Menus
                         (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 200));
             }
 
-            if (Car.Speed > 10)
+           /* if (Car.Speed > 10)
             {
                 dustEmitter.Update(gameTime, dustEmitter.Origin +
                     new Vector3(
@@ -968,12 +970,12 @@ namespace datx02_rally.Menus
                             (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 40));
                 dustEmitter.Origin = Car.Position;
             }
-
+            */
 
             #region Countdown Lights
 
             // Update all lights to represent the countdown state. Red - Orange - Yellow - Green
-            if (countdownTimeGo.TotalSeconds < 1)
+           /* if (countdownTimeGo.TotalSeconds < 1)
             {
                 foreach (PointLight light in pointLights)
                 {
@@ -985,7 +987,7 @@ namespace datx02_rally.Menus
                     countdownTimeGo += gameTime.ElapsedGameTime;
                 }
             }
-
+            */
             #endregion
             //directionalLight.Direction = Vector3.Transform(
             //    directionalLight.Direction,
@@ -1416,7 +1418,7 @@ namespace datx02_rally.Menus
             #endregion
 
             #region Animals
-
+            /*
             {
                 var t = ((float)gameTime.TotalGameTime.TotalSeconds / 3f) % 1;
                 var position = birdCurve.GetPoint(t);
@@ -1429,7 +1431,7 @@ namespace datx02_rally.Menus
                     Matrix.CreateTranslation(position),
                     view, projection);
             }
-
+            */
             #endregion
 
             //int i = 0;

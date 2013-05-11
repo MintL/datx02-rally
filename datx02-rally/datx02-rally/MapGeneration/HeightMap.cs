@@ -33,8 +33,8 @@ namespace datx02_rally.MapGeneration
             {
                 for (int j = 0; j < Size; j++)
                 {   
-                    //Heights[i, j] += (Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0)) + 0.5f;
-                    Heights[i, j] += (Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0));
+                    Heights[i, j] += (Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0)) + 0.5f;
+                    //Heights[i, j] += (Perlin.Noise(f * i / (float)Size, f * j / (float)Size, 0));
                     if (Heights[i, j] > 1 || Heights[i, j] < 0) 
                     {
                         if (Heights[i, j] > 1)
@@ -154,7 +154,7 @@ namespace datx02_rally.MapGeneration
         public float[,] Generate()
         {
             // Start with the world in a bowl.
-            float halfSize = Size / 2f;
+            /*float halfSize = Size / 2f;
             for (int z = 0; z < Size; z++)
             {
                 for (int x = 0; x < Size; x++)
@@ -164,8 +164,9 @@ namespace datx02_rally.MapGeneration
                     Heights[x, z] = MathHelper.Lerp(xH, zH, .5f);
                 }
             }
-
+            */
             AddPerlinNoise(6.0f);
+            /*
             Perturb(35.0f);
 
             float[,] additional = new HeightMap(Size / 4).Generate(9, 20);
@@ -176,7 +177,7 @@ namespace datx02_rally.MapGeneration
                     Heights[x, z] += .15f * additional[x % quadSize, z % quadSize];
 
             Smoothen();
-
+            */
             for (int z = 0; z < Size; z++)
             {
                 for (int x = 0; x < Size; x++)
@@ -184,7 +185,7 @@ namespace datx02_rally.MapGeneration
                     Heights[x, z] = Math.Max(0, Heights[x, z]);
                 }
             }
-
+            
             return Heights;
         }
 

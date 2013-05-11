@@ -74,7 +74,7 @@ namespace datx02_rally
             color.Y += ((float)Math.Sin(elapsedGameTime * 1f - ColorTimeOffset / 4) + 1.5f) / 20;
             
             //Removes blue in the opposite direction
-            color.Z -= ((float)Math.Sin(elapsedGameTime * 6f + ColorTimeOffset) + 1.5f) / 15;
+            //color.Z -= ((float)Math.Sin(elapsedGameTime * 6f + ColorTimeOffset) + 1.5f) / 15;
 
             Diffuse = color;
         }
