@@ -108,7 +108,8 @@ namespace datx02_rally
                     foreach (var disconnectedPlayer in PlayerList.Values)
                     {
                         ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("Player "+disconnectedPlayer.PlayerName+" disconnected!");
-                        ServerHandler.Game.GetService<CarControlComponent>().RemoveCar(disconnectedPlayer);
+                        var ccc = ServerHandler.Game.GetService<CarControlComponent>();
+                        if (ccc != null) ccc.RemoveCar(disconnectedPlayer);
                     }
                     if (DEBUG_MODE) Console.WriteLine();
                     break;

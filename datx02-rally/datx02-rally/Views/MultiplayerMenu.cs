@@ -97,6 +97,7 @@ namespace datx02_rally.Menus
 
         public override GameState UpdateState(GameTime gameTime)
         {
+            int indexFromBack = MenuItems.Count - selectedIndex;
             var serverClient = gameInstance.GetService<ServerClient>();
             // prepare lobby (once)
             if (state == State.Unconnected && serverClient.connected)
@@ -163,6 +164,7 @@ namespace datx02_rally.Menus
                     }
                 }
             }
+            selectedIndex = MenuItems.Count - indexFromBack;
             return base.UpdateState(gameTime);
         }
     }
