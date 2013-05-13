@@ -196,7 +196,7 @@ namespace datx02_rally.Menus
                         {
                             GameModeChoice choice;
                             int? seed;
-                            if (Overlays[Overlays.Count - 2] is MultiplayerMenu)
+                            if (Overlays.Count - 2 >= 0 && Overlays[Overlays.Count - 2] is MultiplayerMenu)
                             {
                                 choice = GameModeChoice.Multiplayer;
                                 seed = Game.GetService<ServerClient>().Seed;
