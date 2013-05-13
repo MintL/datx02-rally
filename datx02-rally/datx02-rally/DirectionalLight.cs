@@ -20,6 +20,7 @@ namespace datx02_rally
 
         private Vector3 defaultDiffuse, additionalDiffuse;
         public Vector3 Diffuse { get { return defaultDiffuse + additionalDiffuse; } set { additionalDiffuse = value; } }
+        public Vector3 DefaultDiffuse { get { return defaultDiffuse; } set { defaultDiffuse = value; } }
 
         public DirectionalLight(Vector3 direction, Vector3 ambient, Vector3 diffuse)
         {

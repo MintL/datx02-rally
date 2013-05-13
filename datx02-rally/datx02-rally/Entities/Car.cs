@@ -305,7 +305,7 @@ namespace datx02_rally
                     // TODO: CARMOVE
                     if (mesh.Name.Equals("main"))
                     {
-                        param["MaterialReflection"].SetValue(.9f);
+                        param["MaterialReflection"].SetValue(.7f);
                         param["MaterialShininess"].SetValue(10);
 
                         param["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(world)));

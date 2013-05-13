@@ -270,6 +270,13 @@ namespace datx02_rally.Menus
             projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
                 GraphicsDevice.Viewport.AspectRatio, 0.1f, 50000);
 
+            directionalLight = new DirectionalLight(
+                new Vector3(-1.25f, -2f, 5.0f), // Direction
+                new Vector3(.1f, .1f, .1f),//new Vector3(.15f, .14f, .29f), // Ambient
+                new Vector3(.46f, .33f, .75f)); // Diffuse
+
+            Game.AddService(typeof(DirectionalLight), directionalLight);
+
             #region Level terrain generation
 
             int heightMapSize = terrainSegmentsCount * terrainSegmentSize + 1;
@@ -340,13 +347,6 @@ namespace datx02_rally.Menus
             //GraphicsDevice.SetRenderTarget(null);
 
             //terrainEffect.Parameters["TextureMap1"].SetValue(grassTexture);
-
-            directionalLight = new DirectionalLight(
-                new Vector3(-1.25f, -2f, 5.0f), // Direction
-                new Vector3(.15f, .14f, .29f), // Ambient
-                new Vector3(.46f, .33f, .75f)); // Diffuse
-
-            Game.AddService(typeof(DirectionalLight), directionalLight);
 
             #endregion
             terrainEffect.Parameters["TextureMap0"].SetValue(content.Load<Texture2D>(@"Terrain\road"));
@@ -696,6 +696,7 @@ namespace datx02_rally.Menus
 
             #endregion
 
+            #region Checkpoint lights
             foreach (var point in raceTrack.GetCurveRasterization(cp).Points)
             {
                 var pl = new CheckpointLight(point.Position + 500 * Vector3.Up)
@@ -705,6 +706,7 @@ namespace datx02_rally.Menus
                 pointLights.Add(pl);
                 GraphicalObjects.Add(pl);
             }
+            #endregion
 
             #region BackgroundSound
             loopSoundManager.AddNewSound("forestambient");
@@ -831,7 +833,7 @@ namespace datx02_rally.Menus
                     cameraComponent.Enabled = true;
                 hudComponent.Visible = true;
 
-                if (input.GetPressed(Input.ChangeController))
+                /*if (input.GetPressed(Input.ChangeController))
                 {
                     if (input.CurrentController == Controller.Keyboard)
                     {
@@ -843,7 +845,7 @@ namespace datx02_rally.Menus
                         input.CurrentController = Controller.Keyboard;
                         Console.WriteLine("CurrentController equals Keyboard");
                     }
-                }
+                }*/
 
                 if (input.GetPressed(Input.Console))
                     gameInstance.GetService<HUDConsoleComponent>().Toggle();
@@ -929,6 +931,7 @@ namespace datx02_rally.Menus
             }
             #endregion
 
+            #region Particle emission
             // Particles should continue to spawn regardless of the pause state
             for (int x = -3; x < 3; x++)
             {
@@ -972,7 +975,7 @@ namespace datx02_rally.Menus
                             (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 40));
                 dustEmitter.Origin = Car.Position;
             }
-
+            #endregion
 
             #region Countdown Lights
 
@@ -991,6 +994,18 @@ namespace datx02_rally.Menus
             }
 
             #endregion
+
+            //Vector3 originalDiffuse = new Vector3(.46f, .33f, .75f);
+            Vector3 newDiffuse = new Vector3(.65f, .4f, .7f);
+            Vector3 originalDiffuse = new Vector3(.7f, .6f, .8f);
+            
+            //float amount = (float)(Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2) + 1) * 0.5f * 0.4f;
+            float amount = (float)(Math.Sin(gameTime.TotalGameTime.TotalSeconds * 2));
+            directionalLight.DefaultDiffuse = new Vector3(
+                MathHelper.Lerp(originalDiffuse.X, newDiffuse.X, amount),
+                MathHelper.Lerp(originalDiffuse.Y, newDiffuse.Y, amount),
+                MathHelper.Lerp(originalDiffuse.Z, newDiffuse.Z, amount));
+
             //directionalLight.Direction = Vector3.Transform(
             //    directionalLight.Direction,
             //    Matrix.CreateRotationY(

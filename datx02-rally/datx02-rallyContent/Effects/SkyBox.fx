@@ -62,7 +62,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	float blue = (sin(2 * ElapsedTime) + 1) * 0.5 * 0.4;
 	skyBoxColor.rgb = lerp(skyBoxColor.rgb, float3(1,0,1), sin(ElapsedTime * 2) / 4);
-	skyBoxColor.rg = lerp(skyBoxColor.rgb, float3(0,0,1), sin(ElapsedTime * 4) / 4);
+	//skyBoxColor.rg = lerp(skyBoxColor.rgb, float3(0,0,1), sin(ElapsedTime * 4) / 4);
 
 	// 1,0,1
 	// 0,0,1
