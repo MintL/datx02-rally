@@ -22,6 +22,7 @@ namespace datx02_rally
         public bool GameOver { private set; get; }
         public bool GameStarted { set; get; }
         public int CountDownState { get; set; }
+        public TimeSpan StartTime { get; protected set;}
 
         public GameplayMode(GameManager gameInstance)
         {
@@ -34,6 +35,7 @@ namespace datx02_rally
             GameOver = false;
             CurrentState = 0;
             Statistics = null;
+            StartTime = TimeSpan.Zero;
         }
 
         /// <summary>

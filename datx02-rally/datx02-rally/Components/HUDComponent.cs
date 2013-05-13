@@ -34,6 +34,7 @@ namespace datx02_rally.Components
         public bool PlayerPlaceEnabled { get; set; }
         public bool TimeEnabled { get; set; }
         public bool PlacementNotificationsEnabled { get; set; }
+        private bool playerPlaceTimeOut = true;
 
         public HUDComponent(Game game)
             : base(game)
@@ -46,7 +47,7 @@ namespace datx02_rally.Components
             SpeedEnabled = true;
             PlayerPlaceEnabled = true;
             TimeEnabled = true;
-            PlacementNotificationsEnabled = true;
+            PlacementNotificationsEnabled = true; // seriously, don't set this to true, its done externally
             DrawOrder = 100;
         }
 
@@ -63,7 +64,7 @@ namespace datx02_rally.Components
         {
             if (TimeSpan.FromSeconds(3) > DateTime.Now - lastPlacementNotification)
                 return;
-            if (PlacementNotificationsEnabled && position != playerPosition)
+            if (PlacementNotificationsEnabled && position != playerPosition && !playerPlaceTimeOut)
             {
                 lastPlacementNotification = DateTime.Now;
                 string[] suffixes = { "th", "st", "nd", "rd", "th", "th", "th", "th", "th", "th" };
@@ -135,12 +136,16 @@ namespace datx02_rally.Components
             }
             if (TimeEnabled)
             {
-                string totalGameTime = gameTime.TotalGameTime.ToString(@"m\:ss\:ff");
-                //string lapTime = gameTime.TotalGameTime.ToString(@"m\:ss\:ff");
-                Vector2 topCenter1 = new Vector2((Game.GraphicsDevice.Viewport.Width / 2) - (font.MeasureString(totalGameTime).X / 2), 0);
-                //Vector2 topCenter2 = new Vector2((Game.GraphicsDevice.Viewport.Width / 2) - (font.MeasureString(totalGameTime).X / 2), font.MeasureString(totalGameTime).Y);
-                //spriteBatch.DrawString(font, lapTime, topCenter1, Color.Red);
-                spriteBatch.DrawString(font, totalGameTime, topCenter1, Color.SpringGreen);
+                TimeSpan startTime = Game.GetService<GameplayMode>().StartTime;
+                if (startTime != TimeSpan.Zero)
+                {
+                    TimeSpan totalRaceTime = gameTime.TotalGameTime - startTime;
+                    playerPlaceTimeOut = totalRaceTime < TimeSpan.FromSeconds(1);
+
+                    string timeText = totalRaceTime.ToString(@"m\:ss\:ff");
+                    Vector2 topCenter1 = new Vector2((Game.GraphicsDevice.Viewport.Width / 2) - (font.MeasureString(timeText).X / 2), 0);
+                    spriteBatch.DrawString(font, timeText, topCenter1, Color.SpringGreen);
+                }
             }
 
             var notificationPosition = new Vector2(Game.GraphicsDevice.Viewport.Width / 2.0f, Game.GraphicsDevice.Viewport.Height * 0.2f);  

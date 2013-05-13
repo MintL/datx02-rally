@@ -740,12 +740,16 @@ namespace datx02_rally.Menus
         private void SetCarsAtStart(List<Car> cars)
         {
             Vector3 carPosition = raceTrack.Curve.GetPoint(0.99f);
-            foreach (var car in cars)
+            Vector3 carHeading = (raceTrack.Curve.GetPoint(.001f) - carPosition);
+            Vector3 carDistance = Vector3.Cross(Vector3.Normalize(carHeading), Vector3.Up) * 150;
+            int middleIndex = (int)(cars.Count / 2); 
+
+            for (int i = 0; i < cars.Count; i++)
             {
-                Vector3 carHeading = (raceTrack.Curve.GetPoint(.001f) - carPosition);
-                car.Position = carPosition;
+                //carPosition += ;
+                var car = cars[i];
+                car.Position = carPosition + (carDistance * (i - middleIndex));
                 car.Rotation = (float)Math.Atan2(carHeading.X, carHeading.Z) - (float)Math.Atan2(0, -1);
-                carPosition += new Vector3(150, 0, 0);
             }
             
         }

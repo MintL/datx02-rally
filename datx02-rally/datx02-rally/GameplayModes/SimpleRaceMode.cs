@@ -22,7 +22,6 @@ namespace datx02_rally
         protected List<Player> players = new List<Player>();
         public int PlayerPlace { get; set; }
         public TimeSpan TotalRaceTime { get; private set; }
-        protected TimeSpan startTime = TimeSpan.Zero;
         private bool countdown = false;
         protected CurveRasterization checkpointRasterization;
         protected CurveRasterization placementRasterization;
@@ -103,7 +102,7 @@ namespace datx02_rally
 
         public override void PrepareStatistics()
         {
-            goalLineTimes[0] = startTime;
+            goalLineTimes[0] = StartTime;
             TotalRaceTime = goalLineTimes[goalLineTimes.Count - 1] - goalLineTimes[0];
             players.Find(p => p.LOCAL_PLAYER).RaceTime = TotalRaceTime;
 
@@ -133,8 +132,8 @@ namespace datx02_rally
 
         public override void Update(GameTime gameTime, GamePlayView gamePlay)
         {
-            if (startTime != TimeSpan.Zero && GameStarted)
-                startTime = gameTime.TotalGameTime;
+            if (StartTime == TimeSpan.Zero && GameStarted)
+                StartTime = gameTime.TotalGameTime;
             if (Mode == Mode.Singleplayer && !countdown && gamePlay.Initialized)
             {
                 countdown = true;
