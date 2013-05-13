@@ -67,7 +67,11 @@ namespace datx02_rally.Menus
                 AddMenuItem(item);
             }
 
-            // 3D variables needed to display the car
+            directionalLight = new DirectionalLight(
+                new Vector3(-1.25f, -2f, 5.0f), // Direction
+                new Vector3(.1f, .1f, .1f),//new Vector3(.15f, .14f, .29f), // Ambient
+                new Vector3(1f, 1f, 1f)); // Diffuse
+
             MakeCar();
             cameraPosition = new Vector3(0, 100f, 300f);
 
@@ -77,10 +81,7 @@ namespace datx02_rally.Menus
                 diffuseColor = GameSettings.Default.CarColor;
             }
 
-            directionalLight = new DirectionalLight(
-                new Vector3(1, -1, 1), // new Vector3(3f, -10f, -5.0f), // Direction
-                new Vector3(.1f, .1f, .1f), // Ambient
-                new Vector3(.7f, .7f, .7f)); // Diffuse
+            
         }
 
         public override GameState UpdateState(GameTime gameTime)
@@ -123,6 +124,8 @@ namespace datx02_rally.Menus
             car.Projection = projection;
 
             car.Position = Vector3.Zero;
+
+            car.MaterialDiffuse = diffuseColor.ToVector3();
 
             car.Draw(null);
 
@@ -196,13 +199,10 @@ namespace datx02_rally.Menus
 
         public void MakeCar()
         {
-            // Load car effect (10p-light, env-map)
-            carEffect = content.Load<Effect>(@"Effects/CarShading");
-
             car = Car.CreateCar(Game); // (content.Load<Model>(@"Models/Cars/porsche_new"), 13.4631138f);
 
-            // TODO: Directional should be a service.
             car.DirectionalLight = directionalLight;
+            car.EnvironmentMap = null;
         }
 
     }

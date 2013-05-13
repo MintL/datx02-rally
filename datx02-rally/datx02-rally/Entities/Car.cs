@@ -336,5 +336,23 @@ namespace datx02_rally
                             part.Effect.Parameters["EnvironmentMap"].SetValue(value);
             }
         }
+
+        public Vector3 MaterialDiffuse
+        {
+            set
+            {
+                foreach (ModelMesh mesh in model.Meshes)
+                {
+                    if (mesh.Name == "main")
+                    {
+                        foreach (ModelMeshPart part in mesh.MeshParts)
+                        {
+                            if (part.Effect.Parameters["MaterialDiffuse"] != null)
+                                part.Effect.Parameters["MaterialDiffuse"].SetValue(value);
+                        }
+                    }
+                }
+            }
+        }
     }
 }

@@ -156,7 +156,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float3 environmentMap = texCUBE(EnvironmentMapSampler, reflection) * fresnel * MaterialReflection;
 	
 	additionalLight += float4(selfShadow * 
-						(DirectionalLightDiffuse * color.rgb * 
+						(MaterialDiffuse * DirectionalLightDiffuse * color.rgb * 
 							CalculateDiffuse(normal, directionToLight) +
 						DirectionalLightDiffuse * fresnel * 
 							CalculateSpecularBlinn(normal, directionToLight, directionFromEye, MaterialShininess) * 
