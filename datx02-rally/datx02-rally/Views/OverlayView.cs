@@ -135,7 +135,19 @@ namespace datx02_rally.Menus
             spriteBatch.DrawString(MenuHeaderFont, MenuTitle,
                 new Vector2((int)(renderOffset.X + Bounds.Width * 0.03), (int)(renderOffset.Y + Bounds.Height * 0.14) - MenuHeaderFont.MeasureString(MenuTitle).Y),
                 Color.White);
+            //
+            if (mousePos.HasValue) 
+            {
+                Texture2D rect = new Texture2D(GraphicsDevice, 5, 5);
 
+                Color[] data = new Color[5 * 5];
+                for (int i = 0; i < data.Length; ++i) data[i] = Color.Blue;
+                rect.SetData(data);
+
+                Vector2 coor = new Vector2(mousePos.Value.X, mousePos.Value.Y);
+                spriteBatch.Draw(rect, coor, Color.White);
+            }
+            //
             spriteBatch.End();
 
             RenderContent(renderOffset);
@@ -145,10 +157,31 @@ namespace datx02_rally.Menus
             return (Texture2D)renderTarget;
         }
 
+        MouseState? mousePos = null;
         public override GameState UpdateState(GameTime gameTime)
         {
             InputComponent input = gameInstance.GetService<InputComponent>();
+            var prevIndex = selectedIndex;
             GameState nextGameState = GameState.None;
+
+            mousePos = input.GetMousePosition();
+            if (mousePos.HasValue)
+            {
+                int posX = (int)(mousePos.Value.X - 0.5f);
+                int posY = (int)(mousePos.Value.Y - 0.15f);
+                mousePos = new MouseState(posX, posY, 0, ButtonState.Released, ButtonState.Released, ButtonState.Released, ButtonState.Released, ButtonState.Released);
+                for (int i = 0; i < MenuItems.Count; i++)
+                {
+                    var item = MenuItems[i];
+                    if (item.Selectable && item.LastDrawRectangle.Contains(posX, posY))
+                    {
+                        selectedIndex = i;
+                        Console.WriteLine(item.LastDrawRectangle + ", item " + item.Text + " contains mouse");
+                    }
+                    Console.WriteLine(DateTime.Now + ": " + mousePos);
+                }
+            }
+
             if (input.GetKey(Keys.Down))
             {
                 var index = selectedIndex;
@@ -159,8 +192,6 @@ namespace datx02_rally.Menus
 
                 if (selectedIndex > MenuItems.Count - 1)
                     selectedIndex = index;
-                AudioEngineManager.PlaySound("menutick");
-
             }
             else if (input.GetKey(Keys.Up))
             {
@@ -172,8 +203,9 @@ namespace datx02_rally.Menus
 
                 if (selectedIndex < 0)
                     selectedIndex = index;
-                AudioEngineManager.PlaySound("menutick");
             }
+            if (selectedIndex != prevIndex)
+                AudioEngineManager.PlaySound("menutick");
             else if (input.GetKey(Keys.Right) && MenuItems[selectedIndex] is OptionMenuItem)
                 (MenuItems[selectedIndex] as OptionMenuItem).NextOption();
             else if (input.GetKey(Keys.Left) && MenuItems[selectedIndex] is OptionMenuItem)

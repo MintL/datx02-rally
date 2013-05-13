@@ -21,6 +21,7 @@ namespace datx02_rally.Menus
         public Texture2D Background { get; set; }
         public Color FontColor { get; set; }
         public Color FontColorSelected { get; set; }
+        public Rectangle LastDrawRectangle { get; set; }
 
         private bool selectable = true;
         public bool Selectable 
@@ -129,6 +130,7 @@ namespace datx02_rally.Menus
             {
                 spriteBatch.Draw(Background, b, Color.White);
             }
+            LastDrawRectangle = b;
 
             Color textColor;
             if (!Enabled)
@@ -187,7 +189,17 @@ namespace datx02_rally.Menus
         {
             position.X += Bounds.Width / 2 - Background.Bounds.Width / 2;
             spriteBatch.Draw(Background, position, Color.White);
+            LastDrawRectangle = new Rectangle((int)position.X, (int)position.Y, Background.Bounds.Width, Background.Bounds.Height);
+            //
+            Texture2D rect = new Texture2D(spriteBatch.GraphicsDevice, Background.Bounds.Width, Background.Bounds.Height);
 
+            Color[] data = new Color[Background.Bounds.Width * Background.Bounds.Height];
+            for (int i = 0; i < data.Length; ++i) data[i] = (selected) ? Color.Chocolate : Color.Green;
+            rect.SetData(data);
+
+            Vector2 coor = new Vector2(LastDrawRectangle.X, LastDrawRectangle.Y);
+            spriteBatch.Draw(rect, coor, Color.White);
+            //
             Color textColor;
             if (!Enabled)
                 textColor = Color.Gray;
@@ -226,6 +238,7 @@ namespace datx02_rally.Menus
 
             position.X += Bounds.Width / 2 - Background.Bounds.Width / 2;
             spriteBatch.Draw(Background, position, Color.White);
+            LastDrawRectangle = new Rectangle((int)position.X, (int)position.Y, Background.Bounds.Width, Background.Bounds.Height);
 
             Color textColor;
             if (!Enabled)
@@ -356,6 +369,7 @@ namespace datx02_rally.Menus
             {
                 spriteBatch.Draw(Background, b, Color.White);
             }
+            LastDrawRectangle = b;
 
             Color textColor;
             if (!Enabled)

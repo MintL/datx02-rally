@@ -14,6 +14,7 @@ namespace datx02_rally
     {
         private KeyboardState keyboard;
         private KeyboardState previousKeyboard;
+        private MouseState previousMouse;
         private GamePadState gamePad;
         private GamePadState previousGamePad;
         public bool InputEnabled { get; set; }
@@ -64,6 +65,17 @@ namespace datx02_rally
                 }
             }
             return 0.0f;
+        }
+
+        public MouseState? GetMousePosition()
+        {
+            var state = Mouse.GetState();
+            if (state.X < 0 || state.Y < 0 || Game.GraphicsDevice.Viewport.Height < state.Y ||
+                  Game.GraphicsDevice.Viewport.Width < state.X)
+                return null;
+            else
+                return state;
+
         }
 
         public bool GetPressed(Input input)
