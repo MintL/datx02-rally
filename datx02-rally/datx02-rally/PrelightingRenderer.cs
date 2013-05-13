@@ -113,20 +113,9 @@ namespace datx02_rally
             }
 
             // TODO: CARMOVE 
-            //// Car
-            //foreach (ModelMesh mesh in car.Model.Meshes)
-            //{
-            //    foreach (ModelMeshPart part in mesh.MeshParts)
-            //    {
-            //        if (mesh.Name.Equals("main"))
-            //        {
-            //            part.Effect.Parameters["LightMap"].SetValue(LightTarget);
-            //            part.Effect.Parameters["PrelightProjection"].SetValue(LightProjection);
-            //            part.Effect.Parameters["viewportWidth"].SetValue(device.Viewport.Width);
-            //            part.Effect.Parameters["viewportHeight"].SetValue(device.Viewport.Height);
-            //        }
-            //    }
-            //}
+            // Car
+            car.PreparePrelighting(LightTarget, LightProjection, device.Viewport.Width, device.Viewport.Height);
+            
         }
 
         public void RenderDepthNormal(Matrix view)
@@ -217,6 +206,8 @@ namespace datx02_rally
                 //        part.Effect = oldEffects[part];
                 //    }
                 //}
+
+                car.DrawDepthNormal(depthNormalEffect, LightProjection);
             }
 
 

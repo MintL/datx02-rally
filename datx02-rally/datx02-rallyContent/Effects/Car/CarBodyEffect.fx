@@ -143,8 +143,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 	float4 additionalLight = float4(0,0,0,0);
 
 	// Light Map
-	//float2 texCoord = postProjToScreen(input.LightMapPosition) + halfPixel();
-	//additionalLight += tex2D(LightMapSampler, texCoord) * color;
+	float2 texCoord = postProjToScreen(input.LightMapPosition) + halfPixel();
+	additionalLight += tex2D(LightMapSampler, texCoord) * color;
 
 	// Directional light
 	float3 directionToLight = -normalize(DirectionalLightDirection);

@@ -305,18 +305,25 @@ namespace datx02_rally
                     // TODO: CARMOVE
                     if (mesh.Name.Equals("main"))
                     {
-                        param["MaterialReflection"].SetValue(.7f);
-                        param["MaterialShininess"].SetValue(10);
+                        if (param["MaterialReflection"] != null)
+                            param["MaterialReflection"].SetValue(.7f);
+                        if (param["MaterialShininess"] != null) 
+                            param["MaterialShininess"].SetValue(10);
 
-                        param["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(world)));
+                        if (param["NormalMatrix"] != null)
+                            param["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(world)));
 
-                        param["EyePosition"].SetValue(Game.GetService<CameraComponent>().Position);
+                        if (param["EyePosition"] != null) 
+                            param["EyePosition"].SetValue(Game.GetService<CameraComponent>().Position);
 
                         if (DirectionalLight != null)
                         {
-                            param["DirectionalLightDirection"].SetValue(DirectionalLight.Direction);
-                            param["DirectionalLightDiffuse"].SetValue(DirectionalLight.Diffuse);
-                            param["DirectionalLightAmbient"].SetValue(DirectionalLight.Ambient);
+                            if (param["DirectionalLightDirection"] != null)
+                                param["DirectionalLightDirection"].SetValue(DirectionalLight.Direction);
+                            if (param["DirectionalLightDiffuse"] != null)
+                                param["DirectionalLightDiffuse"].SetValue(DirectionalLight.Diffuse);
+                            if (param["DirectionalLightAmbient"] != null)
+                                param["DirectionalLightAmbient"].SetValue(DirectionalLight.Ambient);
                         }
                     }
                 }
@@ -353,6 +360,56 @@ namespace datx02_rally
                     }
                 }
             }
+        }
+
+        // To be used by PrelightingRenderer.
+        public void PreparePrelighting(RenderTarget2D lightTarget, Matrix lightProjection, int width, int height)
+        {
+            foreach (ModelMesh mesh in model.Meshes)
+            {
+                if (mesh.Name.Equals("main"))
+                {
+                    foreach (ModelMeshPart part in mesh.MeshParts)
+                    {
+                        part.Effect.Parameters["LightMap"].SetValue(lightTarget);
+                        part.Effect.Parameters["PrelightProjection"].SetValue(lightProjection);
+                        part.Effect.Parameters["viewportWidth"].SetValue(width);
+                        part.Effect.Parameters["viewportHeight"].SetValue(height);
+                    }
+                }
+            }
+        }
+
+        // Draw the main body of the car with a special effect to draw depth and normal buffer.
+        // To be used by PrelightingRenderer.
+        public void DrawDepthNormal(Effect depthNormalEffect, Matrix lightProjection)
+        {
+            Dictionary<ModelMeshPart, Effect> oldEffects = new Dictionary<ModelMeshPart,Effect>();
+
+            Matrix oldProjection = Projection;
+            Projection = lightProjection;
+
+            foreach (ModelMesh mesh in model.Meshes)
+            {
+                if (mesh.Name.Equals("main"))
+                {
+                    foreach (ModelMeshPart part in mesh.MeshParts)
+                    {
+                        oldEffects.Add(part, part.Effect);
+                        part.Effect = depthNormalEffect;
+                    }
+                }
+            }
+            Draw(null);
+
+            // Reset the effect and projection
+            Projection = oldProjection;            
+            var mainMesh = model.Meshes["main"];
+            foreach (ModelMeshPart part in mainMesh.MeshParts)
+            {
+                part.Effect = oldEffects[part];
+            }   
+            
         }
     }
 }
