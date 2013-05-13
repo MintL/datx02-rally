@@ -17,7 +17,17 @@ namespace datx02_rally
         // Input inversion
         protected Vector2 inputLookInversion = Vector2.One;
 
-        public float Zoom { get; set; }
+        private float zoom;
+        public float Zoom
+        {
+            get { return zoom; }
+            set
+            {
+                zoom = Zoom;
+                lookUpOffset = value * new Vector3(0, .275f, 0);
+                translationOffset = value * new Vector3(0, .2f, 1);
+            }
+        }
         public float RotationSpeed { get; set; }
         public float RotationMagnet { get; set; }
         public float TranslationMagnet { get; set; }
@@ -49,8 +59,8 @@ namespace datx02_rally
             RotationMagnet = .075f;
             TranslationMagnet = .98f;
 
-            lookUpOffset = Zoom * new Vector3(0, .275f, 0);
-            translationOffset = Zoom * new Vector3(0, .2f, 1);
+            //lookUpOffset = Zoom * new Vector3(0, .275f, 0);
+            //translationOffset = Zoom * new Vector3(0, .2f, 1);
 
             cameraRotation = TargetNode.RotationMatrix;
             cameraTranslation = TargetNode.TranslationMatrix;

@@ -265,6 +265,12 @@ namespace datx02_rally
 
             normalMatrix = Matrix.Lerp(normalMatrix, Vector3.Up.GetRotationMatrix(Normal), .2f);
 
+            // Zoom the thirdperson camera with the car speed
+            var camera = Game.GetService<CameraComponent>().CurrentCamera;
+            if (camera is ThirdPersonCamera)
+            {
+                (camera as ThirdPersonCamera).Zoom = 330 + Speed * 1.5f;
+            }
         }
 
         public Matrix View { get; set; }

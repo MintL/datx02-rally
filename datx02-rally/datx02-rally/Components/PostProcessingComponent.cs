@@ -17,7 +17,7 @@ namespace datx02_rally.Components
         GaussianBlur gaussianBlur;
         MotionBlur motionBlur;
         Matrix previousViewProjection;
-        private bool motionBlurEnabled = false;
+        private bool motionBlurEnabled = true;
 
         public PostProcessingComponent(Game game)
             : base(game)
