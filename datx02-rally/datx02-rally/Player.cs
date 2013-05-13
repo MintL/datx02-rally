@@ -17,7 +17,18 @@ namespace datx02_rally
 
         public byte ID;
         public readonly bool LOCAL_PLAYER;
-        public string PlayerName;
+        private string playerName;
+        public string PlayerName
+        {
+            get { 
+                if (LOCAL_PLAYER)
+                    return GameSettings.Default.PlayerName;
+                else
+                    return playerName;
+            }
+            set { playerName = value; }
+        }
+
         public Player(GameManager game) : base(game)
         {
             PlayerName = GameSettings.Default.PlayerName;
