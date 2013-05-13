@@ -146,11 +146,12 @@ namespace datx02_rally.Menus
                 fullPlayerList.Add(serverClient.LocalPlayer);
                 fullPlayerList.OrderBy(p => p.ID);
 
+                int playerNumbering = 1;
                 foreach (var player in fullPlayerList)
                 {
                     if (!lobbyItems.Exists(item => item.Identifier == player.PlayerName + player.ID))
                     {
-                        MenuItem item = new TextMenuItem(player.ID+". "+player.PlayerName, null, player.PlayerName+player.ID);
+                        MenuItem item = new TextMenuItem((playerNumbering++) + ". " + player.PlayerName, null, player.PlayerName + player.ID);
                         item.Background = OptionSelected;
                         item.Font = MenuFont;
                         item.FontColor = ItemColor;
