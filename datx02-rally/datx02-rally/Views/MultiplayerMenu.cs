@@ -56,7 +56,7 @@ namespace datx02_rally.Menus
             string server = (GetMenuItem("server") as TextInputMenuItem).EnteredText;
             gameInstance.GetService<ServerClient>().Connect(System.Net.IPAddress.Parse(server));
 
-            MenuItem start = new StateActionMenuItem("Connecting...", GameState.Gameplay, "start");
+            MenuItem start = new StateActionMenuItem("Connecting...", GameState.CarChooser, "start");
             start.Background = ButtonBackground;
             start.Font = MenuFont;
             start.Enabled = false;
@@ -104,7 +104,7 @@ namespace datx02_rally.Menus
                 state = State.Connected;
 
                 MenuItem startButton = GetMenuItem("start");
-                startButton.Text = "Start Game!";
+                startButton.Text = "Play";
 
                 Vector2 size = GetScreenPosition(new Vector2(1f, 1.6f));
                 Bounds = new Rectangle(0, 0, (int)size.X, (int)size.Y);
