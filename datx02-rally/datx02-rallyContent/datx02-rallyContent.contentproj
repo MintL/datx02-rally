@@ -466,6 +466,11 @@
       <Importer>FontDescriptionImporter</Importer>
       <Processor>FontDescriptionProcessor</Processor>
     </Compile>
+    <Compile Include="Foliage\fern001.FBX">
+      <Name>fern001</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Menu\MenuHeaderFont.spritefont">
@@ -630,10 +635,16 @@
       <ProcessorParameters_GenerateMipmaps>True</ProcessorParameters_GenerateMipmaps>
     </Compile>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Compile Include="Terrain\road_n.png">
       <Name>road_n</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Foliage\Textures\island.png">
+      <Name>island</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
     </Compile>

@@ -86,6 +86,9 @@ namespace datx02_rally.Menus
         RaceTrack raceTrack;
         NavMesh navMesh;
 
+        int heightMapSize;
+        float[,] heightMap;
+
         TerrainModel[,] terrainSegments;
 
         Effect terrainEffect;
@@ -272,10 +275,10 @@ namespace datx02_rally.Menus
 
             #region Level terrain generation
 
-            int heightMapSize = terrainSegmentsCount * terrainSegmentSize + 1;
+            heightMapSize = terrainSegmentsCount * terrainSegmentSize + 1;
             float halfHeightMapSize = heightMapSize / 2f;
             HeightMap heightmapGenerator = new HeightMap(heightMapSize);
-            var heightMap = heightmapGenerator.Generate();
+            heightMap = heightmapGenerator.Generate();
 
             var roadMap = new float[heightMapSize, heightMapSize];
             raceTrack = new RaceTrack(heightMapSize, terrainScale);
@@ -482,67 +485,47 @@ namespace datx02_rally.Menus
 
             #region GameObjects
 
+            GameObjectFactory.Initialize(content);
+            GameObjectFactory.AddAsset("fern001", "Foliage/fern001");
+
+
+            int numObjects = 35;
+            for (int i = 0; i < numObjects; i++)
+            {
+                var obj = GameObjectFactory.CreateRandom();
+                obj.Position = GetRandomPosition() * terrainScale;
+
+                bool positioned = true;
+                foreach (var otherObj in GraphicalObjects)
+                {
+                    if (obj.BoundingSphere.Intersects(otherObj.BoundingSphere))
+                    {
+                        positioned = false;
+                        i--;
+                        break;
+                    }
+                }
+
+                if (positioned) 
+                {
+                    obj.Rotation = new Vector3(0, MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()), 0);
+                    obj.Scale = 3 + 3 * (float)UniversalRandom.GetInstance().NextDouble();
+
+                    GraphicalObjects.Add(obj);
+                    ShadowCasterObjects.Add(obj);
+                }
+                
+                
+            }
+
+            // Deprecated, kept for backward compability with the existing game object classes
             OakTree.LoadMaterial(content);
             BirchTree.LoadMaterial(content);
             Stone.LoadMaterial(content);
 
-            int numObjects = 75;
-
+            numObjects = 60;
             for (int i = 0; i < numObjects; i++)
             {
-
-                var t = navMesh.triangles[UniversalRandom.GetInstance().Next(navMesh.triangles.Length)];
-                float v = (float)UniversalRandom.GetInstance().NextDouble();
-
-                //float u = (float) (UniversalRandom.GetInstance().NextDouble() - 1/2f);
-                //if (u < 0)
-                //    u -= .5f;
-                //else
-                //    u += 1.5f;
-
-                float u = 0;
-                if (UniversalRandom.GetInstance().NextDouble() <= .5)
-                    u = .3f * (float)(-UniversalRandom.GetInstance().NextDouble());
-                else
-                    u = (float)(1 + .3f * UniversalRandom.GetInstance().NextDouble());
-
-
-                var pos = (t.vertices[0] + u * t.ab + v * t.ac) / terrainScale;
-                //var treePos = new Vector3(-halfHeightMapSize + (float)UniversalRandom.GetInstance().NextDouble() * (heightMapSize-50), 0,
-                //    -halfHeightMapSize + (float)UniversalRandom.GetInstance().NextDouble() * (heightMapSize-50));
-
-
-                float X = pos.X + heightMapSize / 2f,
-                    Z = pos.Z +heightMapSize / 2f;
-
-                float Xlerp = X % 1f,
-                    Zlerp = Z % 1f;
-
-                int x0 = (int)X,
-                    z0 = (int)Z,
-                    x1 = x0 + 1,
-                    z1 = z0 + 1;
-
-                float height;
-                float k;
-                if (Xlerp + Zlerp > 1)
-                {
-                    float h1 = MathHelper.Lerp(heightMap[x0, z1], heightMap[x1, z1], Xlerp);
-                    float h2 = MathHelper.Lerp(heightMap[x1, z0], heightMap[x1, z1], Zlerp);
-                    k = h2 / h1;
-                    height = MathHelper.Lerp(h1, h2, .5f);
-                }
-                else
-                {
-                    float h1 = MathHelper.Lerp(heightMap[x0, z0], heightMap[x1, z0], Xlerp),
-                        h2 = MathHelper.Lerp(heightMap[x0, z0], heightMap[x0, z1], Zlerp);
-                    k = h2 / h1;
-                    height = MathHelper.Lerp(h1, h2, .5f);
-                }
-                pos.Y = height - 0.002f;
-
-                if (k > 1.02 ) continue;
-
                 GameObject obj;
                 switch(UniversalRandom.GetInstance().Next(0, 3)) 
                 {
@@ -562,11 +545,26 @@ namespace datx02_rally.Menus
                     break;
                 }
 
-                obj.Position = terrainScale * pos;
-                obj.Rotation = new Vector3(0, MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()), 0);
+                obj.Position = GetRandomPosition() * terrainScale;
 
-                GraphicalObjects.Add(obj);
-                ShadowCasterObjects.Add(obj);
+                bool positioned = true;
+                foreach (var otherObj in GraphicalObjects)
+                {
+                    if (obj.BoundingSphere.Intersects(otherObj.BoundingSphere))
+                    {
+                        positioned = false;
+                        i--;
+                        break;
+                    }
+                }
+
+                if (positioned) 
+                {
+                    obj.Rotation = new Vector3(0, MathHelper.Lerp(0, MathHelper.Pi * 2, (float)UniversalRandom.GetInstance().NextDouble()), 0);
+
+                    GraphicalObjects.Add(obj);
+                    ShadowCasterObjects.Add(obj);
+                }
             }
 
             for (int i = 0; i < FireflyCandidates.Count; i+=5)
@@ -575,6 +573,8 @@ namespace datx02_rally.Menus
                 emitter.Origin = FireflyCandidates[i].Position + Vector3.Up * 500;
                 fireflyEmitter.Add(emitter);
             }
+
+
 
             #endregion
 
@@ -711,6 +711,51 @@ namespace datx02_rally.Menus
             #endregion
 
             init = true;
+        }
+
+        private Vector3 GetRandomPosition()
+        {
+            var t = navMesh.triangles[UniversalRandom.GetInstance().Next(navMesh.triangles.Length)];
+            float v = (float)UniversalRandom.GetInstance().NextDouble();
+            float u = 0;
+
+            if (UniversalRandom.GetInstance().NextDouble() <= .5)
+                u = .3f * (float)(-UniversalRandom.GetInstance().NextDouble());
+            else
+                u = (float)(1 + .3f * UniversalRandom.GetInstance().NextDouble());
+
+            var pos = (t.vertices[0] + u * t.ab + v * t.ac) / terrainScale;
+
+            float X = pos.X + heightMapSize / 2f,
+                Z = pos.Z + heightMapSize / 2f;
+
+            float Xlerp = X % 1f,
+                Zlerp = Z % 1f;
+
+            int x0 = (int)X,
+                z0 = (int)Z,
+                x1 = x0 + 1,
+                z1 = z0 + 1;
+
+            float height;
+            float k;
+            if (Xlerp + Zlerp > 1)
+            {
+                float h1 = MathHelper.Lerp(heightMap[x0, z1], heightMap[x1, z1], Xlerp);
+                float h2 = MathHelper.Lerp(heightMap[x1, z0], heightMap[x1, z1], Zlerp);
+                k = h2 / h1;
+                height = MathHelper.Lerp(h1, h2, .5f);
+            }
+            else
+            {
+                float h1 = MathHelper.Lerp(heightMap[x0, z0], heightMap[x1, z0], Xlerp),
+                    h2 = MathHelper.Lerp(heightMap[x0, z0], heightMap[x0, z1], Zlerp);
+                k = h2 / h1;
+                height = MathHelper.Lerp(h1, h2, .5f);
+            }
+            pos.Y = height - 0.002f;
+
+            return pos;
         }
 
         public Car MakeCar()

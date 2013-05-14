@@ -8,7 +8,13 @@ using Microsoft.Xna.Framework.Content;
 
 namespace datx02_rally.Entities
 {
-    public abstract class GameObject
+    enum GameObjectType
+    {
+        Foliage,
+        Particle
+    }
+
+    public class GameObject
     {
         // TODO: UpdateBoundingVolume has to be called if either the position or scale 
         //       is updated but that means it's updated twice in the beginning
@@ -18,12 +24,14 @@ namespace datx02_rally.Entities
             get { return position; }
             set { position = value; UpdateBoundingVolume(); }
         }
+
         private float scale;
         public float Scale 
         {
             get { return scale; }
             set { scale = value; UpdateBoundingVolume(); }
         }
+
         private Model model;
         public Model Model 
         {
@@ -32,7 +40,7 @@ namespace datx02_rally.Entities
         }
 
         /// <summary>
-        /// Yaw, pitch, roll
+        /// Yaw, pitch, roll TODO: Why not matrix/quarternion?
         /// </summary>
         public Vector3 Rotation { get; set; }
 
@@ -43,10 +51,23 @@ namespace datx02_rally.Entities
         protected Matrix world;
         protected Matrix[] baseTransforms;
 
-        public GameObject()
+        #region Initialization
+
+        public GameObject() :
+            this(1, Vector3.Zero)
         {
-            Scale = 1;
-            Rotation = Vector3.Zero;
+        }
+
+        public GameObject(float scale, Vector3 rotation) :
+            this(null, 1, Vector3.Zero)
+        {
+        }
+
+        public GameObject(Model model, float scale, Vector3 rotation)
+        {
+            Model = model;
+            Scale = scale;
+            Rotation = rotation;
         }
 
         public virtual void UpdateBoundingVolume()
@@ -62,6 +83,8 @@ namespace datx02_rally.Entities
             }
         }
 
+        #endregion
+
         public virtual void Update(GameTime gameTime)
         {
         }
@@ -70,7 +93,7 @@ namespace datx02_rally.Entities
         /// Called for every effect in the model each Draw()
         /// </summary>
         /// <param name="effect"></param>
-        protected abstract void SetEffectParameters(Effect effect);
+        protected virtual void SetEffectParameters(Effect effect) { }
 
         public virtual void Draw(Matrix view, Matrix projection)
         {
@@ -120,7 +143,7 @@ namespace datx02_rally.Entities
 
             foreach (var mesh in Model.Meshes)
             {
-                var orderedParts = mesh.MeshParts.OrderBy(part => part.Effect.Parameters["AlphaMap"].GetValueTexture2D() == null ? -1 : 1); 
+                var orderedParts = mesh.MeshParts.OrderBy(part => part.Effect.Parameters["AlphaMap"] == null ? -1 : 1); 
 
                 //for (int p = mesh.MeshParts.Count - 1; p >= 0; p--) // Need reversed draw order!
                 foreach (var part in orderedParts)
@@ -128,7 +151,7 @@ namespace datx02_rally.Entities
                     //var part = mesh.MeshParts[p];
 
                     //shadowMapEffect.Parameters["AlphaEnabled"].SetValue(false); //p != 0);
-                    var hasAlpha = part.Effect.Parameters["AlphaMap"].GetValueTexture2D() != null;
+                    var hasAlpha = part.Effect.Parameters["AlphaMap"] != null;
                     if (hasAlpha)
                         shadowMapEffect.Parameters["AlphaMap"].SetValue(part.Effect.Parameters["AlphaMap"].GetValueTexture2D());
                     shadowMapEffect.Parameters["AlphaEnabled"].SetValue(hasAlpha);

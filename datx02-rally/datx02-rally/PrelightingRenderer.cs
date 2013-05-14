@@ -103,10 +103,14 @@ namespace datx02_rally
                 {
                     foreach (ModelMeshPart part in mesh.MeshParts)
                     {
-                        part.Effect.Parameters["LightTexture"].SetValue(LightTarget);
-                        part.Effect.Parameters["PrelightProjection"].SetValue(LightProjection);
-                        part.Effect.Parameters["viewportWidth"].SetValue(device.Viewport.Width);
-                        part.Effect.Parameters["viewportHeight"].SetValue(device.Viewport.Height);
+                        if (part.Effect.Parameters["LightTexture"] != null)
+                            part.Effect.Parameters["LightTexture"].SetValue(LightTarget);
+                        if (part.Effect.Parameters["PrelightProjection"] != null)
+                            part.Effect.Parameters["PrelightProjection"].SetValue(LightProjection);
+                        if (part.Effect.Parameters["viewportWidth"] != null) 
+                            part.Effect.Parameters["viewportWidth"].SetValue(device.Viewport.Width);
+                        if (part.Effect.Parameters["viewportHeight"] != null) 
+                            part.Effect.Parameters["viewportHeight"].SetValue(device.Viewport.Height);
                     }
                 }
                 

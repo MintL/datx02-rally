@@ -20,7 +20,6 @@ namespace datx02_rally
         public float ColorTimeOffset { get; set; }
 
         private Vector3 colorVariation = Vector3.One;
-        private Vector3 velocity;
 
         public PointLight(Vector3 position, Vector3 diffuse, float radius)
             : base()
@@ -28,12 +27,6 @@ namespace datx02_rally
             Position = position;
             Diffuse = diffuse;
             Radius = radius;
-
-            // [-1..1]
-            velocity = new Vector3(-1 + 2 * (float)UniversalRandom.GetInstance().NextDouble(),
-                        -1 + 2 * (float)UniversalRandom.GetInstance().NextDouble(),
-                        -1 + 2 * (float)UniversalRandom.GetInstance().NextDouble());
-            velocity.Normalize();
 
         }
 

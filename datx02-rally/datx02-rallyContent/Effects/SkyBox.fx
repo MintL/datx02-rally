@@ -56,8 +56,8 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
     // grab the pixel color value from the skybox cube map
     float4 skyBoxColor = texCUBE(SkyboxSampler, input.Coordinates);
 
-	float size = 2.5;
-	float amount = 4 + (sin(2 * ElapsedTime) + 1) * 0.5 * size; // amount will be in range [1..1+size]
+	float size = 1.3;
+	float amount = 3.2 + (sin(1.3 * ElapsedTime) + 1) * size; // amount will be in range [1..1+size]
 	skyBoxColor = skyBoxColor * amount;
 
 	skyBoxColor.rgb = lerp(skyBoxColor.rgb, FogColor, FogEnabled * FogFactor);
