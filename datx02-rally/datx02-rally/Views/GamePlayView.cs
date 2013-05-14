@@ -903,6 +903,7 @@ namespace datx02_rally.Menus
                         coord = MathHelper.Clamp(Vector3.Dot(Car.Position - t.vertices[0], t.ac) / t.ac.LengthSquared(), 0, 1);
                         Car.Position = coord * t.ac + t.vertices[0];
                         Car.Normal = t.normal;
+                        Car.Speed *= 0.8f;
                     }
                 }
 
