@@ -23,7 +23,9 @@ namespace datx02_rally.Particles.Systems
     {
         public SmokePlumeParticleSystem(Game game, ContentManager content)
             : base(game, content)
-        { }
+        {
+            DrawOrder = 6;
+        }
 
 
         protected override void InitializeSettings(ParticleSettings settings)

@@ -10,7 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace datx02_rally.Entities
 {
-    public class FireObject : PointLight
+    class FireObject : PointLight
     {
         FireParticleSystem fireSystem;
         ParticleEmitter fireEmitter;
@@ -23,14 +23,11 @@ namespace datx02_rally.Entities
         private int colorIndex = 0;
         private static Color[] colors = new Color[] { new Color(255, 100, 50), new Color(255, 80, 40) };
 
-        public FireObject(GameManager gameInstance, ContentManager content, Vector3 firePosition, Vector3 smokeOffset)
+        public FireObject(ContentManager content, FireParticleSystem fireSystem, SmokePlumeParticleSystem fireSmokeSystem, Vector3 firePosition, Vector3 smokeOffset)
             : base(firePosition, Color.Red.ToVector3(), 400)
         {
-            fireSystem = new FireParticleSystem(gameInstance, content);
-            fireSystem.Initialize();
-
-            fireSmokeSystem = new SmokePlumeParticleSystem(gameInstance, content);
-            fireSmokeSystem.Initialize();
+            this.fireSystem = fireSystem;
+            this.fireSmokeSystem = fireSmokeSystem;
 
             fireEmitter = new ParticleEmitter(fireSystem, 100, firePosition);
             fireEmitter.Origin = firePosition;
@@ -56,21 +53,19 @@ namespace datx02_rally.Entities
 
             //fireEmitter.Origin = Position;
             fireEmitter.Update(gameTime, fireEmitter.Origin);
-            fireSystem.Update(gameTime);
 
             //fireSmokeEmitter.Origin = Position + smokeOffset;
             fireSmokeEmitter.Update(gameTime, fireSmokeEmitter.Origin);
-            fireSmokeSystem.Update(gameTime);
         }
 
         // Overrides the default Draw without drawing the assigned model
         public override void Draw(Matrix view, Matrix projection)
         {
-            fireSystem.SetCamera(view, projection);
-            fireSmokeSystem.SetCamera(view, projection);
+            //fireSystem.SetCamera(view, projection);
+            //fireSmokeSystem.SetCamera(view, projection);
 
-            fireSmokeSystem.Draw(null);
-            fireSystem.Draw(null);
+            //fireSmokeSystem.Draw(null);
+            //fireSystem.Draw(null);
         }
 
         public static void LoadMaterial()

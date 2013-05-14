@@ -30,6 +30,7 @@ namespace datx02_rally.Menus
         public GameplayMode mode;
         GameModeChoice gameModeChoice;
 
+        OverlayComponent overlayComponent;
         PauseMenu pauseMenu;
         GameOverMenu gameOverMenu;
         Matrix projectionMatrix;
@@ -121,7 +122,8 @@ namespace datx02_rally.Menus
         ParticleSystem fireflySystem;
         List<ParticleEmitter> fireflyEmitter = new List<ParticleEmitter>();
 
-        FireObject fire;
+        FireParticleSystem fireSystem;
+        SmokePlumeParticleSystem fireSmokeSystem;
 
         #endregion
 
@@ -245,6 +247,14 @@ namespace datx02_rally.Menus
             Game.Components.Add(dustSystem);
             particleSystems.Add(dustSystem);
 
+            fireSmokeSystem = new SmokePlumeParticleSystem(gameInstance, content);
+            Game.Components.Add(fireSmokeSystem);
+            particleSystems.Add(fireSmokeSystem);
+
+            fireSystem = new FireParticleSystem(gameInstance, content);
+            Game.Components.Add(fireSystem);
+            particleSystems.Add(fireSystem);
+
             pauseMenu = new PauseMenu(gameInstance);
             pauseMenu.ChangeResolution();
             pauseMenu.Enabled = false;
@@ -266,6 +276,10 @@ namespace datx02_rally.Menus
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+
+            // Overlay component, used to draw the pause menu and game over menu
+            overlayComponent = new OverlayComponent(Game, spriteBatch);
+            Game.Components.Add(overlayComponent);
 
             projectionMatrix = Matrix.CreatePerspectiveFieldOfView(MathHelper.PiOver4,
                 GraphicsDevice.Viewport.AspectRatio, 0.1f, 50000);
@@ -412,17 +426,6 @@ namespace datx02_rally.Menus
 
                 colorOffset += 100 / cr.Points.Count;
             }
-
-            fire = new FireObject(gameInstance, content, Car.Position + Vector3.Up * 100, Vector3.Up * 10);
-            pointLights.Add(fire);
-            GraphicalObjects.Add(fire);
-
-            //Vector3 forward = Vector3.Transform(Vector3.Backward,
-            //    Matrix.CreateRotationY(Car.Rotation));
-            
-            //Vector3 position = Car.Position;
-
-            //spotLights.Add(new SpotLight(position + new Vector3(0, 50, 0), forward, Color.White.ToVector3(), 45, 45, 500));
 
             #endregion
 
@@ -685,7 +688,7 @@ namespace datx02_rally.Menus
                 SetCarsAtStart(carList);
             }
 
-            int cp = 5;
+            int cp = 6;
             if (gameModeChoice == GameModeChoice.SimpleRace)
                 this.mode = new SimpleRaceMode(gameInstance, 2, cp, raceTrack, Car);
             else if (gameModeChoice == GameModeChoice.Multiplayer)
@@ -697,15 +700,32 @@ namespace datx02_rally.Menus
 
             #endregion
 
+            
             #region Checkpoint lights
-            foreach (var point in raceTrack.GetCurveRasterization(cp).Points)
-            {
+            for (int i=0; i<cp; i++) {
+                var point = raceTrack.GetCurveRasterization(cp).Points[i];
+            
                 var pl = new CheckpointLight(point.Position + 500 * Vector3.Up)
                 {
                     Model = pointLightModel
                 };
                 pointLights.Add(pl);
                 GraphicalObjects.Add(pl);
+
+                #region Fire
+                int halfnumberoffire = 5;
+
+                for (int j = -halfnumberoffire + 1; j < halfnumberoffire; j++)
+                {
+                    Vector3 side = Vector3.Cross(Vector3.Normalize(raceTrack.Curve.GetPoint((i) / (float)cp + .001f) - point.Position), Vector3.Up);
+
+                    var fire = new FireObject(content, fireSystem, fireSmokeSystem, point.Position + side * 100 * j + 
+                        Vector3.Up * 40 + 
+                        Vector3.Up * 35 * (halfnumberoffire-Math.Abs(j)), Vector3.Up * 10);
+                    pointLights.Add(fire);
+                    GraphicalObjects.Add(fire);
+                }
+                #endregion
             }
             #endregion
 
@@ -1263,7 +1283,9 @@ namespace datx02_rally.Menus
 
             postProcessingComponent.RenderedImage = postProcessTexture;
 
-            RenderOverlayMenu(overlay, overlayTexture);
+            overlayComponent.Overlay = overlay;
+            overlayComponent.OverlayTexture = overlayTexture;
+            
 
             base.Draw(gameTime);
             if (init)
@@ -1273,18 +1295,7 @@ namespace datx02_rally.Menus
             }
         }
 
-        public void RenderOverlayMenu(OverlayView overlay, Texture2D overlayTexture)
-        {
-            if (overlay != null)
-            {
-                spriteBatch.Begin();
-                Rectangle position = new Rectangle(GraphicsDevice.Viewport.Width / 2 - overlay.RenderBounds.Width / 2,
-                                                   GraphicsDevice.Viewport.Height / 2 - overlay.RenderBounds.Height / 2,
-                                                   overlay.RenderBounds.Width, overlay.RenderBounds.Height);
-                spriteBatch.Draw(overlayTexture, position, Color.White);
-                spriteBatch.End();
-            }
-        }
+        
         
         private void RenderShadowCasters(BoundingBox boundingBox, Matrix shadowMapView, Matrix shadowMapProjection)
         {

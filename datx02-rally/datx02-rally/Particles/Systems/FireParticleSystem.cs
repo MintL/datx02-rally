@@ -23,14 +23,16 @@ namespace datx02_rally.Particles.Systems
     {
         public FireParticleSystem(Game game, ContentManager content)
             : base(game, content)
-        { }
+        {
+            DrawOrder = 7;
+        }
 
 
         protected override void InitializeSettings(ParticleSettings settings)
         {
             settings.TextureName = @"Particles/smoke_2";
 
-            settings.MaxParticles = 2400;
+            settings.MaxParticles = 10000;
 
             settings.Duration = TimeSpan.FromSeconds(2);
 
@@ -45,8 +47,10 @@ namespace datx02_rally.Particles.Systems
             // Set gravity upside down, so the flames will 'fall' upward.
             settings.Gravity = new Vector3(0, 30, 0);
 
+
+
             settings.MinColor = new Color(250, 200, 0, 100);
-            settings.MaxColor = new Color(220, 20, 60, 100);//new Color(255, 165, 0);
+            settings.MaxColor = new Color(240, 20, 60, 100);//new Color(255, 165, 0);
 
             //, new Color(250, 140, 140),
             //, 
