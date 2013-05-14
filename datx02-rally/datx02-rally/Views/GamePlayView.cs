@@ -415,6 +415,7 @@ namespace datx02_rally.Menus
 
             fire = new FireObject(gameInstance, content, Car.Position + Vector3.Up * 100, Vector3.Up * 10);
             pointLights.Add(fire);
+            GraphicalObjects.Add(fire);
 
             //Vector3 forward = Vector3.Transform(Vector3.Backward,
             //    Matrix.CreateRotationY(Car.Rotation));
@@ -934,29 +935,50 @@ namespace datx02_rally.Menus
 
             #region Particle emission
             // Particles should continue to spawn regardless of the pause state
-            for (int x = -3; x < 3; x++)
+            
+            // Rain system
+            for (int x = -4; x < 4; x++)
             {
-                for (int z = -3; z < 3; z++)
+                for (int z = -4; z < 4; z++)
                 {
                     rainSystem.AddParticle(Car.Position + new Vector3(
-                        (float)UniversalRandom.GetInstance().NextDouble() * x * 200,
+                        (float)UniversalRandom.GetInstance().NextDouble() * x * 150,
                         500 * (float)UniversalRandom.GetInstance().NextDouble(),
-                        (float)UniversalRandom.GetInstance().NextDouble() * z * 200),
+                        (float)UniversalRandom.GetInstance().NextDouble() * z * 150),
                         new Vector3(-1, -1, -1));//Vector3.Down);
                 }
             }
 
+            
+            // Smoke emission on part of track
+            
+
             smokeTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (smokeTime > 0.2)
-            {
-                smokeSystem.AddParticle(Car.Position + Car.Heading * 500 +
-                    new Vector3(
-                        (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 500,
-                        500 * (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()),
-                        (float)UniversalRandom.GetInstance().NextDouble() * 500),
-                        Vector3.Up);
+            if (smokeTime > 0.35) {
+                CurveRasterization cr = new CurveRasterization(raceTrack.Curve, 150);
+                for(int i = 25 ; i < 55; i += 2){
+                    smokeSystem.AddParticle(cr.Points[i].Position +
+                        new Vector3(
+                            (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 1100,
+                            450 * (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()),
+                            (float)UniversalRandom.GetInstance().NextDouble() * 1100),
+                            Vector3.Down); 
+
+                }
                 smokeTime = 0;
             }
+
+            
+            //if (smokeTime > 0.2)
+            //{
+            //    smokeSystem.AddParticle(Car.Position + Car.Heading * 500 +
+            //        new Vector3(
+            //            (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 500,
+            //            500 * (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()),
+            //            (float)UniversalRandom.GetInstance().NextDouble() * 500),
+            //            Vector3.Up);
+            //    smokeTime = 0;
+            //}
 
             foreach (ParticleEmitter emitter in fireflyEmitter)
             {

@@ -20,15 +20,15 @@ namespace datx02_rally.Particles.Systems
 
             settings.MaxParticles = 4000;
 
-            settings.Duration = TimeSpan.FromSeconds(2);
+            settings.Duration = TimeSpan.FromSeconds(.5f);
 
             settings.MinHorizontalVelocity = 0;
             settings.MaxHorizontalVelocity = 15;
 
-            settings.MinVerticalVelocity = 10;
-            settings.MaxVerticalVelocity = 20;
+            settings.MinVerticalVelocity = 180;
+            settings.MaxVerticalVelocity = 380;
 
-            settings.Gravity = new Vector3(0, -5, 0);
+            settings.Gravity = new Vector3(0, -10, 0);
 
             settings.EndVelocity = 0.75f;
 
@@ -44,7 +44,7 @@ namespace datx02_rally.Particles.Systems
             settings.MinColor = settings.MaxColor = new Color(91, 79, 62, 150);
             //settings.MinColor = settings.MaxColor = Color.Gray;
 
-            settings.BlendState = BlendState.AlphaBlend;
+            settings.BlendState = BlendState.Additive;
         }
     }
 }

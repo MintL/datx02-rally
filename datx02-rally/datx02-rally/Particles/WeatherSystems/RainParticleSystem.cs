@@ -16,19 +16,19 @@ namespace datx02_rally.Particles.WeatherSystems
 
         protected override void InitializeSettings(ParticleSettings settings)
         {
-            settings.TextureName = @"Particles/Rain";
+            settings.TextureName = @"Particles/Rain2";
 
             settings.MaxParticles = 10000;
 
-            settings.Duration = TimeSpan.FromSeconds(.6f);
+            settings.Duration = TimeSpan.FromSeconds(.8f);
 
             settings.Gravity = 50 * new Vector3(-0.8f, -1f, -0.8f);
 
             settings.MinHorizontalVelocity = 0;
             settings.MaxHorizontalVelocity = 0;
 
-            settings.MinVerticalVelocity = -200;
-            settings.MaxVerticalVelocity = -300;
+            settings.MinVerticalVelocity = -65;
+            settings.MaxVerticalVelocity = -160;
 
 
             //settings.EndVelocity = 0.75f;
@@ -43,11 +43,11 @@ namespace datx02_rally.Particles.WeatherSystems
             //settings.MaxEndSize = 150;
 
             // All same
-            settings.MinStartSize = settings.MinEndSize = 2f;
-            settings.MaxStartSize = settings.MaxEndSize = 3f;
-            //settings.MinColor = settings.MaxColor = new Color(.15f, .1f, .6f);
+            settings.MinStartSize = settings.MinEndSize = 3f;
+            settings.MaxStartSize = settings.MaxEndSize = 5f;
+            settings.MinColor = settings.MaxColor = new Color(.65f, .6f, 1f, .7f);
 
-            settings.BlendState = BlendState.AlphaBlend;
+            settings.BlendState = BlendState.Additive;
         }
     }
 }
