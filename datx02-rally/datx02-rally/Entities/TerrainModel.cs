@@ -98,7 +98,7 @@ namespace datx02_rally
                         Vector3.Zero, // Normal
                         Vector3.Zero, // Binormal
                         Vector3.Zero, // Tangent
-                        new Vector2(x / 13f, z / 13f),
+                        new Vector2(x / 15f, z / 15f),
                         textureWeights);
 
                 }

@@ -343,9 +343,11 @@ namespace datx02_rally.Menus
             //terrainEffect.Parameters["TextureMap1"].SetValue(grassTexture);
 
             directionalLight = new DirectionalLight(
-                new Vector3(-1.25f, -2f, 5.0f), // Direction
-                new Vector3(.30f, .28f, .49f), // Ambient
-                new Vector3(.56f, .43f, .75f)); // Diffuse
+
+                           new Vector3(-1.25f, -2f, 5.0f), // Direction
+
+                           new Vector3(.55f, .55f, .60f),//new Vector3(.15f, .14f, .29f), // Ambient
+                           new Vector3(.46f, .33f, .75f)); // Diffusea
 
             Game.AddService(typeof(DirectionalLight), directionalLight);
 

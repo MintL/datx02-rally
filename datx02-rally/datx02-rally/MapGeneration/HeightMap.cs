@@ -166,18 +166,22 @@ namespace datx02_rally.MapGeneration
             }
             */
             AddPerlinNoise(6.0f);
-            /*
+            
             Perturb(35.0f);
 
-            float[,] additional = new HeightMap(Size / 4).Generate(9, 20);
+           
+               for (int i = 0; i < 10; i++)
+                   Erode(20.0f);
+               /*
+               float[,] additional = new HeightMap(Size / 4).Generate(9, 20);
 
-            int quadSize = Size / 4;
-            for (int z = 0; z < Size; z++)
-                for (int x = 0; x < Size; x++)
-                    Heights[x, z] += .15f * additional[x % quadSize, z % quadSize];
-
+               int quadSize = Size / 4;
+               for (int z = 0; z < Size; z++)
+                   for (int x = 0; x < Size; x++)
+                       Heights[x, z] += .15f * additional[x % quadSize, z % quadSize];
+               */
             Smoothen();
-            */
+            
             for (int z = 0; z < Size; z++)
             {
                 for (int x = 0; x < Size; x++)
