@@ -715,13 +715,13 @@ namespace datx02_rally.Menus
                 #region Fire
                 int halfnumberoffire = 5;
 
-                for (int j = -halfnumberoffire + 1; j < halfnumberoffire; j++)
+                for (int o = -halfnumberoffire + 1; o < halfnumberoffire; o++)
                 {
                     Vector3 side = Vector3.Cross(Vector3.Normalize(raceTrack.Curve.GetPoint((i) / (float)cp + .001f) - point.Position), Vector3.Up);
 
-                    var fire = new FireObject(content, fireSystem, fireSmokeSystem, point.Position + side * 100 * j + 
-                        Vector3.Up * 40 + 
-                        Vector3.Up * 35 * (halfnumberoffire-Math.Abs(j)), Vector3.Up * 10);
+                    var fire = new FireObject(content, fireSystem, fireSmokeSystem, point.Position + side * 100 * o - 
+                        Vector3.Up * 400 + 
+                        Vector3.Up * 650 * (float)Math.Cos(o/(float)halfnumberoffire), Vector3.Up * 10);
                     pointLights.Add(fire);
                     GraphicalObjects.Add(fire);
                 }
