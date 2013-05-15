@@ -23,10 +23,9 @@ namespace datx02_rally
         TerrainModel[,] terrainSegments;
         int terrainSegmentsCount;
         Car car;
-        List<GameObject> objects;
 
-        List<PointLight> pointLights;
-        List<SpotLight> spotLights;
+//        List<PointLight> pointLights;
+        //List<SpotLight> spotLights;
 
         Effect depthNormalEffect;
         Effect lightingEffect;
@@ -38,6 +37,31 @@ namespace datx02_rally
 
         int viewWidth;
         int viewHeight;
+
+        private List<PointLight> pointLights = new List<PointLight>();
+        private List<GameObject> otherGameObjects = new List<GameObject>();
+        public List<GameObject> GameObjects
+        {
+            get
+            {
+                var objects = new List<GameObject>();
+                objects.AddRange(pointLights);
+                objects.AddRange(otherGameObjects);
+                return objects;
+            }
+            set
+            {
+                pointLights.Clear();
+                otherGameObjects.Clear();
+                foreach (var gameObject in value)
+                {
+                    if (gameObject is PointLight)
+                        pointLights.Add(gameObject as PointLight);
+                    else
+                        otherGameObjects.Add(gameObject);
+                }
+            }
+        }
 
         #endregion
 
@@ -68,15 +92,13 @@ namespace datx02_rally
             lightingEffect.Parameters["viewportHeight"].SetValue(viewHeight);
         }
 
-        public void Render(Matrix view, TerrainModel[,] terrainSegments, int terrainSegmentsCount, List<PointLight> pointLights, Car car, List<GameObject> objects)
+        public void Render(Matrix view, TerrainModel[,] terrainSegments, int terrainSegmentsCount, Car car)
         {
             this.terrainSegments = terrainSegments;
             this.terrainSegmentsCount = terrainSegmentsCount;
-            this.pointLights = pointLights;
             //this.spotLights = spotLights;
 
             this.car = car;
-            this.objects = objects;
             
             RenderDepthNormal(view);
             RenderLight(view * LightProjection);
@@ -97,7 +119,7 @@ namespace datx02_rally
                 }
             }
 
-            foreach (GameObject obj in objects.Where(x => !(x is PointLight)))
+            foreach (GameObject obj in otherGameObjects)
             {
                 foreach (ModelMesh mesh in obj.Model.Meshes)
                 {
@@ -118,7 +140,7 @@ namespace datx02_rally
             
         }
 
-        public void RenderDepthNormal(Matrix view)
+        private void RenderDepthNormal(Matrix view)
         {
             device.RasterizerState = RasterizerState.CullNone;
             device.DepthStencilState = new DepthStencilState { DepthBufferEnable = true, DepthBufferFunction = CompareFunction.LessEqual };
@@ -140,7 +162,7 @@ namespace datx02_rally
                 }
             }
             // Car and objects
-            foreach (GameObject obj in objects.FindAll(x => !(x is PointLight)))
+            foreach (GameObject obj in otherGameObjects)
             {
                 Model model = obj.Model;
                 Dictionary<ModelMeshPart, Effect> oldEffects = new Dictionary<ModelMeshPart, Effect>();
@@ -214,7 +236,7 @@ namespace datx02_rally
             device.SetRenderTargets(null);
         }
 
-        public void RenderLight(Matrix viewProjection)
+        private void RenderLight(Matrix viewProjection)
         {
             lightingEffect.Parameters["DepthTexture"].SetValue(DepthTarget);
             lightingEffect.Parameters["NormalTexture"].SetValue(NormalTarget);

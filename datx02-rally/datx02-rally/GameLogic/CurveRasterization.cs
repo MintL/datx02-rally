@@ -30,9 +30,10 @@ namespace datx02_rally.GameLogic
 
             float d = 1 / (float)points;
             Vector3 position = curve.GetPoint(0), nextPosition;
-            for (float t = d; t < 1; t += d)
+
+            for (int i = 1; i < points; i++)
             {
-                nextPosition = curve.GetPoint(t);
+                nextPosition = curve.GetPoint(i * d);
                 Points.Add(new CurvePoint(position, nextPosition - position));
                 position = nextPosition;
             }

@@ -75,7 +75,8 @@ namespace datx02_rally.Entities
             vertices = new VertexPositionColor[2 * resolution];
             {
                 int i = 0;
-                foreach (var point in new CurveRasterization(curve, resolution).Points)
+                var curveRasterization = new CurveRasterization(curve, resolution).Points;
+                foreach (var point in curveRasterization)
                 {
                     vertices[i++] = new VertexPositionColor(point.Position - (terrainScale * width * point.Side), Color.White);
                     vertices[i++] = new VertexPositionColor(point.Position + (terrainScale * width * point.Side), Color.White);

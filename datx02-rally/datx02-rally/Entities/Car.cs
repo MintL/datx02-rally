@@ -280,6 +280,7 @@ namespace datx02_rally
 
         public override void Draw(GameTime gameTime)
         {
+            return;
             var meshes = model.Meshes.OrderBy(m => m.Name.ToLower().Contains("glass") ? 1 : -1).ToList();
 
             foreach (var mesh in meshes)

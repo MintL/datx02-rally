@@ -47,13 +47,6 @@ namespace datx02_rally.Menus
         List<GameObject> ShadowCasterObjects = new List<GameObject>();
         List<GameObject> FireflyCandidates = new List<GameObject>();
 
-        #region Animals
-
-        Model birdModel;
-        datx02_rally.GameLogic.Curve birdCurve;
-
-        #endregion
-
         #region Lights
 
         List<PointLight> pointLights = new List<PointLight>();
@@ -301,7 +294,8 @@ namespace datx02_rally.Menus
             var roadMap = new float[heightMapSize, heightMapSize];
             raceTrack = new RaceTrack(heightMapSize, terrainScale);
 
-            navMesh = new NavMesh(GraphicsDevice, raceTrack.Curve, 1500, roadWidth, terrainScale);
+            navMesh = new NavMesh(GraphicsDevice, raceTrack.Curve, //1500, roadWidth, terrainScale);
+                750, roadWidth, terrainScale);
 
             Vector3 lastPosition = raceTrack.Curve.GetPoint(.01f) / terrainScale;
 
@@ -602,13 +596,6 @@ namespace datx02_rally.Menus
             //GraphicalObjects.AddRange(list);
 
 
-            #region Animals
-
-            birdModel = gameInstance.Content.Load<Model>(@"Models\bird");
-            birdCurve = new BirdCurve();
-
-            #endregion
-
             #region Cameras
 
             var input = gameInstance.GetService<InputComponent>();
@@ -732,6 +719,8 @@ namespace datx02_rally.Menus
             #region BackgroundSound
             loopSoundManager.AddNewSound("forestambient");
             #endregion
+
+            prelightingRenderer.GameObjects = GraphicalObjects;
 
             init = true;
         }
@@ -1259,7 +1248,7 @@ namespace datx02_rally.Menus
             #region Prelight Rendering
 
             // Render to its rendertargets independently
-            prelightingRenderer.Render(view, terrainSegments, terrainSegmentsCount, pointLights, Car, GraphicalObjects);
+            prelightingRenderer.Render(view, terrainSegments, terrainSegmentsCount, Car);
 
             #endregion
 
@@ -1416,13 +1405,8 @@ namespace datx02_rally.Menus
 
             skyBoxEffect.Parameters["View"].SetValue(view);
             skyBoxEffect.Parameters["Projection"].SetValue(projection);
-            
-            //skyBoxModel.Meshes[0].Draw();
-            if (Keyboard.GetState().IsKeyUp(Keys.O))
-            {
-                skyBoxModel.Meshes[0].Draw();
-            }
 
+            skyBoxModel.Meshes[0].Draw();
 
             #endregion
 
@@ -1432,7 +1416,8 @@ namespace datx02_rally.Menus
                     var terrain = terrainSegments[x, z];
                     if (viewFrustum.Intersects(terrain.BoundingBox))
                     {
-                        if (environment) {
+                        if (environment)
+                        {
                             Vector3 boxStart = Car.Position;
                             boxStart.Y = -5000;
                             Vector3 boxEnd = boxStart;
@@ -1453,11 +1438,14 @@ namespace datx02_rally.Menus
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.DepthStencilState = DepthStencilState.Default;
             GraphicsDevice.RasterizerState = RasterizerState.CullCounterClockwise;
+            GraphicsDevice.SamplerStates[0] = SamplerState.PointClamp;
 
-            
+
             // Set view to particlesystems
             foreach (ParticleSystem pSystem in particleSystems)
+            {
                 pSystem.SetCamera(view, projection);
+            }
 
             #region RenderObjects
 
@@ -1468,44 +1456,6 @@ namespace datx02_rally.Menus
 
             #endregion
 
-            #region Animals
-
-            {
-                var t = ((float)gameTime.TotalGameTime.TotalSeconds / 3f) % 1;
-                var position = birdCurve.GetPoint(t);
-                var heading = Vector3.Normalize(birdCurve.GetPoint(t + (t > .5 ? -.01f : .01f)) - position);
-                if (t > .5)
-                    heading *= -1;
-
-                birdModel.Draw(Matrix.CreateScale(1) *
-                    Vector3.Forward.GetRotationMatrix(heading) *
-                    Matrix.CreateTranslation(position),
-                    view, projection);
-            }
-
-            #endregion
-
-            //int i = 0;
-            //foreach (var GraphicalObject in GraphicalObjects)
-            //{
-            //    ParticleSystem s = null;
-            //    switch (i++ % 4)
-            //    {
-            //        case 0:
-            //            s = yellowSystem;
-            //            break;
-            //        case 1:
-            //            s = redSystem;
-            //            break;
-            //        case 2:
-            //            s = greenSystem;
-            //            break;
-            //        case 3:
-            //            s = plasmaSystem;
-            //            break;
-            //    }
-            //    BoundingBox.CreateFromSphere(GraphicalObject.BoundingSphere).IlluminateBoundingBox(s);
-            //}
 
             if (!environment)
             {
