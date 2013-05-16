@@ -16,8 +16,10 @@ namespace datx02_rally
     {
         #region Field
 
-        public RenderTarget2D DepthTarget { get; protected set; }
-        public RenderTarget2D NormalTarget { get; protected set; }
+        //public RenderTarget2D DepthTarget { get; protected set; }
+        //public RenderTarget2D NormalTarget { get; protected set; }
+        public RenderTarget2D NormalDepthTarget { get; protected set; }
+
         public RenderTarget2D LightTarget { get; protected set; }
 
         TerrainModel[,] terrainSegments;
@@ -81,8 +83,10 @@ namespace datx02_rally
             viewWidth = device.Viewport.Width;
             viewHeight = device.Viewport.Height;
 
-            DepthTarget = new RenderTarget2D(device, viewWidth, viewHeight, false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
-            NormalTarget = new RenderTarget2D(device, viewWidth, viewHeight, false, SurfaceFormat.Color, DepthFormat.Depth24);
+            //DepthTarget = new RenderTarget2D(device, viewWidth, viewHeight, false, SurfaceFormat.Single, DepthFormat.Depth24Stencil8);
+            //NormalTarget = new RenderTarget2D(device, viewWidth, viewHeight, false, SurfaceFormat.Color, DepthFormat.Depth24);
+            NormalDepthTarget = new RenderTarget2D(device, viewWidth, viewHeight, false, SurfaceFormat.HalfVector4, DepthFormat.Depth24);
+
             LightTarget = new RenderTarget2D(device, viewWidth, viewHeight, false, SurfaceFormat.Color, DepthFormat.Depth24);
 
             depthNormalEffect = content.Load<Effect>(@"Effects\Prelight\DepthNormal");
@@ -145,7 +149,7 @@ namespace datx02_rally
             device.RasterizerState = RasterizerState.CullNone;
             device.DepthStencilState = new DepthStencilState { DepthBufferEnable = true, DepthBufferFunction = CompareFunction.LessEqual };
             device.BlendState = BlendState.Opaque;
-            device.SetRenderTargets(NormalTarget, DepthTarget);
+            device.SetRenderTarget(NormalDepthTarget);
             device.Clear(new Color(0, 255, 255));
 
             // Terrain
@@ -238,8 +242,8 @@ namespace datx02_rally
 
         private void RenderLight(Matrix viewProjection)
         {
-            lightingEffect.Parameters["DepthTexture"].SetValue(DepthTarget);
-            lightingEffect.Parameters["NormalTexture"].SetValue(NormalTarget);
+            lightingEffect.Parameters["NormalDepthTexture"].SetValue(NormalDepthTarget);
+            //lightingEffect.Parameters["NormalTexture"].SetValue(NormalTarget);
             Matrix invViewProjection = Matrix.Invert(viewProjection);
             lightingEffect.Parameters["InvViewProjection"].SetValue(invViewProjection);
 

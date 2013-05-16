@@ -239,7 +239,7 @@ namespace datx02_rally.Menus
             dustSystem = new DustParticleSystem(gameInstance, content);
             Game.Components.Add(dustSystem);
             particleSystems.Add(dustSystem);
-
+            
             fireSmokeSystem = new SmokePlumeParticleSystem(gameInstance, content);
             Game.Components.Add(fireSmokeSystem);
             particleSystems.Add(fireSmokeSystem);
@@ -701,11 +701,11 @@ namespace datx02_rally.Menus
 
                 #region Fire
                 int halfnumberoffire = 5;
-
+             
                 for (int o = -halfnumberoffire + 1; o < halfnumberoffire; o++)
                 {
                     Vector3 side = Vector3.Cross(Vector3.Normalize(raceTrack.Curve.GetPoint((i) / (float)cp + .001f) - point.Position), Vector3.Up);
-
+             
                     var fire = new FireObject(content, fireSystem, fireSmokeSystem, point.Position + side * 100 * o - 
                         Vector3.Up * 400 + 
                         Vector3.Up * 650 * (float)Math.Cos(o/(float)halfnumberoffire), Vector3.Up * 10);

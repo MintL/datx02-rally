@@ -53,7 +53,7 @@ namespace datx02_rally.Components
             if (motionBlurEnabled)
             {
                 Matrix viewProjectionInverse = Matrix.Invert(view * prelightingRenderer.LightProjection);
-                finalTexture = motionBlur.PerformMotionBlur(finalTexture, prelightingRenderer.DepthTarget, viewProjectionInverse, previousViewProjection);
+                finalTexture = motionBlur.PerformMotionBlur(finalTexture, prelightingRenderer.NormalDepthTarget, viewProjectionInverse, previousViewProjection);
                 previousViewProjection = view * prelightingRenderer.LightProjection;
             }
 

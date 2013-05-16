@@ -42,11 +42,11 @@ namespace datx02_rally.Graphics
             Size = 30f;
         }
 
-        public Texture2D PerformMotionBlur(Texture2D srcTexture, Texture2D depthTexture, Matrix viewProjectionInverse, Matrix previousViewProjection)
+        public Texture2D PerformMotionBlur(Texture2D srcTexture, Texture2D normalDepthTexture, Matrix viewProjectionInverse, Matrix previousViewProjection)
         {
             effect.Parameters["NumSamples"].SetValue(NumSamples);
             effect.Parameters["Size"].SetValue(Size);
-            effect.Parameters["DepthTexture"].SetValue(depthTexture);
+            effect.Parameters["NormalDepthTexture"].SetValue(normalDepthTexture);
             effect.Parameters["ViewProjectionInverse"].SetValue(viewProjectionInverse);
             effect.Parameters["PreviousViewProjection"].SetValue(previousViewProjection);
 

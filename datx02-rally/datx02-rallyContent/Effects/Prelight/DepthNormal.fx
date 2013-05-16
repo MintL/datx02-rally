@@ -31,17 +31,13 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
     return output;
 }
 
-struct PixelShaderOutput
+float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
-	float4 Normal : COLOR0;
-	float4 Depth : COLOR1;
-};
+	return float4((normalize(input.Normal).xyz / 2) + .5, 1 - (input.Depth.x / input.Depth.y));
+	
+	/*
 
-PixelShaderOutput PixelShaderFunction(VertexShaderOutput input)
-{
-    PixelShaderOutput output;
-
-	output.Depth = float4(1, 1, 1, 1);
+    output.Depth = float4(1, 1, 1, 1);
 	// Depth is stored as distance from camera / far plane distance to get value between 0 and 1
 	output.Depth.r = 1 - (input.Depth.x / input.Depth.y);
 
@@ -53,6 +49,7 @@ PixelShaderOutput PixelShaderFunction(VertexShaderOutput input)
 	output.Normal.a = 1;
 
 	return output;
+	*/
 }
 
 technique Technique1

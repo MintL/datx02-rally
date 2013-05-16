@@ -9,10 +9,10 @@ int NumSamples = 4;
 float Size = 50.0f;
 
 sampler2D sceneSampler : register(s0);
-texture2D DepthTexture;
-sampler2D depthSampler = sampler_state
+texture2D NormalDepthTexture;
+sampler2D normalDepthSampler = sampler_state
 {
-	texture = <DepthTexture>;
+	texture = <NormalDepthTexture>;
 	minfilter = point;
 	magfilter = point;
 	mipfilter = point;
@@ -20,7 +20,7 @@ sampler2D depthSampler = sampler_state
 
 float4 PixelShaderFunction(float2 texCoord : TEXCOORD0) : COLOR0
 {
-    float zOverW = tex2D(depthSampler, texCoord);
+    float zOverW = tex2D(normalDepthSampler, texCoord).a;
 	float4 H = float4(texCoord.x * 2 - 1, (1 - texCoord.y) * 2 - 1, zOverW, 1);
 	float4 D = mul(H, ViewProjectionInverse);
 	float4 worldPos = D / D.w;

@@ -1,18 +1,10 @@
 float4x4 WorldViewProjection;
 float4x4 InvViewProjection;
 
-texture2D DepthTexture;
-texture2D NormalTexture;
-sampler2D depthSampler = sampler_state
+texture2D NormalDepthTexture;
+sampler2D normalDepthSampler = sampler_state
 {
-	texture = <DepthTexture>;
-	minfilter = point;
-	magfilter = point;
-	mipfilter = point;
-};
-sampler2D normalSampler = sampler_state
-{
-	texture = <NormalTexture>;
+	texture = <NormalDepthTexture>;
 	minfilter = point;
 	magfilter = point;
 	mipfilter = point;
@@ -48,13 +40,13 @@ VertexShaderOutput VertexShaderFunction(VertexShaderInput input)
 float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 {
     float2 texCoord = postProjToScreen(input.LightPosition) + halfPixel();
-	float4 depth = tex2D(depthSampler, texCoord);
+	float4 normalDepth = tex2D(normalDepthSampler, texCoord);
 
 	// Recreate the position with the UV coordinates and depth value
 	float4 position;
 	position.x = texCoord.x * 2 - 1;
 	position.y = (1 - texCoord.y) * 2 - 1;
-	position.z = 1 - depth.r;
+	position.z = 1 - normalDepth.a;
 	position.w = 1.0f;
 
 	// Transform position from screen space to world space
@@ -64,7 +56,7 @@ float4 PixelShaderFunction(VertexShaderOutput input) : COLOR0
 
 	// Extract the normal from the normal map and move from
 	// 0 to 1 range to -1 to 1 range
-	float4 normal = normalize((tex2D(normalSampler, texCoord) - .5) * 2);
+	float3 normal = normalize((normalDepth.xyz - .5) * 2);
 
 	// Perform lighting calculations
 	float3 lightDirection = LightPosition - position;

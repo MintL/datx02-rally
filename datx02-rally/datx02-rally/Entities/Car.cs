@@ -15,6 +15,7 @@ namespace datx02_rally
         #region Field
 
         private Model model;
+        private List<ModelMesh> meshes;
 
         public Vector3 Normal;
 
@@ -85,6 +86,8 @@ namespace datx02_rally
         private Car(Game game, Model model, float wheelRadius) : base(game)
         {
             this.model = model;
+            if (model != null)
+                this.meshes = model.Meshes.OrderBy(m => m.Name.ToLower().Contains("glass") ? 1 : -1).ToList();
 
             this.Position = Vector3.Zero;
 
@@ -187,6 +190,10 @@ namespace datx02_rally
             glassEffect = content.Load<Effect>(@"Effects/Car/GlassEffect");
             otherEffect = content.Load<Effect>(@"Effects/Car/OtherCarEffect");
 
+            mainEffect.Parameters["MaterialReflection"].SetValue(.7f);
+            mainEffect.Parameters["MaterialShininess"].SetValue(10);
+
+
             meshEffect = new Dictionary<string, Effect>()
             {
                 { "main", mainEffect },
@@ -206,41 +213,6 @@ namespace datx02_rally
 
         #endregion
 
-        /*
-        protected BoundingBox GetBoundingBox(Model model)
-        {
-            // Initialize minimum and maximum corners of the bounding box to max and min values
-            Vector3 min = new Vector3(float.MaxValue);
-            Vector3 max = new Vector3(float.MinValue);
-
-            // For each mesh of the model
-            foreach (ModelMesh mesh in model.Meshes)
-            {
-                foreach (ModelMeshPart meshPart in mesh.MeshParts)
-                {
-                    // Vertex buffer parameters
-                    int vertexStride = meshPart.VertexBuffer.VertexDeclaration.VertexStride;
-                    int vertexBufferSize = meshPart.NumVertices * vertexStride;
-
-                    // Get vertex data as float
-                    float[] vertexData = new float[vertexBufferSize / sizeof(float)];
-                    meshPart.VertexBuffer.GetData<float>(vertexData);
-
-                    // Iterate through vertices (possibly) growing bounding box, all calculations are done in world space
-                    for (int i = 0; i < vertexBufferSize / sizeof(float); i += vertexStride / sizeof(float))
-                    {
-                        Vector3 transformedPosition = new Vector3(vertexData[i], vertexData[i + 1], vertexData[i + 2]);
-
-                        min = Vector3.Min(min, transformedPosition);
-                        max = Vector3.Max(max, transformedPosition);
-                    }
-                }
-            }
-
-            // Create and return bounding box
-            return new BoundingBox(min, max);
-        }
-        */
 
         public void Update()
         {
@@ -280,9 +252,6 @@ namespace datx02_rally
 
         public override void Draw(GameTime gameTime)
         {
-            return;
-            var meshes = model.Meshes.OrderBy(m => m.Name.ToLower().Contains("glass") ? 1 : -1).ToList();
-
             foreach (var mesh in meshes)
             {
                 var world = Matrix.Identity;
@@ -312,11 +281,6 @@ namespace datx02_rally
                     // TODO: CARMOVE
                     if (mesh.Name.Equals("main"))
                     {
-                        if (param["MaterialReflection"] != null)
-                            param["MaterialReflection"].SetValue(.7f);
-                        if (param["MaterialShininess"] != null) 
-                            param["MaterialShininess"].SetValue(10);
-
                         if (param["NormalMatrix"] != null)
                             param["NormalMatrix"].SetValue(Matrix.Invert(Matrix.Transpose(world)));
 
@@ -372,9 +336,10 @@ namespace datx02_rally
         // To be used by PrelightingRenderer.
         public void PreparePrelighting(RenderTarget2D lightTarget, Matrix lightProjection, int width, int height)
         {
-            foreach (ModelMesh mesh in model.Meshes)
+            //foreach (ModelMesh mesh in model.Meshes)
             {
-                if (mesh.Name.Equals("main"))
+                var mesh = model.Meshes["main"];
+                //if (mesh.Name.Equals("main"))
                 {
                     foreach (ModelMeshPart part in mesh.MeshParts)
                     {
@@ -396,9 +361,10 @@ namespace datx02_rally
             Matrix oldProjection = Projection;
             Projection = lightProjection;
 
-            foreach (ModelMesh mesh in model.Meshes)
+            //foreach (ModelMesh mesh in model.Meshes)
             {
-                if (mesh.Name.Equals("main"))
+                var mesh = model.Meshes["main"];
+                //if (mesh.Name.Equals("main"))
                 {
                     foreach (ModelMeshPart part in mesh.MeshParts)
                     {
@@ -407,7 +373,10 @@ namespace datx02_rally
                     }
                 }
             }
+            var tmpMeshes = meshes;
+            this.meshes = new List<ModelMesh>{ carModel.Meshes["main"] };
             Draw(null);
+            this.meshes = tmpMeshes;
 
             // Reset the effect and projection
             Projection = oldProjection;            
