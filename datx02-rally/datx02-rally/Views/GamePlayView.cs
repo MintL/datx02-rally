@@ -385,6 +385,7 @@ namespace datx02_rally.Menus
             #region Car
 
             Car = MakeCar();
+            gameInstance.AddService(typeof(Car), Car);
             Player localPlayer = gameInstance.GetService<ServerClient>().LocalPlayer;
             gameInstance.GetService<CarControlComponent>().Cars[localPlayer] = Car;
             gameInstance.AddService(typeof(Player), localPlayer);

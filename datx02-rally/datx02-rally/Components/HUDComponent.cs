@@ -15,9 +15,25 @@ namespace datx02_rally.Components
 {
     /// <summary>
     /// This is a game component that implements IUpdateable.
+    /// 
+    /// Speedometer adopted from
+    /// https://code.google.com/p/riot2021/
+    /// and
+    /// http://en.wikibooks.org/wiki/Game_Creation_with_XNA/2D_Development/Heads-Up-Display (original source)
     /// </summary>
     public class HUDComponent : Microsoft.Xna.Framework.DrawableGameComponent
     {
+        // speedometer
+        private enum SpeedHUD { Graphic, Text, None }
+        private SpeedHUD speedRepresentation = SpeedHUD.Graphic;
+        private Vector2 speedometerPosition;
+        private Vector2 needleOrigin;
+        private Vector2 needlePosition;
+        private float MAX_NEEDLE_ANGLE = 240;
+        private Texture2D speedometerTexture;
+        private Texture2D needleTexture;
+
+        // other stuff
         private SpriteBatch spriteBatch;
         private SpriteFont font;
         private TimeSpan timeSinceLastFPS;
@@ -49,6 +65,7 @@ namespace datx02_rally.Components
             TimeEnabled = true;
             PlacementNotificationsEnabled = true; // seriously, don't set this to true, its done externally
             DrawOrder = 100;
+
         }
 
         /// <summary>
@@ -58,6 +75,12 @@ namespace datx02_rally.Components
         public override void Initialize()
         {
             base.Initialize();
+            // speedometer
+            speedometerTexture = Game.Content.Load<Texture2D>(@"HUD/speedometer");
+            needleTexture = Game.Content.Load<Texture2D>(@"HUD/speedometer-needle");
+            speedometerPosition = new Vector2(5, GraphicsDevice.Viewport.Height - speedometerTexture.Height - 5);
+            needlePosition = new Vector2(speedometerPosition.X + speedometerTexture.Width / 2, speedometerPosition.Y + speedometerTexture.Height / 2);
+            needleOrigin = new Vector2(50, 18);
         }
 
         public void SetPlayerPosition(int position, TimeSpan notificationTime) 
@@ -123,9 +146,25 @@ namespace datx02_rally.Components
             }
             if (SpeedEnabled)
             {
-                double carSpeed = Math.Abs(Math.Round(((Game as GameManager).currentView as GamePlayView).Car.Speed * 2.35f, 1));
-                Vector2 bottomLeft = new Vector2(0, Game.GraphicsDevice.Viewport.Height - font.LineSpacing);
-                spriteBatch.DrawString(font, carSpeed.ToString(), bottomLeft, Color.Moccasin);
+                var car = Game.GetService<Car>();
+                switch (speedRepresentation)
+                {
+                    case SpeedHUD.Graphic:
+                        float rotation = ((car.Speed / car.MaxSpeed) * MAX_NEEDLE_ANGLE);
+                        spriteBatch.Draw(speedometerTexture, speedometerPosition, Color.White);
+                        spriteBatch.Draw(needleTexture, needlePosition, null, Color.White, MathHelper.ToRadians(rotation), needleOrigin, 1, SpriteEffects.None, 0);
+                        break;
+                    case SpeedHUD.Text:
+                        double carSpeed = Math.Abs(Math.Round(car.Speed * 2.35f, 1));
+                        Vector2 bottomLeft = new Vector2(0, Game.GraphicsDevice.Viewport.Height - font.LineSpacing);
+                        spriteBatch.DrawString(font, carSpeed.ToString(), bottomLeft, Color.Moccasin);
+                        break;
+                    case SpeedHUD.None:
+                        break;
+                    default:
+                        break;
+                }
+
             }
             if (PlayerPlaceEnabled)
             {
