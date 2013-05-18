@@ -165,9 +165,12 @@ namespace datx02_rally.Components
                     notificationPosition.X - textSize.X / 2,
                     notificationPosition.Y);
 
-                spriteBatch.DrawString(font, notification.Text, thisNotificationPosition, Color.Lerp(Color.Transparent, notification.Color, fadeProgress), 
-                    0.0f, Vector2.Zero, fadeProgress, SpriteEffects.None, 0);
-
+                //spriteBatch.DrawString(font, notification.Text, thisNotificationPosition, Color.Lerp(Color.Transparent, notification.Color, fadeProgress), 
+                //    0.0f, Vector2.Zero, fadeProgress, SpriteEffects.None, 0);
+                DrawOutlinedString(spriteBatch, notification.Text,
+                    Color.Lerp(Color.Transparent, Color.Black, fadeProgress),
+                    Color.Lerp(Color.Transparent, notification.Color, fadeProgress), 
+                    fadeProgress, thisNotificationPosition);
                 notificationPosition.Y += textSize.Y;
                 notification.DisplayedTime += gameTime.ElapsedGameTime;
             }
@@ -176,6 +179,23 @@ namespace datx02_rally.Components
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        // Applied from http://erikskoglund.wordpress.com/2009/09/10/super-simple-text-outlining-in-xna/
+        private void DrawOutlinedString(SpriteBatch sb, string text, Color backColor, Color frontColor, float scale, Vector2 position)
+        {
+            Vector2 origin = Vector2.Zero;//new Vector2(font.MeasureString(text).X / 2, font.MeasureString(text).Y / 2);
+            float rotation = 0.0f;
+            int thickness = 3; // default 1
+
+            //Outline
+            sb.DrawString(font, text, position + new Vector2(thickness * scale, thickness * scale), backColor, rotation, origin, scale, SpriteEffects.None, 0);
+            sb.DrawString(font, text, position + new Vector2(-thickness * scale, -thickness * scale), backColor, rotation, origin, scale, SpriteEffects.None, 0);
+            sb.DrawString(font, text, position + new Vector2(-thickness * scale, thickness * scale), backColor, rotation, origin, scale, SpriteEffects.None, 0);
+            sb.DrawString(font, text, position + new Vector2(thickness * scale, -thickness * scale), backColor, rotation, origin, scale, SpriteEffects.None, 0);
+
+            //Text
+            sb.DrawString(font, text, position, frontColor, rotation, origin, scale, SpriteEffects.None, 0);
         }
 
 
