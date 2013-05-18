@@ -56,8 +56,12 @@ namespace datx02_rally
 
         public void SendReadySignal()
         {
+            var color = GameSettings.Default.CarColor;
             NetOutgoingMessage msg = ServerThread.CreateMessage();
             msg.Write((byte)MessageType.OK);
+            msg.Write(color.R);
+            msg.Write(color.G);
+            msg.Write(color.B);
             ServerThread.SendMessage(msg, NetDeliveryMethod.Unreliable);
         }
 

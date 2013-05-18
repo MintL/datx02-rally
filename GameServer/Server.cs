@@ -143,6 +143,10 @@ namespace GameServer
                     DistributeLobbyUpdate();
                     break;
                 case MessageType.OK:
+                    var c = new Color();
+                    c.r = msg.ReadByte(); c.g = msg.ReadByte(); c.b = msg.ReadByte();
+                    player.CarColor = c;
+
                     player.Ready = true;
                     break;
                 case MessageType.RaceTime:
@@ -164,6 +168,10 @@ namespace GameServer
             {
                 msg.Write(player.PlayerID);
                 msg.Write(player.PlayerName);
+                msg.Write(player.Ready);
+                msg.Write(player.CarColor.r);
+                msg.Write(player.CarColor.g);
+                msg.Write(player.CarColor.b);
             }
             serverThread.SendToAll(msg, NetDeliveryMethod.Unreliable);
         }

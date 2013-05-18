@@ -6,11 +6,14 @@ using Microsoft.Xna.Framework;
 
 namespace datx02_rally
 {
+    public enum PlayerState { Lobby, Game }
     class Player : GameComponent
     {
         public Vector3 Position { get; set; }
         public float Rotation { get; set; }
         public float Speed { get; set; }
+        public Vector3 CarColor { get; set; }
+        public PlayerState State { get; set; }
         public PositionMessage LastReceived { get; private set; }
         public TimeSpan RaceTime { get; set; }
         public int Lap { get; set; }
@@ -36,6 +39,7 @@ namespace datx02_rally
             LastReceived = new PositionMessage();
             LastReceived.Sequence = byte.MinValue;
             RaceTime = TimeSpan.MaxValue;
+            State = PlayerState.Lobby;
             Lap = 0;
         }
 
@@ -47,6 +51,7 @@ namespace datx02_rally
             LastReceived = new PositionMessage();
             LastReceived.Sequence = byte.MinValue;
             RaceTime = TimeSpan.MaxValue;
+            State = PlayerState.Lobby;
             Lap = 0;
         }
 

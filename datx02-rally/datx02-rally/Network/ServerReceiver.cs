@@ -85,6 +85,9 @@ namespace datx02_rally
                     {
                         byte discoveredPlayerId = msg.ReadByte();
                         string discoveredPlayerName = msg.ReadString();
+                        bool discoveredPlayerReady = msg.ReadBoolean();
+                        Vector3 discoveredPlayerColor = new Color(msg.ReadByte(), msg.ReadByte(), msg.ReadByte()).ToVector3();
+
                         if (DEBUG_MODE) Console.Write(discoveredPlayerName + ", ");
 
                         if (ServerHandler.LocalPlayer.ID != discoveredPlayerId) // ignore info of local player
@@ -93,11 +96,16 @@ namespace datx02_rally
                             if (!PlayerList.TryGetValue(discoveredPlayerId, out discoveredPlayer))
                             {
                                 ServerHandler.Game.GetService<HUDConsoleComponent>().WriteOutput("New remote player "+discoveredPlayerName+" discovered!");
-                                newPlayerList[discoveredPlayerId] = new Player(GameManager.GetInstance(), discoveredPlayerId, discoveredPlayerName);
+                                var newPlayer = new Player(GameManager.GetInstance(), discoveredPlayerId, discoveredPlayerName);
+                                newPlayer.State = discoveredPlayerReady ? PlayerState.Game : PlayerState.Lobby;
+                                newPlayer.CarColor = discoveredPlayerColor;
+                                newPlayerList[discoveredPlayerId] = newPlayer;
                             }
                             else
                             {
                                 discoveredPlayer.PlayerName = discoveredPlayerName; // maybe has changed name
+                                discoveredPlayer.CarColor = discoveredPlayerColor; // or color
+                                discoveredPlayer.State = discoveredPlayerReady ? PlayerState.Game : PlayerState.Lobby;
                                 newPlayerList[discoveredPlayerId] = discoveredPlayer;
                                 PlayerList.Remove(discoveredPlayerId);
                             }

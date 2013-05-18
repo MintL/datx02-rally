@@ -152,7 +152,8 @@ namespace datx02_rally.Menus
                 {
                     if (!lobbyItems.Exists(item => item.Identifier == player.PlayerName + player.ID))
                     {
-                        MenuItem item = new TextMenuItem((playerNumbering++) + ". " + player.PlayerName, null, player.PlayerName + player.ID);
+                        string stateText = player.State == PlayerState.Lobby ? "In Lobby" : "In Game";
+                        MenuItem item = new TextMenuItem((playerNumbering++) + ". " + player.PlayerName, stateText, player.PlayerName + player.ID);
                         item.Background = OptionSelected;
                         item.Font = MenuFont;
                         item.FontColor = ItemColor;

@@ -28,7 +28,8 @@ namespace datx02_rally
             if (model == null)
                 model = Game.Content.Load<Model>(@"Models/porsche");
 
-            Cars[player] = gameplay.MakeCar();
+            var car = gameplay.MakeCar();
+            Cars[player] = car;
         }
 
         public void RemoveCar(Player player)
@@ -57,6 +58,7 @@ namespace datx02_rally
         /// <param name="car"></param>
         private void UpdateNetworkCar(Player player, Car car)
         {
+            car.MaterialDiffuse = player.CarColor;
             simulationStrategy.UpdatePosition(player, car);
         }
 
