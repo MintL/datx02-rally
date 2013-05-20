@@ -76,7 +76,7 @@ namespace datx02_rally.Components
         {
             base.Initialize();
             // speedometer
-            speedometerTexture = Game.Content.Load<Texture2D>(@"HUD/speedometer");
+            speedometerTexture = Game.Content.Load<Texture2D>(@"HUD/speedometer2");
             needleTexture = Game.Content.Load<Texture2D>(@"HUD/speedometer-needle");
             speedometerPosition = new Vector2(5, GraphicsDevice.Viewport.Height - speedometerTexture.Height - 5);
             needlePosition = new Vector2(speedometerPosition.X + speedometerTexture.Width / 2, speedometerPosition.Y + speedometerTexture.Height / 2);
@@ -142,7 +142,7 @@ namespace datx02_rally.Components
                 }
 
                 Vector2 topLeft = new Vector2(0, 0);
-                spriteBatch.DrawString(font, currentFps == 0 ? "" : currentFps.ToString(), topLeft, Color.Moccasin);
+                DrawOutlinedString(spriteBatch, currentFps == 0 ? "" : currentFps.ToString(), Color.Black, Color.Moccasin, 1, topLeft);
             }
             if (SpeedEnabled)
             {
@@ -157,7 +157,7 @@ namespace datx02_rally.Components
                     case SpeedHUD.Text:
                         double carSpeed = Math.Abs(Math.Round(car.Speed * 2.35f, 1));
                         Vector2 bottomLeft = new Vector2(0, Game.GraphicsDevice.Viewport.Height - font.LineSpacing);
-                        spriteBatch.DrawString(font, carSpeed.ToString(), bottomLeft, Color.Moccasin);
+                        DrawOutlinedString(spriteBatch, carSpeed.ToString(), Color.Black, Color.Moccasin, 1, bottomLeft);
                         break;
                     case SpeedHUD.None:
                         break;
@@ -171,7 +171,7 @@ namespace datx02_rally.Components
                 int totalPlayers = Game.GetService<CarControlComponent>().Cars.Count;
                 string positionText = playerPosition + "/" + totalPlayers;
                 Vector2 topRight = new Vector2(Game.GraphicsDevice.Viewport.Width - font.MeasureString(positionText).X, 0);
-                spriteBatch.DrawString(font, positionText, topRight, Color.Azure);
+                DrawOutlinedString(spriteBatch, positionText, Color.Black, Color.Azure, 1, topRight);
             }
             if (TimeEnabled)
             {
@@ -183,7 +183,7 @@ namespace datx02_rally.Components
 
                     string timeText = totalRaceTime.ToString(@"m\:ss\:ff");
                     Vector2 topCenter1 = new Vector2((Game.GraphicsDevice.Viewport.Width / 2) - (font.MeasureString(timeText).X / 2), 0);
-                    spriteBatch.DrawString(font, timeText, topCenter1, Color.SpringGreen);
+                    DrawOutlinedString(spriteBatch, timeText, Color.Black, Color.SpringGreen, 1, topCenter1);
                 }
             }
 
