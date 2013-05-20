@@ -147,15 +147,16 @@ namespace datx02_rally.Components
             if (SpeedEnabled)
             {
                 var car = Game.GetService<Car>();
+                float carSpeed = Math.Abs(car.Speed);
                 switch (speedRepresentation)
                 {
                     case SpeedHUD.Graphic:
-                        float rotation = ((car.Speed / car.MaxSpeed) * MAX_NEEDLE_ANGLE);
+                        float rotation = ((carSpeed / car.MaxSpeed) * MAX_NEEDLE_ANGLE);
                         spriteBatch.Draw(speedometerTexture, speedometerPosition, Color.White);
                         spriteBatch.Draw(needleTexture, needlePosition, null, Color.White, MathHelper.ToRadians(rotation), needleOrigin, 1, SpriteEffects.None, 0);
                         break;
                     case SpeedHUD.Text:
-                        double carSpeed = Math.Abs(Math.Round(car.Speed * 2.35f, 1));
+                        carSpeed = (float)Math.Round(carSpeed * 2.35f, 1);
                         Vector2 bottomLeft = new Vector2(0, Game.GraphicsDevice.Viewport.Height - font.LineSpacing);
                         DrawOutlinedString(spriteBatch, carSpeed.ToString(), Color.Black, Color.Moccasin, 1, bottomLeft);
                         break;
