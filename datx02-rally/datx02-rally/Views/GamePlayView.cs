@@ -75,7 +75,7 @@ namespace datx02_rally.Menus
         Vector3 terrainScale = new Vector3(75, 3500, 75);
 
         float roadWidth = 7; // #Quads
-        float roadFalloff = 30; // #Quads
+        float roadFalloff = 16; // 30; // #Quads
 
         RaceTrack raceTrack;
         NavMesh navMesh;
@@ -501,9 +501,9 @@ namespace datx02_rally.Menus
 
                 float u = 0;
                 if (UniversalRandom.GetInstance().NextDouble() <= .5)
-                    u = .3f * (float)(-UniversalRandom.GetInstance().NextDouble());
+                    u = -.5f - .3f * (float)(-UniversalRandom.GetInstance().NextDouble());
                 else
-                    u = (float)(1 + .3f * UniversalRandom.GetInstance().NextDouble());
+                    u = (float)(1.5f + .3f * UniversalRandom.GetInstance().NextDouble());
 
 
                 var pos = (t.vertices[0] + u * t.ab + v * t.ac) / terrainScale;
@@ -557,7 +557,7 @@ namespace datx02_rally.Menus
                     break;
                 default:
                     obj = new Stone(gameInstance);
-                    obj.Scale = 0.5f + (float)UniversalRandom.GetInstance().NextDouble();
+                    obj.Scale = 0.5f + (float)(.25 * UniversalRandom.GetInstance().NextDouble());
                     break;
                 }
 
@@ -966,7 +966,7 @@ namespace datx02_rally.Menus
             smokeTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
             if (smokeTime > 0.35) {
                 CurveRasterization cr = new CurveRasterization(raceTrack.Curve, 150);
-                for(int i = 25 ; i < 55; i += 2){
+                for(int i = 25 ; i < 55; i += 3){
                     smokeSystem.AddParticle(cr.Points[i].Position +
                         new Vector3(
                             (-1f + 2 * (float)UniversalRandom.GetInstance().NextDouble()) * 1100,
@@ -1434,7 +1434,8 @@ namespace datx02_rally.Menus
                     }
                 }
 
-            //navMesh.Draw(view, projection);
+            //if (Keyboard.GetState().IsKeyUp(Keys.N))
+            //    navMesh.Draw(view, projection);
 
             GraphicsDevice.BlendState = BlendState.AlphaBlend;
             GraphicsDevice.DepthStencilState = DepthStencilState.Default;
