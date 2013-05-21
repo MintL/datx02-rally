@@ -401,7 +401,7 @@ namespace datx02_rally.Menus
 
             Vector3 pointLightOffset = new Vector3(0, 250, 0);
 
-            var cr = new CurveRasterization(raceTrack.Curve, 75);
+            var cr = new CurveRasterization(raceTrack.Curve, 50);
 
             float colorOffset = 0f;
 
@@ -410,7 +410,9 @@ namespace datx02_rally.Menus
                 Random r = UniversalRandom.GetInstance();
 
                 Vector3 color = new Vector3(0f,0f,0f);
-                PointLight pl = new PointLight(point.Position + pointLightOffset, color, 450)
+                PointLight pl = new PointLight(point.Position + pointLightOffset + 
+                    Vector3.Transform(50 * Vector3.Up, Matrix.CreateRotationZ(MathHelper.TwoPi * (float)UniversalRandom.GetInstance().NextDouble())), 
+                    color, 450)
                 {
                     Model = pointLightModel, 
                     ColorTimeOffset = colorOffset
@@ -678,9 +680,9 @@ namespace datx02_rally.Menus
 
             int cp = 6;
             if (gameModeChoice == GameModeChoice.SimpleRace)
-                this.mode = new SimpleRaceMode(gameInstance, 2, cp, raceTrack, Car);
+                this.mode = new SimpleRaceMode(gameInstance, 3, cp, raceTrack, Car);
             else if (gameModeChoice == GameModeChoice.Multiplayer)
-                this.mode = new MultiplayerRaceMode(gameInstance, 2, cp, raceTrack, Car);
+                this.mode = new MultiplayerRaceMode(gameInstance, 3, cp, raceTrack, Car);
             else
                 throw new Exception("Stop choosing weird game modes");
 

@@ -27,10 +27,10 @@ namespace datx02_rally.GameLogic
             float step = MathHelper.TwoPi / 5f;
             for (float i = 0; i < MathHelper.TwoPi; i += step)
             {
+                height = (float)(.15 + .2 * (UniversalRandom.GetInstance().NextDouble() - .5));
                 nodes.Add(new CurveNode()
                 {
                     Position = terrainScale * Vector3.Transform(new Vector3(nodecenter, height, 0), Matrix.CreateRotationY(direction * i)),
-                    //Tangent = Vector3.Transform(terrainScale * new Vector3(nodecenter, 0, 0), Matrix.CreateRotationY(MathHelper.PiOver4 * (float)(2 * UniversalRandom.GetInstance().NextDouble() - 1) / 2))
                     Tangent = Vector3.Transform(terrainScale * new Vector3(0, 0, -direction * strength * nodecenter),
                         Matrix.CreateRotationY(direction * (i + (float)(variation * UniversalRandom.GetInstance().NextDouble()))))
                 });

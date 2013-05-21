@@ -50,7 +50,7 @@ namespace datx02_rally
             //if (GameSettings.Default.FullScreen != Graphics.IsFullScreen)
             //    Graphics.ToggleFullScreen();
 
-            UniversalRandom.ResetInstance(0);
+            //UniversalRandom.ResetInstance(0);
 
             var profilerGameComponent = new ProfilerGameComponent(this, "ProfilerFont");
             ProfilingManager.Run = false;
