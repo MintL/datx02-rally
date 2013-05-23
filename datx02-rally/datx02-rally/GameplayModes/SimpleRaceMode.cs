@@ -41,7 +41,9 @@ namespace datx02_rally
             GameStarted = false;
             TotalRaceTime = TimeSpan.Zero;
 
-            players.Add(gameInstance.GetService<Player>());
+            var player = gameInstance.GetService<Player>();
+            player.Lap = 0;
+            players.Add(player);
 
             Initialize();
         }
