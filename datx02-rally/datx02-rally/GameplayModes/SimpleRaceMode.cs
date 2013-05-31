@@ -217,7 +217,8 @@ namespace datx02_rally
             if (Math.Abs(closestIndex - nextClosestIndex) > 1)
             {
                 // cases too god damn annoying, don't have time to code, just return same as before
-                return cachedClosestPoint;
+                //return cachedClosestPoint;
+                return new Tuple<int, float>(int.MaxValue, 0f);
                 /*var thirdClosest = placementRasterization.Points.IndexOf(orderedPoints.ElementAt(3));
                 Console.WriteLine("WOW, ABOUT TO LAP, closest: " + closestIndex + "(" + newClosestDistance + "), nextclosest: " + nextClosestIndex + "(" + Vector3.DistanceSquared(car.Position, nextClosestPoint.Position) + "), third:" + thirdClosest);
                 if (Math.Abs(thirdClosest - closestIndex) > 2)//Vector3.DistanceSquared(closestPoint.Position, thirdClosest.Position) > Vector3.DistanceSquared(nextClosestPoint.Position, thirdClosest.Position))
